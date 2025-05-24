@@ -89,6 +89,8 @@ $  python -m http.server  -b '127.0.0.1' -p 8082
 # Serving HTTP on 127.0.0.1 port 8000 (http://127.0.0.1:8000/) 
 ```
 
+![SNIPPET]("docs\images\snippet.jpeg")
+
 ### Basic Usage
 ```python
 from obiai import BayesianDebiasFramework
@@ -330,5 +332,4 @@ Enterprise and commercial licenses available. Contact [licensing@obinexuscomputi
 ---
 
 **"Transforming AI from pattern matching to principled reasoning - one Bayesian network at a time."**
-
 *OBINexus Computing - Computing from the Heart*
