@@ -5,7 +5,7 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/obinexus/obiai)
 
 **A Bayesian Network Framework for Mitigating Bias in Machine Learning Systems**
-![DAG +Baysian Network](docs\images\obiai.gif)
+![DAG +Baysian Network](docs/images/obiai.gif)
 
 Developed by [Nnamdi Michael Okpala](https://github.com/obinexus) at OBINexus Computing
 
@@ -90,7 +90,7 @@ $  python -m http.server  -b '127.0.0.1' -p 8082
 # Serving HTTP on 127.0.0.1 port 8000 (http://127.0.0.1:8000/) 
 ```
 
-![SNIPPET]("docs\images\snippet.jpeg")
+![SNIPPET](docs/images/snippet.jpeg)
 
 ### Basic Usage
 ```python
@@ -313,6 +313,12 @@ All algorithm contributions must include:
 - **Media**: media@obinexuscomputing.org
 
 ---
+
+## 📖 Story Time: A Dialogue About Consciousness Models
+
+A dialogue between Nnamdi Michael Okpala and a student about consciousness models and protective barriers in information processing.
+
+[Read the full story here](docs/story.md)
 
 ## 📄 License
 
