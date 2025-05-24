@@ -84,6 +84,10 @@ pip install -r requirements.txt
 python setup.py install
 ```
 
+```bash
+$  python -m http.server . -b '127.0.0.1' 8082 
+```
+
 ### Basic Usage
 ```python
 from obiai import BayesianDebiasFramework
