@@ -5,6 +5,7 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/obinexus/obiai)
 
 **A Bayesian Network Framework for Mitigating Bias in Machine Learning Systems**
+![DAG +Baysian Network](docs\images\obiai.gif)
 
 Developed by [Nnamdi Michael Okpala](https://github.com/obinexus) at OBINexus Computing
 
