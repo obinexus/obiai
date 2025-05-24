@@ -85,7 +85,8 @@ python setup.py install
 ```
 
 ```bash
-$  python -m http.server . -b '127.0.0.1' 8082 
+$  python -m http.server  -b '127.0.0.1' -p 8082
+# Serving HTTP on 127.0.0.1 port 8000 (http://127.0.0.1:8000/) 
 ```
 
 ### Basic Usage
