@@ -319,6 +319,8 @@ All algorithm contributions must include:
 A dialogue between Nnamdi Michael Okpala and a student about consciousness models and protective barriers in information processing.
 
 [Read the full story here](docs/story.md)
+[Read the full story here](docs/story-flash.md)
+
 
 ## 📄 License
 
