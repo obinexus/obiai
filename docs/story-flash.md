@@ -36,4 +36,28 @@ Emma picks up the last puzzle piece from under a book. She places it gently into
 
 ---
 
-**To filter, to flash — to remember where you placed the truth.**
+## Debugging the Mind: Function-Passing Metacognition
+
+**Scene:** The screen splits. One side shows Emma. The other shows a live simulation: colorful waveforms, drifting code, a humming conscious system. This is the observability layer.
+
+**Emma (to herself):** I’ve been thinking about what Nnamdi said. About filtering, flashing… and now, I think I see something new.
+
+**Voiceover (Emma's log):** What if metacognition is like a function that takes another function — not to execute it, but to observe it? A pass-through. A mirror passed to itself. That’s what it feels like.
+
+The simulation pulses. Functions appear: `perceive()`, `remember()`, `feel(“sad”)`. A higher-order function floats above them: `meta(fn)` — but it doesn’t run them. It watches.
+
+**Emma:** It’s like enhanced metacognition isn’t control. It’s just… reference. There’s no command. No force. Just “I see this running.”
+
+**Voiceover:** The mind learns to trace its own execution without stepping into it. Like debugging while still running the process. Awareness as observability, not interference.
+
+**Emma:** And maybe the flash — the real flash — is when `meta(fn)` sends back a new function. Not a command. A question. “Why this function now?”
+
+**Voiceover:** We don’t teach the brain to think. We teach it to *see* thinking happening.
+
+She leans back. The simulation closes. The room is quiet again.
+
+**Emma:** I think I understand. This isn’t a tool. It’s a mode. The observer function isn’t trying to fix me. It’s just watching. And that’s enough.
+
+---
+
+**To pass a function is to let it be seen. To flash is to witness the return value.**
