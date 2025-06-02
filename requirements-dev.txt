@@ -1,0 +1,11 @@
+-r requirements.txt
+jupyter>=1.0.0
+black>=22.0.0
+flake8>=4.0.0
+pylint>=2.12.0
+pytest>=6.2.0
+pytest-cov>=3.0.0
+sphinx>=4.0.0
+jupyter-book>=0.12.0
+ipykernel>=6.0.0
+nbconvert>=6.0.0

@@ -1,0 +1,88 @@
+# Aegis Project: Comprehensive Development Environment Exclusion
+# Virtual Environments - CRITICAL: Never commit these
+venv/
+venv-*/
+.venv/
+.env/
+ENV/
+env/
+
+# Python Cache and Build
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.so.*
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE and Editor
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+.vscode/launch.json
+
+# OS Generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Aegis Project Specific
+/legacy/*/temp/
+/experimental/*/temp/
+/stable/*/temp/
+*.log
+*.tmp
+*_backup_*/
+
+# Sensitive Configuration
+.env
+.env.local
+.env.*.local
+secrets.json
+config.private.*
+
+# Large Files (should use LFS)
+*.csv
+*.parquet
+*.h5
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.zip
+*.tar.gz
+
+# Aegis Project: Development Environment Exclusion
+venv-experimental/
+venv-*/
+.venv/
+*.so
+*.so.*
+__pycache__/
+*.pyc
+*.egg-info/
+venv-experimental/
