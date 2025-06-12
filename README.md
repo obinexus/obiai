@@ -14,6 +14,10 @@
 
 **A Bayesian Network Framework for Mitigating Bias in Machine Learning Systems**
 ![DAG +Baysian Network](docs/images/obiai.gif)
+
+![OBI AI Architecture Overview](docs/images/obiai.gif)
+
+
 ```sh
 ┌────────────────────────────────────────────────────────────┐
 │                     AI Application Layer                   │
