@@ -1,6 +1,4 @@
 # OBI AI - Unbiased Artificial Intelligence Framework
-
-
 # 🧠 **OBINexus Modular AI Architecture**
 
 *Built for Safe, Bias-Aware, Consciousness-Integrated AI Systems*
