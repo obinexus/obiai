@@ -1,19 +1,8 @@
-<<<<<<< HEAD
-# OBI AI - Unbiased Artificial Intelligence Framework
-# 🧠 **OBINexus Modular AI Architecture**
-*Building Safe, Bias-Aware, and Consciousness-Integrated AI Systems*
-
-"Advancing AI safety and ethics through rigorous mathematical frameworks and transparent system design."
-
-
-**Nnamdi Michael Okpala** | OBINexus Computing | June 2025
-=======
 # PyOBIAI - Python Implementation of OBINexus OBIAI Framework
 
 **Ontological Bayesian Intelligence Architecture Infrastructure**  
 *Python Proof of Concept for Bias-Aware AI Systems*
 
->>>>>>> dev
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![OBINexus Compatible](https://img.shields.io/badge/OBINexus-Compatible-brightgreen)](https://github.com/obinexus)
