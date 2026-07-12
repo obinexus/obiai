@@ -1,0 +1,247 @@
+// ============================================================
+// FILE: aegis_proof_3_1_3_2_M1_prerequisites.psc.txt
+// MODULE 1 OF 5 — Mathematical Prerequisites & Assumptions
+// SOURCE: "AEGIS-PROOF-3.1 & 3.2: Mathematical Verification Suite
+//          Filter-Flash Monotonicity and Hybrid Mode Convergence"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ── PROOF CHAIN POSITION ─────────────────────────────────────
+//
+//   AEGIS-PROOF-1.1 : Cost-Knowledge Function Monotonicity       (prior)
+//   AEGIS-PROOF-1.2 : Traversal Cost Function Safety             (prior)
+//   AEGIS-PROOF-3.1 : Filter-Flash Monotonicity                  (THIS)
+//   AEGIS-PROOF-3.2 : Hybrid Mode Convergence                    (THIS)
+//
+//   Both 3.1 and 3.2 rest on three shared assumptions below.
+//   All four proofs constitute the AEGIS mathematical verification suite.
+
+DEFINE AEGISProofChain AS:
+    proof_1_1 := { id: "AEGIS-PROOF-1.1", subject: "Cost-Knowledge Monotonicity",   status: VERIFIED }
+    proof_1_2 := { id: "AEGIS-PROOF-1.2", subject: "Traversal Cost Function Safety", status: VERIFIED }
+    proof_3_1 := { id: "AEGIS-PROOF-3.1", subject: "Filter-Flash Monotonicity",      status: VERIFIED }
+    proof_3_2 := { id: "AEGIS-PROOF-3.2", subject: "Hybrid Mode Convergence",        status: VERIFIED }
+
+    CONSTANT EPISTEMIC_CONFIDENCE_THRESHOLD := 0.954   // 95.4%
+    CONSTANT DIRAM_EPSILON_BOUND            := 0.6     // ε(x) ≤ 0.6
+END DEFINE
+
+
+// ── ASSUMPTION 1: ENVIRONMENT STATIONARITY ───────────────────
+
+// ASSUMPTION 1 (Environment Stationarity):
+//   The environment distribution E exhibits WEAK STATIONARITY:
+//
+//     E[Xₜ] = μ                         (constant mean)
+//     Cov(Xₜ, Xₜ₊ₖ) = γ(k)  for all t  (covariance depends only on lag k)
+//
+//   Interpretation: the statistical properties of the environment
+//   do not drift over time — a necessary condition for convergence
+//   guarantees in AEGIS-PROOF-3.2.
+
+DEFINE EnvironmentStationarity AS:
+    // Weak stationarity conditions on environment distribution E
+
+    PROCEDURE VerifyMeanStationarity(E: EnvironmentDistribution,
+                                      t_samples: List[INT],
+                                      tolerance: REAL) -> BOOL:
+        // Check E[Xₜ] ≈ μ (constant) for all sampled time points t
+        means := []
+        FOR EACH t IN t_samples:
+            means.APPEND(E.sample_mean(at_time=t))
+        END FOR
+        mean_variance := VARIANCE(means)
+        IF mean_variance > tolerance:
+            EMIT WARNING "Assumption 1 violated: mean drift detected | var=" + mean_variance
+            RETURN FALSE
+        END IF
+        RETURN TRUE
+    END PROCEDURE
+
+    PROCEDURE VerifyCovarianceStationarity(E: EnvironmentDistribution,
+                                            lag_k: INT, t1: INT, t2: INT,
+                                            tolerance: REAL) -> BOOL:
+        // Check Cov(Xₜ₁, Xₜ₁₊ₖ) ≈ Cov(Xₜ₂, Xₜ₂₊ₖ) = γ(k) for all t
+        cov_t1 := E.covariance(t1, t1 + lag_k)
+        cov_t2 := E.covariance(t2, t2 + lag_k)
+        IF ABS(cov_t1 - cov_t2) > tolerance:
+            EMIT WARNING "Assumption 1 violated: covariance not time-invariant at lag=" + lag_k
+            RETURN FALSE
+        END IF
+        RETURN TRUE
+    END PROCEDURE
+
+END DEFINE
+
+
+// ── ASSUMPTION 2: COST FUNCTION PROPERTIES ───────────────────
+
+// ASSUMPTION 2 (Cost Function Properties):
+//   Runtime and error cost functions must satisfy:
+//
+//   (1) LIPSCHITZ:   |C_runtime(m₁) − C_runtime(m₂)| ≤ Lᵣ · ‖m₁ − m₂‖
+//   (2) MONOTONE:    ∂C_error(m) / ∂p_conf ≤ 0  ∀m ∈ {Flash, Filter}
+//   (3) BOUNDED:     0 ≤ C_runtime(m), C_error(m) ≤ M < ∞
+
+DEFINE CostFunctionProperties AS:
+    Lr : REAL      // Lipschitz constant for runtime cost
+    M  : REAL      // upper bound on all cost functions
+
+    PROCEDURE VerifyLipschitz(C_runtime: Function, m1: Mode, m2: Mode,
+                               Lr: REAL) -> BOOL:
+        // |C_runtime(m₁) − C_runtime(m₂)| ≤ Lᵣ · ‖m₁ − m₂‖
+        lhs := ABS(C_runtime(m1) - C_runtime(m2))
+        rhs := Lr * NormDifference(m1, m2)
+        IF lhs > rhs:
+            EMIT WARNING "Assumption 2(Lipschitz) violated: " + lhs + " > " + rhs
+            RETURN FALSE
+        END IF
+        RETURN TRUE
+    END PROCEDURE
+
+    PROCEDURE VerifyMonotone(C_error: Function, m: Mode,
+                              p_conf_range: List[REAL]) -> BOOL:
+        // ∂C_error(m) / ∂p_conf ≤ 0 — error cost DECREASES as confidence increases
+        // Numerical check: cost values decrease with increasing p_conf
+        prev_cost := POSITIVE_INFINITY
+        FOR EACH p IN SORTED(p_conf_range, order=ASCENDING):
+            cost := C_error(m, p)
+            IF cost > prev_cost + 1e-10:
+                EMIT WARNING "Assumption 2(Monotone) violated at p=" + p +
+                             " for mode " + m
+                RETURN FALSE
+            END IF
+            prev_cost := cost
+        END FOR
+        RETURN TRUE
+    END PROCEDURE
+
+    PROCEDURE VerifyBounded(C_runtime: Function, C_error: Function,
+                             M: REAL, test_modes: List[Mode]) -> BOOL:
+        // 0 ≤ C_runtime(m), C_error(m) ≤ M for all modes
+        FOR EACH m IN test_modes:
+            c_run := C_runtime(m)
+            c_err := C_error(m)
+            IF c_run < 0 OR c_run > M:
+                EMIT WARNING "Assumption 2(Bounded) violated: C_runtime(" + m + ")=" + c_run
+                RETURN FALSE
+            END IF
+            IF c_err < 0 OR c_err > M:
+                EMIT WARNING "Assumption 2(Bounded) violated: C_error(" + m + ")=" + c_err
+                RETURN FALSE
+            END IF
+        END FOR
+        RETURN TRUE
+    END PROCEDURE
+
+END DEFINE
+
+
+// ── ASSUMPTION 3: DAG COST REGULARITY ────────────────────────
+
+// ASSUMPTION 3 (DAG Cost Regularity):
+//   The DAG cost function satisfies three regularity conditions:
+//
+//   (4) CONTINUITY:   DAG_cost(v, n) is continuous in (v, n)
+//   (5) BOUNDEDNESS:  ‖∇_{v,n} DAG_cost(v, n)‖ ≤ G < ∞
+//   (6) CONVEXITY:    ∇² DAG_cost(v, n) ⪰ 0  (positive semidefinite Hessian)
+
+DEFINE DAGCostRegularity AS:
+    G : REAL    // gradient bound (Lipschitz constant on gradients)
+
+    PROCEDURE VerifyContinuity(DAG_cost: Function, v: Verb, n: Noun,
+                                delta: REAL) -> BOOL:
+        // Numerical continuity check: small perturbation → small cost change
+        cost_base   := DAG_cost(v, n)
+        cost_perturb := DAG_cost(Perturb(v, delta), Perturb(n, delta))
+        IF ABS(cost_perturb - cost_base) > 10 * delta:
+            EMIT WARNING "Assumption 3(Continuity) violated at (v=" + v + ", n=" + n + ")"
+            RETURN FALSE
+        END IF
+        RETURN TRUE
+    END PROCEDURE
+
+    PROCEDURE VerifyGradientBound(DAG_cost: Function, v: Verb, n: Noun,
+                                   G: REAL) -> BOOL:
+        // ‖∇_{v,n} DAG_cost(v, n)‖ ≤ G
+        grad_norm := GradientNorm(DAG_cost, v, n)
+        IF grad_norm > G:
+            EMIT WARNING "Assumption 3(Bounded gradient) violated: ‖∇J‖=" + grad_norm +
+                         " > G=" + G
+            RETURN FALSE
+        END IF
+        RETURN TRUE
+    END PROCEDURE
+
+    PROCEDURE VerifyConvexity(DAG_cost: Function, v: Verb, n: Noun) -> BOOL:
+        // ∇² DAG_cost ⪰ 0 (all eigenvalues of Hessian ≥ 0)
+        hessian     := ComputeHessian(DAG_cost, v, n)
+        eigenvalues := ComputeEigenvalues(hessian)
+        FOR EACH λ IN eigenvalues:
+            IF λ < -1e-10:    // numerical tolerance for near-zero negatives
+                EMIT WARNING "Assumption 3(Convexity) violated: negative eigenvalue λ=" + λ
+                RETURN FALSE
+            END IF
+        END FOR
+        RETURN TRUE
+    END PROCEDURE
+
+END DEFINE
+
+
+// ── CONSOLIDATED ASSUMPTION VERIFICATION ─────────────────────
+
+PROCEDURE VerifyAllAssumptions(E: EnvironmentDistribution,
+                                C_runtime: Function, C_error: Function,
+                                DAG_cost: Function,
+                                Lr: REAL, G: REAL, M: REAL) -> AssumptionReport:
+
+    report := NEW AssumptionReport()
+
+    // Assumption 1: Environment stationarity
+    report.A1_mean     := EnvironmentStationarity.VerifyMeanStationarity(
+                              E, t_samples=[0,10,20,50,100], tolerance=0.01)
+    report.A1_cov      := EnvironmentStationarity.VerifyCovarianceStationarity(
+                              E, lag_k=1, t1=0, t2=50, tolerance=0.01)
+    report.A1_ok       := report.A1_mean AND report.A1_cov
+
+    // Assumption 2: Cost function properties
+    test_modes     := [FILTER, FLASH]
+    p_conf_samples := [0.1, 0.3, 0.5, 0.7, 0.9, 0.954]
+
+    report.A2_lipschitz := CostFunctionProperties.VerifyLipschitz(
+                               C_runtime, FILTER, FLASH, Lr)
+    report.A2_monotone  := CostFunctionProperties.VerifyMonotone(
+                               C_error, FILTER, p_conf_samples) AND
+                           CostFunctionProperties.VerifyMonotone(
+                               C_error, FLASH, p_conf_samples)
+    report.A2_bounded   := CostFunctionProperties.VerifyBounded(
+                               C_runtime, C_error, M, test_modes)
+    report.A2_ok        := report.A2_lipschitz AND report.A2_monotone AND
+                           report.A2_bounded
+
+    // Assumption 3: DAG cost regularity
+    test_v := SampleVerb(); test_n := SampleNoun()
+    report.A3_cont   := DAGCostRegularity.VerifyContinuity(DAG_cost, test_v, test_n, 1e-4)
+    report.A3_grad   := DAGCostRegularity.VerifyGradientBound(DAG_cost, test_v, test_n, G)
+    report.A3_convex := DAGCostRegularity.VerifyConvexity(DAG_cost, test_v, test_n)
+    report.A3_ok     := report.A3_cont AND report.A3_grad AND report.A3_convex
+
+    report.all_assumptions_hold := report.A1_ok AND report.A2_ok AND report.A3_ok
+
+    IF NOT report.all_assumptions_hold:
+        EMIT ERROR "One or more assumptions violated — proofs 3.1 and 3.2 not applicable"
+    ELSE:
+        EMIT INFO "All 3 assumptions verified — AEGIS-PROOF-3.1 and 3.2 are applicable"
+    END IF
+
+    RETURN report
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: aegis_proof_3_1_3_2_M2_filterflash_monotonicity.psc.txt
+// ============================================================

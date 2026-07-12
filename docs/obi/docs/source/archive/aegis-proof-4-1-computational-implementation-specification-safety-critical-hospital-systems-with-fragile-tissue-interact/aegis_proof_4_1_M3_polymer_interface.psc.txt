@@ -1,0 +1,271 @@
+// ============================================================
+// FILE: aegis_proof_4_1_M3_polymer_interface.psc.txt
+// MODULE 3 OF 5 — Polymer Material Interface: 3-Layer Architecture
+//                 & Kelvin-Voigt Force Transmission Model
+// SOURCE: "AEGIS-PROOF-4.1: Computational Implementation Specification
+//          Safety-Critical Hospital Systems with Fragile Tissue Interaction"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4: POLYMER MATERIAL INTERFACE SPECIFICATIONS
+// ------------------------------------------------------------
+
+// The polymer contact interface has a THREE-TIER structure
+// analogous to human skin layers. Each layer has distinct
+// mechanical properties, sensor capabilities, and safety functions.
+
+// Shore A hardness scale reference (for context):
+//   Shore A 5-10  : ultra-soft gel (pediatric tissue simulant)
+//   Shore A 10-20 : ultra-soft silicone (epidermis layer)
+//   Shore A 15-25 : elderly tissue simulant
+//   Shore A 30-40 : healthy adult tissue simulant
+
+
+// ── SECTION 4.1: THREE-LAYER ARCHITECTURE ────────────────────
+
+DEFINE PolymerLayer AS ENUM:
+    EPIDERMIS       // Layer 1: outermost — tactile + sensor
+    DERMIS          // Layer 2: middle — force distribution + variable stiffness
+    HYPODERMIS      // Layer 3: innermost — structural + actuator interface
+END DEFINE
+
+
+DEFINE EpidermisLayerSpec AS:
+    // Layer 1: Ultra-soft silicone
+    layer       := EPIDERMIS
+    thickness_mm : RANGE[0.5, 1.0]         // 0.5–1mm
+    material    := "Silicone"
+    shore_A     : RANGE[10, 20]            // Shore A 10–20
+
+    // Functions:
+    //   - Tactile sensation replication
+    //   - Embedded pressure sensors (resolution: 0.1N)
+    //   - Self-healing properties for repeated contact
+
+    sensor_resolution_N  := 0.1    // 0.1N force resolution
+    self_healing         := TRUE
+
+    PROCEDURE ReadTactilePressure() -> REAL:
+        // Returns current contact force reading from embedded sensors
+        RETURN EmbeddedSensorArray.read_force_N()
+    END PROCEDURE
+
+    PROCEDURE IsSelfHealed() -> BOOL:
+        // Check if epidermis layer has recovered from previous deformation
+        RETURN self_healing_monitor.check_integrity()
+    END PROCEDURE
+END DEFINE
+
+
+DEFINE DermisLayerSpec AS:
+    // Layer 2: Thermoplastic elastomer composite
+    layer       := DERMIS
+    thickness_mm : RANGE[2.0, 3.0]         // 2–3mm
+    material    := "Thermoplastic Elastomer Composite"
+
+    // Functions:
+    //   - Force distribution and shock absorption
+    //   - Variable stiffness control via thermal activation
+    //   - Integrated safety circuits for emergency shutdown
+
+    variable_stiffness   := TRUE
+    thermal_activation   := TRUE
+    emergency_shutdown   := TRUE    // hardware circuit — not software only
+
+    PROCEDURE SetStiffness(target_shore_A: REAL) -> VOID:
+        // Thermal activation adjusts viscoelastic properties
+        // Higher temperature → lower stiffness
+        temperature := StiffnessToTemperature(target_shore_A)
+        ThermalActuator.set_temperature(temperature)
+    END PROCEDURE
+
+    PROCEDURE TriggerHardwareEmergencyShutdown() -> VOID:
+        // Integrated safety circuit — hardware interrupt, bypasses software
+        EMIT CRITICAL "DERMIS EMERGENCY CIRCUIT TRIGGERED"
+        HardwareShutdownCircuit.activate()
+    END PROCEDURE
+
+    PROCEDURE DistributeForce(F_input: REAL) -> ForceDistribution:
+        // Spreads point force over contact area to reduce peak pressure
+        contact_area_cm2 := DeriveContactArea(F_input)
+        distributed_P := F_input / MAX(contact_area_cm2, 1e-4)
+        RETURN ForceDistribution(peak_P=distributed_P, area=contact_area_cm2)
+    END PROCEDURE
+END DEFINE
+
+
+DEFINE HypodermisLayerSpec AS:
+    // Layer 3: Structural polymer matrix
+    layer       := HYPODERMIS
+    thickness_mm : RANGE[5.0, 8.0]         // 5–8mm
+    material    := "Structural Polymer Matrix"
+
+    // Functions:
+    //   - Load bearing and mechanical support
+    //   - Interface with robotic actuators
+    //   - Compliance adaptation based on patient parameters
+
+    load_bearing         := TRUE
+    actuator_interface   := TRUE
+    compliance_adaptive  := TRUE
+
+    PROCEDURE AdaptCompliance(patient: PatientProfile) -> VOID:
+        // Adjust structural compliance based on patient fragility profile
+        compliance_target := patient.tissue_compliance
+        StructuralActuator.set_compliance(compliance_target)
+    END PROCEDURE
+
+    PROCEDURE TransmitActuatorCommand(F_commanded: REAL) -> REAL:
+        // Passes actuation force through to dermis/epidermis layers.
+        // Returns actual transmitted force after mechanical compliance.
+        transmission_efficiency := GetTransmissionEfficiency()
+        F_transmitted := F_commanded * transmission_efficiency
+        RETURN F_transmitted
+    END PROCEDURE
+END DEFINE
+
+
+// ── POLYMER STACK INSTANTIATION ───────────────────────────────
+
+DEFINE PolymerContactStack AS:
+    epidermis  : EpidermisLayerSpec
+    dermis     : DermisLayerSpec
+    hypodermis : HypodermisLayerSpec
+
+    // Total thickness range: 7.5–12mm (sum of three layers)
+    INVARIANT: TotalThickness() IN RANGE[7.5, 12.0]
+END DEFINE
+
+PROCEDURE InitializePolymerStack(patient: PatientProfile) -> PolymerContactStack:
+    stack := NEW PolymerContactStack()
+
+    // Configure dermis stiffness to match patient tissue compliance
+    // Softer patient → softer dermis (match impedance)
+    target_shore := LERP(10.0, 30.0, t=patient.tissue_compliance)
+    stack.dermis.SetStiffness(target_shore)
+
+    // Adapt hypodermis compliance to patient fragility
+    stack.hypodermis.AdaptCompliance(patient)
+
+    EMIT INFO "Polymer stack initialized for patient " + patient.patient_id +
+              " | target Shore A=" + target_shore
+    RETURN stack
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 4.2: KELVIN-VOIGT FORCE TRANSMISSION MODEL
+// ------------------------------------------------------------
+
+// The polymer-tissue interaction follows a MODIFIED KELVIN-VOIGT model:
+//
+//   F_contact(t) = k_polymer · x(t) + b_polymer · ẋ(t) + η · nonlinear_term(x, ẋ)
+//
+//   k_polymer  : spring stiffness coefficient (elastic component)
+//   b_polymer  : damping coefficient (viscous component)
+//   η          : adaptive nonlinear scaling factor (tissue compliance response)
+//   x(t)       : displacement (compression depth)
+//   ẋ(t)       : velocity (compression rate)
+//   nonlinear_term(x, ẋ) : captures polymer's adaptive response to compliance variations
+
+DEFINE KelvinVoigtParams AS:
+    k_polymer : REAL    // spring constant [N/m]
+    b_polymer : REAL    // damping constant [N·s/m]
+    eta       : REAL    // adaptive nonlinear weight
+END DEFINE
+
+
+PROCEDURE KelvinVoigtForce(x: REAL, x_dot: REAL,
+                             params: KelvinVoigtParams) -> REAL:
+    // F_contact(t) = k · x(t) + b · ẋ(t) + η · nonlinear_term(x, ẋ)
+
+    elastic_term   := params.k_polymer * x
+    viscous_term   := params.b_polymer * x_dot
+    nonlinear_term := ComputeNonlinearTerm(x, x_dot, params.eta)
+
+    F_contact := elastic_term + viscous_term + nonlinear_term
+    RETURN F_contact
+END PROCEDURE
+
+
+PROCEDURE ComputeNonlinearTerm(x: REAL, x_dot: REAL, eta: REAL) -> REAL:
+    // η · nonlinear_term(x, ẋ)
+    // Nonlinearity captures polymer's adaptive response to tissue compliance.
+    // Example realization: cubic displacement + velocity cross-term
+    //   nonlinear_term = x³ + x · ẋ   (captures stiffening at large deformation)
+    nl_displacement := x ^ 3
+    nl_cross        := x * x_dot
+    RETURN eta * (nl_displacement + nl_cross)
+END PROCEDURE
+
+
+PROCEDURE EstimateKelvinVoigtParams(patient: PatientProfile,
+                                     stack: PolymerContactStack) -> KelvinVoigtParams:
+    // Estimate k, b, η from patient fragility and polymer layer properties.
+
+    // k_polymer: stiffer patient → stiffer polymer needed for control
+    k_polymer := BASE_STIFFNESS * (1.0 - patient.tissue_compliance)
+
+    // b_polymer: more vascular tissue needs more damping to avoid bruising
+    b_polymer := BASE_DAMPING * patient.vascularity_index
+
+    // η: elderly patients have more nonlinear tissue response
+    eta := BASE_ETA * patient.age_factor
+
+    RETURN KelvinVoigtParams(k_polymer=k_polymer, b_polymer=b_polymer, eta=eta)
+END PROCEDURE
+
+
+PROCEDURE VerifyKelvinVoigtStability(params: KelvinVoigtParams,
+                                      x_max: REAL) -> BOOL:
+    // Stability condition: critical damping criterion
+    // b ≥ 2·√(k·m_eff) ensures no oscillatory overshoot
+    // (which could cause repeated micro-impacts on fragile tissue)
+
+    M_EFF := 0.5   // kg — effective mass of end-effector assembly
+    critical_damping := 2.0 * SQRT(params.k_polymer * M_EFF)
+
+    IF params.b_polymer < critical_damping:
+        EMIT WARNING "KV model under-damped: b=" + params.b_polymer +
+                     " < critical=" + critical_damping +
+                     " — oscillatory contact risk"
+        RETURN FALSE
+    END IF
+
+    // Also verify force at max displacement stays below bruise threshold
+    F_at_max := KelvinVoigtForce(x_max, 0.0, params)
+    EMIT INFO "KV force at x_max=" + x_max + " → F=" + F_at_max
+
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── REAL-TIME FORCE PREDICTION ────────────────────────────────
+
+PROCEDURE PredictContactForce(x_current: REAL, x_dot_current: REAL,
+                                params: KelvinVoigtParams,
+                                patient: PatientProfile,
+                                constraints: FragilityConstraints) -> REAL:
+    // Predict F_contact and compare against tissue thresholds BEFORE applying.
+
+    F_predicted := KelvinVoigtForce(x_current, x_dot_current, params)
+
+    F_thresh := ComputeFractureThreshold(patient, constraints.kappa)
+    IF F_predicted > F_thresh:
+        EMIT WARNING "Predicted force F=" + F_predicted +
+                     " would exceed fracture threshold F_thresh=" + F_thresh
+        // Return safe maximum instead
+        RETURN F_thresh * 0.9    // 10% safety margin
+    END IF
+
+    RETURN F_predicted
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: aegis_proof_4_1_M4_safety_protocols.psc.txt
+// ============================================================

@@ -1,0 +1,300 @@
+// ============================================================
+// FILE: dag_ephemeris_M2_ephemeris_step.psc.txt
+// MODULE 2 OF 5 — Ephemeris Step Decision Logic
+// SOURCE: "DAG Cost Function and Ephemeris Step: Formal Mathematical
+//          Specification for OBIAI Filter-Flash Transitions"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 2: EPHEMERIS STEP DECISION LOGIC
+// ------------------------------------------------------------
+
+// The ephemeris step is the core cognitive switching mechanism
+// of the OBIAI Filter-Flash framework. It determines whether the
+// system operates in FILTER (persistent) or REFLASH (ephemeral) mode
+// based on the current epistemic confidence.
+//
+// "Ephemeris" in this context refers to a time-dependent positional
+// calculation — analogous to astronomical ephemeris tables — where
+// the system's optimal mode is a function of its current confidence state.
+
+
+// ── SECTION 2.1: CONFIDENCE THRESHOLD FRAMEWORK ──────────────
+
+// ephemeris_decision(state) = FILTER   if p_conf(state) ≥ 0.954
+//                           = REFLASH  if p_conf(state) < 0.954
+//
+// Note: in AEGIS-PROOF-3.1/3.2 and 4.1, the low-confidence mode
+// was called "FLASH". Here it is named "REFLASH" — same semantic
+// meaning, updated terminology for this specification.
+
+DEFINE EphemerisMode AS ENUM:
+    FILTER    // persistent symbolic reasoning — deep contextual analysis
+    REFLASH   // ephemeral working memory — rapid response, minimal context
+END DEFINE
+
+CONSTANT EPISTEMIC_THRESHOLD := 0.954    // 95.4% — constant across all AEGIS docs
+
+
+PROCEDURE EphemerisDecision(state: SystemState) -> EphemerisMode:
+    // ephemeris_decision(state) per eq. 14
+
+    p_conf := ComputeEpistemicConfidence(state)
+
+    IF p_conf >= EPISTEMIC_THRESHOLD:
+        EMIT INFO "Ephemeris: FILTER | p_conf=" + p_conf
+        RETURN FILTER
+    ELSE:
+        EMIT INFO "Ephemeris: REFLASH | p_conf=" + p_conf
+        RETURN REFLASH
+    END IF
+END PROCEDURE
+
+
+// ── SECTION 2.2: EPISTEMIC CONFIDENCE CALCULATION ────────────
+
+// p_conf(state) = (1/N) Σᵢ max(P(Filterᵢ | state), P(Flashᵢ | state))
+//
+// where probabilities follow Bayesian update rules:
+//
+//   P(Filterᵢ | state) = P(state | Filterᵢ) · P(Filterᵢ) / P(state)
+//
+// Interpretation: for each of N evidence sources, take the maximum
+// probability under either mode, then average. This measures how
+// decidedly the system can assign each piece of evidence to a mode.
+
+PROCEDURE ComputeEpistemicConfidence(state: SystemState) -> REAL:
+    // p_conf(state) = (1/N) Σᵢ max(P(Filterᵢ|state), P(Flashᵢ|state))
+
+    N          := state.evidence_sources.count
+    IF N == 0:
+        EMIT WARNING "No evidence sources — returning minimum confidence"
+        RETURN 0.0
+    END IF
+
+    confidence_sum := 0.0
+
+    FOR i := 1 TO N:
+        evidence_i := state.evidence_sources[i]
+
+        P_filter_i := BayesianUpdate(evidence_i, mode=FILTER, state=state)
+        P_flash_i  := BayesianUpdate(evidence_i, mode=REFLASH, state=state)
+
+        // Take maximum: how decisively is this evidence assigned to a mode?
+        confidence_sum := confidence_sum + MAX(P_filter_i, P_flash_i)
+    END FOR
+
+    p_conf := confidence_sum / N
+
+    // Post-condition: p_conf ∈ [0, 1]
+    ASSERT p_conf >= 0.0 AND p_conf <= 1.0
+    RETURN p_conf
+END PROCEDURE
+
+
+PROCEDURE BayesianUpdate(evidence: Evidence, mode: EphemerisMode,
+                          state: SystemState) -> REAL:
+    // P(mode_i | state) = P(state | mode_i) · P(mode_i) / P(state)
+    //
+    // Prior P(mode_i): base rate of Filter vs Flash activation
+    // Likelihood P(state | mode_i): how well mode_i explains this state
+
+    prior := GetModePrior(mode)
+    likelihood := ComputeLikelihood(state, evidence, mode)
+    marginal   := ComputeMarginal(state, evidence)   // P(state) — normalizer
+
+    IF ABS(marginal) < 1e-12:
+        EMIT WARNING "Marginal P(state) ≈ 0 — Bayesian update numerically unstable"
+        RETURN prior   // fallback to prior
+    END IF
+
+    posterior := (likelihood * prior) / marginal
+
+    // Clamp to [0, 1] for numerical safety
+    RETURN CLAMP(posterior, 0.0, 1.0)
+END PROCEDURE
+
+
+PROCEDURE GetModePrior(mode: EphemerisMode) -> REAL:
+    // Base rate priors — may be learned from deployment history.
+    // Default: equal priors (uninformative).
+    MATCH mode:
+        CASE FILTER:  RETURN 0.5
+        CASE REFLASH: RETURN 0.5
+    END MATCH
+END PROCEDURE
+
+
+PROCEDURE ComputeLikelihood(state: SystemState, evidence: Evidence,
+                              mode: EphemerisMode) -> REAL:
+    // P(state | mode_i): how well does mode explain the current state?
+    //
+    // Filter: high likelihood when state has high confidence, low urgency
+    // Reflash: high likelihood when state has low confidence, high urgency
+
+    MATCH mode:
+        CASE FILTER:
+            // Filter thrives in stable, high-confidence states
+            stability := 1.0 - state.urgency_level
+            RETURN stability * evidence.context_richness
+
+        CASE REFLASH:
+            // Reflash thrives in urgent, low-stability states
+            RETURN state.urgency_level * (1.0 - evidence.context_richness)
+    END MATCH
+END PROCEDURE
+
+
+PROCEDURE ComputeMarginal(state: SystemState, evidence: Evidence) -> REAL:
+    // P(state) = Σ_m P(state | m) · P(m)  — sum over all modes
+    p_state_given_filter  := ComputeLikelihood(state, evidence, FILTER)
+    p_state_given_reflash := ComputeLikelihood(state, evidence, REFLASH)
+    p_filter_prior        := GetModePrior(FILTER)
+    p_reflash_prior       := GetModePrior(REFLASH)
+
+    marginal := (p_state_given_filter  * p_filter_prior) +
+                (p_state_given_reflash * p_reflash_prior)
+    RETURN marginal
+END PROCEDURE
+
+
+// ── SECTION 2.3: MODE SELECTION COST MINIMIZATION ────────────
+
+// Optimal mode selection through expected cost minimization:
+//
+//   mode* = argmin_{m ∈ {Flash, Filter}} E[C_runtime(m) + C_error(m)]
+//
+//   C_runtime(m) = αₘ · latency(m) + βₘ · energy(m)
+//   C_error(m)   = Σ_{v,n} DAG_cost(v,n) · P(error | v, n, m)
+
+PROCEDURE SelectOptimalMode(state: SystemState,
+                             verb_noun_pairs: List[(SymbolicCapsule, SymbolicCapsule)],
+                             alpha_m_filter: REAL, alpha_m_flash: REAL,
+                             beta_m_filter: REAL, beta_m_flash: REAL) -> EphemerisMode:
+    // mode* = argmin E[C_runtime(m) + C_error(m)]
+
+    cost_filter := ComputeTotalExpectedCost(FILTER, state, verb_noun_pairs,
+                                             alpha_m_filter, beta_m_filter)
+    cost_reflash := ComputeTotalExpectedCost(REFLASH, state, verb_noun_pairs,
+                                              alpha_m_flash, beta_m_flash)
+
+    IF cost_filter <= cost_reflash:
+        EMIT LOG "Mode selection: FILTER | E[C]=" + cost_filter +
+                 " ≤ REFLASH E[C]=" + cost_reflash
+        RETURN FILTER
+    ELSE:
+        EMIT LOG "Mode selection: REFLASH | E[C]=" + cost_reflash +
+                 " < FILTER E[C]=" + cost_filter
+        RETURN REFLASH
+    END IF
+END PROCEDURE
+
+
+PROCEDURE ComputeTotalExpectedCost(mode: EphemerisMode,
+                                    state: SystemState,
+                                    pairs: List[(SymbolicCapsule, SymbolicCapsule)],
+                                    alpha_m: REAL, beta_m: REAL) -> REAL:
+    // E[C_runtime(m) + C_error(m)]
+
+    C_runtime := ComputeRuntimeCost(mode, state, alpha_m, beta_m)
+    C_error   := ComputeErrorCost(mode, pairs)
+    RETURN C_runtime + C_error
+END PROCEDURE
+
+
+PROCEDURE ComputeRuntimeCost(mode: EphemerisMode, state: SystemState,
+                               alpha_m: REAL, beta_m: REAL) -> REAL:
+    // C_runtime(m) = αₘ · latency(m) + βₘ · energy(m)
+
+    latency_m := MeasureLatency(mode)    // seconds — Filter slower, Reflash faster
+    energy_m  := MeasureEnergy(mode)     // joules — Filter more compute-intensive
+
+    RETURN (alpha_m * latency_m) + (beta_m * energy_m)
+END PROCEDURE
+
+
+PROCEDURE ComputeErrorCost(mode: EphemerisMode,
+                            pairs: List[(SymbolicCapsule, SymbolicCapsule)]) -> REAL:
+    // C_error(m) = Σ_{v,n} DAG_cost(v,n) · P(error | v, n, m)
+
+    total := 0.0
+    FOR EACH (v, n) IN pairs:
+        dag_c     := DAGCost(v, n, LAMBDA_DEFAULT, MU_DEFAULT,
+                             BETA1_DEFAULT, BETA2_DEFAULT,
+                             GAMMA1_DEFAULT, GAMMA2_DEFAULT)
+        p_error   := P_ErrorGivenMode(v, n, mode)
+        total     := total + dag_c * p_error
+    END FOR
+    RETURN total
+END PROCEDURE
+
+
+PROCEDURE P_ErrorGivenMode(v: SymbolicCapsule, n: SymbolicCapsule,
+                             mode: EphemerisMode) -> REAL:
+    // P(error | v, n, m) — error probability for this verb-noun pair under mode m
+    // Filter: lower error probability (persistent context helps)
+    // Reflash: higher error probability (ephemeral, no deep context)
+
+    base_error := DAGCost(v, n, LAMBDA_DEFAULT, MU_DEFAULT,
+                          BETA1_DEFAULT, BETA2_DEFAULT,
+                          GAMMA1_DEFAULT, GAMMA2_DEFAULT) / MAX_DAG_COST
+
+    MATCH mode:
+        CASE FILTER:
+            RETURN base_error * 0.3    // Filter reduces error by ~70%
+        CASE REFLASH:
+            RETURN base_error * 0.8    // Reflash retains ~80% of base error
+    END MATCH
+END PROCEDURE
+
+
+PROCEDURE MeasureLatency(mode: EphemerisMode) -> REAL:
+    // Approximate latency per mode (seconds)
+    MATCH mode:
+        CASE FILTER:  RETURN 0.005    // 5ms — deliberate symbolic reasoning
+        CASE REFLASH: RETURN 0.0005   // 0.5ms — rapid working memory lookup
+    END MATCH
+END PROCEDURE
+
+PROCEDURE MeasureEnergy(mode: EphemerisMode) -> REAL:
+    // Relative energy consumption (normalized units)
+    MATCH mode:
+        CASE FILTER:  RETURN 1.0    // full symbolic reasoning cost
+        CASE REFLASH: RETURN 0.2    // lightweight ephemeral computation
+    END MATCH
+END PROCEDURE
+
+
+// ── COMBINED EPHEMERIS STEP (confidence + cost minimization) ──
+
+PROCEDURE EphemerisStepFull(state: SystemState,
+                              verb_noun_pairs: List[(SymbolicCapsule, SymbolicCapsule)]) -> EphemerisMode:
+    // Two-stage decision:
+    //   Stage 1: Confidence threshold (eq. 14) — fast path
+    //   Stage 2: Cost minimization (eq. 17) — used when confidence is borderline
+
+    p_conf := ComputeEpistemicConfidence(state)
+    CONSTANT BORDER_ZONE := 0.05   // within 5% of threshold = borderline
+
+    // Fast path: clear above or below threshold
+    IF p_conf >= EPISTEMIC_THRESHOLD + BORDER_ZONE:
+        RETURN FILTER
+    ELSE IF p_conf < EPISTEMIC_THRESHOLD - BORDER_ZONE:
+        RETURN REFLASH
+    ELSE:
+        // Borderline: use cost minimization to break the tie
+        EMIT LOG "Borderline confidence p=" + p_conf + " — using cost minimization"
+        RETURN SelectOptimalMode(state, verb_noun_pairs,
+                                  alpha_m_filter=0.5, alpha_m_flash=0.3,
+                                  beta_m_filter=0.5,  beta_m_flash=0.2)
+    END IF
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: dag_ephemeris_M3_peristaltic_vexameneria.psc.txt
+// ============================================================

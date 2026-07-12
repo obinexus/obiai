@@ -1,0 +1,373 @@
+// ============================================================
+// FILE: actor_class_M5_architecture_stack.psc.txt
+// MODULE 5 OF 5 — Systemic Architecture & Deployment Protocol
+// SOURCE: "The Actor Class: A Categorical Foundation for
+//          Epistemic AI Systems with Continuous Space Navigation
+//          and Dimensional Innovation"
+// AUTHOR: OBINexus Computing
+// CLASSIFICATION: Foundational Architecture / Patent Filing
+// DATE: 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 8: ACTOR DEPLOYMENT STACK
+// ------------------------------------------------------------
+
+// DEFINITION 5 (Actor Deployment Stack):
+//
+//   Layer 1 : Core Actor ∈ A
+//   Layer 2 : Cost Governance (Φ, Ψ)
+//   Layer 3 : Epistemic Validation (ε ≥ 0.954)
+//   Layer 4 : Dimensional Innovation Engine (τ)
+//   Layer 5 : Environmental Interface (S ↔ World)
+//
+//   This five-layer architecture ensures actors maintain
+//   operational integrity while exercising creative autonomy.
+
+
+// ── LAYER 1: CORE ACTOR ──────────────────────────────────────
+
+CLASS CoreActorLayer:
+    // Layer 1: The fundamental Actor tuple α = (S, C, Φ, Ψ, ε)
+    // All other layers wrap or extend this core.
+
+    PRIVATE:
+        actor : Actor          // the base tuple
+
+    PUBLIC:
+
+        PROCEDURE Initialize(S, C, Phi, Psi, epsilon) -> VOID:
+            self.actor := InstantiateActor(S, C, Phi, Psi, epsilon)
+            IF self.actor == NULL:
+                EMIT CRITICAL "Layer 1 initialization failed — stack cannot proceed"
+                HALT
+            END IF
+            EMIT INFO "Layer 1 [Core Actor] initialized | ε=" + epsilon
+        END PROCEDURE
+
+        PROCEDURE GetActor() -> Actor:
+            RETURN self.actor
+        END PROCEDURE
+
+        PROCEDURE IsValid() -> BOOL:
+            RETURN self.actor != NULL AND DimensionalInnovationProperty(self.actor)
+        END PROCEDURE
+
+END CLASS
+
+
+// ── LAYER 2: COST GOVERNANCE ─────────────────────────────────
+
+CLASS CostGovernanceLayer:
+    // Layer 2: Wraps Φ and Ψ with governance enforcement and logging.
+
+    PRIVATE:
+        Phi         : StaticCostFunction
+        Psi         : DynamicCostFunction
+        audit_log   : List[CostDecision]
+
+    PUBLIC:
+
+        PROCEDURE Configure(boundary_states B: Set[State]) -> VOID:
+            (self.Phi, self.Psi) := ConfigureCostFunctions(B)
+            EMIT INFO "Layer 2 [Cost Governance] configured | Sinphase bound=0.6"
+        END PROCEDURE
+
+        PROCEDURE EvaluateTransition(s: State, s_prime: State) -> CostDecision:
+            psi_val  := self.Psi(s, s_prime)
+            theta_s  := ComputeStateDependentThreshold(s_prime)
+            phi_val  := self.Phi(s_prime, psi_val)
+
+            decision := CostDecision(
+                from_state  = s,
+                to_state    = s_prime,
+                psi         = psi_val,
+                phi         = phi_val,
+                permitted   = (phi_val == 1 AND psi_val <= SINPHASE_GOVERNANCE_BOUND)
+            )
+
+            self.audit_log.APPEND(decision)
+            RETURN decision
+        END PROCEDURE
+
+        PROCEDURE GetAuditLog() -> List[CostDecision]:
+            RETURN self.audit_log
+        END PROCEDURE
+
+END CLASS
+
+
+// ── LAYER 3: EPISTEMIC VALIDATION ────────────────────────────
+
+CLASS EpistemicValidationLayer:
+    // Layer 3: Enforces ε ≥ 0.954 on all actor decisions.
+    //          Rejects any computation below the confidence threshold.
+
+    PRIVATE:
+        epsilon : REAL     // ≥ 0.954
+
+    PUBLIC:
+
+        PROCEDURE Initialize(epsilon: REAL) -> VOID:
+            IF epsilon < 0.954:
+                EMIT ERROR "Layer 3: epsilon=" + epsilon + " < 0.954 — rejected"
+                HALT
+            END IF
+            self.epsilon := epsilon
+            EMIT INFO "Layer 3 [Epistemic Validation] | ε=" + epsilon
+        END PROCEDURE
+
+        PROCEDURE ValidateDecision(decision: CostDecision,
+                                   confidence: REAL) -> BOOL:
+            // Only proceed with decisions above epistemic threshold
+            IF confidence < self.epsilon:
+                EMIT WARNING "Decision confidence=" + confidence +
+                             " < ε=" + self.epsilon + " — REJECTED"
+                RETURN FALSE
+            END IF
+            RETURN TRUE
+        END PROCEDURE
+
+        PROCEDURE ComputeDecisionConfidence(α: Actor, s: State,
+                                            s_prime: State) -> REAL:
+            // Confidence derived from posterior probability of transition
+            // under the actor's epistemic metric
+            dist := EpistemicMetric(s, s_prime)
+            confidence := 1.0 - dist   // higher distance → lower confidence
+            RETURN CLAMP(confidence, 0.0, 1.0)
+        END PROCEDURE
+
+END CLASS
+
+
+// ── LAYER 4: DIMENSIONAL INNOVATION ENGINE ───────────────────
+
+CLASS DimensionalInnovationEngine:
+    // Layer 4: Manages generation, validation, and application of τ transforms.
+    //          τ must NOT be in span(C) — genuine novelty required.
+
+    PRIVATE:
+        innovation_history : List[Transform]     // previously applied τs
+
+    PUBLIC:
+
+        PROCEDURE GenerateInnovation(α: Actor, s: State,
+                                     context: Context) -> Transform:
+            // Attempt to find τ ∉ span(C) that is permissible
+            MAX_ATTEMPTS := 50
+            attempt := 0
+
+            WHILE attempt < MAX_ATTEMPTS:
+                τ_candidate := SampleCandidateTransform(α.S, context)
+
+                // Check novelty: τ must NOT be in span(C)
+                IF τ_candidate IN ComputeSpan(α.C):
+                    attempt += 1
+                    CONTINUE   // not genuinely novel — try again
+                END IF
+
+                // Check permissibility under cost functions
+                IF IsInnovationPermissible(α, s, τ_candidate, 0.5, 0.5):
+                    self.innovation_history.APPEND(τ_candidate)
+                    EMIT INFO "Layer 4: Novel innovation τ found and approved"
+                    RETURN τ_candidate
+                END IF
+
+                attempt += 1
+            END WHILE
+
+            EMIT WARNING "Layer 4: No permissible innovation found in " +
+                         MAX_ATTEMPTS + " attempts"
+            RETURN NULL
+        END PROCEDURE
+
+        PROCEDURE ApplyInnovation(α: Actor, s: State,
+                                   τ: Transform) -> State:
+            // Apply τ to expand the actor's manifold
+            IF τ == NULL:
+                RETURN s    // no-op if no valid innovation
+            END IF
+            s_expanded := τ.apply(s)
+            // Verify the innovation expanded the manifold (new dimension added)
+            ASSERT s_expanded.dimensionality > s.dimensionality
+            RETURN s_expanded
+        END PROCEDURE
+
+        PROCEDURE GetInnovationHistory() -> List[Transform]:
+            RETURN self.innovation_history
+        END PROCEDURE
+
+END CLASS
+
+
+// ── LAYER 5: ENVIRONMENTAL INTERFACE ─────────────────────────
+
+CLASS EnvironmentalInterface:
+    // Layer 5: Bridges the actor's internal semantic manifold S
+    //          to the external world (internet-scale or physical).
+
+    PRIVATE:
+        env_type   : EnvironmentType
+        world_map  : Map[WorldState → State]     // world → manifold encoding
+        state_map  : Map[State → WorldAction]    // manifold state → world action
+
+    PUBLIC:
+
+        PROCEDURE Initialize(env_type: EnvironmentType,
+                             boundary_states B: Set[State]) -> VOID:
+            self.env_type := env_type
+            EMIT INFO "Layer 5 [Environmental Interface] | mode=" + env_type
+        END PROCEDURE
+
+        PROCEDURE EncodeWorldState(w: WorldState) -> State:
+            // Map external world observation to semantic manifold state
+            IF w IN self.world_map:
+                RETURN self.world_map[w]
+            END IF
+            // Generate new encoding for unseen world state
+            new_state := GenerateManifoldEncoding(w)
+            self.world_map[w] := new_state
+            RETURN new_state
+        END PROCEDURE
+
+        PROCEDURE DecodeStateToAction(s: State) -> WorldAction:
+            // Map semantic manifold state to executable world action
+            IF s IN self.state_map:
+                RETURN self.state_map[s]
+            END IF
+            action := GenerateWorldAction(s)
+            self.state_map[s] := action
+            RETURN action
+        END PROCEDURE
+
+END CLASS
+
+
+// ── FULL DEPLOYMENT STACK ORCHESTRATOR ───────────────────────
+
+CLASS ActorDeploymentStack:
+    // Orchestrates all 5 layers into a unified deployment pipeline.
+
+    PRIVATE:
+        layer1 : CoreActorLayer
+        layer2 : CostGovernanceLayer
+        layer3 : EpistemicValidationLayer
+        layer4 : DimensionalInnovationEngine
+        layer5 : EnvironmentalInterface
+
+    PUBLIC:
+
+        PROCEDURE Initialize(config: DeploymentConfig) -> VOID:
+            EMIT INFO "=== ACTOR DEPLOYMENT STACK INITIALIZATION ==="
+
+            // Layer 1: Core Actor
+            layer1.Initialize(
+                S       = config.manifold,
+                C       = config.nav_functor,
+                Phi     = config.phi,
+                Psi     = config.psi,
+                epsilon = config.epsilon
+            )
+
+            // Layer 2: Cost Governance
+            layer2.Configure(boundary_states = config.boundaries)
+
+            // Layer 3: Epistemic Validation
+            layer3.Initialize(epsilon = config.epsilon)   // ε ≥ 0.954
+
+            // Layer 4: Dimensional Innovation Engine
+            layer4 := NEW DimensionalInnovationEngine()
+
+            // Layer 5: Environmental Interface
+            layer5.Initialize(
+                env_type = config.environment_type,
+                boundary_states = config.boundaries
+            )
+
+            EMIT INFO "=== STACK READY | All 5 layers initialized ==="
+        END PROCEDURE
+
+
+        PROCEDURE ExecuteCycle(world_observation: WorldState,
+                               context: Context) -> WorldAction:
+            // Full stack execution cycle:
+
+            // L5: Encode world → manifold state
+            s_current := layer5.EncodeWorldState(world_observation)
+
+            // L3: Validate current epistemic confidence
+            confidence := layer3.ComputeDecisionConfidence(
+                layer1.GetActor(), s_current, s_current
+            )
+            IF NOT layer3.ValidateDecision(NULL, confidence):
+                EMIT WARNING "Insufficient epistemic confidence — cycle aborted"
+                RETURN NULL_ACTION
+            END IF
+
+            // L4: Attempt dimensional innovation
+            τ := layer4.GenerateInnovation(layer1.GetActor(), s_current, context)
+            IF τ != NULL:
+                s_current := layer4.ApplyInnovation(layer1.GetActor(), s_current, τ)
+            END IF
+
+            // L1+L2: Navigate to next state with cost governance
+            α       := layer1.GetActor()
+            s_next  := α.C.apply(s_current)
+            decision := layer2.EvaluateTransition(s_current, s_next)
+
+            IF NOT decision.permitted:
+                EMIT INFO "Transition blocked by cost governance — remaining at s_current"
+                s_next := s_current
+            END IF
+
+            // L5: Decode manifold state → world action
+            action := layer5.DecodeStateToAction(s_next)
+            RETURN action
+
+        END PROCEDURE
+
+
+        PROCEDURE GetStackDiagnostics() -> StackReport:
+            report := NEW StackReport()
+            report.layer1_valid      := layer1.IsValid()
+            report.cost_audit        := layer2.GetAuditLog()
+            report.epsilon           := layer3.epsilon
+            report.innovation_count  := layer4.GetInnovationHistory().length
+            report.env_mode          := layer5.env_type
+            RETURN report
+        END PROCEDURE
+
+END CLASS
+
+
+// ============================================================
+// CONCLUSION (§9) — Formal Summary of Established Properties
+// ============================================================
+
+//   1. Actors form a DISTINCT CLASS transcending agent limitations
+//      → Theorem 1: A ≇ G (no categorical isomorphism)
+//
+//   2. Continuous space navigation enables UNBOUNDED problem-solving
+//      → Definition 2 + Proposition 1: C preserves continuity in S
+//
+//   3. Dual cost functions ensure SAFE DEPLOYMENT without constraining innovation
+//      → Theorem 2: Φ(τ(s), Ψ(s,τ(s)))=1 ∧ Ψ≤0.6 ↔ innovation permissible
+//      → Theorem 3: Properly configured Φ guarantees no system breach
+//
+//   4. TURING-COMPLETE EPISTEMIC AUTONOMY emerges from the architecture
+//      → Theorem 4: ∀ TM T, ∃ actor αT simulating T
+//
+//   5. Evolution from agents to actors is MATHEMATICALLY NECESSARY
+//      → Proposition 2: I_A ⊂ I_α; actors = minimal AGI class
+
+
+// ============================================================
+// END MODULE 5 — FINAL MODULE
+//
+// FULL MODULE INDEX:
+//   M1: actor_class_M1_definition.psc.txt
+//   M2: actor_class_M2_navigation.psc.txt
+//   M3: actor_class_M3_cost_functions.psc.txt
+//   M4: actor_class_M4_deployment_turing.psc.txt
+//   M5: actor_class_M5_architecture_stack.psc.txt  ← THIS FILE
+// ============================================================

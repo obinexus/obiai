@@ -1,0 +1,488 @@
+// ============================================================
+// FILE: CSL_Module2_CulturalValidationAndUI.psc.txt
+// SOURCE: Formal_Technical_Specification___Conceptual_Symbolic_Language_Layer__CSL_.pdf
+//         Sections 4, 5
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing (2025)
+// PURPOSE: Pseudocode for Cultural Validation Framework,
+//          Progressive Disclosure Architecture, Dynamic Visualization,
+//          and Cross-Cultural Adaptation
+// ============================================================
+
+MODULE CSL_CulturalValidationAndUI
+
+// ============================================================
+// SECTION 4 — Cultural Validation Framework
+// ============================================================
+
+// ============================================================
+// SECTION 4.1 — Systematic Authenticity Verification
+// ============================================================
+
+// DEFINITION 3 (Cultural Authenticity Score):
+// The cultural authenticity score A(G_i) for glyph G_i is:
+//
+//   A(G_i) = w1 · H_historical(G_i)
+//           + w2 · V_community(G_i)
+//           + w3 · I_integrity(G_i)
+//
+// Where:
+//   H_historical(G_i) = measures historical precedent accuracy
+//   V_community(G_i)  = community validation score
+//   I_integrity(G_i)  = compositional integrity assessment
+
+STRUCTURE AuthenticityWeights:
+    w1: Float    // Weight for historical precedent
+    w2: Float    // Weight for community validation
+    w3: Float    // Weight for compositional integrity
+    // Constraint: w1 + w2 + w3 = 1.0
+END STRUCTURE
+
+FUNCTION measure_historical_precedent(glyph: Glyph) -> Float:
+    // H_historical(G_i)
+    // Looks up historical records for this glyph's usage patterns
+    historical_refs := glyph_db.get_historical_references(glyph.id)
+
+    IF historical_refs IS EMPTY THEN
+        RETURN 0.0    // No historical precedent found
+    END IF
+
+    // Score based on age, frequency, and consistency of historical usage
+    RETURN compute_historical_score(historical_refs)
+END FUNCTION
+
+FUNCTION measure_community_validation(glyph: Glyph) -> Float:
+    // V_community(G_i)
+    // Aggregates scores from community reviewers and cultural advisors
+    reviews := community_db.get_reviews(glyph.id)
+
+    IF reviews IS EMPTY THEN
+        RETURN 0.0    // Awaiting community review
+    END IF
+
+    approval_rate := COUNT(r IN reviews WHERE r.status == APPROVED)
+                   / COUNT(reviews)
+    RETURN approval_rate
+END FUNCTION
+
+FUNCTION measure_compositional_integrity(glyph: Glyph) -> Float:
+    // I_integrity(G_i)
+    // Validates that glyph composition follows structural grammar rules
+    // and does not violate cultural constraints
+    grammar_valid    := validate_grammar_structure(glyph)
+    constraint_valid := validate_cultural_constraints(glyph)
+
+    IF NOT grammar_valid OR NOT constraint_valid THEN
+        RETURN 0.0
+    END IF
+
+    // Score based on structural coherence
+    RETURN compute_structural_coherence_score(glyph)
+END FUNCTION
+
+FUNCTION compute_cultural_authenticity(
+    glyph:   Glyph,
+    weights: AuthenticityWeights
+) -> Float:
+    // A(G_i) = w1·H + w2·V + w3·I
+    H := measure_historical_precedent(glyph)
+    V := measure_community_validation(glyph)
+    I := measure_compositional_integrity(glyph)
+
+    A := (weights.w1 * H) + (weights.w2 * V) + (weights.w3 * I)
+    RETURN A
+END FUNCTION
+
+
+// ============================================================
+// ALGORITHM 1 — Compositional Glyph Generation
+// ============================================================
+
+// REQUIRE: Bayesian state B_t, base concept c, cultural validator V
+// ENSURE:  Composed glyph G_composed
+
+CONSTANT COMPLEXITY_THRESHOLD := 0.75   // TODO: Clarify exact threshold from source PDF
+
+FUNCTION get_base_glyph_for_concept(concept: BayesianConcept) -> BaseGlyph:
+    // Line 1: g_base ← GetBaseGlyph(c)
+    RETURN glyph_registry.get_atomic(concept)
+END FUNCTION
+
+FUNCTION extract_modifiers(bayesian_state: BayesianState) -> List<GlyphModifier>:
+    // Line 2: modifiers ← ExtractModifiers(B_t)
+    // Pull intensity, direction, uncertainty modifiers from current Bayesian state
+    mods := []
+    mods.append(GlyphModifier { modifier_type: "intensity",   parameter_rho:   bayesian_state.evidence_strength })
+    mods.append(GlyphModifier { modifier_type: "direction",   parameter_theta: bayesian_state.causal_direction  })
+    mods.append(GlyphModifier { modifier_type: "uncertainty", parameter_eps:   bayesian_state.variance          })
+    RETURN mods
+END FUNCTION
+
+FUNCTION calculate_complexity(
+    base:      BaseGlyph,
+    modifiers: List<GlyphModifier>
+) -> Float:
+    // Line 3: complexity ← CalculateComplexity(g_base, modifiers)
+    base_complexity     := base.intrinsic_complexity
+    modifier_complexity := SUM(m.parameter_rho FOR m IN modifiers)
+    RETURN base_complexity + modifier_complexity
+END FUNCTION
+
+FUNCTION apply_progressive_revelation(
+    base:      BaseGlyph,
+    modifiers: List<GlyphModifier>
+) -> ComposedGlyph:
+    // Called when complexity > THRESHOLD
+    // Reveals modifiers incrementally based on user familiarity
+    // (See Section 5.1 — Progressive Disclosure Architecture)
+    RETURN progressive_disclosure_engine.render(base, modifiers, reveal_mode=INCREMENTAL)
+END FUNCTION
+
+FUNCTION compositional_glyph_generation(
+    bayesian_state: BayesianState,
+    concept:        BayesianConcept,
+    validator:      CulturalValidator
+) -> ComposedGlyph:
+
+    // Line 1
+    g_base    := get_base_glyph_for_concept(concept)
+    // Line 2
+    modifiers := extract_modifiers(bayesian_state)
+    // Line 3
+    complexity := calculate_complexity(g_base, modifiers)
+
+    // Lines 4-7: Complexity gate
+    IF complexity > COMPLEXITY_THRESHOLD THEN
+        RETURN apply_progressive_revelation(g_base, modifiers)
+    END IF
+
+    // Line 8: Apply modifier stack
+    g_composed := apply_modifier_stack(ModifierStack {
+        base_glyph: g_base,
+        modifiers:  modifiers
+    })
+
+    // Lines 9-14: Cultural validation gate
+    IF validator.validate_cultural(g_composed) THEN
+        RETURN g_composed
+    ELSE
+        // Cultural validation failed — request expert guidance
+        RETURN request_cultural_guidance(g_base, modifiers)
+    END IF
+
+END FUNCTION
+
+
+// ============================================================
+// SECTION 4.2 — Multi-Tier Validation Protocol
+// ============================================================
+
+// Four-tier validation escalation:
+//   Tier 1 → Automated rule-based pattern matching
+//   Tier 2 → Historical precedent database lookup
+//   Tier 3 → Human cultural advisor consultation
+//   Tier 4 → Iterative refinement with feedback
+
+DEFINE ValidationTier AS ENUM {
+    TIER_1_AUTOMATED,
+    TIER_2_HISTORICAL,
+    TIER_3_COMMUNITY_REVIEW,
+    TIER_4_ITERATIVE_REFINEMENT
+}
+
+FUNCTION validate_cultural(glyph: ComposedGlyph) -> ValidationResult:
+    // Tier 1: Automated Guidelines — rule-based cultural pattern matching
+    tier1_result := run_automated_pattern_matching(glyph)
+    IF tier1_result.passed THEN
+        RETURN ValidationResult { tier: TIER_1_AUTOMATED, approved: TRUE }
+    END IF
+
+    // Tier 2: Historical Precedent — database lookup for similar compositions
+    tier2_result := lookup_historical_precedents(glyph)
+    IF tier2_result.precedent_found AND tier2_result.approved THEN
+        RETURN ValidationResult { tier: TIER_2_HISTORICAL, approved: TRUE }
+    END IF
+
+    // Tier 3: Community Review — human cultural advisor consultation
+    tier3_result := submit_to_community_advisors(glyph)
+    IF tier3_result.approved THEN
+        RETURN ValidationResult { tier: TIER_3_COMMUNITY_REVIEW, approved: TRUE }
+    END IF
+
+    // Tier 4: Iterative Refinement — incorporate feedback and re-validate
+    refined_glyph := incorporate_feedback(glyph, tier3_result.feedback)
+    tier4_result  := run_automated_pattern_matching(refined_glyph)
+    RETURN ValidationResult {
+        tier:     TIER_4_ITERATIVE_REFINEMENT,
+        approved: tier4_result.passed,
+        revised:  refined_glyph
+    }
+
+END FUNCTION
+
+FUNCTION request_cultural_guidance(
+    base:      BaseGlyph,
+    modifiers: List<GlyphModifier>
+) -> ComposedGlyph:
+    // Escalate to cultural advisory board
+    advisory_input := cultural_advisory_board.request_guidance(base, modifiers)
+    revised_glyph  := rebuild_with_guidance(base, modifiers, advisory_input)
+    RETURN revised_glyph
+END FUNCTION
+
+
+// ============================================================
+// SECTION 5 — Advanced UI/UX Integration Patterns
+// ============================================================
+
+// ============================================================
+// SECTION 5.1 — Progressive Disclosure Architecture
+// ============================================================
+
+// DEFINITION 4 (Adaptive Complexity Management):
+// Given user familiarity U_f and inference complexity I_c,
+// the optimal display complexity D_c is:
+//
+//   D_c = I_c · e^{-λ · U_f} + ε_base
+//
+// Where:
+//   λ        = adaptation rate (controls how fast complexity reduces with familiarity)
+//   ε_base   = minimum comprehensibility floor (always show at least this much)
+
+FUNCTION compute_display_complexity(
+    inference_complexity: Float,    // I_c
+    user_familiarity:     Float,    // U_f
+    config:               CSLConfiguration
+) -> Float:
+    // D_c = I_c · e^{-λ · U_f} + ε_base
+    lambda   := config.adaptation_rate
+    eps_base := config.epsilon_base
+
+    D_c := inference_complexity * EXP(-lambda * user_familiarity) + eps_base
+    RETURN D_c
+END FUNCTION
+
+PROCEDURE progressive_disclosure_render(
+    glyph:     ComposedGlyph,
+    user_ctx:  UserContext,
+    config:    CSLConfiguration
+):
+    I_c := measure_glyph_complexity(glyph)
+    U_f := user_ctx.familiarity_score
+    D_c := compute_display_complexity(I_c, U_f, config)
+
+    // Determine how many layers to reveal
+    layers_to_reveal := map_complexity_to_layers(D_c)
+
+    FOR i FROM 1 TO layers_to_reveal DO
+        render_layer(glyph, layer_index=i)
+    END FOR
+END PROCEDURE
+
+
+// ============================================================
+// SECTION 5.2 — Dynamic Visualization States
+// ============================================================
+
+// SECTION 5.2.1 — Real-Time Inference Visualization
+//
+// Four states based on comprehension probability:
+//   State 1: Base concepts only          — P(comprehension) > 0.8
+//   State 2: Primary relationships added — 0.5 < P(comprehension) ≤ 0.8
+//   State 3: Full compositional display  — P(comprehension) ≤ 0.5
+//   State 4: Expert mode (math overlays) — explicit user request
+
+DEFINE VisualizationState AS ENUM {
+    STATE_1_BASE_ONLY,          // High comprehension
+    STATE_2_PRIMARY_RELATIONS,  // Moderate comprehension
+    STATE_3_FULL_COMPOSITION,   // Low comprehension
+    STATE_4_EXPERT_MODE         // Mathematical overlays
+}
+
+FUNCTION determine_visualization_state(
+    comprehension_prob: Float,
+    expert_requested:   Boolean
+) -> VisualizationState:
+
+    IF expert_requested THEN
+        RETURN STATE_4_EXPERT_MODE
+    END IF
+
+    IF comprehension_prob > 0.8 THEN
+        RETURN STATE_1_BASE_ONLY
+    ELSE IF comprehension_prob > 0.5 THEN
+        RETURN STATE_2_PRIMARY_RELATIONS
+    ELSE
+        RETURN STATE_3_FULL_COMPOSITION
+    END IF
+
+END FUNCTION
+
+PROCEDURE render_inference_visualization(
+    glyph:              ComposedGlyph,
+    comprehension_prob: Float,
+    expert_requested:   Boolean
+):
+    state := determine_visualization_state(comprehension_prob, expert_requested)
+
+    SWITCH state:
+        CASE STATE_1_BASE_ONLY:
+            render_base_glyphs_only(glyph)
+
+        CASE STATE_2_PRIMARY_RELATIONS:
+            render_base_glyphs_only(glyph)
+            render_primary_relations(glyph)
+
+        CASE STATE_3_FULL_COMPOSITION:
+            render_full_composition(glyph)
+
+        CASE STATE_4_EXPERT_MODE:
+            render_full_composition(glyph)
+            overlay_mathematical_annotations(glyph)
+    END SWITCH
+END PROCEDURE
+
+
+// ============================================================
+// SECTION 5.2.2 — Uncertainty Visualization Framework
+// ============================================================
+
+// Uncertainty Level    | Visual Modulation              | Threshold
+// ---------------------|--------------------------------|----------------------------
+// High Confidence      | Solid, vibrant rendering       | σ² < 0.1
+// Moderate Uncertainty | Semi-transparent, steady       | 0.1 ≤ σ² < 0.3
+// High Uncertainty     | Dashed borders, pulsing        | 0.3 ≤ σ² < 0.6
+// Extreme Uncertainty  | Faded, fragmented display      | σ² ≥ 0.6
+
+DEFINE UncertaintyLevel AS ENUM {
+    HIGH_CONFIDENCE,
+    MODERATE_UNCERTAINTY,
+    HIGH_UNCERTAINTY,
+    EXTREME_UNCERTAINTY
+}
+
+FUNCTION classify_uncertainty(variance: Float) -> UncertaintyLevel:
+    IF variance < 0.1 THEN
+        RETURN HIGH_CONFIDENCE
+    ELSE IF variance < 0.3 THEN
+        RETURN MODERATE_UNCERTAINTY
+    ELSE IF variance < 0.6 THEN
+        RETURN HIGH_UNCERTAINTY
+    ELSE
+        RETURN EXTREME_UNCERTAINTY
+    END IF
+END FUNCTION
+
+STRUCTURE VisualModulation:
+    border_style:  String    // "solid" | "dashed" | "fragmented"
+    opacity:       Float     // 0.0 (invisible) to 1.0 (fully opaque)
+    animation:     String    // "none" | "pulse" | "fragment"
+    color_saturation: Float  // 0.0 (grey) to 1.0 (vibrant)
+END STRUCTURE
+
+FUNCTION get_visual_modulation(level: UncertaintyLevel) -> VisualModulation:
+    SWITCH level:
+        CASE HIGH_CONFIDENCE:
+            RETURN VisualModulation {
+                border_style: "solid", opacity: 1.0,
+                animation: "none", color_saturation: 1.0
+            }
+        CASE MODERATE_UNCERTAINTY:
+            RETURN VisualModulation {
+                border_style: "solid", opacity: 0.65,
+                animation: "none", color_saturation: 0.7
+            }
+        CASE HIGH_UNCERTAINTY:
+            RETURN VisualModulation {
+                border_style: "dashed", opacity: 0.45,
+                animation: "pulse", color_saturation: 0.4
+            }
+        CASE EXTREME_UNCERTAINTY:
+            RETURN VisualModulation {
+                border_style: "fragmented", opacity: 0.2,
+                animation: "fragment", color_saturation: 0.15
+            }
+    END SWITCH
+END FUNCTION
+
+PROCEDURE render_with_uncertainty(glyph: ComposedGlyph, variance: Float):
+    level      := classify_uncertainty(variance)
+    modulation := get_visual_modulation(level)
+    apply_visual_modulation(glyph, modulation)
+END PROCEDURE
+
+
+// ============================================================
+// SECTION 5.3 — Cross-Cultural Adaptation Interface (Algorithm 2)
+// ============================================================
+
+// ALGORITHM 2 — Cultural Context Adaptation
+// REQUIRE: User cultural profile P_u, base conceptual state C_b
+// ENSURE:  Culturally adapted visualization V_adapted
+
+FUNCTION get_glyph_sets(user_profile: CulturalProfile) -> List<GlyphSet>:
+    // Line 1: available_sets ← GetGlyphSets(P_u)
+    RETURN glyph_registry.get_sets_for_culture(user_profile.cultural_context)
+END FUNCTION
+
+FUNCTION select_primary_set(
+    user_profile:     CulturalProfile,
+    available_sets:   List<GlyphSet>
+) -> GlyphSet:
+    // Choose most culturally aligned glyph set
+    // Score each set against user's cultural profile
+    best_set   := NULL
+    best_score := -1.0
+
+    FOR EACH set IN available_sets DO
+        score := compute_cultural_alignment(set, user_profile)
+        IF score > best_score THEN
+            best_score := score
+            best_set   := set
+        END IF
+    END FOR
+
+    RETURN best_set
+END FUNCTION
+
+FUNCTION cultural_context_adaptation(
+    user_profile:      CulturalProfile,     // P_u
+    base_state:        ConceptualState,     // C_b
+    validator:         CulturalValidator
+) -> Visualization:
+
+    // Line 1: Get available glyph sets for this cultural profile
+    available_sets := get_glyph_sets(user_profile)
+
+    // Lines 2-4: Fallback if no sets available
+    IF COUNT(available_sets) == 0 THEN
+        RETURN default_textual_fallback(base_state)
+    END IF
+
+    // Line 6: Select primary culturally-aligned glyph set
+    primary_set := select_primary_set(user_profile, available_sets)
+
+    // Line 7: Translate conceptual state to adapted visualization
+    V_adapted := translate_conceptual_state(base_state, primary_set)
+
+    // Lines 8-14: Validate cultural appropriateness
+    validation := validate_cultural_appropriateness(V_adapted)
+
+    IF validation.approved THEN
+        RETURN V_adapted
+    ELSE
+        // Escalate to cultural guidance
+        RETURN request_cultural_guidance_for_context(base_state, user_profile)
+    END IF
+
+END FUNCTION
+
+FUNCTION default_textual_fallback(state: ConceptualState) -> Visualization:
+    // When no glyph sets match the user's cultural profile,
+    // fall back to textual representation of Bayesian state
+    RETURN Visualization.TEXT(
+        content: format_bayesian_state_as_text(state),
+        type:    "textual_fallback"
+    )
+END FUNCTION
+
+END MODULE CSL_CulturalValidationAndUI

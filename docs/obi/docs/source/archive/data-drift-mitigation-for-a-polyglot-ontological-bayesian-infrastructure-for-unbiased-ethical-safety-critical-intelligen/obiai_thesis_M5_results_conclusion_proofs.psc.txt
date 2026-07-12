@@ -1,0 +1,316 @@
+// ============================================================
+// FILE: obiai_thesis_M5_results_conclusion_proofs.psc.txt
+// MODULE 5 OF 5 — Experimental Results, Discussion, Conclusion
+//                 & AEGIS Proof Appendices
+// SOURCE: "Data Drift Mitigation for a Polyglot Ontological Bayesian
+//          Infrastructure..." (OBIAI Thesis)
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing
+// DATE:   September 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// CHAPTER 8: EXPERIMENTAL RESULTS
+// ------------------------------------------------------------
+
+// ── §8.1: TRIANGI DATASET PERFORMANCE ────────────────────────
+
+// Validation criterion (cross-ref: AEGIS-PROOF-3.1/3.2 Triangi benchmark):
+//
+//   ValidationTriangi = (1/|T|) Σ_{t∈T} I[p_conf(t) ≥ 0.954] ≥ 0.954
+//
+// Figure 8.1 (Coherence Under Data Drift) shows:
+//   - OBIAI coherence remains ≥ 0.954 across drift magnitudes 0–12
+//   - Baseline drops below threshold around drift magnitude 4
+//   - OBIAI advantage largest at extreme drift (magnitude 10–12)
+
+DEFINE TriangiExperimentSpec AS:
+    dataset_name        := "Triangi"
+    drift_range         := RANGE[0.0, 12.0]     // drift magnitudes tested
+    coherence_target    := 0.954
+    evaluation_metric   := "Coherence maintenance under data drift"
+
+    // Expected result (from Figure 8.1):
+    OBIAI_coherence_at_drift_12  := APPROX(0.954)   // holds threshold at extreme
+    baseline_coherence_at_drift_4 := BELOW(0.954)   // baseline fails here
+END DEFINE
+
+
+PROCEDURE TriangiValidation(model: FilterFlashEngine,
+                              test_set T: List[TestCase]) -> TriangiReport:
+    // Full Triangi benchmark evaluation
+
+    n_total    := LENGTH(T)
+    n_passed   := 0
+    coherence_by_drift := {}   // drift_magnitude → coherence
+
+    FOR EACH test_case IN T:
+        // Process test case through OBIAI
+        input_dp   := test_case.input
+        y_t        := model.Process(input_dp)
+
+        // Check coherence
+        p_conf     := MeasureCoherence(y_t)
+        drift_mag  := test_case.drift_magnitude
+
+        IF p_conf >= C_COHERENCE:
+            n_passed := n_passed + 1
+        END IF
+
+        // Record coherence at this drift magnitude
+        IF drift_mag NOT IN coherence_by_drift:
+            coherence_by_drift[drift_mag] := []
+        END IF
+        coherence_by_drift[drift_mag].APPEND(p_conf)
+    END FOR
+
+    // Compute aggregate metrics
+    overall_score := n_passed / MAX(n_total, 1)
+
+    // Average coherence per drift level
+    avg_coherence_curve := {}
+    FOR EACH (drift, values) IN coherence_by_drift:
+        avg_coherence_curve[drift] := MEAN(values)
+    END FOR
+
+    report := TriangiReport(
+        n_total             = n_total,
+        n_passed            = n_passed,
+        overall_score       = overall_score,
+        threshold_met       = (overall_score >= C_COHERENCE),
+        coherence_curve     = avg_coherence_curve,
+        threshold           = C_COHERENCE
+    )
+
+    IF report.threshold_met:
+        EMIT INFO "TRIANGI BENCHMARK PASSED | score=" + overall_score
+    ELSE:
+        EMIT ERROR "TRIANGI BENCHMARK FAILED | score=" + overall_score +
+                   " < " + C_COHERENCE
+    END IF
+
+    RETURN report
+END PROCEDURE
+
+
+PROCEDURE CompareOBIAIvsBaseline(obiai_model: FilterFlashEngine,
+                                   baseline_model: BaselineModel,
+                                   test_set T: List[TestCase]) -> ComparisonReport:
+    // Generate comparison data for Figure 8.1
+
+    drift_levels := [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    report       := NEW ComparisonReport()
+
+    FOR EACH d IN drift_levels:
+        cases_at_d   := FILTER(T, by=drift_magnitude(d))
+
+        // OBIAI coherence at drift level d
+        obiai_vals   := []
+        FOR EACH tc IN cases_at_d:
+            out := obiai_model.Process(tc.input)
+            obiai_vals.APPEND(MeasureCoherence(out))
+        END FOR
+
+        // Baseline coherence at drift level d
+        base_vals := []
+        FOR EACH tc IN cases_at_d:
+            out := baseline_model.Process(tc.input)
+            base_vals.APPEND(MeasureCoherence(out))
+        END FOR
+
+        report.obiai_curve[d]    := MEAN(obiai_vals)
+        report.baseline_curve[d] := MEAN(base_vals)
+        report.threshold_line[d] := C_COHERENCE   // 0.954
+
+        EMIT LOG "Drift=" + d + " | OBIAI=" + report.obiai_curve[d] +
+                 " | Baseline=" + report.baseline_curve[d]
+    END FOR
+
+    RETURN report
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// CHAPTER 9: DISCUSSION
+// ------------------------------------------------------------
+
+// ── §9.1: KEY FINDINGS ───────────────────────────────────────
+
+DEFINE KeyFindings AS:
+    FINDING_1 := {
+        claim     : "The 95.4% threshold provides optimal balance between safety and performance",
+        evidence  : "Triangi dataset: OBIAI maintains C ≥ 0.954 across all drift magnitudes",
+        cross_ref : "AEGIS-PROOF-3.1 Corollary 1 (confidence threshold optimality)"
+    }
+
+    FINDING_2 := {
+        claim     : "DIRAM cascade enables graceful degradation under extreme drift",
+        evidence  : "Three-tier cascade (±3/±6/±9) prevents catastrophic failure at |drift|=12",
+        cross_ref : "Algorithm 1 (cascade activation thresholds)"
+    }
+
+    FINDING_3 := {
+        claim     : "Filter-Flash architecture supports both persistent and ephemeral reasoning",
+        evidence  : "FilterFlashEngine routes via confidence: Filter (C≥0.954) vs Flash (C<0.954)",
+        cross_ref : "AEGIS-PROOF-3.1 (monotonicity), AEGIS-PROOF-3.2 (convergence)"
+    }
+END DEFINE
+
+PROCEDURE PrintKeyFindings() -> VOID:
+    EMIT INFO "=== KEY FINDINGS ==="
+    FOR EACH finding IN [KeyFindings.FINDING_1, KeyFindings.FINDING_2, KeyFindings.FINDING_3]:
+        EMIT INFO "FINDING: " + finding.claim
+        EMIT INFO "EVIDENCE: " + finding.evidence
+        EMIT INFO "CROSS-REF: " + finding.cross_ref
+        EMIT INFO "---"
+    END FOR
+END PROCEDURE
+
+
+// ── §9.2: LIMITATIONS ────────────────────────────────────────
+
+DEFINE Limitations AS:
+    LIMIT_1 := "Triangi dataset may not cover all real-world distribution types"
+    LIMIT_2 := "DIRAM cascade adds latency overhead — may not suit ultra-low-latency systems"
+    LIMIT_3 := "Cultural grounding (Nsibidi) requires domain-specific glyph encoding — not universal"
+    LIMIT_4 := "Flash decay rate λ is manually tuned — adaptive learning of λ is future work"
+    LIMIT_5 := "Storage layer XOR composition is not invertible — retrieval fidelity may degrade"
+END DEFINE
+
+
+// ------------------------------------------------------------
+// CHAPTER 10: CONCLUSION
+// ------------------------------------------------------------
+
+// ── §10.1: CONTRIBUTIONS ─────────────────────────────────────
+
+DEFINE ThesisContributions AS:
+    CONTRIB_1 := "First polyglot framework achieving 95.4% coherence under drift"
+    CONTRIB_2 := "Novel DIRAM cascade for adaptive persona management"
+    CONTRIB_3 := "Mathematically verified Filter-Flash cognitive architecture"
+    CONTRIB_4 := "Real-world validation in safety-critical domains (housing, social, autonomous vehicles)"
+END DEFINE
+
+// ── §10.2: FUTURE WORK ───────────────────────────────────────
+
+DEFINE FutureWork AS:
+    FW_1 := "Quantum memory integration for enhanced Flash persistence"
+    FW_2 := "Cross-cultural symbolic translation"
+    FW_3 := "Extension to multi-modal sensory fusion"
+END DEFINE
+
+
+// ------------------------------------------------------------
+// APPENDIX A: MATHEMATICAL PROOFS (Cross-references)
+// ------------------------------------------------------------
+
+// ── A.1: AEGIS-PROOF-3.1 — FILTER-FLASH MONOTONICITY ─────────
+
+// FULL PROOF: see aegis_proof_3_1_3_2_M2_filterflash_monotonicity.psc.txt
+//
+// Summary:
+//   Under Assumptions 1–3 (stationarity, Lipschitz, DAG regularity):
+//   For fixed environment and monotone cost functions,
+//   increasing p_conf MONOTONICALLY INCREASES the advantage of Filter over Flash.
+//
+//   Δ(p) = E[C_Flash] − E[C_Filter] is non-decreasing in p.
+//   dΔ(p)/dp ≥ 0  →  Corollary: θ = 0.954 is optimal mode selection threshold.
+
+PROCEDURE AppendixA1_Reference() -> VOID:
+    EMIT INFO "AEGIS-PROOF-3.1 (Filter-Flash Monotonicity)"
+    EMIT INFO "Full pseudocode: aegis_proof_3_1_3_2_M2_filterflash_monotonicity.psc.txt"
+    EMIT INFO "Key result: dΔ(p)/dp ≥ 0 — Filter advantage monotonically increases with p_conf"
+    EMIT INFO "Corollary: θ = 0.954 optimal for real-world deployment"
+END PROCEDURE
+
+
+// ── A.2: AEGIS-PROOF-3.2 — HYBRID MODE CONVERGENCE ───────────
+
+// FULL PROOF: see aegis_proof_3_1_3_2_M3_hybrid_convergence.psc.txt
+//
+// Summary:
+//   Under Robbins-Monro conditions (summable learning rates, bounded gradients, convexity):
+//   The hybrid update sequence {(vₙ, nₙ)} converges to global minimum J*.
+//
+//   lim_{n→∞} J(vₙ, nₙ) = J*  almost surely.
+//   Convergence rate: O(1/n) under strong convexity (Corollary 2).
+//
+//   DIRAM compatibility: J → J* implies ε(transition) → 0 ≤ 0.6.
+
+PROCEDURE AppendixA2_Reference() -> VOID:
+    EMIT INFO "AEGIS-PROOF-3.2 (Hybrid Mode Convergence)"
+    EMIT INFO "Full pseudocode: aegis_proof_3_1_3_2_M3_hybrid_convergence.psc.txt"
+    EMIT INFO "Key result: J(vₙ,nₙ) → J* a.s. via Robbins-Monro + Lyapunov"
+    EMIT INFO "Convergence rate: O(1/n) under strong convexity"
+    EMIT INFO "DIRAM compatibility: ε(transition) ≤ 0.6 asymptotically"
+END PROCEDURE
+
+
+// ── COMPLETE CORPUS INDEX (all 7 PDFs, 35 modules) ───────────
+
+PROCEDURE PrintCompleteCorpusIndex() -> VOID:
+    EMIT INFO "================================================================"
+    EMIT INFO "COMPLETE OBINEXUS PSEUDOCODE CORPUS — 7 PDFs, 35 MODULES"
+    EMIT INFO "================================================================"
+    EMIT INFO ""
+    EMIT INFO "PDF 1 — Bayesian Debiasing Framework"
+    EMIT INFO "  bayesian_debiasing_M1_problem_formulation.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M2_framework_math.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M3_algorithm.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M4_guarantees_validation.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M5_implementation_safety.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 2 — Actor Class: Epistemic AI Architecture"
+    EMIT INFO "  actor_class_M1_definition.psc.txt"
+    EMIT INFO "  actor_class_M2_navigation.psc.txt"
+    EMIT INFO "  actor_class_M3_cost_functions.psc.txt"
+    EMIT INFO "  actor_class_M4_deployment_turing.psc.txt"
+    EMIT INFO "  actor_class_M5_architecture_stack.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 3 — AEGIS-PROOF-1.2: Traversal Cost Function"
+    EMIT INFO "  aegis_proof_1_2_M1_definitions.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M2_theorem_proof.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M3_parameters.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M4_stability_filterflash.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M5_validation_deployment.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 4 — AEGIS-PROOF-3.1 & 3.2: Monotonicity + Convergence"
+    EMIT INFO "  aegis_proof_3_1_3_2_M1_prerequisites.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M2_filterflash_monotonicity.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M3_hybrid_convergence.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M4_obiai_diram_integration.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M5_compliance_algorithm.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 5 — AEGIS-PROOF-4.1: Hospital Safety Systems"
+    EMIT INFO "  aegis_proof_4_1_M1_foundation.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M2_realtime_solver.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M3_polymer_interface.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M4_safety_protocols.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M5_obiai_compliance_benchmarks.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 6 — DAG Ephemeris Spec: Verb-Noun Cost + Vexameneria"
+    EMIT INFO "  dag_ephemeris_M1_dag_cost_function.psc.txt"
+    EMIT INFO "  dag_ephemeris_M2_ephemeris_step.psc.txt"
+    EMIT INFO "  dag_ephemeris_M3_peristaltic_vexameneria.psc.txt"
+    EMIT INFO "  dag_ephemeris_M4_application_diram.psc.txt"
+    EMIT INFO "  dag_ephemeris_M5_verification_complexity.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 7 — OBIAI Thesis: Data Drift Mitigation Framework  ← THIS"
+    EMIT INFO "  obiai_thesis_M1_architecture.psc.txt"
+    EMIT INFO "  obiai_thesis_M2_diram_cascade_algorithm.psc.txt"
+    EMIT INFO "  obiai_thesis_M3_implementation_modules.psc.txt"
+    EMIT INFO "  obiai_thesis_M4_drift_detection_safety.psc.txt"
+    EMIT INFO "  obiai_thesis_M5_results_conclusion_proofs.psc.txt  ← THIS"
+    EMIT INFO ""
+    EMIT INFO "SHARED INVARIANTS ACROSS ALL 7 DOCUMENTS:"
+    EMIT INFO "  EPISTEMIC_THRESHOLD := 0.954"
+    EMIT INFO "  DIRAM_EPSILON_BOUND := 0.6"
+    EMIT INFO "  SINPHASE_BOUND      := 0.6"
+    EMIT INFO "  TRIPOLAR            := {UCHE, EZE, OBI}"
+    EMIT INFO "================================================================"
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 5 — FINAL MODULE — CORPUS COMPLETE
+// ============================================================

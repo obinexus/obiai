@@ -1,0 +1,241 @@
+// ============================================================
+// FILE: HAOS_Module1_ActorAndDIRAM.psc.txt
+// SOURCE: Hierarchical_Actor_Orchestrated_State_Management_with_DIRAM_Backed_Epistemic_Validation.pdf
+//         Sections I, II
+// AUTHOR: OBINexus Computing — Aegis Framework Division
+// COMPLIANCE: NASA-STD-8739.8, AEGIS-PROOF-1.2
+// CLASSIFICATION: Production Infrastructure
+// PURPOSE: Pseudocode for Actor Class Extension Definition,
+//          DIRAM Core State Structure, and Memory Allocation
+//          with Cryptographic Trace Linking
+// ============================================================
+
+MODULE HAOS_ActorAndDIRAM
+
+// ============================================================
+// SECTION I — INTRODUCTION: Actor Class Extension
+// ============================================================
+
+// The hierarchical state resolution model extends the OBIAI
+// Actor class through systematic sub-conceptual decomposition.
+// Actors navigate infinite-dimensional semantic manifolds;
+// this system adds production-ready state management while
+// preserving the dimensional innovation property.
+
+// DEFINITION 1 (Actor Class Extension):
+// Given an Actor α = (S, C, Φ, Ψ, ε) where ε ≥ 0.954,
+// the hierarchical state extension introduces:
+//
+//   D : S → 2^S          (sub-conceptual decomposition function)
+//   L : S × C → S        (state lifecycle automaton)
+//   T : S → {0,1}^256    (DIRAM trace function — SHA-256 output)
+//
+// These three extensions enable Actors to decompose high-level
+// missions into epistemically validated sub-tasks.
+
+CONSTANT EPISTEMIC_THRESHOLD := 0.954     // ε — minimum proof confidence
+CONSTANT MAX_CASCADE_DEPTH   := 5         // Maximum rollback cascade depth
+CONSTANT SHA256_DIGEST_BYTES := 32        // 256 bits = 32 bytes
+CONSTANT PHI_VECTOR_DIM      := 8         // Dimensions in epistemic signature
+
+STRUCTURE ActorTuple:
+    S:   SemanticStateSpace    // State space — infinite-dimensional manifold
+    C:   ConceptualContext     // Conceptual context
+    Phi: EpistemicFunction     // Epistemic validation function (Φ)
+    Psi: TransformFunction     // Transformation function (Ψ)
+    eps: Float                 // ε — confidence threshold, must be ≥ 0.954
+END STRUCTURE
+
+FUNCTION validate_actor_tuple(alpha: ActorTuple) -> Boolean:
+    // Actor is valid only if epistemic threshold is met
+    IF alpha.eps < EPISTEMIC_THRESHOLD THEN
+        RETURN FALSE
+    END IF
+    RETURN TRUE
+END FUNCTION
+
+// Sub-conceptual decomposition function D : S → 2^S
+FUNCTION decompose_state(S: SemanticStateSpace) -> PowerSet<SemanticState>:
+    // Returns the power set (all subsets) of states reachable from S
+    // Each subset represents a tractable sub-task decomposition
+    sub_states := {}
+    FOR EACH semantic_element IN S DO
+        sub_states.add(generate_sub_concept(semantic_element))
+    END FOR
+    RETURN sub_states
+END FUNCTION
+
+// State lifecycle automaton L : S × C → S
+FUNCTION lifecycle_transition(
+    state:   SemanticState,
+    context: ConceptualContext
+) -> SemanticState:
+    // Deterministic state advancement — epistemic validation required
+    // Proof: Each transition invokes audit-transition-Φ before advancing
+    ASSERT state.proof_confidence >= EPISTEMIC_THRESHOLD
+    next_state := apply_lifecycle_rule(state, context)
+    RETURN next_state
+END FUNCTION
+
+// DIRAM trace function T : S → {0,1}^256
+FUNCTION diram_trace(state: SemanticState) -> SHA256Digest:
+    // Generates 256-bit cryptographic proof of state identity
+    RETURN sha256(state.state_id || state.parent_state_hash || state.timestamp)
+END FUNCTION
+
+
+// ============================================================
+// SECTION II — DIRAM HARDWARE FAULT-TOLERANT ARCHITECTURE
+// ============================================================
+
+// ============================================================
+// SECTION II.A — Core State Structure
+// ============================================================
+
+// The hierarchical state anchors to DIRAM's cryptographic
+// memory governance. Every state carries:
+//   - Identity and parentage (SHA-256 hash chain)
+//   - Semantic intent (verb-noun concept triplet)
+//   - Epistemic confidence (proof_confidence ≥ 0.954)
+//   - Lifecycle position (TODO | DOING | DONE | BLOCKED | ROLLEDBACK)
+//   - DIRAM trace link (forensic memory anchor)
+
+DEFINE StateFlag AS ENUM:
+    STATE_TODO       := 0x01    // Pending — not yet started
+    STATE_DOING      := 0x02    // In-progress — actively executing
+    STATE_DONE       := 0x04    // Completed — verified and committed
+    STATE_BLOCKED    := 0x08    // Blocked — dependency or confidence failure
+    STATE_ROLLEDBACK := 0x10    // Rolled back — epistemic failure recovered
+END ENUM
+
+STRUCTURE VerbNounConcept:
+    verb:       String[32]      // Action operation (e.g., "predict", "validate")
+    noun:       String[32]      // Domain object  (e.g., "failure", "state")
+    phi_vector: Float[8]        // Epistemic signature — 8-dimensional Φ vector
+END STRUCTURE
+
+STRUCTURE DIRAMStateAllocation:
+    base_allocation:  DIRAMAllocation   // Underlying memory block
+    state_ref:        HierarchicalState // Pointer back to owning state
+    blockchain_entry: GitRAFBlockEntry  // Immutable audit trail reference
+    receipt_hash:     Byte[32]          // SHA-256 receipt for this allocation
+END STRUCTURE
+
+STRUCTURE HierarchicalState:
+    state_id:          UInt64              // Unique state identifier
+    parent_state_hash: String[65]         // SHA-256 hash of parent state (64 hex + null)
+    intent:            VerbNounConcept    // Verb-noun semantic intent
+    result_metric:     Float              // Outcome measure [0.0, 1.0]
+    proof_confidence:  Float              // Must be ≥ EPISTEMIC_THRESHOLD (0.954)
+    status_flag:       StateFlag          // Current lifecycle position
+    error_count:       UInt8              // Count of failed transitions
+    timestamp:         UInt64             // Unix timestamp of last transition
+    diram_trace:       DIRAMStateAllocation  // Cryptographic memory trace
+END STRUCTURE
+
+// Validation helpers:
+FUNCTION is_epistemically_valid(state: HierarchicalState) -> Boolean:
+    RETURN state.proof_confidence >= EPISTEMIC_THRESHOLD
+END FUNCTION
+
+FUNCTION is_in_trial_error_lock(state: HierarchicalState) -> Boolean:
+    // Trial-and-error lock triggers when confidence fails AND errors accumulate
+    RETURN (state.proof_confidence < EPISTEMIC_THRESHOLD)
+       AND (state.error_count >= 2)
+END FUNCTION
+
+
+// ============================================================
+// SECTION II.B — Memory Allocation with Trace Linking
+// ============================================================
+
+// Every state allocation generates a cryptographic receipt.
+// Allocation is REFUSED if proof_confidence < EPISTEMIC_THRESHOLD.
+// Each allocation is also appended to the GitRAF blockchain
+// for immutable audit trail.
+
+FUNCTION diram_allocate_state_memory(
+    state:      HierarchicalState,
+    intent_tag: String
+) -> DIRAMStateAllocation OR NULL:
+
+    // Gate 1: Enforce epistemic constraint — block non-compliant states
+    IF state.proof_confidence < EPISTEMIC_THRESHOLD THEN
+        // Refuse allocation — epistemically unsound state
+        emit_trace("ALLOCATION_REFUSED_EPISTEMIC_FAIL", state.state_id)
+        RETURN NULL
+    END IF
+
+    // Step 1: Allocate traced memory block in DIRAM
+    // diram_alloc_traced creates a size-tagged allocation in hardware-backed memory
+    base := diram_alloc_traced(
+                size:       sizeof(HierarchicalState),
+                intent_tag: intent_tag
+            )
+
+    // Step 2: Link to blockchain for immutable audit trail
+    // gitraf_blockchain_append_state ensures forensic traceability
+    gitraf_blockchain_append_state(
+        state_id:          state.state_id,
+        parent_state_hash: state.parent_state_hash
+    )
+
+    // Step 3: Create and return full allocation with state linkage
+    allocation := create_state_allocation(base, state)
+    RETURN allocation
+
+END FUNCTION
+
+// Verb-noun concept example instantiation (from Listing 5):
+FUNCTION example_predict_failure_intent() -> VerbNounConcept:
+    RETURN VerbNounConcept {
+        verb:       "predict",
+        noun:       "failure",
+        phi_vector: [0.97, 0.95, 0.98, 0.96, 0.94, 0.99, 0.95, 0.97]
+        // All phi_vector components ≥ 0.94 — satisfies ε ≥ 0.954 in aggregate
+    }
+END FUNCTION
+
+// SHA-256 receipt generation for forensic accountability:
+// Maps to generate-receipt-Φ in the verb-noun glossary
+FUNCTION generate_receipt(state: HierarchicalState) -> Byte[32]:
+    // Produce SHA-256 trace for forensic accountability
+    receipt_input := state.state_id
+                  || state.parent_state_hash
+                  || state.intent.verb
+                  || state.intent.noun
+                  || state.timestamp
+    RETURN sha256(receipt_input)
+END FUNCTION
+
+// Append state transition to immutable DIRAM log:
+// Maps to append-trace-Φ in the verb-noun glossary
+FUNCTION append_trace(
+    state:       HierarchicalState,
+    transition:  StateTransitionRecord
+) -> Boolean:
+    // Add state transition to immutable DIRAM log
+    // Immutable: no UPDATE or DELETE permitted on this record
+    log_entry := DIRAMLogEntry {
+        state_id:    state.state_id,
+        transition:  transition,
+        receipt:     generate_receipt(state),
+        timestamp:   state.timestamp
+    }
+    RETURN diram_log.append(log_entry)  // Append-only
+END FUNCTION
+
+// Bind epistemic state to physical memory substrate:
+// Maps to anchor-hardware-Φ in the verb-noun glossary
+FUNCTION anchor_hardware(state: HierarchicalState) -> Boolean:
+    // Physical memory binding for forensic-level accountability
+    // Ties the state's DIRAM allocation to a specific hardware address
+    IF state.diram_trace IS NULL THEN
+        RETURN FALSE
+    END IF
+    physical_addr := diram_get_physical_address(state.diram_trace.base_allocation)
+    state.diram_trace.hardware_anchor := physical_addr
+    RETURN physical_addr IS NOT NULL
+END FUNCTION
+
+END MODULE HAOS_ActorAndDIRAM

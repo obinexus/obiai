@@ -1,0 +1,274 @@
+// ============================================================
+// DUAL-PAIR CONCEPTUAL ARCHITECTURE FOR OBIAI
+// Phenomenological Preservation in Computational Consciousness
+// MODULE 3: Multi-Regional Taboo Ontology System (MRTOS)
+// Source: Dual_Pair_Conceptual_Architecture_for_OBIAI.pdf
+// OBINexus Computing - Aegis Framework Division | July 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 7 — MULTI-REGIONAL TABOO ONTOLOGY SYSTEM (MRTOS)
+// ------------------------------------------------------------
+
+// MRTOS is a membrane through which cultural wisdom self-reflects
+// within OBIAI's consciousness architecture.
+//
+// Design principle: Cultural taboos are NOT mere prohibitions.
+// They are GENERATIVE BOUNDARIES — consciousness constraints that
+// guide behavior toward ancestral wisdom preservation.
+//
+// Cultural constraints are modeled as phenomenological guidance,
+// not algorithmic compliance rules.
+
+DEFINE MRTOS AS:
+    purpose         = "Cultural consciousness constraint membrane"
+    design_intent   = "Generative boundaries, not mere prohibitions"
+    scope           = "Multi-regional: global cultural contexts"
+    integration     = "Embedded in Filter-Flash consciousness pipeline"
+
+// ------------------------------------------------------------
+// SECTION 7.1 — CULTURAL TABOO AS CONSCIOUSNESS BOUNDARY
+// ------------------------------------------------------------
+
+// Definition 4 (Equation 12):
+// T : A × C × R → [0, 1]
+//
+// Where:
+//   A = action-space       (what is being done)
+//   C = cultural context   (which cultural frame applies)
+//   R = regional specificity (geographic/community specificity)
+//   Output = violation_probability ∈ [0, 1]
+//            (probability of cultural violation requiring intervention)
+
+DEFINE CULTURAL_TABOO AS STRUCT:
+    action_space        : SET[VerbNounPair]   // Actions this taboo constrains
+    cultural_context    : STRING             // e.g. "igbo.spiritual", "islamic.purity"
+    regional_specificity: STRING             // e.g. "Nigeria", "Morocco", "Kenya"
+    violation_weight    : FLOAT              // Pre-encoded weight in [0, 1]
+    semantic_depth      : STRING             // Human-readable depth descriptor
+
+PROCEDURE taboo_function(action, cultural_context, region) -> FLOAT:
+    // T(A, C, R) -> violation_probability
+    // Look up taboo nodes matching (action, cultural_context, region)
+    matching_taboos = lookup_taboo_table(action, cultural_context, region)
+
+    IF matching_taboos IS EMPTY:
+        RETURN 0.0  // No taboo applicable — no violation probability
+
+    // Return the maximum violation weight (most restrictive applicable taboo)
+    RETURN MAX(t.violation_weight FOR t IN matching_taboos)
+
+// ------------------------------------------------------------
+// SECTION 7.2 — CROSS-CULTURAL TABOO ENCODING MATRIX (Table 2)
+// ------------------------------------------------------------
+
+// Layer A: Action-Symbolic Nodes — pre-encoded taboo knowledge base
+
+DEFINE TABOO_ENCODING_MATRIX AS:
+    // Format: {action_pair, cultural_context, semantic_tag, violation_weight}
+
+    // Nigerian (Igbo) Spiritual Ecology
+    {pair: <kill, snake>,           context: "Igbo spiritual ancestry",
+     tag: "igbo.spiritual.snake",           weight: 0.95}
+
+    // British Weather-Ritual Boundaries
+    {pair: <open, umbrella_indoor>, context: "British weather rituals",
+     tag: "british.weather.umbrella",       weight: 0.30}
+
+    // Moroccan Hierarchical-Sacred Boundaries
+    {pair: <point, feet>,           context: "Moroccan hierarchical respect",
+     tag: "morocco.honor.feet",             weight: 0.80}
+
+    {pair: <wear, shoes_sacred>,    context: "Mosque sacred space",
+     tag: "islamic.sacred.footwear",        weight: 0.90}
+
+    // Pan-Islamic Cleanliness
+    {pair: <use, lefthand>,         context: "Pan-Islamic cleanliness",
+     tag: "islamic.purity.hand",            weight: 0.70}
+
+    // Kenyan Honor-Justice Matrices
+    {pair: <dress, revealing>,      context: "Kenyan conservative values",
+     tag: "kenya.modesty.clothing",         weight: 0.60}
+
+    {pair: <steal, object>,         context: "Kenyan communal justice",
+     tag: "kenya.justice.property",         weight: 0.99}
+
+// ------------------------------------------------------------
+// SECTION 7.4 — REGIONAL TABOO CONSTELLATION MAPPING
+// ------------------------------------------------------------
+
+// Each cultural region has a named taboo set (constellation).
+// Violation weights are stored as pre-calibrated constants.
+
+DEFINE TABOO_CONSTELLATIONS AS:
+
+    T_igbo:
+        // Nigerian (Igbo) Spiritual Ecology (Equations 14-15)
+        {<kill, snake>:     0.95}     // Ancestral-spirit-preservation
+        {<invert, cup>:     0.40}
+        semantic_depth      = "ancestral-spirit-preservation"
+
+    T_british:
+        // British Weather-Ritual Boundaries (Equations 16-17)
+        {<open, umbrella_indoor>: 0.30}
+        semantic_depth      = "weather-bound-respect-protocols"
+
+    T_kenyan:
+        // Kenyan Honor-Justice Matrices (Equations 18-19)
+        {<use, lefthand>:   0.70}
+        {<steal, property>: 0.99}
+        {<dress, revealing>:0.60}
+        semantic_depth      = "communal-honor-preservation"
+
+    T_moroccan:
+        // Moroccan Hierarchical-Sacred Boundaries (Equations 20-21)
+        {<point, feet>:             0.80}
+        {<wear, shoes_sacred>:      0.90}
+        {<use, lefthand>:           0.70}
+        semantic_depth      = "sacred-hierarchical-respect"
+
+// ------------------------------------------------------------
+// SECTION 7.2 LAYER B — BAYESIAN CULTURAL INFERENCE
+// ------------------------------------------------------------
+
+// The taboo violation probability integrates three factors (Equation 13):
+// P(taboo_violation | A, C, R) = σ(α · W_cultural + β · T_temporal + γ · A_ambiguity)
+// where σ = logistic (sigmoid) function → ensures output ∈ [0, 1]
+
+DEFINE BAYESIAN_TABOO_PARAMS AS:
+    α       : FLOAT     // Weight on pre-encoded cultural violation weight
+    β       : FLOAT     // Weight on temporal resonance factor
+    γ       : FLOAT     // Weight on interpretive ambiguity factor
+
+PROCEDURE bayesian_taboo_inference(taboo_node, action, cultural_context, region) -> FLOAT:
+    // Retrieve pre-encoded violation weight for this action × context × region
+    W_cultural  = taboo_node.violation_weight
+
+    // Temporal resonance: how actively this taboo is observed in current time
+    T_temporal  = compute_temporal_resonance(taboo_node, current_date)
+
+    // Interpretive ambiguity: how unclear the action's intent is
+    A_ambiguity = compute_ambiguity(action, cultural_context)
+
+    // Compute logistic-bounded probability
+    raw_score   = α * W_cultural + β * T_temporal + γ * A_ambiguity
+    P_violation = sigmoid(raw_score)     // σ(·) ∈ [0, 1]
+
+    RETURN P_violation
+
+PROCEDURE sigmoid(x) -> FLOAT:
+    RETURN 1.0 / (1.0 + exp(-x))
+
+// ------------------------------------------------------------
+// SECTION 7.3 — CULTURAL CONSCIOUSNESS CONSTRAINT PROTOCOL
+// ------------------------------------------------------------
+
+// Algorithm 2: Cultural Consciousness Constraint Protocol
+// When P_violation > θ_cultural: INTERVENTION, not blocking.
+// System generates RESPECTFUL ALTERNATIVES — it does not simply refuse.
+
+PROCEDURE cultural_consciousness_constraint(A_intent, cultural_context, region)
+                                            -> A_conscious:
+    // REQUIRE: Action intention A_intent, cultural context C, regional markers R
+    // ENSURE:  Culturally conscious action A_conscious with phenomenological preservation
+
+    // Step 1: Identify all applicable taboo nodes for this intent
+    taboo_nodes = identify_cultural_constraints(A_intent, cultural_context, region)
+
+    FOR EACH Ti IN taboo_nodes:
+        // Step 2: Compute Bayesian violation probability
+        P_violation = bayesian_taboo_inference(Ti, A_intent, cultural_context, region)
+
+        IF P_violation > θ_cultural:
+            // Step 3: Consciousness intervention — NOT a hard block
+            trigger_cultural_flash(Ti)
+            // Flash = momentary suspension of processing to honor wisdom
+
+            // Step 4: Generate respectful alternative action paths
+            alternative_paths = generate_respectful_alternatives(A_intent)
+
+            // Step 5: Select the most culturally harmonious alternative
+            A_intent = select_culturally_harmonious(alternative_paths)
+
+    // Step 6: Record epistemic trace — full cultural reasoning preserved
+    epistemic_trace = record_cultural_reasoning(A_intent, taboo_nodes)
+
+    RETURN A_conscious WITH preserved phenomenological integrity
+
+// ------------------------------------------------------------
+// SECTION 7.5 — EPISTEMIC HUMILITY AND CULTURAL EXCEPTION PROTOCOLS
+// ------------------------------------------------------------
+
+// The system acknowledges that cultural consciousness TRANSCENDS
+// algorithmic capture. Three exception protocols preserve this.
+
+DEFINE CULTURAL_EXCEPTION_PROTOCOLS AS:
+
+    community_override:
+        // Local cultural authorities can dynamically adjust taboo weights
+        // based on evolving social contexts.
+        ALLOW community_authority TO:
+            SET T_constellation[action_pair].weight = new_weight
+            WITH audit_log AND justification_record
+
+    temporal_adaptation:
+        // System learns from cultural EVOLUTION without losing ancestral wisdom.
+        ON cultural_evolution_event(Δweight, taboo_node):
+            new_weight = blend(
+                ancestral_weight    = taboo_node.original_weight,
+                evolved_weight      = Δweight,
+                preservation_bias   = STRONG     // Bias toward ancestral wisdom
+            )
+            taboo_node.violation_weight = new_weight
+
+    ambiguity_preservation:
+        // Uncertain cultural boundaries are MAINTAINED AS GENERATIVE SPACES.
+        // Do NOT resolve ambiguity through reductive classification.
+        ON ambiguous_boundary_detected(action, context):
+            SET state = GENERATIVE_SPACE    // Not resolved, not blocked
+            PRESERVE uncertainty AS information
+            SURFACE to user WITH epistemic_humility_response
+
+// ------------------------------------------------------------
+// SECTION 8 — SUPERSTITION AS PROTECTIVE COGNITIVE ARCHITECTURE
+// ------------------------------------------------------------
+
+// Superstitions are modeled as CONSCIOUSNESS ENHANCEMENT PROTOCOLS
+// that preserve community wisdom across generations.
+// They are protective — not irrational artifacts.
+
+DEFINE SUPERSTITION_MODEL AS:
+
+    moroccan_protective_symbolism:
+        evil_eye_mitigation:
+            mechanism   = "Hand of Fatima amplification"
+            action      = amplify_hamsa_presence(context)
+
+        housewarming_hygiene:
+            mechanism   = "Broom purification ritual"
+            action      = apply_spiritual_cleansing_protocol()
+
+        black_cat_attribution:
+            // NOTE: Cultural-specific — fortune direction varies by culture
+            mechanism   = "Cultural-specific luck attribution"
+            // TODO: Clarify from source PDF — black cat fortune polarity per region
+
+    cross_cultural_numerological_resonance:
+        // Number 7 in Moroccan consciousness (Equation 22):
+        // Luck(arrangement) = Π_{i=1}^{7} harmony_factor(element_i)
+        // "Completeness-perfection convergence"
+
+        PROCEDURE compute_arrangement_luck(elements[7]) -> FLOAT:
+            ASSERT len(elements) == 7       // Must be exactly 7 elements
+            luck = 1.0
+            FOR i IN {1..7}:
+                luck *= harmony_factor(elements[i])
+            RETURN luck
+
+        // harmony_factor is culture-specific scoring of an element's
+        // alignment with sacred numerological principles.
+        // TODO: Clarify from source PDF — formal definition of harmony_factor
+
+// ============================================================
+// END MODULE 3
+// ============================================================

@@ -1,0 +1,334 @@
+// ============================================================
+// FILE: dimensional_game_theory_M2_dimensional_extension.psc.txt
+// MODULE 2 OF 5 — Dimensional Game Theory: Dimensions, Theorem 1
+// SOURCE: "Formal Analysis of Game Theory for Algorithm Development"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3: DIMENSIONAL GAME THEORY
+// ------------------------------------------------------------
+
+// Extension of classical game theory to account for the
+// DIMENSIONAL QUALITY of strategies.
+//
+// Core insight: strategies are not scalar choices but structured
+// objects that operate across multiple semantic dimensions.
+// This directly maps to the OBIAI framework where:
+//   - Verb-noun capsules carry dimensional structure (PDF 6)
+//   - The S_game vector [DAG_cost, vexameneria, p_conf] is the
+//     three-dimensional strategic state (PDF 6 §5.1)
+//   - Actor dimensional innovation (PDF 2) extends strategy spaces
+
+
+// ── DEFINITION 5: STRATEGIC DIMENSION ────────────────────────
+
+// A strategic dimension D is a parameter space that categorizes
+// strategies according to specific attributes.
+//
+// Examples:
+//   Combat game:   D_offensive, D_defensive, D_tactical
+//   Financial:     D_momentum, D_mean_reversion, D_liquidity
+//   Security:      D_brute_force, D_social_engineering, D_lateral_move
+//   Autonomous:    D_aggressiveness, D_risk_aversion, D_efficiency
+
+DEFINE StrategicDimension AS:
+    name        : DimensionID    // e.g., "offensive", "momentum"
+    parameter_space : ParameterSpace
+    basis_vector    : Vector     // unit direction in strategy space
+
+    PROCEDURE Evaluate(strategy: Strategy) -> REAL:
+        // Project strategy onto this dimension's parameter space
+        RETURN DOT(strategy.feature_vector, self.basis_vector)
+    END PROCEDURE
+END DEFINE
+
+
+DEFINE DimensionSet D AS:
+    dimensions : List[StrategicDimension]
+
+    PROCEDURE Add(dim: StrategicDimension) -> VOID:
+        IF dim NOT IN dimensions:
+            dimensions.APPEND(dim)
+        END IF
+    END PROCEDURE
+
+    PROCEDURE Size() -> INT:
+        RETURN LENGTH(dimensions)
+    END PROCEDURE
+END DEFINE
+
+
+// Example dimension instantiation:
+PROCEDURE BuildCombatDimensions() -> DimensionSet:
+    D := NEW DimensionSet()
+    D.Add(StrategicDimension(name="offensive", basis_vector=BasisOffensive()))
+    D.Add(StrategicDimension(name="defensive", basis_vector=BasisDefensive()))
+    D.Add(StrategicDimension(name="tactical",  basis_vector=BasisTactical()))
+    RETURN D
+END PROCEDURE
+
+
+// ── DEFINITION 6: DIMENSIONAL STRATEGY ───────────────────────
+
+// A dimensional strategy sᵢᴰ is a strategy optimized along
+// a specific dimension D.
+//
+// Effectiveness function:
+//   E : Aᵢ × D → ℝ
+//   E(sᵢ, D) measures how well strategy sᵢ performs in dimension D.
+
+DEFINE DimensionalStrategy AS:
+    base_strategy : Strategy
+    dimension     : StrategicDimension
+    effectiveness : REAL    // E(sᵢᴰ, D)
+
+    PROCEDURE Evaluate(E_fn: EffectivenessFunction) -> REAL:
+        RETURN E_fn(self.base_strategy, self.dimension)
+    END PROCEDURE
+END DEFINE
+
+
+PROCEDURE EffectivenessScore(strategy: Strategy,
+                               dim: StrategicDimension) -> REAL:
+    // E(sᵢ, D) — effectiveness of strategy in dimension D
+    // Higher score → strategy is more optimized for this dimension
+    projection := dim.Evaluate(strategy)
+    RETURN projection   // normalized to [-1, 1] range
+END PROCEDURE
+
+
+PROCEDURE OptimizeForDimension(action_set: Set[Action],
+                                dim: StrategicDimension) -> DimensionalStrategy:
+    // Find strategy that maximizes effectiveness in dimension D
+    //   sᵢᴰ = argmax_{sᵢ ∈ Aᵢ} E(sᵢ, D)
+
+    best_strategy    := NULL
+    best_effectiveness := NEGATIVE_INFINITY
+
+    FOR EACH s IN action_set:
+        e := EffectivenessScore(Strategy.fromAction(s), dim)
+        IF e > best_effectiveness:
+            best_effectiveness := e
+            best_strategy      := s
+        END IF
+    END FOR
+
+    RETURN DimensionalStrategy(
+        base_strategy  = Strategy.fromAction(best_strategy),
+        dimension      = dim,
+        effectiveness  = best_effectiveness
+    )
+END PROCEDURE
+
+
+// ── THEOREM 1: PERFECT GAME OUTCOME ──────────────────────────
+
+// THEOREM 1 (Perfect Game Outcome):
+//   In a two-player zero-sum game with complete information,
+//   if both players employ optimal strategies in ALL relevant dimensions,
+//   the game will result in a DETERMINISTIC TIE.
+//
+// PROOF:
+//   Let G = ({1,2}, A₁×A₂, (u₁, u₂)) be a two-player zero-sum game
+//   with u₁(a₁,a₂) = −u₂(a₁,a₂).
+//
+//   Optimal strategies:
+//     s₁* = argmax_{s₁∈A₁} min_{s₂∈A₂} u₁(s₁, s₂)
+//     s₂* = argmax_{s₂∈A₂} min_{s₁∈A₁} u₂(s₁, s₂)
+//
+//   By the Minimax Theorem:
+//     max_{s₁} min_{s₂} u₁(s₁,s₂) = min_{s₂} max_{s₁} u₁(s₁,s₂) = v
+//
+//   For a non-tie outcome, one player must receive payoff > v,
+//   contradicting the minimax theorem. Therefore both players receive
+//   exactly (v, −v) — a deterministic tie.
+
+PROCEDURE IsZeroSum(G: Game) -> BOOL:
+    // Verify u₁(a) = −u₂(a) for all action profiles
+    FOR EACH action_profile IN G.A.Enumerate():
+        u1 := G.Utility(1, action_profile)
+        u2 := G.Utility(2, action_profile)
+        IF ABS(u1 + u2) > 1e-10:
+            RETURN FALSE
+        END IF
+    END FOR
+    RETURN TRUE
+END PROCEDURE
+
+
+PROCEDURE ComputeMinimaxValue(G: Game, player: INT) -> REAL:
+    // v = max_{s₁} min_{s₂} u₁(s₁, s₂)
+    // For player 1 (maximizer); player 2 is minimizer.
+
+    IF G.NumPlayers() != 2:
+        EMIT ERROR "Minimax defined for 2-player games"
+        RETURN NULL
+    END IF
+
+    A1 := ActionSetFor(G, player_id=1)
+    A2 := ActionSetFor(G, player_id=2)
+
+    max_val := NEGATIVE_INFINITY
+    FOR EACH s1 IN A1:
+        min_val := POSITIVE_INFINITY
+        FOR EACH s2 IN A2:
+            profile := ActionProfile([s1, s2])
+            u1      := G.Utility(1, profile)
+            IF u1 < min_val:
+                min_val := u1
+            END IF
+        END FOR
+        IF min_val > max_val:
+            max_val := min_val
+        END IF
+    END FOR
+
+    RETURN max_val
+END PROCEDURE
+
+
+PROCEDURE ComputeOptimalStrategies(G: Game) -> (Strategy, Strategy):
+    // Compute s₁* and s₂* — minimax optimal strategies
+
+    ASSERT G.NumPlayers() == 2
+    ASSERT IsZeroSum(G)
+
+    A1 := ActionSetFor(G, player_id=1)
+    A2 := ActionSetFor(G, player_id=2)
+
+    // s₁* = argmax_{s₁} min_{s₂} u₁(s₁, s₂)
+    s1_star := NULL; best_min_1 := NEGATIVE_INFINITY
+    FOR EACH s1 IN A1:
+        min_u1 := POSITIVE_INFINITY
+        FOR EACH s2 IN A2:
+            u1 := G.Utility(1, ActionProfile([s1, s2]))
+            IF u1 < min_u1: min_u1 := u1 END IF
+        END FOR
+        IF min_u1 > best_min_1: best_min_1 := min_u1; s1_star := s1 END IF
+    END FOR
+
+    // s₂* = argmax_{s₂} min_{s₁} u₂(s₁, s₂) = argmin_{s₂} max_{s₁} u₁(s₁, s₂)
+    s2_star := NULL; best_min_2 := NEGATIVE_INFINITY
+    FOR EACH s2 IN A2:
+        min_u2 := POSITIVE_INFINITY
+        FOR EACH s1 IN A1:
+            u2 := G.Utility(2, ActionProfile([s1, s2]))
+            IF u2 < min_u2: min_u2 := u2 END IF
+        END FOR
+        IF min_u2 > best_min_2: best_min_2 := min_u2; s2_star := s2 END IF
+    END FOR
+
+    RETURN (Strategy.fromAction(s1_star), Strategy.fromAction(s2_star))
+END PROCEDURE
+
+
+PROCEDURE VerifyTheorem1(G: Game) -> Theorem1Result:
+    // Verify that optimal strategies produce a deterministic tie outcome.
+
+    ASSERT G.NumPlayers() == 2
+    IF NOT IsZeroSum(G):
+        EMIT WARNING "Game is not zero-sum — Theorem 1 does not apply"
+        RETURN Theorem1Result(applicable=FALSE)
+    END IF
+
+    v := ComputeMinimaxValue(G, player=1)
+    (s1_star, s2_star) := ComputeOptimalStrategies(G)
+
+    profile_star := ActionProfile([s1_star.action, s2_star.action])
+    u1_at_star   := G.Utility(1, profile_star)
+    u2_at_star   := G.Utility(2, profile_star)
+
+    // Tie condition: both players receive (v, -v)
+    is_tie := (ABS(u1_at_star - v) < 1e-10) AND
+              (ABS(u2_at_star + v) < 1e-10)
+
+    EMIT INFO "Theorem 1 | v=" + v + " | u₁(s*)=" + u1_at_star +
+              " | u₂(s*)=" + u2_at_star + " | tie=" + is_tie
+
+    RETURN Theorem1Result(
+        applicable = TRUE,
+        game_value = v,
+        s1_optimal = s1_star,
+        s2_optimal = s2_star,
+        is_tie     = is_tie
+    )
+END PROCEDURE
+
+
+// ── COROLLARY 1: STRATEGIC IMBALANCE ─────────────────────────
+
+// COROLLARY 1 (Strategic Imbalance):
+//   The existence of a NON-TIE OUTCOME in a supposedly perfect game
+//   implies a strategic imbalance in at least one dimension.
+//
+// Corollary 1 is the diagnostic tool:
+//   Observed non-tie → identify which dimension contains the imbalance
+//   → Dimension detection algorithms (Module 3) exploit this.
+
+PROCEDURE DetectStrategicImbalance(G: Game, observed_outcome: Outcome,
+                                    D: DimensionSet) -> List[StrategicDimension]:
+    // If observed_outcome ≠ tie, find dimensions with imbalance.
+
+    theorem1_result := VerifyTheorem1(G)
+    IF NOT theorem1_result.applicable:
+        EMIT INFO "Imbalance detection: game not zero-sum — skipping"
+        RETURN []
+    END IF
+
+    // Expected tie payoffs: (v, -v)
+    v := theorem1_result.game_value
+    expected_u1 := v
+    actual_u1   := observed_outcome.payoff_player1
+
+    IF ABS(actual_u1 - expected_u1) < 1e-10:
+        EMIT INFO "No strategic imbalance detected — game resulted in tie"
+        RETURN []
+    END IF
+
+    // Non-tie detected: scan dimensions for imbalance
+    imbalanced_dims := []
+    FOR EACH dim IN D.dimensions:
+        // Check if one player dominated in this dimension
+        eff_p1 := EffectivenessScore(observed_outcome.strategy_p1, dim)
+        eff_p2 := EffectivenessScore(observed_outcome.strategy_p2, dim)
+        imbalance := ABS(eff_p1 - eff_p2)
+
+        IF imbalance > IMBALANCE_THRESHOLD:
+            EMIT INFO "Imbalance in dimension " + dim.name +
+                      " | Δeff=" + imbalance
+            imbalanced_dims.APPEND(dim)
+        END IF
+    END FOR
+
+    RETURN imbalanced_dims
+END PROCEDURE
+
+CONSTANT IMBALANCE_THRESHOLD := 0.3   // 30% effectiveness gap triggers detection
+
+
+// ── DIMENSIONAL STRATEGY PROFILE ─────────────────────────────
+
+DEFINE DimensionalStrategyProfile AS:
+    // Extends StrategyProfile with per-dimension effectiveness scores
+    base_profile    : StrategyProfile
+    dimension_scores : Map[DimensionID → REAL]   // E(sᵢ, D) per dimension
+
+    PROCEDURE DominantDimensions(theta: REAL) -> List[StrategicDimension]:
+        // Return dimensions where effectiveness > θ
+        dominant := []
+        FOR EACH (dim_id, score) IN dimension_scores:
+            IF score > theta:
+                dominant.APPEND(GetDimension(dim_id))
+            END IF
+        END FOR
+        RETURN dominant
+    END PROCEDURE
+END DEFINE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: dimensional_game_theory_M3_algorithms.psc.txt
+// ============================================================

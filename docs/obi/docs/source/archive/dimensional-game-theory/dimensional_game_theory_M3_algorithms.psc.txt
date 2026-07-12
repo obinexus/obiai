@@ -1,0 +1,313 @@
+// ============================================================
+// FILE: dimensional_game_theory_M3_algorithms.psc.txt
+// MODULE 3 OF 5 — Algorithmic Implementation:
+//                 Dimension Detection & Adaptive Response
+// SOURCE: "Formal Analysis of Game Theory for Algorithm Development"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4: ALGORITHMIC IMPLEMENTATION
+// ------------------------------------------------------------
+
+// Two core algorithm classes derived from dimensional game theory:
+//   Algorithm 1: Dimension Identification (detect strategic structure)
+//   Algorithm 2: Adaptive Response (exploit detected imbalances)
+
+
+// ── SECTION 4.1: ALGORITHM 1 — DIMENSION IDENTIFICATION ──────
+
+// ALGORITHM 1: Dimension Identification
+//
+//   INPUT:  Historical game data H = {(s₁ⁱ, s₂ⁱ, oⁱ)}ᵢ₌₁ᵐ
+//             where oⁱ = game outcome for match i
+//   OUTPUT: Strategic dimension set D
+
+PROCEDURE DimensionIdentification(H: HistoricalGameData) -> DimensionSet:
+    // Initialize empty dimension set
+    D := NEW DimensionSet()
+    D.dimensions := []
+
+    // Iterate over all pairs of strategies from different matches
+    FOR EACH match_i IN H.matches:
+        FOR EACH match_j IN H.matches WHERE match_j.id != match_i.id:
+            s1_i := match_i.strategy_p1
+            s2_j := match_j.strategy_p2
+
+            // Compute feature vector f = F(s₁ⁱ − s₂ʲ)
+            strategy_diff := StrategyDifference(s1_i, s2_j)
+            f             := FeatureVector(strategy_diff)
+
+            // Apply Principal Component Analysis to f
+            components    := PrincipalComponentAnalysis(f)
+
+            // Add significant components as new dimensions
+            FOR EACH component IN components:
+                IF component.explained_variance > PCA_SIGNIFICANCE_THRESHOLD:
+                    dim := StrategicDimension(
+                        name         = "dim_" + D.Size(),
+                        basis_vector = component.eigenvector,
+                        parameter_space = ParameterSpace.fromComponent(component)
+                    )
+                    IF NOT D.Contains(dim):
+                        D.Add(dim)
+                        EMIT INFO "New dimension identified: " + dim.name +
+                                  " (variance=" + component.explained_variance + ")"
+                    END IF
+                END IF
+            END FOR
+        END FOR
+    END FOR
+
+    EMIT INFO "Dimension identification complete | |D|=" + D.Size()
+    RETURN D
+END PROCEDURE
+
+CONSTANT PCA_SIGNIFICANCE_THRESHOLD := 0.05   // minimum explained variance
+
+
+PROCEDURE StrategyDifference(s1: Strategy, s2: Strategy) -> StrategyDelta:
+    // Computes the feature-space difference between two strategies.
+    // s₁ⁱ − s₂ʲ: element-wise difference of strategy feature vectors.
+
+    IF LENGTH(s1.feature_vector) != LENGTH(s2.feature_vector):
+        EMIT ERROR "Strategy dimensions mismatch"
+        RETURN NULL
+    END IF
+
+    diff_vector := s1.feature_vector - s2.feature_vector
+    RETURN StrategyDelta(vector=diff_vector, from_s=s1, to_s=s2)
+END PROCEDURE
+
+
+PROCEDURE FeatureVector(delta: StrategyDelta) -> Vector:
+    // F(delta): maps strategy difference to feature representation.
+    // Applies domain-specific feature extraction (e.g., norm, angle,
+    // frequency components) to the raw difference vector.
+
+    features := []
+    features.APPEND(NORM(delta.vector))                    // magnitude
+    features.APPEND(NORM_L1(delta.vector))                 // L1 sparsity
+    features.APPEND(MAX(ABS(delta.vector)))                // max deviation
+    FOR EACH v IN delta.vector:
+        features.APPEND(v)                                  // raw components
+    END FOR
+    RETURN Vector(features)
+END PROCEDURE
+
+
+PROCEDURE PrincipalComponentAnalysis(f: Vector) -> List[PCAComponent]:
+    // Apply PCA to identify significant directions in feature space.
+    // Returns components sorted by descending explained variance.
+
+    // 1. Center the feature vector (subtract mean — single sample context)
+    // 2. Compute covariance structure via outer product
+    // 3. Eigendecompose to get principal directions
+
+    // For single-vector input: return the vector itself as one component
+    // Full PCA requires a matrix (multiple samples); called iteratively above.
+    component := PCAComponent(
+        eigenvector          = NORMALIZE(f),
+        explained_variance   = NORM(f) ^ 2 / MAX(NORM(f) ^ 2, 1e-12)
+    )
+    RETURN [component]
+END PROCEDURE
+
+// NOTE: Production implementation accumulates multiple f vectors in a
+// sample matrix before running full eigendecomposition. The single-sample
+// version above is the per-iteration step as specified in Algorithm 1.
+
+
+// ── SECTION 4.2: ALGORITHM 2 — ADAPTIVE RESPONSE ─────────────
+
+// ALGORITHM 2: Adaptive Response
+//
+//   INPUT:  Current game state g
+//           Opponent strategy estimate ŝₒ
+//   OUTPUT: Weighted combination of counter-strategies
+
+PROCEDURE AdaptiveResponse(g: GameState,
+                             s_hat_opponent: Strategy,
+                             D: DimensionSet,
+                             theta_dominance: REAL) -> Strategy:
+    // Step 1: Identify dominant dimensions of opponent's strategy
+    D_dom := IdentifyDominantDimensions(s_hat_opponent, D, theta_dominance)
+
+    EMIT INFO "Dominant dimensions: " + D_dom.length + " found"
+
+    // Step 2: For each dominant dimension, generate counter-strategy
+    counter_strategies := []
+    FOR EACH dim IN D_dom:
+        // sᶜᴰ: counter-strategy that maximizes effectiveness in counter(D)
+        counter_dim := CounterDimension(dim)
+        s_c_D       := GenerateCounterStrategy(g, dim, counter_dim)
+        counter_strategies.APPEND((s_c_D, dim))
+    END FOR
+
+    // Step 3: Combine counter-strategies with weights ∝ dimension dominance
+    combined := CombineCounterStrategies(counter_strategies, s_hat_opponent, D)
+    RETURN combined
+END PROCEDURE
+
+
+PROCEDURE IdentifyDominantDimensions(s_opponent: Strategy,
+                                      D: DimensionSet,
+                                      theta: REAL) -> List[StrategicDimension]:
+    // D_dom = {D | E(ŝₒ, D) > θ}
+    // Dimensions where opponent's strategy is highly effective.
+
+    D_dom := []
+    FOR EACH dim IN D.dimensions:
+        effectiveness := EffectivenessScore(s_opponent, dim)
+        IF effectiveness > theta:
+            D_dom.APPEND(dim)
+            EMIT LOG "Dimension " + dim.name +
+                     " dominates at E=" + effectiveness + " > θ=" + theta
+        END IF
+    END FOR
+    RETURN D_dom
+END PROCEDURE
+
+
+PROCEDURE GenerateCounterStrategy(g: GameState,
+                                   opponent_dim: StrategicDimension,
+                                   counter_dim: StrategicDimension) -> DimensionalStrategy:
+    // Generate sᶜᴰ that maximizes E(sᶜᴰ, counter(D))
+    //
+    // Counter-strategy maximizes effectiveness in the dimension that
+    // NEUTRALIZES the opponent's dominant dimension.
+
+    available_actions := g.available_actions_for_player
+
+    best_counter  := NULL
+    best_eff      := NEGATIVE_INFINITY
+
+    FOR EACH action IN available_actions:
+        s_candidate := Strategy.fromAction(action)
+        eff         := EffectivenessScore(s_candidate, counter_dim)
+        IF eff > best_eff:
+            best_eff     := eff
+            best_counter := s_candidate
+        END IF
+    END FOR
+
+    RETURN DimensionalStrategy(
+        base_strategy  = best_counter,
+        dimension      = counter_dim,
+        effectiveness  = best_eff
+    )
+END PROCEDURE
+
+
+PROCEDURE CounterDimension(dim: StrategicDimension) -> StrategicDimension:
+    // Returns the dimension that counters (neutralizes) the given dimension.
+    // Counter relationship: offensive ↔ defensive, momentum ↔ mean_reversion, etc.
+
+    COUNTER_MAP := {
+        "offensive"       : "defensive",
+        "defensive"       : "offensive",
+        "momentum"        : "mean_reversion",
+        "mean_reversion"  : "momentum",
+        "brute_force"     : "input_validation",
+        "social_engineering" : "awareness_training",
+        "aggressiveness"  : "yielding",
+        "risk_aversion"   : "calculated_risk"
+    }
+
+    IF dim.name IN COUNTER_MAP:
+        counter_name := COUNTER_MAP[dim.name]
+        RETURN StrategicDimension(name=counter_name,
+                                   basis_vector=NegateProjection(dim.basis_vector))
+    END IF
+
+    // Default: negate the dimension's basis vector
+    RETURN StrategicDimension(name="counter_" + dim.name,
+                               basis_vector=NegateProjection(dim.basis_vector))
+END PROCEDURE
+
+
+PROCEDURE CombineCounterStrategies(
+    counter_list: List[(DimensionalStrategy, StrategicDimension)],
+    s_opponent: Strategy,
+    D: DimensionSet) -> Strategy:
+    // Combine counter-strategies with weights proportional to dimension dominance.
+    //
+    // weight(D) ∝ E(ŝₒ, D) — more dominant dimension → higher weight
+
+    IF LENGTH(counter_list) == 0:
+        EMIT WARNING "No counter-strategies to combine — returning null strategy"
+        RETURN NullStrategy()
+    END IF
+
+    // Compute raw dominance weights
+    weights    := []
+    strategies := []
+    FOR EACH (s_c, dim) IN counter_list:
+        dominance := EffectivenessScore(s_opponent, dim)
+        weights.APPEND(MAX(dominance, 0.0))    // ensure non-negative
+        strategies.APPEND(s_c)
+    END FOR
+
+    // Normalize weights to sum to 1
+    total_weight := SUM(weights)
+    IF total_weight < 1e-12:
+        // Equal weighting if all dominances are zero
+        weights := [1.0 / LENGTH(counter_list)] * LENGTH(counter_list)
+    ELSE:
+        weights := [w / total_weight FOR w IN weights]
+    END IF
+
+    // Weighted combination of strategy feature vectors
+    combined_features := ZERO_VECTOR(LENGTH(strategies[0].base_strategy.feature_vector))
+    FOR idx := 0 TO LENGTH(strategies) - 1:
+        combined_features := combined_features +
+                             weights[idx] * strategies[idx].base_strategy.feature_vector
+    END FOR
+
+    EMIT INFO "Combined strategy | weights=" + weights
+    RETURN Strategy(feature_vector=combined_features)
+END PROCEDURE
+
+
+// ── ALGORITHM INTEGRATION: DETECT → ADAPT PIPELINE ───────────
+
+PROCEDURE DimensionalGameLoop(G: Game, H: HistoricalGameData,
+                                theta_dominance: REAL) -> List[Strategy]:
+    // Full dimensional game theory pipeline:
+    //   1. Identify dimensions from history
+    //   2. Observe opponent strategy
+    //   3. Adaptively respond each round
+
+    D := DimensionIdentification(H)
+    round_strategies := []
+
+    FOR EACH round IN G.rounds:
+        // Estimate opponent strategy from observations
+        s_hat_opp := EstimateOpponentStrategy(round.observations, D)
+
+        // Adaptive response
+        my_strategy := AdaptiveResponse(round.game_state, s_hat_opp, D,
+                                         theta_dominance)
+        round_strategies.APPEND(my_strategy)
+
+        // Update historical data with this round's outcome
+        H.AddMatch(my_strategy, round.opponent_strategy, round.outcome)
+
+        // Re-identify dimensions with updated history (adaptive learning)
+        IF round.index % DIMENSION_UPDATE_INTERVAL == 0:
+            D := DimensionIdentification(H)
+            EMIT INFO "Dimensions refreshed at round " + round.index
+        END IF
+    END FOR
+
+    RETURN round_strategies
+END PROCEDURE
+
+CONSTANT DIMENSION_UPDATE_INTERVAL := 10   // re-run PCA every 10 rounds
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: dimensional_game_theory_M4_applications.psc.txt
+// ============================================================

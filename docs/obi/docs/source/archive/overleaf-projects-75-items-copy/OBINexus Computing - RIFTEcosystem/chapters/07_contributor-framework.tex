@@ -1,0 +1,327 @@
+% ==============================================================================
+\chapter{Contributor Framework: Governance-Enforced Progression}
+\label{ch:contributor-framework}
+% ==============================================================================
+% AUTHOR NOTE: Do not speculate. Cite all methods. Source must trace to implementation or research.
+
+\section{Framework Architecture Overview}
+
+The OBINexus Contributor Framework implements a three-tier progression model where advancement requires demonstrable competence through cryptographically-verified contributions rather than social consensus or time-based promotion. The framework integrates directly with the Git-RAF validation system described in Chapter \ref{ch:gitraf-integration} to ensure that contributor classifications reflect actual governance compliance capabilities.
+
+Unlike traditional open source contribution models that rely on maintainer discretion or community voting, this framework establishes objective criteria for advancement based on entropy analysis of submitted work, governance contract compliance, and measurable impact on system reliability \cite{TODO:contributor-progression-spec}.
+
+\subsection{Three-Tier Classification System}
+
+The framework implements three contributor levels with distinct governance capabilities and responsibilities:
+
+\begin{description}
+\item[\textbf{Observer}] Read-only access with ability to submit governance-validated proposals
+\item[\textbf{Builder}] Write access to designated branches with AuraSeal commitment requirements
+\item[\textbf{Steward}] Full repository access with authority to validate other contributors' work
+\end{description}
+
+Each tier requires specific governance thresholds to be met and maintained, with automatic demotion triggers when entropy analysis indicates declining contribution quality or policy compliance violations.
+
+\section{Observer Level: Entry Point Governance}
+
+\subsection{Access Permissions and Constraints}
+
+Observer status provides the foundational entry point into the contributor ecosystem. Observers can access all public documentation, browse code repositories, and submit governance-validated proposals through the standardized submission process.
+
+Observer permissions include:
+\begin{itemize}
+\item Read access to all public repositories and documentation
+\item Ability to submit \texttt{.rift.gov}-bound proposals for review
+\item Access to contributor training materials and governance tutorials
+\item Participation in public governance discussions and policy feedback
+\end{itemize}
+
+\subsection{Governance Validation Requirements}
+
+All Observer submissions must pass basic governance validation as defined in the RIFTlang specification (Chapter \ref{ch:riftlang-spec}). This includes:
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Observer-level governance contract template
+@policy("observer.submission", level="basic")
+@entropy_bound(max_deviation=0.10)
+@validation_required("syntax", "contract_compliance")
+governance_contract observer_submission {
+    compilation_required: true,
+    governance_check: basic,
+    mentor_review: optional,
+    public_visibility: true
+}
+\end{lstlisting}
+
+\subsection{Advancement Criteria to Builder Status}
+
+Advancement from Observer to Builder requires meeting specific quantitative criteria over a sustained period:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|r|l|}
+\hline
+\textbf{Metric} & \textbf{Threshold} & \textbf{Validation Method} \\
+\hline
+Successful submissions & 10 & Git-RAF validation logs \\
+Governance compliance rate & 95\% & Automated policy checking \\
+Entropy consistency & $< 0.08$ deviation & Statistical analysis \\
+Community impact score & $> 0.15$ & Consumer feedback integration \\
+Sustained contribution period & 90 days & Timestamp verification \\
+\hline
+\end{tabular}
+\caption{Observer to Builder Advancement Criteria}
+\label{tab:observer_advancement}
+\end{table}
+
+\section{Builder Level: Productive Contribution}
+
+\subsection{Enhanced Access and Responsibilities}
+
+Builder status grants write access to designated development branches with corresponding governance responsibilities. Builders can create feature branches, submit pull requests, and participate in technical governance discussions with binding votes on implementation decisions.
+
+Builder capabilities expand to include:
+\begin{itemize}
+\item Write access to \texttt{develop} and \texttt{feature/*} branches
+\item Authority to review and approve Observer submissions
+\item Participation in technical governance votes
+\item Access to advanced tooling and development infrastructure
+\end{itemize}
+
+\subsection{AuraSeal Commitment Requirements}
+
+All Builder contributions require AuraSeal cryptographic attestation as integrated with the Git-RAF system (Chapter \ref{ch:gitraf-integration}). This creates a permanent, auditable record of contribution quality and governance compliance.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Builder-level AuraSeal commitment structure
+@policy("builder.contribution", level="standard")
+@entropy_bound(max_deviation=0.05)
+@aura_seal_required("contribution_quality", "governance_compliance")
+governance_contract builder_contribution {
+    compilation_required: true,
+    governance_check: standard,
+    peer_review: required,
+    impact_assessment: quantitative,
+    rollback_capability: maintained
+}
+\end{lstlisting}
+
+\subsection{Governance Threshold Maintenance}
+
+Builders must maintain specific governance thresholds to retain their status. The framework continuously monitors contribution quality through entropy analysis and automated policy compliance checking.
+
+\begin{equation}
+\text{Builder Status} = \begin{cases}
+\text{Maintained} & \text{if } \mathcal{H}(\text{contributions}) < 0.05 \text{ and } \mathcal{C}(\text{policies}) > 0.90 \\
+\text{Review Required} & \text{if } 0.05 \leq \mathcal{H}(\text{contributions}) < 0.08 \\
+\text{Automatic Demotion} & \text{if } \mathcal{H}(\text{contributions}) \geq 0.08 \text{ or } \mathcal{C}(\text{policies}) \leq 0.85
+\end{cases}
+\end{equation}
+
+where $\mathcal{H}$ represents entropy deviation from baseline and $\mathcal{C}$ represents policy compliance rate.
+
+\section{Steward Level: Governance Authority}
+
+\subsection{Full Repository Access and Validation Authority}
+
+Steward status provides full repository access with authority to validate contributions from Observers and Builders. Stewards can approve merges to production branches, participate in governance council decisions, and serve as mentors for lower-tier contributors.
+
+Steward authorities include:
+\begin{itemize}
+\item Full access to all repository branches including \texttt{main} and \texttt{release/*}
+\item Authority to approve Builder advancement and Observer mentorship
+\item Participation in governance council with binding policy votes
+\item Access to advanced analytics and contributor performance metrics
+\end{itemize}
+
+\subsection{Advanced Governance Responsibilities}
+
+Stewards bear responsibility for maintaining the overall health of the contributor ecosystem through active governance participation and quality assurance activities.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Steward-level governance responsibilities
+@policy("steward.governance", level="maximum")
+@entropy_monitoring("continuous")
+@escalation_authority("governance_violations")
+governance_contract steward_responsibilities {
+    governance_check: comprehensive,
+    mentor_obligation: minimum_monthly_hours(8),
+    policy_enforcement: binding_authority,
+    ecosystem_health: monitoring_required,
+    emergency_response: available_24_7
+}
+\end{lstlisting}
+
+\subsection{Steward Accountability and Oversight}
+
+Steward actions undergo continuous monitoring through the same entropy analysis and governance compliance systems that apply to lower tiers, with additional oversight mechanisms for governance decisions.
+
+\section{Entropy-Based Drift Detection}
+
+\subsection{Contribution Quality Monitoring}
+
+The framework implements continuous entropy analysis to detect degradation in contribution quality or potential governance circumvention attempts. This monitoring applies to all contributor tiers with tier-specific thresholds and response protocols.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Entropy monitoring for contribution quality
+entropy_monitor contribution_quality {
+    baseline_calculation: rolling_30_day_average,
+    deviation_threshold: {
+        observer: 0.10,
+        builder: 0.05,
+        steward: 0.03
+    },
+    monitoring_frequency: per_commit,
+    alert_escalation: {
+        warning: deviation > 0.75 * threshold,
+        review: deviation > threshold,
+        suspension: deviation > 1.5 * threshold
+    }
+}
+\end{lstlisting}
+
+\subsection{Behavioral Consistency Verification}
+
+The system tracks behavioral patterns across multiple dimensions to identify potential issues before they impact system reliability or governance compliance.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Metric} & \textbf{Monitoring Frequency} & \textbf{Alert Threshold} \\
+\hline
+Code quality entropy & Per commit & $> 0.05$ deviation \\
+Collaboration patterns & Weekly analysis & Significant isolation \\
+Governance compliance & Continuous & $< 90\%$ success rate \\
+Response time patterns & Daily average & $> 2\sigma$ from baseline \\
+\hline
+\end{tabular}
+\caption{Behavioral Consistency Monitoring}
+\label{tab:behavioral_monitoring}
+\end{table}
+
+\section{Escalation Protocols}
+
+\subsection{Automated Escalation Triggers}
+
+The framework implements automated escalation protocols that activate when entropy analysis or policy compliance monitoring detects potential issues requiring human intervention.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Automated escalation protocol
+escalation_protocol governance_violation {
+    trigger_conditions: [
+        entropy_deviation > threshold,
+        policy_violation_detected,
+        community_complaint_filed,
+        security_incident_correlation
+    ],
+    escalation_path: {
+        level_1: peer_review_required,
+        level_2: steward_investigation,
+        level_3: governance_council_review,
+        level_4: external_audit_trigger
+    },
+    response_timeframes: {
+        level_1: 24_hours,
+        level_2: 72_hours,
+        level_3: 168_hours,
+        level_4: 720_hours
+    }
+}
+\end{lstlisting}
+
+\subsection{Manual Escalation Procedures}
+
+Contributors at any level can initiate manual escalation procedures when they detect potential governance violations or system issues that require investigation.
+
+\section{Impact-Based Advancement Validation}
+
+\subsection{Quantitative Impact Assessment}
+
+Advancement between contributor tiers requires demonstrable positive impact on system reliability, governance compliance, or community health. The framework implements quantitative metrics for impact assessment rather than subjective evaluation.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Impact assessment metrics
+impact_assessment contributor_advancement {
+    code_quality_improvement: measurable_entropy_reduction,
+    governance_enhancement: policy_compliance_rate_increase,
+    community_contribution: mentor_hours_provided,
+    system_reliability: defect_resolution_rate,
+    innovation_factor: novel_governance_solutions_implemented
+}
+\end{lstlisting}
+
+\subsection{Consumer Validation Integration}
+
+The advancement process incorporates consumer feedback mechanisms that validate whether contributor work actually serves documented user needs and system requirements.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|r|l|}
+\hline
+\textbf{Advancement Level} & \textbf{Consumer Validation Required} & \textbf{Validation Method} \\
+\hline
+Observer → Builder & 3 positive validations & Direct user feedback \\
+Builder → Steward & 10 positive validations & Structured impact assessment \\
+Steward retention & Quarterly review & Comprehensive governance audit \\
+\hline
+\end{tabular}
+\caption{Consumer Validation Requirements}
+\label{tab:consumer_validation}
+\end{table}
+
+\section{Audit-Anchored Advancement}
+
+\subsection{Cryptographic Advancement Records}
+
+All contributor advancement decisions create permanent, cryptographically-signed records that can be independently verified and audited. These records integrate with the Git-RAF AuraSeal system to ensure advancement decisions cannot be retroactively modified.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Advancement record structure
+advancement_record {
+    contributor_id: cryptographic_hash<identity>,
+    from_level: observer | builder | steward,
+    to_level: builder | steward,
+    advancement_date: iso8601_timestamp,
+    validation_metrics: quantitative_assessment,
+    governance_signatures: multi_signature_approval,
+    aura_seal: cryptographic_attestation,
+    audit_trail: complete_decision_history
+}
+\end{lstlisting}
+
+\subsection{Governance Decision Traceability}
+
+The framework maintains complete traceability for all governance decisions affecting contributor status, enabling independent auditing and dispute resolution.
+
+\section{Integration with RIFTlang Governance Contracts}
+
+\subsection{Contributor-Specific Governance Contracts}
+
+The framework leverages the RIFTlang governance contract system (Chapter \ref{ch:riftlang-spec}) to enforce contributor-specific policies and validate compliance automatically.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Contributor-level governance contract
+@policy_scope("contributor_framework")
+@entropy_bound(max_deviation=0.05)
+@advancement_criteria("quantitative_only")
+governance_contract contributor_management {
+    level_enforcement: automatic,
+    advancement_validation: cryptographic_proof,
+    demotion_triggers: entropy_based,
+    audit_requirements: comprehensive_logging,
+    dispute_resolution: governance_council_binding
+}
+\end{lstlisting}
+
+\subsection{Cross-System Policy Consistency}
+
+The contributor framework maintains policy consistency with the Git-RAF integration system and the broader OBINexus governance architecture through shared governance contract specifications.
+
+\section*{Conclusion}
+
+The OBINexus Contributor Framework transforms traditional open source contribution models by establishing objective, measurable criteria for advancement based on demonstrable competence rather than social consensus. Through integration with the Git-RAF cryptographic validation system and RIFTlang governance contracts, the framework creates a transparent, auditable pathway for contributor development that serves both individual advancement and ecosystem health.
+
+The entropy-based monitoring system provides continuous quality assurance while the escalation protocols ensure appropriate response to governance violations. Impact-based advancement criteria ensure that contributor progression reflects actual value creation rather than time-based promotion, while consumer validation integration maintains alignment with real user needs.
+
+This framework establishes the foundation for sustainable community development within governance-enforced systems, enabling innovation while maintaining accountability and trust.

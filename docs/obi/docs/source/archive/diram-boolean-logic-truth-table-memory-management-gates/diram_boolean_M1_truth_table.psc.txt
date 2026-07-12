@@ -1,0 +1,179 @@
+// ============================================================
+// FILE: diram_boolean_M1_truth_table.psc.txt
+// MODULE 1 OF 5 — DIRAM Boolean Logic Truth Table
+//                 Input Definitions & Gate Specification
+// SOURCE: "DIRAM Boolean Logic Truth Table - Memory Management Gates"
+// ORG:    OBINexus Aegis Project | Directed Instruction RAM
+// GOVERNANCE: ε(x) ≤ 0.5 | Binary Logic: 2-Input, 1-Output
+// ============================================================
+
+// ── CORPUS POSITION ──────────────────────────────────────────
+//
+// DIRAM (Directed Instruction RAM) is the memory governance layer
+// referenced throughout the OBINexus corpus. This document provides
+// its formal Boolean logic specification.
+//
+// Cross-references:
+//   PDF 6  (DAG Ephemeris §5.2):
+//     DIRAM_validate(transition) = COMMIT if ε(transition) ≤ 0.6
+//     → THIS document: ε(x) ≤ 0.5 (DIRAM-specific tighter bound)
+//   PDF 7  (OBIAI Thesis):
+//     "DIRAM cascade governance constraints"
+//   PDF 9  (RAF Cryptographic):
+//     entropy_coefficient ≤ 0.5 in QuantumAuraSeal
+//     → Matches DIRAM's ε ≤ 0.5 exactly
+//   AEGIS-PROOF-3.1/3.2: ε(transition) ≤ 0.6 (higher-level bound)
+//
+// EPSILON HIERARCHY (resolved):
+//   ε ≤ 0.5 — DIRAM hardware-level governance (THIS document)
+//   ε ≤ 0.6 — AEGIS/DIRAM integration layer (PDFs 3, 4, 6, 7)
+//   The 0.5 bound is STRICTER — hardware enforces tighter compliance
+//   before the software 0.6 bound is even reached.
+
+DEFINE DIRAMContext AS:
+    full_name       := "Directed Instruction RAM"
+    short_name      := "DIRAM"
+    governance_eps  := 0.5     // ε(x) ≤ 0.5 — hardware-level constraint
+    logic_type      := "2-Input, 1-Output Binary"
+    gates_used      := ["NOT", "XOR"]
+    output_type     := "Memory Action: 0=Block/Defer, 1=Allow/Process"
+END DEFINE
+
+
+// ── INPUT DEFINITIONS ─────────────────────────────────────────
+
+// INPUT A: Cache State
+//   0 = Cache Miss  (data not in cache — must fetch from main memory)
+//   1 = Cache Hit   (data present in cache — can serve immediately)
+
+// INPUT B: Governance State
+//   0 = ε ≤ 0.5 Compliant   (within safe memory allocation limits)
+//   1 = ε > 0.5 Violation   (too many heap events — must throttle)
+
+// OUTPUT: Memory Action
+//   0 = Block / Defer   (operation not permitted)
+//   1 = Allow / Process (operation permitted)
+
+DEFINE DIRAMInput AS:
+    A : {0, 1}    // Cache State: 0=Miss, 1=Hit
+    B : {0, 1}    // Governance State: 0=Compliant, 1=Violation
+END DEFINE
+
+DEFINE DIRAMOutput AS:
+    value : {0, 1}    // Memory Action: 0=Block, 1=Allow
+    action : STRING   // human-readable action label
+END DEFINE
+
+
+// ── TRUTH TABLE (CANONICAL) ───────────────────────────────────
+
+//  Input A │ Input B │ NOT A │ A XOR B │ Final Output
+//  ────────┼─────────┼───────┼─────────┼─────────────
+//    0     │    0    │   1   │    0    │     1      ✅ Allow
+//    0     │    1    │   1   │    1    │     0      ❌ Block
+//    1     │    0    │   0   │    1    │     1      ✅ Allow
+//    1     │    1    │   0   │    0    │     0      ❌ Block
+
+DEFINE DIRAMTruthTable AS:
+    rows : List[TruthTableRow]
+
+    ROW_1 := TruthTableRow(A=0, B=0, NOT_A=1, XOR_AB=0, output=1,
+                            scenario="Cache Miss + Compliant",
+                            decision=ALLOW,
+                            explanation="Cache miss with good governance → Fetch data, update cache")
+
+    ROW_2 := TruthTableRow(A=0, B=1, NOT_A=1, XOR_AB=1, output=0,
+                            scenario="Cache Miss + Violation",
+                            decision=BLOCK,
+                            explanation="Cache miss during constraint violation → Defer allocation")
+
+    ROW_3 := TruthTableRow(A=1, B=0, NOT_A=0, XOR_AB=1, output=1,
+                            scenario="Cache Hit + Compliant",
+                            decision=ALLOW,
+                            explanation="Cache hit with good governance → Process immediately")
+
+    ROW_4 := TruthTableRow(A=1, B=1, NOT_A=0, XOR_AB=0, output=0,
+                            scenario="Cache Hit + Violation",
+                            decision=BLOCK,
+                            explanation="Even cache hits blocked during severe violations")
+END DEFINE
+
+
+// ── GATE DEFINITIONS ─────────────────────────────────────────
+
+PROCEDURE NOT_A(A: {0, 1}) -> {0, 1}:
+    // Standard logical NOT: inverts cache state
+    // A=0 (Miss)  → NOT_A=1 (miss requires action)
+    // A=1 (Hit)   → NOT_A=0 (hit needs no extra action)
+    RETURN 1 - A
+END PROCEDURE
+
+
+PROCEDURE XOR_AB(A: {0, 1}, B: {0, 1}) -> {0, 1}:
+    // Standard logical XOR: detects difference between inputs
+    // A=B → XOR=0 (inputs agree — both low or both high)
+    // A≠B → XOR=1 (inputs differ — asymmetric state)
+    RETURN A XOR B
+END PROCEDURE
+
+
+// ── FINAL OUTPUT LOGIC ────────────────────────────────────────
+
+// The truth table output is computed as:
+//   Output = (NOT_A AND NOT XOR_AB) OR (NOT NOT_A AND XOR_AB)
+//   Output = (NOT_A AND ¬XOR_AB) OR (A AND XOR_AB)
+//
+// Equivalently (from C implementation):
+//   return (not_a && !xor_ab) || (!not_a && xor_ab)
+//
+// This is: Output = NOT_A XNOR (A XOR B)... let's verify:
+//   Row 1: (1 && !0) || (!1 && 0) = (1&&1)||(0&&0) = 1||0 = 1 ✓
+//   Row 2: (1 && !1) || (!1 && 1) = (1&&0)||(0&&1) = 0||0 = 0 ✓
+//   Row 3: (0 && !1) || (!0 && 1) = (0&&0)||(1&&1) = 0||1 = 1 ✓
+//   Row 4: (0 && !0) || (!0 && 0) = (0&&1)||(1&&0) = 0||0 = 0 ✓
+
+PROCEDURE DIRAMMemoryGate(A: {0, 1}, B: {0, 1}) -> {0, 1}:
+    // Core binary gate function: 2-input, 1-output
+    not_a   := NOT_A(A)
+    xor_ab  := XOR_AB(A, B)
+
+    // Truth table logic: allow when miss+compliant OR hit+compliant
+    output := (not_a AND NOT xor_ab) OR (NOT not_a AND xor_ab)
+    RETURN output
+END PROCEDURE
+
+
+PROCEDURE LookupTruthTable(A: {0, 1}, B: {0, 1}) -> DIRAMOutput:
+    // Direct lookup — faster than gate computation for real-time use
+    MATCH (A, B):
+        CASE (0, 0): RETURN DIRAMOutput(value=1, action="ALLOW: Fetch data, update cache")
+        CASE (0, 1): RETURN DIRAMOutput(value=0, action="BLOCK: Defer allocation")
+        CASE (1, 0): RETURN DIRAMOutput(value=1, action="ALLOW: Process immediately")
+        CASE (1, 1): RETURN DIRAMOutput(value=0, action="BLOCK: Throttle cache hits")
+    END MATCH
+END PROCEDURE
+
+
+PROCEDURE VerifyTruthTableConsistency() -> BOOL:
+    // Verify gate computation matches lookup table for all 4 rows.
+    all_ok := TRUE
+    FOR EACH (A, B) IN [(0,0), (0,1), (1,0), (1,1)]:
+        gate_result   := DIRAMMemoryGate(A, B)
+        lookup_result := LookupTruthTable(A, B).value
+        IF gate_result != lookup_result:
+            EMIT ERROR "Inconsistency at (A=" + A + ", B=" + B + "): " +
+                       "gate=" + gate_result + " lookup=" + lookup_result
+            all_ok := FALSE
+        END IF
+    END FOR
+    IF all_ok:
+        EMIT INFO "Truth table consistency verified ✓"
+    END IF
+    RETURN all_ok
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: diram_boolean_M2_cache_mechanics.psc.txt
+// ============================================================

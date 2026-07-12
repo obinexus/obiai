@@ -1,0 +1,291 @@
+// ============================================================
+// FILE: dimensional_game_theory_M4_applications.psc.txt
+// MODULE 4 OF 5 — Practical Applications Across Domains
+// SOURCE: "Formal Analysis of Game Theory for Algorithm Development"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 5: PRACTICAL APPLICATIONS
+// ------------------------------------------------------------
+
+// Four real-world application domains for dimensional game theory.
+// Each domain maps to a specific set of strategic dimensions and
+// demonstrates how Algorithm 1 (detection) + Algorithm 2 (adaptation)
+// operate in practice.
+//
+// Cross-reference to OBIAI corpus:
+//   §5.3 Autonomous Vehicles → also covered in dag_ephemeris PDF §4
+//         (driving scenarios: "see-sign ⊕ busy-street" etc.)
+
+
+// ── §5.1: FINANCIAL MARKETS ───────────────────────────────────
+
+// Dimensions: momentum, mean-reversion, liquidity-seeking
+// Game structure: market participants compete for edge
+// Adaptive problem: detect when market is momentum-dominated; respond
+
+DEFINE FinancialMarketDimensions AS:
+    D_MOMENTUM      := StrategicDimension(name="momentum",
+                                           basis_vector=MomentumBasis())
+    D_MEAN_REVERSION := StrategicDimension(name="mean_reversion",
+                                            basis_vector=MeanReversionBasis())
+    D_LIQUIDITY     := StrategicDimension(name="liquidity",
+                                           basis_vector=LiquidityBasis())
+END DEFINE
+
+
+PROCEDURE FinancialAdaptiveStrategy(market_state: MarketState,
+                                     trade_history: HistoricalGameData,
+                                     theta: REAL) -> TradingStrategy:
+    // Detect current market regime and adapt trading strategy.
+
+    // Step 1: Identify dominant dimensions from recent trades
+    D := DimensionIdentification(trade_history)
+
+    // Step 2: Model aggregate market as "opponent"
+    market_strategy := EstimateMarketStrategy(market_state)
+
+    // Step 3: Find dominant market dimensions
+    D_dom := IdentifyDominantDimensions(market_strategy, D, theta)
+
+    // Step 4: Log detected regime for audit
+    EMIT LOG "Market regime: " + D_dom.map(d.name) +
+             " | state=" + market_state.regime_label
+
+    // Step 5: Generate adaptive trading response
+    counter_strategy := AdaptiveResponse(
+        g             = market_state.AsGameState(),
+        s_hat_opponent = market_strategy,
+        D             = D,
+        theta_dominance = theta
+    )
+
+    RETURN TradingStrategy.fromDimensional(counter_strategy, market_state)
+END PROCEDURE
+
+PROCEDURE EstimateMarketStrategy(state: MarketState) -> Strategy:
+    // Infer aggregate market participant strategy from observable signals:
+    // price momentum, volume patterns, order book depth
+    features := [
+        state.price_momentum_5d,
+        state.price_momentum_20d,
+        state.volume_trend,
+        state.order_book_imbalance,
+        state.volatility_ratio
+    ]
+    RETURN Strategy(feature_vector=Vector(features))
+END PROCEDURE
+
+
+// ── §5.2: CYBERSECURITY ───────────────────────────────────────
+
+// Dimensions: brute_force, social_engineering, lateral_movement
+// Game structure: attacker vs defender (zero-sum)
+// Adaptive problem: identify attack vector; dynamically allocate defenses
+
+DEFINE CybersecurityDimensions AS:
+    D_BRUTE_FORCE      := StrategicDimension(name="brute_force",
+                                              basis_vector=BruteForceBasis())
+    D_SOCIAL_ENGINEER  := StrategicDimension(name="social_engineering",
+                                              basis_vector=SocialEngBasis())
+    D_LATERAL_MOVE     := StrategicDimension(name="lateral_movement",
+                                              basis_vector=LateralMoveBasis())
+    D_PERSISTENCE      := StrategicDimension(name="persistence",
+                                              basis_vector=PersistenceBasis())
+END DEFINE
+
+DEFINE CybersecurityGame AS:
+    // Two-player zero-sum: Attacker vs Defender
+    players := [ATTACKER, DEFENDER]
+    action_space_attacker := ATTACK_ACTIONS
+    action_space_defender := DEFENSE_ACTIONS
+
+    PROCEDURE IsZeroSum() -> BOOL: RETURN TRUE END PROCEDURE
+END DEFINE
+
+
+PROCEDURE CybersecurityAdaptiveDefense(threat_feed: ThreatStream,
+                                        defense_history: HistoricalGameData,
+                                        resource_budget: REAL) -> DefenseAllocation:
+    // Identify threat dimensions and allocate defensive resources.
+
+    D := BuildSecurityDimensions()
+
+    // Estimate attacker strategy from threat intelligence
+    attacker_strategy := EstimateAttackerStrategy(threat_feed)
+
+    // Identify dominant attack dimensions
+    D_dom := IdentifyDominantDimensions(attacker_strategy, D,
+                                         theta=0.4)
+
+    EMIT ALERT "Attack dimensions detected: " +
+               D_dom.map(d.name)
+
+    // Allocate defense budget proportional to dimension dominance
+    allocations := {}
+    total_dominance := SUM([EffectivenessScore(attacker_strategy, d)
+                            FOR d IN D_dom])
+
+    FOR EACH dim IN D_dom:
+        dominance := EffectivenessScore(attacker_strategy, dim)
+        weight    := dominance / MAX(total_dominance, 1e-12)
+        allocations[dim.name] := resource_budget * weight
+        EMIT INFO "Defense allocation: " + dim.name + " → " +
+                  allocations[dim.name] + " units"
+    END FOR
+
+    RETURN DefenseAllocation(allocations=allocations,
+                              primary_dimension=D_dom[0])
+END PROCEDURE
+
+PROCEDURE BuildSecurityDimensions() -> DimensionSet:
+    D := NEW DimensionSet()
+    D.Add(CybersecurityDimensions.D_BRUTE_FORCE)
+    D.Add(CybersecurityDimensions.D_SOCIAL_ENGINEER)
+    D.Add(CybersecurityDimensions.D_LATERAL_MOVE)
+    D.Add(CybersecurityDimensions.D_PERSISTENCE)
+    RETURN D
+END PROCEDURE
+
+
+// ── §5.3: AUTONOMOUS VEHICLES ─────────────────────────────────
+
+// Dimensions: aggressiveness, risk_aversion, efficiency
+// Game structure: multi-agent traffic interaction
+// Adaptive problem: model other drivers; navigate safely
+//
+// Cross-reference: DAG Ephemeris §4 (driving scenarios):
+//   "see-sign ⊕ busy-street" → p_conf=0.972 → FILTER → speed adjustment
+//   "braking-car ⊕ immediate-hazard" → p_conf=0.847 → REFLASH → rapid response
+//
+// The dimensional game theory framework HERE provides the strategic layer
+// that FEEDS INTO the ephemeris step decision (p_conf computation).
+
+DEFINE AutonomousVehicleDimensions AS:
+    D_AGGRESSION   := StrategicDimension(name="aggressiveness",
+                                          basis_vector=AggressionBasis())
+    D_RISK_AVERSION := StrategicDimension(name="risk_aversion",
+                                           basis_vector=RiskAversionBasis())
+    D_EFFICIENCY   := StrategicDimension(name="efficiency",
+                                          basis_vector=EfficiencyBasis())
+END DEFINE
+
+
+PROCEDURE AutonomousVehicleNavigation(observations: List[VehicleObservation],
+                                       own_state: VehicleState,
+                                       driver_history: HistoricalGameData) -> NavigationDecision:
+    // Model surrounding drivers as strategic agents; compute safe response.
+
+    D := BuildVehicleDimensions()
+
+    navigation_decisions := []
+
+    FOR EACH obs IN observations:
+        // Estimate this driver's strategy along behavioral dimensions
+        driver_strategy := EstimateDriverStrategy(obs)
+
+        // Identify driver behavioral profile
+        D_dom := IdentifyDominantDimensions(driver_strategy, D, theta=0.35)
+
+        // Generate safe counter-navigation
+        nav_response := AdaptiveResponse(
+            g               = own_state.AsGameState(),
+            s_hat_opponent  = driver_strategy,
+            D               = D,
+            theta_dominance = 0.35
+        )
+
+        // Map dimensional response to concrete maneuver
+        maneuver := DimensionalStrategyToManeuver(nav_response, own_state, D_dom)
+        navigation_decisions.APPEND((obs.vehicle_id, maneuver))
+
+        EMIT LOG "Vehicle " + obs.vehicle_id + " | dims=" +
+                 D_dom.map(d.name) + " | maneuver=" + maneuver.type
+    END FOR
+
+    // Aggregate all vehicle models into a unified navigation decision
+    RETURN SynthesizeNavigationDecision(navigation_decisions, own_state)
+END PROCEDURE
+
+PROCEDURE EstimateDriverStrategy(obs: VehicleObservation) -> Strategy:
+    // Infer driver behavior profile from observable kinematics
+    features := [
+        obs.following_distance_ratio,   // aggressiveness proxy
+        obs.lane_change_frequency,       // aggressiveness
+        obs.speed_variance,              // risk indicator
+        obs.braking_sharpness            // response style
+    ]
+    RETURN Strategy(feature_vector=Vector(features))
+END PROCEDURE
+
+PROCEDURE BuildVehicleDimensions() -> DimensionSet:
+    D := NEW DimensionSet()
+    D.Add(AutonomousVehicleDimensions.D_AGGRESSION)
+    D.Add(AutonomousVehicleDimensions.D_RISK_AVERSION)
+    D.Add(AutonomousVehicleDimensions.D_EFFICIENCY)
+    RETURN D
+END PROCEDURE
+
+
+// ── §5.4: BUSINESS COMPETITION ────────────────────────────────
+
+// Dimensions: price_sensitivity, quality_focus, innovation_rate
+// Game structure: multi-player competitive market
+// Adaptive problem: model competitors; develop adaptive competitive responses
+
+DEFINE BusinessDimensions AS:
+    D_PRICE_SENSITIVITY := StrategicDimension(name="price_sensitivity",
+                                               basis_vector=PriceBasis())
+    D_QUALITY_FOCUS     := StrategicDimension(name="quality_focus",
+                                               basis_vector=QualityBasis())
+    D_INNOVATION_RATE   := StrategicDimension(name="innovation_rate",
+                                               basis_vector=InnovationBasis())
+END DEFINE
+
+
+PROCEDURE BusinessCompetitiveStrategy(market_data: MarketIntelligence,
+                                       own_capabilities: CompanyProfile,
+                                       competitor_history: HistoricalGameData,
+                                       theta: REAL) -> CompetitiveStrategy:
+    // Analyze competitor strategies; develop dimensional competitive response.
+
+    D := BuildBusinessDimensions()
+
+    // Model each competitor as a strategic agent
+    competitor_responses := []
+    FOR EACH competitor IN market_data.competitors:
+        comp_strategy := EstimateCompetitorStrategy(competitor)
+        D_dom         := IdentifyDominantDimensions(comp_strategy, D, theta)
+
+        EMIT INFO "Competitor " + competitor.name + " | dominant_dims=" +
+                  D_dom.map(d.name)
+
+        response := AdaptiveResponse(
+            g               = own_capabilities.AsGameState(),
+            s_hat_opponent  = comp_strategy,
+            D               = D,
+            theta_dominance = theta
+        )
+        competitor_responses.APPEND(response)
+    END FOR
+
+    // Aggregate responses into a unified competitive strategy
+    unified := SynthesizeCompetitiveStrategy(competitor_responses, own_capabilities)
+    RETURN unified
+END PROCEDURE
+
+PROCEDURE BuildBusinessDimensions() -> DimensionSet:
+    D := NEW DimensionSet()
+    D.Add(BusinessDimensions.D_PRICE_SENSITIVITY)
+    D.Add(BusinessDimensions.D_QUALITY_FOCUS)
+    D.Add(BusinessDimensions.D_INNOVATION_RATE)
+    RETURN D
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: dimensional_game_theory_M5_obinexus_integration.psc.txt
+// ============================================================

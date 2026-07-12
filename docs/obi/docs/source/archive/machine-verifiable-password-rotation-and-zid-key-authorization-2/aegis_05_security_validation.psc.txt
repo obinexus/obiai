@@ -1,0 +1,273 @@
+// ============================================================
+// FILE: aegis_05_security_validation.psc.txt
+// MODULE 5: Universal Security Model, Validation Framework & System Invariants
+// SOURCE: Mathematical_Framework_for_Zero_Overhead_Data_Marshalling_for_AI.pdf
+// Sections: 7 (Universal Security Model), 8 (Performance Analysis),
+//           9 (Conclusion / Implementation Readiness)
+// Project: Aegis — OBINexus Engineering Team | Document Version 2.0
+// ============================================================
+
+// ------------------------------------------------------------
+// OVERVIEW
+// ------------------------------------------------------------
+
+// This module defines:
+//   1. The universal security model with cross-algorithm reduction proofs
+//   2. The safety-critical validation framework (soundness, correctness, hardness)
+//   3. Top-level marshalling pipeline integrating all prior modules
+//   4. System-wide invariants and implementation readiness properties
+
+// ------------------------------------------------------------
+// SECTION 7: CROSS-ALGORITHM SECURITY EQUIVALENCE TABLE
+// ------------------------------------------------------------
+
+// Each primitive family has a polynomial-time reduction from protocol break
+// to the respective hard problem.
+
+SECURITY_EQUIVALENCE_TABLE = {
+
+    RSA: {
+        hard_problem        : "Integer Factorization",
+        reduction           : "Break(M) <=_p Factor(N) where N=p*q, |p|=|q|=lambda/2",
+        security_class      : "IND-CCA2 / EU-CMA under factoring assumption"
+    },
+
+    ECC: {
+        hard_problem        : "Elliptic Curve Discrete Logarithm (ECDLP)",
+        reduction           : "Break(M) <=_p ECDLP(G, P, Q) where Q = k*P, k in Z_n",
+        security_class      : "IND-CCA2 under ECDLP assumption"
+    },
+
+    LATTICE: {
+        hard_problem        : "Learning With Errors (LWE)",
+        reduction           : "Break(M) <=_p LWE(n, q, chi) where chi is error distribution",
+        security_class      : "Post-quantum secure under LWE assumption"
+    },
+
+    POST_QUANTUM: {
+        hard_problem        : "Quantum-Hard Problem",
+        reduction           : "Break(M) <=_p QuantumHardProblem(lambda)",
+        adversary_advantage : "Adv <= 2^(-lambda/3)",
+        security_class      : "Secure against Grover and Shor attacks"
+    }
+}
+
+// ------------------------------------------------------------
+// RUNTIME CRYPTOGRAPHIC PRIMITIVE SELECTOR
+// ------------------------------------------------------------
+
+ENUM CryptoPrimitive = { RSA, ECC, LATTICE }
+
+FUNCTION select_primitive(environment_context) -> CryptoPrimitive:
+    IF environment_context.requires_post_quantum THEN
+        RETURN CryptoPrimitive.LATTICE      // LWE-based — quantum resistant
+    ELSE IF environment_context.prefers_lightweight THEN
+        RETURN CryptoPrimitive.ECC          // Smaller keys, fast ops
+    ELSE
+        RETURN CryptoPrimitive.RSA          // Legacy compatibility
+    END IF
+END FUNCTION
+
+FUNCTION instantiate_sigma(primitive: CryptoPrimitive, lambda) -> SignatureScheme:
+    MATCH primitive:
+        CASE RSA:
+            RETURN RSA_PSS_Scheme(key_bits = lambda)
+        CASE ECC:
+            RETURN ECDSA_Scheme(curve = select_curve(lambda))
+        CASE LATTICE:
+            RETURN CRYSTALS_Dilithium_Scheme(security_level = lambda)
+    END MATCH
+    // All three satisfy Definition 2.4 (Universal Cryptographic Security)
+END FUNCTION
+
+// ------------------------------------------------------------
+// TOP-LEVEL MARSHALLING PIPELINE
+// ------------------------------------------------------------
+
+// Integrates Modules 1–4 into a single operation flow:
+// Module 1: System model + state transition
+// Module 2: Zero-overhead delta payload construction
+// Module 3: Protocol soundness enforcement
+// Module 4: Recovery on failure
+
+FUNCTION execute_marshalling_operation(
+        D: DistributedSystem,
+        s: SystemState,
+        op: Operation,
+        n_i: NodeID,
+        n_j: NodeID,
+        Sigma: SignatureScheme
+    ) -> MarshallingResult:
+
+    // --- Phase 1: Validate topology and edge existence (Module 1) ---
+    IF (n_i, n_j) NOT IN D.E THEN
+        RETURN MarshallingResult { status = FAILED, reason = "No edge between nodes" }
+    END IF
+    protocol = D.M[(n_i, n_j)]
+
+    // --- Phase 2: Compute next state via state transition (Module 1) ---
+    s_prime = compute_next_state(s, op, n_i, n_j)
+    IF NOT state_transition(s, op, s_prime, Sigma) THEN
+        RETURN MarshallingResult { status = FAILED, reason = "Invalid state transition" }
+    END IF
+
+    // --- Phase 3: Build zero-overhead marshalling payload (Module 2) ---
+    payload = build_marshalling_payload(s, s_prime, n_i, n_j, Sigma)
+    // Payload size: O(1) amortized — Theorem 3.1
+
+    // --- Phase 4: Verify protocol soundness (Module 3) ---
+    IF NOT verify_marshalling_operation(payload, Sigma) THEN
+        // Soundness violation — log and reject
+        audit_log(event="SOUNDNESS_VIOLATION", nodes=(n_i, n_j), timestamp=now())
+        RETURN MarshallingResult { status = FAILED, reason = "Protocol soundness violation" }
+    END IF
+
+    // --- Phase 5: Transmit payload to n_j ---
+    transmission_result = transmit(payload, n_j, protocol)
+    IF transmission_result != SUCCESS THEN
+        // Trigger recovery if transmission failed (Module 4)
+        failure_state = build_failure_state(s, op, transmission_result)
+        recovery      = recovery_algorithm(failure_state, Sigma)
+        RETURN MarshallingResult {
+            status    = RECOVERED,
+            state     = recovery.s_r,
+            proof     = recovery.pi,
+            soundness = recovery.sigma
+        }
+    END IF
+
+    // --- Phase 6: Record successful transition ---
+    audit_log(event="MARSHALLING_SUCCESS", nodes=(n_i, n_j), timestamp=now())
+
+    RETURN MarshallingResult {
+        status  = SUCCESS,
+        state   = s_prime,
+        payload = payload
+    }
+
+END FUNCTION
+
+// ------------------------------------------------------------
+// SECTION 8.2: UNIFIED VALIDATION HARNESS
+// ------------------------------------------------------------
+
+// Executes all three validation categories against a given protocol instance.
+
+FUNCTION run_validation_harness(protocol, lambda, n, test_cases) -> ValidationReport:
+
+    report = ValidationReport { passed = 0, failed = 0, details = [] }
+
+    // --- Soundness Validation ---
+    FOR EACH (s, op) IN test_cases.soundness_cases:
+        result = validate_soundness(s, op)
+        IF result THEN
+            report.passed += 1
+        ELSE
+            report.failed += 1
+            report.details.append("SOUNDNESS FAIL: state=" + s + " op=" + op)
+        END IF
+    END FOR
+
+    // --- Correctness Validation ---
+    FOR EACH s_failure IN test_cases.failure_scenarios:
+        result = validate_correctness(s_failure)
+        IF result THEN
+            report.passed += 1
+        ELSE
+            report.failed += 1
+            report.details.append("CORRECTNESS FAIL: failure_state=" + s_failure)
+        END IF
+    END FOR
+
+    // --- Hardness Validation ---
+    hardness_ok = validate_hardness(lambda, n, bound=n)
+    IF hardness_ok THEN
+        report.passed += 1
+    ELSE
+        report.failed += 1
+        report.details.append("HARDNESS FAIL: lambda=" + lambda + " n=" + n)
+    END IF
+
+    RETURN report
+
+END FUNCTION
+
+// ------------------------------------------------------------
+// SYSTEM-WIDE INVARIANTS (SECTION 9 / CONCLUSION)
+// ------------------------------------------------------------
+
+// These invariants must hold at all times in a conformant implementation:
+
+SYSTEM_INVARIANTS = {
+
+    INV_01: "Zero Overhead — TotalOverhead(M_ij) = O(1) regardless of payload size",
+    // Proof: Theorem 3.1
+
+    INV_02: "Cryptographic Soundness — Pr[Soundness violation] <= negl(lambda)",
+    // Proof: Theorem 4.1
+
+    INV_03: "Recovery Determinism — Algorithm 1 always terminates within |Delta| <= k steps",
+    // Proof: Theorem 5.1 Invariant 2
+
+    INV_04: "State Indistinguishability — recovered s_r is cryptographically indistinguishable from valid execution",
+    // Proof: Theorem 5.1
+
+    INV_05: "NASA-STD-8739.8 Compliance — deterministic execution, bounded resources, formal verification, graceful degradation",
+    // Proof: Theorem 6.1
+
+    INV_06: "Cross-Algorithm Equivalence — security guarantees hold across RSA, ECC, and lattice primitives",
+    // Proof: Theorem 7.1
+
+    INV_07: "All state transitions are cryptographically verified — no unverified transition is ever accepted",
+    // Mechanism: Definition 2.3 + marshalling_function_M (Module 1)
+
+    INV_08: "Audit trail is append-only — no deletion of transition records permitted",
+    // Mechanism: RecordCryptographicTransition (Module 4)
+
+    INV_09: "Delta compression reduces communication from O(n^2 * m) to O(n * log m)",
+    // Mechanism: compute_state_delta (Module 2)
+
+    INV_10: "Proof cache ensures O(1) amortized verification — no repeated proof computation for identical deltas"
+    // Mechanism: compute_or_retrieve_proof (Module 2)
+}
+
+// ------------------------------------------------------------
+// IMPLEMENTATION READINESS CHECKLIST (Section 9)
+// ------------------------------------------------------------
+
+IMPLEMENTATION_READINESS = {
+
+    ITEM_1: {
+        component : "Formal proofs and algorithms",
+        status    : "Complete — sufficient for implementation phase of Aegis project"
+    },
+
+    ITEM_2: {
+        component : "Universal security model",
+        status    : "Complete — long-term viability ensured as crypto standards evolve"
+    },
+
+    ITEM_3: {
+        component : "NASA-STD-8739.8 compliance proofs",
+        status    : "Complete — suitable for mission-critical deployments"
+    },
+
+    ITEM_4: {
+        component : "Future work — complex distributed scenario extensions",
+        status    : "Pending — must maintain determinism, security, and efficiency invariants"
+    }
+}
+
+// ============================================================
+// MODULE INDEX — AEGIS FRAMEWORK
+// ============================================================
+//
+//   aegis_01_system_model.psc.txt          — 5-tuple system model, state machine, definitions
+//   aegis_02_zero_overhead.psc.txt         — Theorem 3.1: O(1) overhead proof, delta/cache
+//   aegis_03_protocol_soundness.psc.txt    — Theorem 4.1: soundness reduction, cross-algo security
+//   aegis_04_recovery_algorithm.psc.txt    — Algorithm 1: bounded delta replay, NASA compliance
+//   aegis_05_security_validation.psc.txt   — Universal security model, validation harness, invariants
+//
+// ============================================================
+// END MODULE 5 — END OF AEGIS PSEUDOCODE SPECIFICATION
+// ============================================================

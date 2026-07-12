@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OBIAI 2 | OBI Source HTML</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --surface: #ffffff;
+      --text: #202321;
+      --muted: #626962;
+      --accent: #147d7e;
+      --border: #d9ddd4;
+      --code: #eef1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    header, main, footer { max-width: 1060px; margin: 0 auto; padding: 1.25rem; }
+    header { border-bottom: 4px solid var(--accent); background: #161819; color: #f5f7f2; max-width: none; }
+    header > div { max-width: 1060px; margin: 0 auto; }
+    a { color: #0f5f60; }
+    header a { color: inherit; }
+    main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 1.25rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p, li { max-width: 78ch; }
+    img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    pre { overflow: auto; background: #20251f; color: #f7fbf2; padding: 1rem; border-radius: 8px; }
+    code { background: var(--code); padding: 0.12rem 0.25rem; border-radius: 5px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--border); padding: 0.45rem 0.6rem; text-align: left; }
+    blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding-left: 1rem; color: var(--muted); }
+    .skip-link { position: absolute; left: 1rem; top: 0.75rem; transform: translateY(-200%); }
+    .skip-link:focus { transform: translateY(0); background: var(--surface); color: var(--text); padding: 0.5rem; }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header>
+    <div>
+      <a href="../index.html">OBI Source HTML</a>
+      <h1>OBIAI 2</h1>
+      <p>Generated from Markdown with Python tooling and Pandoc-compatible source preservation.</p>
+    </div>
+  </header>
+  <main id="content" tabindex="-1">
+    <h1 id="obiai-2">OBIAI 2</h1>
+<p>Source folder: <code>overleaf-projects-75-items-copy/OBIAI-2</code></p>
+<h2 id="extracted-files">Extracted Files</h2>
+<ul>
+<li><code>main.tex</code></li>
+</ul>
+<h2 id="main">main</h2>
+<h1 id="component-architecture-tree">Component Architecture Tree</h1>
+<p>The OBIAI system implements a three-tier component isolation architecture:</p>
+<ul>
+<li>
+<p><strong>Stable Tier</strong>: Production-verified components with mathematical proof validation</p>
+</li>
+<li>
+<p><strong>Experimental Tier</strong>: Development components under active testing and peer review</p>
+</li>
+<li>
+<p><strong>Legacy Tier</strong>: Archived components maintained for audit replay and compatibility</p>
+</li>
+</ul>
+<h2 id="active-component-hierarchy">Active Component Hierarchy</h2>
+<figure data-latex-placement="h">
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Component</strong></th>
+<th style="text-align: left;"><strong>Tier</strong></th>
+<th style="text-align: left;"><strong>Version</strong></th>
+<th style="text-align: left;"><strong>Dependencies</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Cost-Knowledge Function</td>
+<td style="text-align: left;"><span style="color: green"><strong>[STABLE]</strong> Stable</span></td>
+<td style="text-align: left;"><code>v1.1.0</code></td>
+<td style="text-align: left;">None</td>
+</tr>
+<tr>
+<td style="text-align: left;">Traversal Cost Function</td>
+<td style="text-align: left;"><span style="color: green"><strong>[STABLE]</strong> Stable</span></td>
+<td style="text-align: left;"><code>v1.2.0</code></td>
+<td style="text-align: left;">v1.1.0</td>
+</tr>
+<tr>
+<td style="text-align: left;">Triangle Convergence</td>
+<td style="text-align: left;"><span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental</span></td>
+<td style="text-align: left;"><code>v1.5.0</code></td>
+<td style="text-align: left;">v1.2.0</td>
+</tr>
+<tr>
+<td style="text-align: left;">Uncertainty Handling</td>
+<td style="text-align: left;"><span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental</span></td>
+<td style="text-align: left;"><code>v1.6.0</code></td>
+<td style="text-align: left;">v1.5.0</td>
+</tr>
+<tr>
+<td style="text-align: left;">Filter-Flash Integration</td>
+<td style="text-align: left;"><span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental</span></td>
+<td style="text-align: left;"><code>v1.5.1</code></td>
+<td style="text-align: left;">v1.5.0</td>
+</tr>
+<tr>
+<td style="text-align: left;">Swapper Engine Core</td>
+<td style="text-align: left;"><span style="color: green"><strong>[STABLE]</strong> Stable</span></td>
+<td style="text-align: left;"><code>v2.0.0</code></td>
+<td style="text-align: left;">v1.2.0</td>
+</tr>
+</tbody>
+</table>
+<figcaption>OBIAI Component Tier Assignments and Dependencies</figcaption>
+</figure>
+
+<h2 id="repository-structure-mapping">Repository Structure Mapping</h2>
+<p>Component source location: <a href="https://github.com/obinexus/obiai">https://github.com/obinexus/obiai</a></p>
+<pre><code>obiai/
+|-- stable/
+|   |-- cost_function_stable.tex
+|   |-- traversal_cost_stable.tex
+|   +-- swapper_engine_stable.tex
+|-- experimental/
+|   |-- triangle_convergence_experimental.tex
+|   |-- uncertainty_handling_experimental.tex
+|   +-- filter_flash_experimental.tex
++-- legacy/
+    |-- proof_concepts_legacy.tex
+    +-- archived_implementations_legacy.tex
+</code></pre>
+<h1 id="stable-tier-components">Stable Tier Components</h1>
+<h2 id="mathematical-foundation-components">Mathematical Foundation Components</h2>
+<h3 id="aegis-proof-11-cost-knowledge-function">AEGIS-PROOF-1.1: Cost-Knowledge Function</h3>
+<p><strong>Status</strong>: <span style="color: green"><strong>[STABLE]</strong> Stable v1.1.0</span><br>
+<strong>Mathematical Foundation</strong>:</p>
+<pre><code class="language-math">\begin{equation}
+C(K_t, S) = H(S) \cdot \exp(-K_t)
+\end{equation}
+</code></pre>
+<p><strong>Verification</strong>: Monotonicity proven, boundary conditions validated<br>
+<strong>Dependencies</strong>: None<br>
+<strong>Deployment Clearance</strong>: Clinical Production Ready</p>
+<h3 id="aegis-proof-12-traversal-cost-function">AEGIS-PROOF-1.2: Traversal Cost Function</h3>
+<p><strong>Status</strong>: <span style="color: green"><strong>[STABLE]</strong> Stable v1.2.0</span><br>
+<strong>Mathematical Foundation</strong>:</p>
+<pre><code class="language-math">\begin{equation}
+C(Node_i \rightarrow Node_j) = \alpha \cdot KL(P_i \parallel P_j) + \beta \cdot \Delta H(S_{i,j})
+\end{equation}
+</code></pre>
+<p><strong>Verification</strong>: Non-negativity proven, stability confirmed<br>
+<strong>Dependencies</strong>: Cost-Knowledge Function v1.1.0<br>
+<strong>Deployment Clearance</strong>: Clinical Production Ready</p>
+<h3 id="swapper-engine-core">Swapper Engine Core</h3>
+<p><strong>Status</strong>: <span style="color: green"><strong>[STABLE]</strong> Stable v2.0.0</span><br>
+<strong>Function</strong>: Tier isolation enforcement and component compatibility validation<br>
+<strong>Verification</strong>: Runtime tier validation confirmed<br>
+<strong>Dependencies</strong>: Traversal Cost Function v1.2.0<br>
+<strong>Deployment Clearance</strong>: Production Infrastructure Ready</p>
+<h1 id="experimental-tier-components">Experimental Tier Components</h1>
+<p><strong>Warning</strong>: Experimental components are under active development and have not achieved production verification status. They are loaded in shadow-mode for testing and validation purposes only.</p>
+<h2 id="advanced-reasoning-components">Advanced Reasoning Components</h2>
+<h3 id="triangle-convergence-logic">Triangle Convergence Logic</h3>
+<p><strong>Status</strong>: <span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental v1.5.0</span><br>
+<strong>Development Phase</strong>: Inverted triangle cost reasoning implementation<br>
+<strong>Core Algorithm</strong>:</p>
+<pre><code class="language-math">\begin{equation}
+S_k = \{Node_j \in S_{k-1} | Import\_Critical\_Costs(Node_j) \leq Threshold_k\}
+\end{equation}
+</code></pre>
+<p><strong>Dependencies</strong>: Traversal Cost Function v1.2.0<br>
+<strong>Testing Status</strong>: Component integration under validation<br>
+<strong>Deployment Clearance</strong>: Development Only</p>
+<h3 id="uncertainty-handling-framework">Uncertainty Handling Framework</h3>
+<p><strong>Status</strong>: <span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental v1.6.0</span><br>
+<strong>Development Phase</strong>: Three-tier uncertainty classification system<br>
+<strong>Classification Zones</strong>: Known-Knowns, Known-Unknowns, Unknown-Unknowns<br>
+<strong>Dependencies</strong>: Triangle Convergence v1.5.0<br>
+<strong>Testing Status</strong>: Architectural specification phase<br>
+<strong>Deployment Clearance</strong>: Development Only</p>
+<h3 id="filter-flash-integration">Filter-Flash Integration</h3>
+<p><strong>Status</strong>: <span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental v1.5.1</span><br>
+<strong>Development Phase</strong>: Consciousness-aware inference triggering<br>
+<strong>Integration Protocol</strong>: Filter/Flash threshold modulation with cost functions<br>
+<strong>Dependencies</strong>: Triangle Convergence v1.5.0<br>
+<strong>Testing Status</strong>: Algorithm design validation<br>
+<strong>Deployment Clearance</strong>: Development Only</p>
+<h1 id="legacy-tier-components">Legacy Tier Components</h1>
+<p><strong>Security Notice</strong>: Legacy components are maintained in strict isolation for audit replay purposes only. They cannot interact with active inference cycles and are prohibited from live deployment.</p>
+<h2 id="archived-implementations">Archived Implementations</h2>
+<h3 id="archived-proof-concepts">Archived Proof Concepts</h3>
+<p><strong>Status</strong>: <span style="color: red"><strong>[LEGACY]</strong> Legacy v0.x.x</span><br>
+<strong>Archive Date</strong>: Pre-AEGIS validation framework<br>
+<strong>Content</strong>: Initial mathematical explorations and proof-of-concept implementations<br>
+<strong>Security Isolation</strong>: Strict sandboxing enforced<br>
+<strong>Interaction Policy</strong>: Audit replay only, no live inference integration<br>
+<strong>Access Control</strong>: Legacy tier components prohibited from production use</p>
+<h3 id="historical-implementation-archive">Historical Implementation Archive</h3>
+<p><strong>Status</strong>: <span style="color: red"><strong>[LEGACY]</strong> Legacy v0.x.x</span><br>
+<strong>Archive Date</strong>: Pre-component tier architecture<br>
+<strong>Content</strong>: Deprecated algorithms and experimental approaches<br>
+<strong>Preservation Purpose</strong>: Audit trail and compatibility reference<br>
+<strong>Security Notice</strong>: Cannot interact with Stable or Experimental components<br>
+<strong>Documentation Status</strong>: Maintained for regulatory compliance only</p>
+<h1 id="active-tier-summary">Active Tier Summary</h1>
+<h2 id="current-production-configuration">Current Production Configuration</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Component Name</strong></th>
+<th style="text-align: left;"><strong>Tier</strong></th>
+<th style="text-align: left;"><strong>Status</strong></th>
+<th style="text-align: left;"><strong>Deployment Clearance</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">AEGIS-PROOF-1.1</td>
+<td style="text-align: left;"><span style="color: green"><strong>[STABLE]</strong> Stable</span></td>
+<td style="text-align: left;">Active</td>
+<td style="text-align: left;">Clinical Deployment</td>
+</tr>
+<tr>
+<td style="text-align: left;">AEGIS-PROOF-1.2</td>
+<td style="text-align: left;"><span style="color: green"><strong>[STABLE]</strong> Stable</span></td>
+<td style="text-align: left;">Active</td>
+<td style="text-align: left;">Clinical Deployment</td>
+</tr>
+<tr>
+<td style="text-align: left;">Triangle Inference</td>
+<td style="text-align: left;"><span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental</span></td>
+<td style="text-align: left;">Testing</td>
+<td style="text-align: left;">Development Only</td>
+</tr>
+<tr>
+<td style="text-align: left;">Uncertainty Framework</td>
+<td style="text-align: left;"><span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental</span></td>
+<td style="text-align: left;">Testing</td>
+<td style="text-align: left;">Development Only</td>
+</tr>
+<tr>
+<td style="text-align: left;">Filter-Flash Logic</td>
+<td style="text-align: left;"><span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental</span></td>
+<td style="text-align: left;">Testing</td>
+<td style="text-align: left;">Development Only</td>
+</tr>
+<tr>
+<td style="text-align: left;">Legacy Proof Systems</td>
+<td style="text-align: left;"><span style="color: red"><strong>[LEGACY]</strong> Legacy</span></td>
+<td style="text-align: left;">Archived</td>
+<td style="text-align: left;">Audit Only</td>
+</tr>
+</tbody>
+</table>
+<p>OBIAI Tier Status Matrix</p>
+<h2 id="semantic-versioning-status">Semantic Versioning Status</h2>
+<ul>
+<li>
+<p><strong>Stable Release Branch</strong>: <code>v1.2.x</code> - Production ready</p>
+</li>
+<li>
+<p><strong>Experimental Development</strong>: <code>v1.5.x-1.6.x</code> - Under validation</p>
+</li>
+<li>
+<p><strong>Legacy Archive</strong>: <code>v0.x.x</code> - Maintenance mode</p>
+</li>
+</ul>
+<h1 id="cost-function-framework-integration">Cost Function Framework Integration</h1>
+<h2 id="import-driven-cost-model">Import-Driven Cost Model</h2>
+<p>The OBIAI cost framework implements the following hierarchical structure:</p>
+<pre><code class="language-math">\begin{align}
+C_{total}(Node_i \rightarrow Node_j) &amp;= Import\_Critical\_Costs(Node_j) + C_{path}(Node_i \rightarrow Node_j) \\
+Import\_Critical\_Costs(Node_j) &amp;= \lambda_1 \cdot FairnessPenalty(Node_j) \\
+&amp;\quad + \lambda_2 \cdot EntropyPenalty(Node_j) \\
+&amp;\quad + \lambda_3 \cdot ConsciousnessRisk(Node_j)
+\end{align}
+</code></pre>
+<h2 id="tier-aware-cost-computation">Tier-Aware Cost Computation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Cost Component</strong></th>
+<th style="text-align: left;"><strong>Implementation Tier</strong></th>
+<th style="text-align: left;"><strong>Validation Status</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Base Cost Function</td>
+<td style="text-align: left;"><span style="color: green"><strong>[STABLE]</strong> Stable v1.1.0</span></td>
+<td style="text-align: left;">Mathematically Verified</td>
+</tr>
+<tr>
+<td style="text-align: left;">KL Divergence Computation</td>
+<td style="text-align: left;"><span style="color: green"><strong>[STABLE]</strong> Stable v1.2.0</span></td>
+<td style="text-align: left;">Production Ready</td>
+</tr>
+<tr>
+<td style="text-align: left;">Fairness Penalty Logic</td>
+<td style="text-align: left;"><span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental v1.5.0</span></td>
+<td style="text-align: left;">Under Testing</td>
+</tr>
+<tr>
+<td style="text-align: left;">Entropy Penalty System</td>
+<td style="text-align: left;"><span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental v1.5.1</span></td>
+<td style="text-align: left;">Under Testing</td>
+</tr>
+<tr>
+<td style="text-align: left;">Consciousness Risk Assessment</td>
+<td style="text-align: left;"><span style="color: orange"><strong>[EXPERIMENTAL]</strong> Experimental v1.6.0</span></td>
+<td style="text-align: left;">Development Phase</td>
+</tr>
+</tbody>
+</table>
+<p>Cost Function Component Implementation Status</p>
+<h1 id="runtime-compatibility-matrix">Runtime Compatibility Matrix</h1>
+<h2 id="component-interaction-validation">Component Interaction Validation</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"></th>
+<th style="text-align: left;"><strong>Stable</strong></th>
+<th style="text-align: left;"><strong>Experimental</strong></th>
+<th style="text-align: left;"><strong>Legacy</strong></th>
+<th style="text-align: left;"><strong>Status</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Stable</strong></td>
+<td style="text-align: left;"><span style="color: green">✓ Allowed</span></td>
+<td style="text-align: left;"><span style="color: orange">⚠ Test Only</span></td>
+<td style="text-align: left;"><span style="color: red">✗ Prohibited</span></td>
+<td style="text-align: left;">Production</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Experimental</strong></td>
+<td style="text-align: left;"><span style="color: green">✓ Allowed</span></td>
+<td style="text-align: left;"><span style="color: green">✓ Allowed</span></td>
+<td style="text-align: left;"><span style="color: red">✗ Prohibited</span></td>
+<td style="text-align: left;">Development</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Legacy</strong></td>
+<td style="text-align: left;"><span style="color: red">✗ Prohibited</span></td>
+<td style="text-align: left;"><span style="color: red">✗ Prohibited</span></td>
+<td style="text-align: left;"><span style="color: orange">⚠ Audit Only</span></td>
+<td style="text-align: left;">Archived</td>
+</tr>
+</tbody>
+</table>
+<p>Tier Interaction Compatibility Matrix</p>
+<h2 id="non-commutative-version-constraints">Non-Commutative Version Constraints</h2>
+<p>The OBIAI architecture enforces non-commutative versioning where:</p>
+<pre><code class="language-math">\begin{equation}
+V(component_a) + V(component_b) \neq V(component_b) + V(component_a)
+\end{equation}
+</code></pre>
+<p>This constraint ensures that component loading order determines system behavior and maintains deterministic inference pathways.</p>
+<h2 id="swapper-engine-compatibility-validation">Swapper Engine Compatibility Validation</h2>
+<ol>
+<li>
+<p><strong>Tier Isolation Enforcement</strong>: Runtime validation prevents cross-tier component interaction</p>
+</li>
+<li>
+<p><strong>Semantic Version Verification</strong>: Automated compatibility checking using semiver signatures</p>
+</li>
+<li>
+<p><strong>Dependency Chain Validation</strong>: Topological sorting with chronological constraints</p>
+</li>
+<li>
+<p><strong>Safety Circuit Breaker</strong>: Automatic fallback to stable-only component stacks on tier violations</p>
+</li>
+</ol>
+<h1 id="deployment-safety-protocols">Deployment Safety Protocols</h1>
+<h2 id="clinical-deployment-readiness">Clinical Deployment Readiness</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Safety Requirement</strong></th>
+<th style="text-align: left;"><strong>Status</strong></th>
+<th style="text-align: left;"><strong>Validation Method</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Mathematical Verification</td>
+<td style="text-align: left;"><span style="color: green">Complete</span></td>
+<td style="text-align: left;">AEGIS-PROOF-1.1, 1.2 validation</td>
+</tr>
+<tr>
+<td style="text-align: left;">Bias Reduction (85% target)</td>
+<td style="text-align: left;"><span style="color: green">Verified</span></td>
+<td style="text-align: left;">Demographic parity testing</td>
+</tr>
+<tr>
+<td style="text-align: left;">Real-time Performance</td>
+<td style="text-align: left;"><span style="color: orange">Testing</span></td>
+<td style="text-align: left;">Clinical workflow integration</td>
+</tr>
+<tr>
+<td style="text-align: left;">Tier Isolation Security</td>
+<td style="text-align: left;"><span style="color: green">Implemented</span></td>
+<td style="text-align: left;">Swapper Engine validation</td>
+</tr>
+<tr>
+<td style="text-align: left;">Failure Mode Handling</td>
+<td style="text-align: left;"><span style="color: orange">Development</span></td>
+<td style="text-align: left;">Bounded abort protocols</td>
+</tr>
+<tr>
+<td style="text-align: left;">Human Override Integration</td>
+<td style="text-align: left;"><span style="color: orange">Specification</span></td>
+<td style="text-align: left;">Clinical safety requirements</td>
+</tr>
+</tbody>
+</table>
+<p>Clinical Deployment Safety Checklist</p>
+<h1 id="implementation-roadmap">Implementation Roadmap</h1>
+<h2 id="phase-progression-timeline">Phase Progression Timeline</h2>
+<ol>
+<li>
+<p><strong>Phase 1.5</strong>: Triangle convergence logic promotion to stable tier</p>
+</li>
+<li>
+<p><strong>Phase 1.6</strong>: Uncertainty handling framework validation</p>
+</li>
+<li>
+<p><strong>Phase 2.0</strong>: Clinical dataset integration and validation</p>
+</li>
+<li>
+<p><strong>Phase 2.1</strong>: Production deployment with full tier isolation</p>
+</li>
+</ol>
+<h2 id="critical-success-factors">Critical Success Factors</h2>
+<ul>
+<li>
+<p>Maintaining mathematical rigor throughout component development</p>
+</li>
+<li>
+<p>Preserving 85% bias reduction requirement across all tier transitions</p>
+</li>
+<li>
+<p>Ensuring real-time performance constraints for clinical deployment</p>
+</li>
+<li>
+<p>Implementing comprehensive audit trails for regulatory compliance</p>
+</li>
+</ul>
+<h1 id="technical-references">Technical References</h1>
+<ul>
+<li>
+<p>OBIAI Repository: <a href="https://github.com/obinexus/obiai">https://github.com/obinexus/obiai</a></p>
+</li>
+<li>
+<p>AEGIS-PROOF-1.1: Monotonicity of Cost-Knowledge Function</p>
+</li>
+<li>
+<p>AEGIS-PROOF-1.2: Traversal Cost Function Verification</p>
+</li>
+<li>
+<p>Triangle Convergence Specification: Phase 1.5 Documentation</p>
+</li>
+<li>
+<p>Uncertainty Handling Framework: Phase 1.6 Specification</p>
+</li>
+</ul>
+<h2 id="collaborative-development-team">Collaborative Development Team</h2>
+<ul>
+<li>
+<p><strong>Lead Mathematician</strong>: Nnamdi Michael Okpala</p>
+</li>
+<li>
+<p><strong>Technical Engineering</strong>: Claude (Systems Architecture)</p>
+</li>
+<li>
+<p><strong>Organization</strong>: OBINexus Computing - Aegis Framework Division</p>
+</li>
+</ul>
+<p><strong>Document Classification</strong>: Technical Implementation Specification<br>
+<strong>Security Level</strong>: Internal Development<br>
+<strong>Last Updated</strong>: June 2025<br>
+<strong>Next Review</strong>: Component promotion to Phase 1.6</p>
+  </main>
+  <footer>
+    <p>Generated artifact: <code>archive/overleaf-projects-75-items-copy-obiai-2</code></p>
+  </footer>
+</body>
+</html>

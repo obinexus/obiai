@@ -1,0 +1,248 @@
+// ============================================================
+// DIRAM (Directed Instruction RAM)
+// MODULE 3: Memory Governance — Allocation, Constraints, Zero-Trust
+// Source: Directed_Instruction_RAM.pdf (README.md, 2025-07-03)
+// OBINexus Aegis Project | License: MIT
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3.1 — CORE ALLOCATION DATA STRUCTURE
+// ------------------------------------------------------------
+
+// Every memory allocation in DIRAM is tracked via this struct.
+// This is the fundamental unit of zero-trust memory governance.
+
+DEFINE diram_allocation_t AS STRUCT:
+    base_addr       : POINTER          // Base address of allocated region
+    size            : SIZE_T           // Size in bytes
+    timestamp       : UINT64           // UNIX timestamp at allocation time
+    sha256_receipt  : CHAR[65]         // Null-terminated hex SHA-256 digest
+    heap_events     : UINT8            // Count of heap events in current epoch
+    binding_pid     : PID_T            // PID that performed the allocation
+
+// SHA-256 receipt input: base_addr || size || timestamp || binding_pid
+// Receipt ensures any cross-process or tampered access is detectable.
+
+// ------------------------------------------------------------
+// SECTION 3.2 — SINPHASÉ GOVERNANCE: HEAP EVENT CONSTRAINT
+// ------------------------------------------------------------
+
+// ε(x) = heap_events_in_epoch / max_heap_events
+// Constraint: ε(x) MUST be ≤ 0.6 at all times
+// Violations cause allocation DEFERRAL (not failure).
+
+DEFINE HEAP_GOVERNANCE_STATE AS:
+    epoch_counter   : INTEGER = 0
+    max_heap_events : INTEGER = 3       // From config: max_heap_events
+    current_epsilon : FLOAT   = 0.0    // Recomputed on each allocation
+
+PROCEDURE compute_epsilon() -> FLOAT:
+    RETURN epoch_counter / max_heap_events
+
+PROCEDURE detect_new_epoch() -> BOOLEAN:
+    // TODO: Clarify from source PDF — exact epoch boundary detection mechanism
+    // Inferred: epoch resets on command boundary in REPL or explicit trigger
+    RETURN current_command_sequence != previous_command_sequence
+
+PROCEDURE check_heap_constraint(requested_size) -> ENUM:
+    IF detect_new_epoch():
+        epoch_counter = 0
+        current_epsilon = 0.0
+
+    epoch_counter += 1
+    current_epsilon = compute_epsilon()
+
+    IF current_epsilon > 0.6:
+        LOG_ERROR(0x1001, "Heap constraint violation: ε=" + current_epsilon)
+        RETURN ALLOCATION_DEFERRED
+
+    RETURN ALLOCATION_PERMITTED
+
+// ------------------------------------------------------------
+// SECTION 3.3 — TRACED ALLOCATION PROCEDURE
+// ------------------------------------------------------------
+
+PROCEDURE diram_alloc(size, tag) -> POINTER:
+    // Step 1: Governance check
+    status = check_heap_constraint(size)
+    IF status == ALLOCATION_DEFERRED:
+        EMIT telemetry_event(code=0x1001, tag=tag, epsilon=current_epsilon)
+        RETURN NULL   // Caller must retry in next epoch
+
+    // Step 2: System memory allocation
+    region = system_malloc(size)
+    IF region == NULL:
+        LOG_ERROR(0x1002, "Memory exhausted: requested=" + size)
+        RETURN NULL
+
+    // Step 3: Guard page installation (if enabled)
+    IF global_config.guard_pages:
+        install_guard_pages(region, size)
+
+    // Step 4: Canary value injection (if enabled)
+    IF global_config.canary_values:
+        inject_canary(region, size)
+
+    // Step 5: Build allocation record
+    alloc_record = NEW diram_allocation_t
+    alloc_record.base_addr      = region
+    alloc_record.size           = size
+    alloc_record.timestamp      = current_unix_timestamp()
+    alloc_record.heap_events    = epoch_counter
+    alloc_record.binding_pid    = get_current_pid()
+
+    // Step 6: Generate cryptographic receipt
+    receipt_input = concat(region, size, alloc_record.timestamp, alloc_record.binding_pid)
+    alloc_record.sha256_receipt = SHA256(receipt_input)
+
+    // Step 7: Register in allocation table
+    allocation_table[region] = alloc_record
+
+    // Step 8: Write to trace log (asynchronous, line-buffered)
+    IF global_config.trace_enabled:
+        ASYNC_WRITE TO alloc_trace.log:
+            "[ALLOC] addr=" + region +
+            " size=" + size +
+            " tag=" + tag +
+            " SHA=" + alloc_record.sha256_receipt
+
+    RETURN region
+
+// ------------------------------------------------------------
+// SECTION 3.4 — FREE PROCEDURE WITH CRYPTOGRAPHIC VERIFICATION
+// ------------------------------------------------------------
+
+PROCEDURE diram_free(addr):
+    IF addr NOT IN allocation_table:
+        LOG_ERROR(0x1003, "Invalid free — addr not registered: " + addr)
+        RETURN
+
+    alloc_record = allocation_table[addr]
+
+    // Step 1: PID binding check (fork safety)
+    IF alloc_record.binding_pid != get_current_pid():
+        LOG_ERROR(0x1003, "PID mismatch — fork safety violation")
+        IF global_config.pid_binding == "strict":
+            ABORT  // Hard failure on strict mode
+        ELSE:
+            LOG_WARNING("Non-strict PID mismatch — proceeding with caution")
+
+    // Step 2: Canary validation
+    IF global_config.canary_values:
+        IF canary_corrupted(addr, alloc_record.size):
+            LOG_ERROR(0x1004, "Zero-trust boundary breach — canary corrupted at " + addr)
+            EMIT telemetry_event(code=0x1004, addr=addr)
+
+    // Step 3: SHA receipt re-verification
+    IF global_config.memory_audit:
+        recomputed_receipt = SHA256(concat(
+            alloc_record.base_addr,
+            alloc_record.size,
+            alloc_record.timestamp,
+            alloc_record.binding_pid
+        ))
+        IF recomputed_receipt != alloc_record.sha256_receipt:
+            LOG_ERROR(0x1005, "SHA-256 verification failure at " + addr)
+            EMIT telemetry_event(code=0x1005, addr=addr)
+            // TODO: Clarify from source PDF — halt or warn on SHA mismatch?
+
+    // Step 4: Remove guard pages
+    IF global_config.guard_pages:
+        remove_guard_pages(addr, alloc_record.size)
+
+    // Step 5: Remove from allocation table and free memory
+    REMOVE allocation_table[addr]
+    system_free(addr)
+
+    IF global_config.trace_enabled:
+        ASYNC_WRITE TO alloc_trace.log:
+            "[FREE] addr=" + addr + " size=" + alloc_record.size
+
+// ------------------------------------------------------------
+// SECTION 3.5 — ERROR INDEX CATEGORIES
+// ------------------------------------------------------------
+
+// DIRAM categorizes all governance errors for telemetry and audit.
+
+DEFINE ERROR_CODES AS:
+    0x1001 : "Heap constraint violation (ε(x) > 0.6)"
+    0x1002 : "Memory exhausted condition"
+    0x1003 : "PID mismatch (fork safety violation)"
+    0x1004 : "Zero-trust boundary breach (canary or guard page)"
+    0x1005 : "SHA-256 verification failure"
+
+PROCEDURE LOG_ERROR(code, message):
+    timestamp = current_unix_timestamp()
+    entry = "[ERROR " + hex(code) + "] " + message + " at t=" + timestamp
+    WRITE entry TO stderr
+    IF global_config.memory_audit:
+        ASYNC_WRITE entry TO alloc_trace.log
+    EMIT telemetry_event(code=code, message=message)
+
+// ------------------------------------------------------------
+// SECTION 3.6 — ZERO-TRUST BOUNDARY ENFORCEMENT
+// ------------------------------------------------------------
+
+// Zero-trust enforcement operates at three levels:
+// 1. PID binding — prevents cross-process access
+// 2. SHA-256 receipts — ensures allocation integrity
+// 3. Guard pages / canary values — detects boundary violations
+
+PROCEDURE verify_zero_trust(addr) -> BOOLEAN:
+    IF addr NOT IN allocation_table:
+        LOG_ERROR(0x1004, "Access to unregistered address: " + addr)
+        RETURN FALSE
+
+    alloc_record = allocation_table[addr]
+
+    // PID check
+    IF alloc_record.binding_pid != get_current_pid():
+        LOG_ERROR(0x1003, "Zero-trust PID mismatch")
+        RETURN FALSE
+
+    // SHA receipt check
+    expected = SHA256(concat(
+        alloc_record.base_addr,
+        alloc_record.size,
+        alloc_record.timestamp,
+        alloc_record.binding_pid
+    ))
+    IF expected != alloc_record.sha256_receipt:
+        LOG_ERROR(0x1005, "SHA-256 receipt mismatch")
+        RETURN FALSE
+
+    RETURN TRUE
+
+// ------------------------------------------------------------
+// SECTION 3.7 — MEMORY SPACE ISOLATION
+// ------------------------------------------------------------
+
+// Named memory spaces provide logical partitioning.
+// Each space has its own configurable limit and allocation table.
+
+DEFINE MEMORY_SPACE AS STRUCT:
+    name            : STRING
+    limit_bytes     : INTEGER
+    allocation_table: MAP<POINTER, diram_allocation_t>
+    used_bytes      : INTEGER
+
+PROCEDURE create_memory_space(name, limit_mb) -> MEMORY_SPACE:
+    space = NEW MEMORY_SPACE
+    space.name = name
+    space.limit_bytes = limit_mb * 1024 * 1024
+    space.used_bytes = 0
+    REGISTER space IN global_space_registry
+    RETURN space
+
+PROCEDURE alloc_in_space(space, size, tag) -> POINTER:
+    IF space.used_bytes + size > space.limit_bytes:
+        LOG_ERROR(0x1002, "Memory space '" + space.name + "' exhausted")
+        RETURN NULL
+    ptr = diram_alloc(size, tag)
+    IF ptr != NULL:
+        space.used_bytes += size
+    RETURN ptr
+
+// ============================================================
+// END MODULE 3
+// ============================================================

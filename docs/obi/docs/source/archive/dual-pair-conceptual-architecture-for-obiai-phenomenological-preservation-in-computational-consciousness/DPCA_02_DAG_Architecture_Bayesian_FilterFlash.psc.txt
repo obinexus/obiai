@@ -1,0 +1,181 @@
+// ============================================================
+// DUAL-PAIR CONCEPTUAL ARCHITECTURE FOR OBIAI
+// Phenomenological Preservation in Computational Consciousness
+// MODULE 2: DAG Architecture, Bayesian Weighting & Filter-Flash Integration
+// Source: Dual_Pair_Conceptual_Architecture_for_OBIAI.pdf
+// OBINexus Computing - Aegis Framework Division | July 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3.1 — DUAL-PAIR DAG: FORMAL DEFINITION
+// ------------------------------------------------------------
+
+// Definition 2: The conceptual DAG G = (V, E, W) where:
+//   V = set of dual-pair units Di
+//   E = set of valid transitions (Di -> Dj)
+//   W : E -> R+  assigns real-valued positive transition weights
+
+DEFINE DUAL_PAIR_DAG AS STRUCT:
+    V   : SET[DUAL_PAIR_UNIT]           // All dual-pair nodes (Equation 3)
+    E   : SET[(DUAL_PAIR_UNIT, DUAL_PAIR_UNIT)]  // Valid directed edges (Eq. 4)
+    W   : MAP[(Di, Dj), FLOAT]          // Transition weights W: E -> R+ (Eq. 5)
+
+// Edge weights incorporate contextual salience through the extended
+// semantic function (Equation 6):
+//
+// W(Di, Dj) = α · P(Dj | Di, context)
+//           + β · cultural_authenticity(Di, Dj)
+//           + γ · phenomenological_continuity(Di, Dj)
+
+DEFINE WEIGHT_PARAMS AS:
+    α   : FLOAT     // Weight on Bayesian conditional probability
+    β   : FLOAT     // Weight on cultural authenticity score
+    γ   : FLOAT     // Weight on phenomenological continuity score
+
+PROCEDURE compute_edge_weight(Di, Dj, context) -> FLOAT:
+    // Term 1: Bayesian conditional probability of Dj given Di and context
+    bayesian_term   = bayesian_update(Dj, given=Di, context=context)
+
+    // Term 2: Cultural authenticity of the transition
+    cultural_term   = cultural_authenticity(Di, Dj)
+
+    // Term 3: Phenomenological continuity — experiential coherence preserved
+    phenom_term     = phenomenological_continuity(Di, Dj)
+
+    weight = α * bayesian_term + β * cultural_term + γ * phenom_term
+
+    ASSERT weight > 0       // W must map to R+ (positive reals)
+    RETURN weight
+
+// ------------------------------------------------------------
+// SECTION 3.2 — TRANSITION VALIDITY CONDITIONS
+// ------------------------------------------------------------
+
+// Transitions are only permitted when ALL three constraints are satisfied.
+// These constraints preserve experiential coherence.
+
+DEFINE TRANSITION_THRESHOLDS AS:
+    λ_emotional : FLOAT     // Maximum permitted emotional load
+    λ_cultural  : FLOAT     // Maximum permitted cultural disruption
+    θ_prior     : FLOAT     // Minimum confidence in source node Di
+
+PROCEDURE transition_valid(Di, Dj) -> BOOLEAN:
+    // Constraint 1 (Equation 7): Emotional load must be below threshold
+    IF emotional_load(Di, Dj) >= λ_emotional:
+        RETURN FALSE    // Transition would cause experiential rupture
+
+    // Constraint 2 (Equation 8): Cultural disruption must be below threshold
+    IF cultural_disruption(Di, Dj) >= λ_cultural:
+        RETURN FALSE    // Transition violates cultural coherence
+
+    // Constraint 3 (Equation 9): Prior confidence in Di must be sufficient
+    IF confidence_threshold(Di) <= θ_prior:
+        RETURN FALSE    // Source node too uncertain to proceed from
+
+    RETURN TRUE
+
+PROCEDURE build_dag(all_dual_pairs, context) -> DUAL_PAIR_DAG:
+    dag = NEW DUAL_PAIR_DAG
+    dag.V = all_dual_pairs
+
+    FOR EACH Di IN all_dual_pairs:
+        FOR EACH Dj IN all_dual_pairs:
+            IF Di != Dj AND transition_valid(Di, Dj):
+                edge = (Di, Dj)
+                dag.E.add(edge)
+                dag.W[edge] = compute_edge_weight(Di, Dj, context)
+
+    RETURN dag
+
+// ------------------------------------------------------------
+// SECTION 5.1 — BAYESIAN ACTIVATION MAPPING (Filter-Flash Integration)
+// ------------------------------------------------------------
+
+// The dual-pair architecture integrates with OBIAI's Filter-Flash system.
+// Algorithm 1: Dual-Pair Filter-Flash Activation
+
+PROCEDURE dual_pair_filter_flash_activation(Dcurrent, S, context) -> DUAL_PAIR_UNIT:
+    // REQUIRE: Current state Dcurrent, sensory input S, context C
+    // ENSURE:  Next state Dnext with confidence metrics
+
+    // Step 1: Get all adjacent dual-pair candidates from DAG
+    candidates = get_adjacent_pairs(Dcurrent)
+
+    // Step 2: Process each candidate through Filter-Flash pipeline
+    FOR EACH Dj IN candidates:
+        // Bayesian update — compute activation probability
+        P_activation = bayesian_update(Dj, given=Dcurrent, S=S, context=context)
+
+        // Compute transition cost from DAG weight
+        transition_cost = W(Dcurrent, Dj)
+
+        // FILTER: If activation probability exceeds filter threshold
+        IF P_activation > θ_filter:
+            apply_filter(Dj)        // Pre-process and validate Dj
+
+        // FLASH: If salience gradient exceeds flash threshold
+        IF salience_gradient(Dcurrent, Dj) > θ_flash:
+            trigger_flash_event(Dcurrent, Dj)
+            // Flash event = validated cognitive resonance event
+            // (see Dream System Module 2 — Flash confidence thresholds)
+
+    // Step 3: Return optimal transition from all processed candidates
+    RETURN optimal_transition(candidates)
+
+DEFINE FILTER_FLASH_THRESHOLDS AS:
+    θ_filter    : FLOAT     // Minimum activation probability to pass filter
+    θ_flash     : FLOAT     // Minimum salience gradient to trigger flash event
+
+// NOTE: This activation procedure is called cyclically as OBIAI
+// navigates through experiential states in the dual-pair DAG.
+
+// ------------------------------------------------------------
+// SECTION 5.2 — HARDWARE IMPLEMENTATION PATHWAY
+// ------------------------------------------------------------
+
+// The dual-pair architecture is designed for physical realizability.
+// Each design element maps to a hardware analog.
+
+DEFINE HARDWARE_MAPPING AS:
+
+    mechanical_electrical_analogy:
+        // Each dual-pair functions as a BISTABLE MECHANICAL RESONATOR
+        // with electrical activation thresholds.
+        // State transitions = phase changes in coupled oscillator systems.
+        dual_pair_unit  -> bistable_resonator
+        state_transition -> phase_change(coupled_oscillators)
+
+    robotic_component_mapping:
+
+        SENSOR_ARRAYS:
+            // Encode PRIMARY verb-noun pairs through environmental interaction
+            function    = encode_primary_pair_from_environment()
+            maps_to     = P1 in each DUAL_PAIR_UNIT
+
+        ACTUATOR_SYSTEMS:
+            // Manifest SECONDARY (resonant) pairs through behavioral expression
+            function    = express_resonant_pair_as_action()
+            maps_to     = P2 in each DUAL_PAIR_UNIT
+
+        NEURAL_PROCESSING_UNITS:
+            // Maintain Bayesian weight updates in real-time
+            function    = update_W(Di, Dj) continuously
+            update_rate = real_time
+
+        CULTURAL_VALIDATION_MODULES:
+            // Ensure cultural authenticity during state transitions
+            function    = validate_cultural_authenticity(Di, Dj)
+            enforced    = at_every_transition
+
+    diram_backed_memory:
+        // Dimensional Inference RAM (DIRAM) maintains phenomenological traces
+        // across processing cycles — consciousness continuity rather than
+        // discrete computational snapshots.
+        // NOTE: DIRAM cross-reference = OBINexus DIRAM module (see DIRAM_03)
+        function        = persist_epistemic_trace(dual_pair_path, weights, reasoning)
+        scope           = across_all_processing_cycles
+        guarantee       = consciousness_continuity     // Not snapshot-based
+
+// ============================================================
+// END MODULE 2
+// ============================================================

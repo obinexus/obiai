@@ -1,0 +1,214 @@
+// ============================================================
+// FILE: actor_class_M2_navigation.psc.txt
+// MODULE 2 OF 5 — Categorical Navigation of Continuous Space
+// SOURCE: "The Actor Class: A Categorical Foundation for
+//          Epistemic AI Systems with Continuous Space Navigation
+//          and Dimensional Innovation"
+// AUTHOR: OBINexus Computing
+// CLASSIFICATION: Foundational Architecture / Patent Filing
+// DATE: 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3: CONTINUOUS SPACE NAVIGATION
+// ------------------------------------------------------------
+
+// DEFINITION 2 (Continuous Space Navigation):
+//
+//   An actor α navigates continuous space via functor COMPOSITION:
+//
+//       S ──C──→ S
+//       ↓π         ↓π
+//     S/∼ ──C──→ S/∼
+//
+//   where π is the quotient map under epistemic equivalence ∼.
+//
+//   Interpretation:
+//     - S is the full semantic manifold (raw, infinite-dimensional)
+//     - S/∼ is the quotient space: states epistemically equivalent
+//       under ∼ are collapsed into the same equivalence class
+//     - The diagram COMMUTES: navigating in S then projecting
+//       is equivalent to projecting then navigating in S/∼
+
+// ── EPISTEMIC EQUIVALENCE RELATION ───────────────────────────
+
+DEFINE EpistemicEquivalence (~) AS RELATION ON S:
+    // Two states s₁, s₂ ∈ S are epistemically equivalent (s₁ ∼ s₂)
+    // when they are indistinguishable under the actor's epistemic metric.
+
+    PROCEDURE IsEquivalent(s1: State, s2: State, epsilon: REAL) -> BOOL:
+        dist := EpistemicMetric(s1, s2)
+        RETURN dist < (1.0 - epsilon)   // within epistemic confidence radius
+    END PROCEDURE
+
+    // Equivalence relation must satisfy:
+    //   Reflexivity:  s ∼ s
+    //   Symmetry:     s₁ ∼ s₂ → s₂ ∼ s₁
+    //   Transitivity: s₁ ∼ s₂ ∧ s₂ ∼ s₃ → s₁ ∼ s₃
+
+    ASSERT IsReflexive(~)
+    ASSERT IsSymmetric(~)
+    ASSERT IsTransitive(~)
+END DEFINE
+
+
+// ── QUOTIENT SPACE CONSTRUCTION ──────────────────────────────
+
+PROCEDURE ConstructQuotientSpace(S: Manifold, ~: EpistemicEquivalence) -> QuotientSpace:
+    // S/∼  groups epistemically equivalent states into equivalence classes
+
+    equivalence_classes := {}
+    visited := SET()
+
+    FOR EACH state s IN S:
+        IF s NOT IN visited:
+            class_s := { t IN S : IsEquivalent(s, t) }
+            equivalence_classes.ADD(class_s)
+            visited.ADD_ALL(class_s)
+        END IF
+    END FOR
+
+    quotient_space := QuotientSpace(
+        classes = equivalence_classes,
+        topology = InducedTopology(S, ~)
+    )
+    RETURN quotient_space
+END PROCEDURE
+
+
+// ── QUOTIENT MAP π ───────────────────────────────────────────
+
+PROCEDURE QuotientMap(s: State, S_quotient: QuotientSpace) -> EquivalenceClass:
+    // π : S → S/∼
+    // Maps each state to its equivalence class
+    FOR EACH class C IN S_quotient.classes:
+        IF s IN C:
+            RETURN C
+        END IF
+    END FOR
+    EMIT ERROR "State " + s + " not found in any equivalence class"
+    RETURN NULL
+END PROCEDURE
+
+
+// ── COMMUTING DIAGRAM VERIFICATION ───────────────────────────
+
+PROCEDURE VerifyCommutingDiagram(α: Actor, s: State,
+                                  S_quotient: QuotientSpace) -> BOOL:
+    // Verify: π(C(s)) == C̃(π(s))
+    // where C̃ is the induced functor on S/∼
+
+    // Path 1: Navigate in S, then project
+    C_of_s       := α.C.apply(s)
+    path1        := QuotientMap(C_of_s, S_quotient)
+
+    // Path 2: Project, then navigate in S/∼
+    pi_of_s      := QuotientMap(s, S_quotient)
+    C_tilde      := InducedFunctor(α.C, S_quotient)
+    path2        := C_tilde.apply(pi_of_s)
+
+    // Check commutativity
+    IF path1 != path2:
+        EMIT WARNING "Commuting diagram violated at state: " + s
+        RETURN FALSE
+    END IF
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── PROPOSITION 1: CONTINUITY PRESERVATION ───────────────────
+
+// PROPOSITION 1 (Continuity Preservation):
+//
+//   For an actor α = (S, C, Φ, Ψ, ε), the navigation functor C
+//   preserves continuity:
+//
+//     ∀U ⊆ S open, C⁻¹(U) is open
+//
+//   Proof: The epistemic metric on S induces the standard topology.
+//   Functor composition preserves limits and colimits in the category
+//   of topological spaces, ensuring C maintains continuous navigation paths.
+
+PROCEDURE VerifyContinuityPreservation(C: Functor, S: Manifold) -> BOOL:
+    // Check that C is continuous: preimage of every open set is open
+
+    FOR EACH open_set U IN S.open_sets:   // sample from topology
+        preimage := C.inverse_image(U)    // C⁻¹(U)
+        IF NOT S.is_open(preimage):
+            EMIT WARNING "Continuity violated: C⁻¹(U) not open for U=" + U
+            RETURN FALSE
+        END IF
+    END FOR
+
+    EMIT INFO "Continuity preservation confirmed for functor C"
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── EPISTEMIC METRIC ─────────────────────────────────────────
+
+PROCEDURE EpistemicMetric(s1: State, s2: State) -> REAL:
+    // Measures distance between two states in the semantic manifold S.
+    // The metric is induced by the epistemic structure of the actor.
+    //
+    // Properties (metric axioms):
+    //   Non-negativity:   d(s1, s2) >= 0
+    //   Identity:         d(s1, s1) == 0
+    //   Symmetry:         d(s1, s2) == d(s2, s1)
+    //   Triangle ineq:    d(s1, s3) <= d(s1, s2) + d(s2, s3)
+
+    // Concrete realization uses KL-divergence base component:
+    //   d_epistemic(s1, s2) := sqrt( KL(P_s1 ‖ P_s2) + KL(P_s2 ‖ P_s1) )
+    //   (Jensen-Shannon divergence — symmetric variant of KL)
+
+    kl_forward  := KLDivergence(s1.distribution, s2.distribution)
+    kl_backward := KLDivergence(s2.distribution, s1.distribution)
+    distance    := SQRT((kl_forward + kl_backward) / 2.0)
+
+    ASSERT distance >= 0
+    RETURN distance
+END PROCEDURE
+
+
+// ── NAVIGATION PATH REPRESENTATION ───────────────────────────
+
+DEFINE NavigationPath AS:
+    // A continuous path γ : [0,1] → S in the semantic manifold
+    // γ(0) = start state
+    // γ(1) = target state
+    // γ(t) for t ∈ (0,1) = intermediate states (must be continuous)
+
+    start   : State
+    target  : State
+    steps   : List[State]     // discretized approximation of γ
+
+    INVARIANT: steps[0]     == start
+    INVARIANT: steps[LAST]  == target
+END DEFINE
+
+
+PROCEDURE NavigateTo(α: Actor, current: State, target: State) -> NavigationPath:
+    // Compute a continuous navigation path from current to target
+    // using the actor's navigation functor C.
+
+    path := NEW NavigationPath(start=current, target=target)
+
+    state := current
+    WHILE state != target AND path.steps.length < MAX_NAVIGATION_STEPS:
+        next_state := α.C.apply(state)     // one functor step
+        path.steps.APPEND(next_state)
+        state := next_state
+    END WHILE
+
+    IF state != target:
+        EMIT WARNING "Navigation did not converge to target"
+    END IF
+
+    RETURN path
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: actor_class_M3_cost_functions.psc.txt
+// ============================================================

@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RIFT Formal Theory of Thread Safe Code Transpilation | OBI Documentation</title>
+  <meta name="description" content="RIFT Formal Theory of Thread Safe Code Transpilation Source folder: overleaf-projects-75-items-copy/RIFT -Formal Theory of Thread-Safe Code Transpilation Extracted Files main.tex main Introduction Concurrent programming with locks introduces complexity, deadl...">
+  <link rel="canonical" href="https://obinexus.github.io/obi/sources/overleaf-projects-75-items-copy-rift-formal-theory-of-thread-safe-code-transpilation.html">
+  <meta property="og:title" content="RIFT Formal Theory of Thread Safe Code Transpilation">
+  <meta property="og:description" content="RIFT Formal Theory of Thread Safe Code Transpilation Source folder: overleaf-projects-75-items-copy/RIFT -Formal Theory of Thread-Safe Code Transpilation Extracted Files main.tex main Introduction Concurrent programming with locks introduces complexity, deadl...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://obinexus.github.io/obi/sources/overleaf-projects-75-items-copy-rift-formal-theory-of-thread-safe-code-transpilation.html">
+  <meta property="og:site_name" content="OBI Documentation">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="RIFT Formal Theory of Thread Safe Code Transpilation">
+  <meta name="twitter:description" content="RIFT Formal Theory of Thread Safe Code Transpilation Source folder: overleaf-projects-75-items-copy/RIFT -Formal Theory of Thread-Safe Code Transpilation Extracted Files main.tex main Introduction Concurrent programming with locks introduces complexity, deadl...">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="../assets/obi.css">
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] } };
+    window.OBI_SEARCH_URL = "../search.json";
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"ScholarlyArticle","name":"RIFT Formal Theory of Thread Safe Code Transpilation","description":"RIFT Formal Theory of Thread Safe Code Transpilation Source folder: overleaf-projects-75-items-copy/RIFT -Formal Theory of Thread-Safe Code Transpilation Extracted Files main.tex main Introduction Concurrent programming with locks introduces complexity, deadl...","isPartOf":{"@type":"WebSite","name":"OBI Documentation","url":"https://obinexus.github.io/obi/"},"author":{"@type":"Person","name":"Nnamdi Michael Okpala"}}</script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="brand">
+      <a href="../index.html" aria-label="OBI Documentation home">
+        <span class="brand-mark">OBI</span>
+        <span>
+          <strong>Ontological Bayesian Intelligence</strong>
+          <small>OBINexus documentation</small>
+        </span>
+      </a>
+    </div>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" class="site-nav" aria-label="Primary navigation"><a href="../index.html" class="">Overview</a><a href="../papers.html" class="active">Papers</a><a href="../bibliography.html" class="">Bibliography</a></nav>
+  </header>
+  <div class="doc-shell">
+    <aside class="doc-sidebar">
+      <search class="search-panel">
+        <label for="site-search">Search documentation</label>
+        <input id="site-search" type="search" placeholder="Search OBI docs" autocomplete="off">
+        <div id="search-results" class="search-results" role="listbox" aria-label="Search results"></div>
+      </search>
+      <nav class="toc" aria-label="Table of contents">
+        <h2>On This Page</h2>
+        <a class="toc-level-2" href="#rift-formal-theory-of-thread-safe-code-transpilation">RIFT Formal Theory of Thread Safe Code Transpilation</a><a class="toc-level-3" href="#extracted-files">Extracted Files</a><a class="toc-level-3" href="#main">main</a><a class="toc-level-2" href="#introduction">Introduction</a><a class="toc-level-3" href="#motivation">Motivation</a><a class="toc-level-3" href="#contributions">Contributions</a><a class="toc-level-2" href="#preliminaries-token-memory-model">Preliminaries: Token-Memory Model</a><a class="toc-level-3" href="#definition-token">Definition: Token</a><a class="toc-level-3" href="#axiom-type-consistency">Axiom: Type Consistency</a><a class="toc-level-3" href="#axiom-scope-preservation">Axiom: Scope Preservation</a><a class="toc-level-2" href="#theorem-thread-safe-equivalence">Theorem: Thread-Safe Equivalence</a><a class="toc-level-3" href="#main-theorem">Main Theorem</a><a class="toc-level-3" href="#proof-sketch">Proof Sketch</a><a class="toc-level-4" href="#part-i-correctness">Part (i): Correctness</a><a class="toc-level-3" href="#data-dependency-graph">Data Dependency Graph</a><a class="toc-level-3" href="#analysis">Analysis</a><a class="toc-level-4" href="#token-memory-contracts">Token-Memory Contracts</a><a class="toc-level-4" href="#synchronization-invariant">Synchronization Invariant</a>
+      </nav>
+    </aside>
+    <main id="content" class="content" tabindex="-1">
+      <article class="doc-article">
+        <header class="article-header">
+          <p class="eyebrow">OBINexus / OBI</p>
+          <h1>RIFT Formal Theory of Thread Safe Code Transpilation</h1>
+          <p>RIFT Formal Theory of Thread Safe Code Transpilation Source folder: overleaf-projects-75-items-copy/RIFT -Formal Theory of Thread-Safe Code Transpilation Extracted Files main.tex main Introduction Concurrent programming with locks introduces complexity, deadl...</p>
+        </header>
+        <h2 id="rift-formal-theory-of-thread-safe-code-transpilation">RIFT Formal Theory of Thread Safe Code Transpilation</h2>
+<p>Source folder: <code>overleaf-projects-75-items-copy/RIFT -Formal Theory of Thread-Safe Code Transpilation</code></p>
+<h3 id="extracted-files">Extracted Files</h3>
+<ul>
+<li><code>main.tex</code></li>
+</ul>
+<h3 id="main">main</h3>
+<h2 id="introduction">Introduction</h2>
+<p>Concurrent programming with locks introduces complexity, deadlock risk, and performance bottlenecks. Traditional approaches either accept the overhead or introduce subtle correctness bugs. Rift addresses this through <em>theorem-based transpilation</em>: by formalizing what &quot;thread-safety&quot; means, we can prove that certain locks are redundant and can be removed without compromising correctness.</p>
+<h3 id="motivation">Motivation</h3>
+<p>Consider a simple thread-safe counter protected by a lock. If code inside the critical section performs operations unrelated to the counter’s integrity (e.g., printing), those operations create unnecessary lock contention. Rift’s key insight: <strong>a lock protects an invariant, not a region of code</strong>. By separating the code that maintains the invariant from code that merely observes its effects, we can minimize lock scope while preserving the invariant.</p>
+<h3 id="contributions">Contributions</h3>
+<ol>
+<li>Formalization of Token-Memory Contracts as the semantic foundation for transpilation</li>
+</ol>
+<ol>
+<li>Proof of the Thread-Safe Equivalence Theorem (Theorem &lt;a href=&quot;#thm:main&quot; data-reference-type=&quot;ref&quot; data-reference=&quot;thm:main&quot;&gt;[thm:main]&lt;/a&gt;)</li>
+</ol>
+<ol>
+<li>Axiomatization of Lock Minimality (Axioms &lt;a href=&quot;#ax:lockmin&quot; data-reference-type=&quot;ref&quot; data-reference=&quot;ax:lockmin&quot;&gt;[ax:lockmin]&lt;/a&gt;)</li>
+</ol>
+<ol>
+<li>Practical transpilation algorithm with proof certificates</li>
+</ol>
+<h2 id="preliminaries-token-memory-model">Preliminaries: Token-Memory Model</h2>
+<h3 id="definition-token">Definition: Token</h3>
+<p>A <strong>token</strong> is a triple $<code>(T, V, M)</code>$ representing a program entity:</p>
+<p>&lt;div class=&quot;definition&quot;&gt;</p>
+<p>Let $<code>T \in \mathcal{T}</code>$ denote a semantic type (e.g., $<code>\text{int}, \text{lock}, \text{thread}</code>$), $<code>V</code>$ denote a runtime value, and $<code>M</code>$ denote memory metadata. A token is: ``` math \tau = (T, V, M)</p>
+<pre><code class="language-text">where:
+
+- $`T \in \{\text{homogeneous}, \text{heterogeneous}\}`$ classifies token category
+
+- $`V`$ is the runtime instance (e.g., $`\text{counter}, \text{lock}, \text{thread\_id}`$)
+
+- $`M = (\text{size}, \text{scope}, \text{guard}, \text{access\_pattern})`$ encodes memory governance
+
+&lt;/div&gt;
+
+## Definition: Token-Memory Contract
+
+&lt;div class=&quot;definition&quot;&gt;
+
+A Token-Memory Contract for a token $`\tau = (T, V, M)`$ is a quadruple:
+``` math
+C_\tau = (T, V, M, \Pi)</code></pre>
+<p>where $<code>\Pi</code>$ is a set of <strong>protocol predicates</strong> that govern access to $<code>V</code>$. A protocol predicate $<code>\pi \in \Pi</code>$ has the form: ``` math \pi: \text{Guard} \to \text{Access} \to \text{Action}</p>
+<pre><code class="language-text">
+For example, if $`V = \text{counter}`$ and $`M.guard = \text{counter\_lock}`$, then:
+``` math
+\pi_{\text{counter}} = \text{holds\_lock}(\text{counter\_lock}) \to \text{read}(\text{counter}) \to \text{safe}</code></pre>
+<p>&lt;/div&gt;</p>
+<h3 id="axiom-type-consistency">Axiom: Type Consistency</h3>
+<p>&lt;div class=&quot;axiom&quot;&gt;</p>
+<p>&lt;span id=&quot;ax:typemem&quot; label=&quot;ax:typemem&quot;&gt;&lt;/span&gt; For all tokens $<code>\tau = (T, V, M)</code>$ in a well-formed program: ``` math T \equiv \text{type}(V) \quad \land \quad \text{Memory}(M) \equiv \text{sizeof}(T)</p>
+<pre><code class="language-text">Type information must be consistent between the token’s declared type and its memory footprint.
+
+&lt;/div&gt;
+
+## Axiom: Memory Governance
+
+&lt;div class=&quot;axiom&quot;&gt;
+
+&lt;span id=&quot;ax:memgov&quot; label=&quot;ax:memgov&quot;&gt;&lt;/span&gt; If $`M.guard = G`$ (a synchronization primitive), then all accesses to $`V`$ must be within a protected region:
+``` math
+\forall \text{ access } a \text{ to } V: \quad \text{holds}(G) \text{ at } a</code></pre>
+<p>&lt;/div&gt;</p>
+<h3 id="axiom-scope-preservation">Axiom: Scope Preservation</h3>
+<p>&lt;div class=&quot;axiom&quot;&gt;</p>
+<p>&lt;span id=&quot;ax:scope&quot; label=&quot;ax:scope&quot;&gt;&lt;/span&gt; The scope of a token (global, local, thread-local) must be preserved across transpilation: ``` math \text{scope}(V_{\text{source}}) = \text{scope}(V_{\text{target}})</p>
+<pre><code class="language-text">
+&lt;/div&gt;
+
+# Semantics: Synchronization Invariants
+
+## Synchronization Invariant
+
+&lt;div class=&quot;definition&quot;&gt;
+
+A synchronization invariant $`I`$ is a predicate over program state that must be maintained by all thread interleavings. Formally:
+``` math
+I: \text{State} \to \mathbb{B}</code></pre>
+<p>where $<code>\mathbb{B} = \{\text{true}, \text{false}\}</code>$.</p>
+<p>A program is <em>safe</em> with respect to $<code>I</code>$ if: ``` math \forall \text{ execution } e: \quad I(\text{state}(e)) \text{ is always true}</p>
+<pre><code class="language-text">
+&lt;/div&gt;
+
+## Example: Counter Invariant
+
+For the counter example, the synchronization invariant is:
+``` math
+I_{\text{counter}} = \text{counter} \geq 0 \land \text{counter} \leq n_{\text{threads}} \times n_{\text{increments}}</code></pre>
+<p>This invariant depends <strong>only</strong> on accesses to the <code>counter</code> variable, not on print statements.</p>
+<h2 id="theorem-thread-safe-equivalence">Theorem: Thread-Safe Equivalence</h2>
+<h3 id="main-theorem">Main Theorem</h3>
+<p>&lt;div class=&quot;theorem&quot;&gt;</p>
+<p>&lt;span id=&quot;thm:main&quot; label=&quot;thm:main&quot;&gt;&lt;/span&gt; Let $<code>P</code>$ be a thread-safe program with lock-protected critical sections, and let $<code>P&#39;</code>$ be the program obtained by applying Rift’s lock minimality transformations (defined below). Then:</p>
+<ol>
+<li><strong>Correctness</strong>: $<code>\forall</code>$ executions $<code>e</code>$ of $<code>P</code>$ and $<code>e&#39;</code>$ of $<code>P&#39;</code>$:</li>
+<p>``<code> math \text{result}(e) = \text{result}(e&#39;) </code>``</p>
+</ol>
+<ol>
+<li><strong>Invariant Preservation</strong>: For all synchronization invariants $<code>I</code>$ that $<code>P</code>$ satisfies:</li>
+<p>``<code> math P \models I \implies P&#39; \models I </code>``</p>
+</ol>
+<ol>
+<li><strong>Lock Minimality</strong>: The critical sections in $<code>P&#39;</code>$ are minimal:</li>
+<p>``<code> math \text{lock\_scope}(P&#39;) \leq \text{lock\_scope}(P) </code>``</p>
+</ol>
+<p>&lt;/div&gt;</p>
+<h3 id="proof-sketch">Proof Sketch</h3>
+<h4 id="part-i-correctness">Part (i): Correctness</h4>
+<p>Let $<code>P</code>$ be partitioned into regions: ``` math P = S_{\text{setup}} + \bigcup_i (C_i + N_i) + S_{\text{teardown}}</p>
+<pre><code class="language-text">where:
+
+- $`S_{\text{setup}}, S_{\text{teardown}}`$ are initialization/finalization
+
+- $`C_i`$ is the $`i`$-th critical section (lock-protected)
+
+- $`N_i`$ is code following $`C_i`$ but outside the lock
+
+Rift’s transformation identifies code within $`C_i`$ that is *not part of the synchronization contract* and moves it after $`C_i`$:
+``` math
+C_i = D_i \cup S_i \quad \Rightarrow \quad C_i&#39; = D_i, \quad N_i&#39; = S_i + N_i</code></pre>
+<p>where:</p>
+<ul>
+<li>$<code>D_i</code>$ is <em>dependent</em> on the lock (maintains the invariant)</li>
+</ul>
+<ul>
+<li>$<code>S_i</code>$ is <em>side-effect</em> code (does not affect the invariant)</li>
+</ul>
+<p>Since $<code>S_i</code>$ does not modify variables that $<code>D_i</code>$ reads, and does not read variables that $<code>D_i</code>$ modifies in a way that affects synchronization, the result is identical: ``` math \text{result}(P) = \text{result}(D_i + \text{rest}) = \text{result}(D_i + S_i + \text{rest})</p>
+<pre><code class="language-text">
+### Part (ii): Invariant Preservation
+
+Let $`I`$ be a synchronization invariant. The key observation: $`I`$ is maintained by the *critical section accesses*, not by the entire critical section region.
+
+Formally:
+``` math
+I = f(\text{protected\_vars})</code></pre>
+<p>where $<code>\text{protected\_vars}</code>$ is the set of variables accessed within the critical section.</p>
+<p>If Rift moves code $<code>S</code>$ outside the critical section, and $<code>S</code>$ does not modify $<code>\text{protected\_vars}</code>$ in a way that breaks $<code>I</code>$, then: ``` math P \models I \implies P&#39; \models I</p>
+<pre><code class="language-text">
+This is verified by static analysis (data dependency graph).
+
+### Part (iii): Lock Minimality
+
+The lock scope is measured as the number of instructions executed within a critical section. By moving non-critical code outside, we reduce this count.
+
+## Corollary: Data Race Freedom
+
+&lt;div class=&quot;corollary&quot;&gt;
+
+&lt;span id=&quot;cor:drf&quot; label=&quot;cor:drf&quot;&gt;&lt;/span&gt; If $`P`$ is data-race-free (all shared variables are protected by locks), then $`P&#39;`$ is also data-race-free.
+
+&lt;/div&gt;
+
+&lt;div class=&quot;proof&quot;&gt;
+
+*Proof.* Rift does not introduce new accesses to shared variables; it only reorders code. Since all accesses to shared variables remain protected by their original locks, no new data races are created. ◻
+
+&lt;/div&gt;
+
+# Lock Minimality Axiom
+
+&lt;div class=&quot;axiom&quot;&gt;
+
+&lt;span id=&quot;ax:lockmin&quot; label=&quot;ax:lockmin&quot;&gt;&lt;/span&gt; A critical section can be decomposed into:
+``` math
+C = D \cup S</code></pre>
+<p>where:</p>
+<ul>
+<li>$<code>D</code>$ (dependent) = code that maintains a synchronization invariant</li>
+</ul>
+<ul>
+<li>$<code>S</code>$ (side-effect) = code that does not affect the invariant</li>
+</ul>
+<p>Side-effect code can be moved outside the critical section if no data dependencies are violated.</p>
+<p>&lt;/div&gt;</p>
+<h3 id="data-dependency-graph">Data Dependency Graph</h3>
+<p>To formalize when code can be moved, we use a data dependency graph:</p>
+<p>&lt;div class=&quot;definition&quot;&gt;</p>
+<p>Let $<code>\text{vars}(e)</code>$ denote the set of variables accessed by expression $<code>e</code>$. Code statements $<code>s_1</code>$ and $<code>s_2</code>$ have a dependency if: ``` math \text{writes}(s_1) \cap \text{reads}(s_2) \neq \emptyset \quad \lor \quad \text{reads}(s_1) \cap \text{writes}(s_2) \neq \emptyset</p>
+<pre><code class="language-text">
+&lt;/div&gt;
+
+&lt;div class=&quot;theorem&quot;&gt;
+
+&lt;span id=&quot;thm:movable&quot; label=&quot;thm:movable&quot;&gt;&lt;/span&gt; A statement $`s`$ can be moved outside a critical section $`C`$ if:
+
+1.  $`s`$ has no data dependencies with statements in $`D`$ (the lock-dependent part)
+
+2.  $`s`$ reads no variable that is modified by other threads outside the critical section
+
+&lt;/div&gt;
+
+# Transpilation Algorithm
+
+## Algorithm: Rift Transpiler
+
+&lt;div class=&quot;algorithm&quot;&gt;
+
+&lt;div class=&quot;algorithmic&quot;&gt;
+
+$`\text{tokens} \gets \text{Tokenize}(P)`$ $`\text{VerifyContracts}(\text{tokens})`$ $`\text{patterns} \gets \text{PatternMatch}(\text{tokens})`$ $`C_{\text{all}} \gets \text{ExtractCriticalSections}(\text{patterns})`$
+
+$`D, S \gets \text{Partition}(C)`$ $`G \gets \text{BuildDependencyGraph}(D \cup S)`$ $`S_{\text{movable}} \gets \text{FilterMovable}(S, G, D)`$ $`P \gets \text{Reorder}(P, D, S_{\text{movable}})`$
+
+$`P&#39; \gets \text{CodeGen}(P, T_{\text{target}})`$ $`\text{proof} \gets \text{GenerateProofCertificate}(P, P&#39;, \text{tokens})`$ $`(P&#39;, \text{proof})`$
+
+&lt;/div&gt;
+
+&lt;/div&gt;
+
+# Case Study: Counter Example
+
+## Source Code
+
+``` python
+counter = 0
+counter_lock = threading.Lock()
+
+def increment_counter(thread_id, increments):
+    global counter
+    for _ in range(increments):
+        time.sleep(random.uniform(0.01, 0.05))
+        with counter_lock:
+            temp = counter
+            temp += 1
+            counter = temp
+            print(f&quot;Thread-{thread_id}: {counter}&quot;)</code></pre>
+<h3 id="analysis">Analysis</h3>
+<h4 id="token-memory-contracts">Token-Memory Contracts</h4>
+<p>| Token        | Type | Memory    | Guard        | |:-------------|:-----|:----------|:-------------| | counter      | int  | 4/8 bytes | counter_lock | | counter_lock | lock | OS mutex  | N/A          | | thread_id    | int  | TLS       | N/A          |</p>
+<p>Tokens in Counter Example</p>
+<h4 id="synchronization-invariant">Synchronization Invariant</h4>
+<p>``` math I = \text{counter} \in [0, 50]</p>
+<pre><code>(5 threads × 10 increments = 50 total increments)
+
+### Partition
+
+- $`D`$ (dependent): `temp = counter; temp += 1; counter = temp`
+
+- $`S`$ (side-effect): `print(...)`
+
+### Movability Check
+
+- `print()` reads `thread_id` (thread-local, no contention)
+
+- `print()` reads `counter` (but we capture it in `local_value` inside the lock)
+
+- `print()` does not write to any shared variable
+
+- Therefore: `print()` is movable ✓
+
+## Transformed Code (C)
+
+    [language=C, caption=Optimized Counter (C, Rift output)]
+    pthread_mutex_lock(&amp;counter_lock);
+    {
+        temp = counter;
+        temp += 1;
+        counter = temp;
+        local_value = counter;
+    }
+    pthread_mutex_unlock(&amp;counter_lock);
+
+    // MOVED OUTSIDE LOCK (Rift optimization)
+    printf(&quot;Thread-%d: %d\n&quot;, thread_id, local_value);
+
+## Correctness Verification
+
+By Theorem &lt;a href=&quot;#thm:main&quot; data-reference-type=&quot;ref&quot; data-reference=&quot;thm:main&quot;&gt;[thm:main]&lt;/a&gt;:
+
+- **Correctness**: Result is identical (both increment counter to 50)
+
+- **Invariant Preservation**: $`I`$ still holds (counter never exceeds 50)
+
+- **Lock Minimality**: Critical section reduced from 4 to 3 statements
+
+# Integration with OBINexus Framework
+
+## Connection to NSIGII
+
+Rift’s Token-Memory Contracts integrate with NSIGII’s dual-FFI network:
+
+- Tokens correspond to NSIGII packets
+
+- Memory governance aligns with NSIGII’s lattice-based corruption detection
+
+- Proof certificates are compatible with the Epsilon Corruption Lattice
+
+## Connection to libpolycall
+
+The transpilation proof certificates integrate with libpolycall’s telemetry:
+
+- Each transpilation generates a proof artifact (auditable)
+
+- Proof hashes feed into the SecureAuditNode
+
+- Compliance can be verified across language boundaries (Python, C, Go, Lua)
+
+# Conclusion
+
+Rift provides a formal, theorem-based approach to transpiling thread-safe code. By formalizing Token-Memory Contracts and proving the Thread-Safe Equivalence Theorem, we enable automated, provably-correct lock minimization. This framework is foundational to OBINexus’ commitment to dignity and consent in system design: resources are governed transparently, locks protect invariants rather than code regions, and correctness is proven, not assumed.
+
+# Acknowledgments
+
+This work is part of the OBINexus Computing constitutional technology framework. Special thanks to the Igbo philosophical tradition (Uche/Eze/Obi) which inspired the tripartite approach to system governance.
+
+&lt;div class=&quot;thebibliography&quot;&gt;
+
+99
+
+Owicki, S., &amp; Gries, D. (1976). An axiomatic proof technique for parallel programs. *Acta Informatica*, 6(4), 319–340.
+
+Lamport, L. (1977). Proving the correctness of multiprocess programs. *IEEE Transactions on Software Engineering*, (2), 125–143.
+
+Dijkstra, E. W. (1968). Cooperating sequential processes. *Programming Languages*, 43–112.
+
+Herlihy, M., Luchangco, V., Moir, M., &amp; William N. Scherer III. (2012). *The Art of Multiprocessor Programming, Revised Reprint*. Elsevier.
+
+&lt;/div&gt;
+</code></pre>
+      </article>
+    </main>
+  </div>
+  <footer class="site-footer">
+    <p>OBI is an ontological and Bayesian reasoning infrastructure for uncertainty-aware robotic and humanitarian systems.</p>
+    <p>Generated as static HTML for local serving, NW.js desktop viewing, and GitHub Pages publishing.</p>
+  </footer>
+  <script src="../assets/obi.js" defer></script>
+</body>
+</html>

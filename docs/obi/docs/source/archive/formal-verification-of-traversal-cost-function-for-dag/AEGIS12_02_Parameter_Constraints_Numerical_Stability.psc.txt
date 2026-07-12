@@ -1,0 +1,218 @@
+// ============================================================
+// AEGIS-PROOF-1.2: Formal Verification of Traversal Cost Function
+// for Epistemological DAG Inference
+// MODULE 2: Parameter Constraints, Sensitivity Analysis & Numerical Stability
+// Source: Formal_Verification_of_Traversal_Cost_Function_for_DAG.pdf
+// OBINexus Computing - Aegis Framework Division | May 27, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4 — PARAMETER CONSTRAINTS AND OPTIMIZATION
+// ------------------------------------------------------------
+
+// SECTION 4.1 — WEIGHTING PARAMETER ANALYSIS
+
+// Lemma 1 (Parameter Boundedness):
+// For stable traversal cost computation, α and β must satisfy:
+//   α + β = 1          (normalization constraint, Equation 10)
+//   0 ≤ α, β ≤ 1       (boundedness constraint, Equation 11)
+//   α, β > ε           (non-degeneracy, Equation 12, where ε > 0)
+
+DEFINE PARAMETER_CONSTRAINTS AS:
+    normalization   : α + β == 1.0          // Equation 10
+    boundedness     : 0.0 <= α <= 1.0       // Equation 11
+                    AND 0.0 <= β <= 1.0
+    non_degeneracy  : α > ε AND β > ε       // Equation 12 — neither weight is zero
+    // Non-degeneracy ensures BOTH components (KL and ΔH) contribute to cost.
+    // A degenerate case (α=0 or β=0) would ignore one cost dimension entirely.
+
+DEFINE ε_min : FLOAT = 1e-6    // Practical minimum for non-degeneracy
+
+PROCEDURE validate_parameters(α, β) -> BOOLEAN:
+    // Check all three parameter constraints (Lemma 1)
+
+    // Constraint 1: Normalization
+    IF abs((α + β) - 1.0) > 1e-10:
+        LOG "Parameter violation: α + β = " + (α + β) + " ≠ 1"
+        RETURN FALSE
+
+    // Constraint 2: Boundedness
+    IF α < 0.0 OR α > 1.0 OR β < 0.0 OR β > 1.0:
+        LOG "Parameter violation: α or β outside [0, 1]"
+        RETURN FALSE
+
+    // Constraint 3: Non-degeneracy
+    IF α <= ε_min OR β <= ε_min:
+        LOG "Parameter violation: α or β ≤ ε (degenerate case)"
+        RETURN FALSE
+
+    RETURN TRUE
+
+// Parameter interpretation:
+DEFINE PARAMETER_SEMANTIC AS:
+    α_high_β_low:
+        // α ≈ 1, β ≈ 0
+        // Cost dominated by KL divergence — probabilistic distribution mismatch
+        // Use when: semantic interpretations are the primary concern
+        profile = "Probabilistic-dominant"
+
+    α_low_β_high:
+        // α ≈ 0, β ≈ 1
+        // Cost dominated by entropy change — epistemic uncertainty shift
+        // Use when: knowledge state transition quality is primary concern
+        profile = "Epistemic-dominant"
+
+    α_balanced_β:
+        // α ≈ β ≈ 0.5
+        // Equal weight on distributional and epistemic components
+        // Use when: both dimensions equally important
+        profile = "Balanced"
+
+// ------------------------------------------------------------
+// SECTION 4.2 — SENSITIVITY ANALYSIS (Equations 13-14)
+// ------------------------------------------------------------
+
+// Partial derivatives confirm monotonic cost increase with parameters:
+//
+// ∂C/∂α = KL(Pi ‖ Pj) ≥ 0    (Equation 13)
+// ∂C/∂β = ΔH(Si,j) ≥ 0       (Equation 14)
+//
+// Interpretation: Increasing either weighting parameter NEVER decreases cost.
+// This ensures PREDICTABLE behavior under parameter adjustments.
+
+PROCEDURE compute_sensitivity(Node_i, Node_j, α, β) -> SENSITIVITY_REPORT:
+    KL_term     = compute_KL_divergence_stable(Node_i.P_i, Node_j.P_i)
+    delta_H     = compute_entropy_change(Node_i.S_i, Node_j.S_i)
+
+    // Partial derivatives (Equations 13-14)
+    dC_dα = KL_term     // ≥ 0 by Gibbs' inequality
+    dC_dβ = delta_H     // ≥ 0 for valid disambiguation transitions
+
+    ASSERT dC_dα >= 0   // Monotonicity in α verified
+    ASSERT dC_dβ >= 0   // Monotonicity in β verified
+
+    RETURN {
+        dC_dα:  dC_dα,
+        dC_dβ:  dC_dβ,
+        α_sensitivity: "Monotonically increasing — predictable",
+        β_sensitivity: "Monotonically increasing — predictable"
+    }
+
+// ------------------------------------------------------------
+// SECTION 5 — NUMERICAL STABILITY AND EDGE CASE ANALYSIS
+// ------------------------------------------------------------
+
+// SECTION 5.1 — HANDLING SINGULAR PROBABILITY DISTRIBUTIONS (Equation 15)
+//
+// Problem: When pj,k → 0, the term pi,k · log2(pi,k / pj,k) → +∞
+// This creates numerical instability (division by zero / infinite cost).
+//
+// Solution: KL_stable uses ε_min floor on denominator:
+// KL_stable(Pi ‖ Pj) = Σ_{k=1}^{n} pi,k · log2(pi,k / max(pj,k, ε_min))
+// where ε_min = 10^{-12}
+
+DEFINE ε_min_kl : FLOAT = 1e-12    // Prevents division by zero in KL computation
+
+PROCEDURE compute_KL_divergence_stable(P_i, P_j) -> FLOAT:
+    // Equation 15: KL_stable with numerical floor
+    kl_stable = 0.0
+
+    FOR EACH k IN {1..n}:
+        p_ik = P_i[k]
+        p_jk = P_j[k]
+
+        // Apply stability floor to denominator
+        p_jk_safe = max(p_jk, ε_min_kl)
+
+        IF p_ik > 0:
+            kl_stable += p_ik * log2(p_ik / p_jk_safe)
+        // When p_ik == 0: term = 0 (by convention 0·log(0) = 0) — skip
+
+    RETURN kl_stable
+    // Note: ε_min = 10^{-12} maintains mathematical accuracy while preventing inf
+
+// Stability guarantee:
+//   For any valid probability distributions P_i, P_j where Σ P_i = Σ P_j = 1:
+//   KL_stable(Pi ‖ Pj) is FINITE and COMPUTABLE.
+//   The floor ε_min introduces at most ε_min-order error in the KL estimate.
+
+// ------------------------------------------------------------
+// SECTION 5.2 — COMPUTATIONAL COMPLEXITY ANALYSIS
+// ------------------------------------------------------------
+
+DEFINE COMPLEXITY_ANALYSIS AS:
+    time_complexity:
+        KL_divergence       = O(n)      // Linear scan over n semantic interpretations
+        entropy_computation = O(n)      // Linear scan over distribution
+        total_traversal_cost= O(n)      // Dominated by KL computation
+        // n = number of semantic interpretations per node
+
+    space_complexity:
+        per_node_cost       = O(1)      // Single float result per node pair
+        distribution_storage= O(n)      // Pi and Pj distributions must be in memory
+
+    numerical_precision:
+        standard_floating_point = STABLE    // Standard IEEE 754 double precision
+        KL_with_floor           = STABLE    // ε_min = 10^{-12} prevents instability
+        log2_computation        = STABLE    // Well-defined for positive arguments
+
+// ------------------------------------------------------------
+// SECTION 5.3 — VALIDATION TEST CASES
+// ------------------------------------------------------------
+
+// Test Case 1: Identity Transition
+PROCEDURE test_identity_transition(α, β) -> TEST_RESULT:
+    // Input: Nodei = Nodej (identical belief states)
+    // Expected: C(Nodei → Nodej) = 0
+    Node_i = create_test_node(P=[0.5, 0.3, 0.2], S=test_context_1)
+    Node_j = COPY(Node_i)   // Identical node
+
+    cost = compute_traversal_cost(Node_i, Node_j, α, β)
+
+    ASSERT cost == 0.0
+    RETURN TEST_RESULT(passed=TRUE, expected=0.0, actual=cost)
+
+// Test Case 2: Maximum Divergence
+PROCEDURE test_maximum_divergence(α, β, n) -> TEST_RESULT:
+    // Input: Orthogonal probability distributions
+    // Pi is concentrated on interpretation 1: [1.0, 0, 0, ..., 0]
+    // Pj is concentrated on interpretation 2: [0, 1.0, 0, ..., 0]
+    // Expected: C = α·log2(n) + β·ΔH_max
+    P_i = [1.0] + [0.0] * (n-1)
+    P_j = [0.0] + [1.0] + [0.0] * (n-2)
+
+    Node_i = create_test_node(P=P_i, S=high_entropy_context)
+    Node_j = create_test_node(P=P_j, S=low_entropy_context)
+
+    expected_KL     = log2(n)               // Maximum KL for n-class distributions
+    expected_delta_H = compute_entropy_change(Node_i.S_i, Node_j.S_i)
+    expected_cost   = α * expected_KL + β * expected_delta_H
+
+    actual_cost = compute_traversal_cost(Node_i, Node_j, α, β)
+    ASSERT abs(actual_cost - expected_cost) < NUMERICAL_TOLERANCE
+    RETURN TEST_RESULT(passed=TRUE, expected=expected_cost, actual=actual_cost)
+
+// Test Case 3: Parameter Sensitivity
+PROCEDURE test_parameter_sensitivity(Node_i, Node_j) -> TEST_RESULT:
+    // Input: Systematic variation of α, β
+    // Expected: Monotonic cost behavior within stability bounds
+    results = []
+    FOR α IN linspace(ε_min, 1.0 - ε_min, steps=100):
+        β = 1.0 - α
+        cost = compute_traversal_cost(Node_i, Node_j, α, β)
+        results.append((α, β, cost))
+
+    // Verify monotonic behavior
+    // Cost should vary monotonically with α (since dC/dα = KL ≥ 0)
+    KL_term = compute_KL_divergence_stable(Node_i.P_i, Node_j.P_i)
+    FOR i IN {1..len(results)-1}:
+        Δα = results[i].α - results[i-1].α
+        ΔC = results[i].cost - results[i-1].cost
+        IF KL_term > 0:
+            ASSERT ΔC * Δα > 0  // Same sign — monotonic in α direction
+
+    RETURN TEST_RESULT(passed=TRUE, description="Parameter sensitivity verified monotonic")
+
+// ============================================================
+// END MODULE 2
+// ============================================================

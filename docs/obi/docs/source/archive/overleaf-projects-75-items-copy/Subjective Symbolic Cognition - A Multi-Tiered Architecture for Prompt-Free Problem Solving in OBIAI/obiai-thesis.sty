@@ -1,0 +1,59 @@
+% obiai-thesis.sty - OBINexus Thesis Package
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{obiai-thesis}[2025/06/17 OBINexus Cognitive Thesis Package]
+
+% Page and Font Settings
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{geometry}
+\geometry{margin=1in}
+\RequirePackage{lmodern}
+\RequirePackage{microtype}
+
+% Math and Symbols
+\RequirePackage{amsmath, amssymb, amsthm}
+\RequirePackage{mathtools}
+
+% Structure and Titles
+\RequirePackage{titlesec}
+\titleformat{\chapter}[hang]{\Huge\bfseries}{\thechapter.}{1em}{}
+\titleformat{\section}[hang]{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}[hang]{\normalsize\bfseries}{\thesubsection}{1em}{}
+
+% Hyperlinks
+\RequirePackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=gray,
+  pdftitle={OBIAI Thesis},
+  pdfauthor={OBINexus},
+  pdfsubject={Symbolic Subjective AI},
+  pdfkeywords={OBIAI, Subjective AI, Sinphase, Symbolic Reasoning}
+}
+
+% Listings and Code
+\RequirePackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  captionpos=b
+}
+
+% Custom Commands
+\newcommand{\obiai}{\textsc{OBIAI}}
+\newcommand{\sinphase}{Sinphas\'e}
+\newcommand{\csl}{CSL (Conceptual Symbolic Language)}
+
+% Theorems
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+% Verbatim Environment Tweak
+\RequirePackage{fancyvrb}
+\fvset{fontsize=\small, frame=single, baselinestretch=1.0}
+
+\endinput

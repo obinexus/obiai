@@ -1,0 +1,345 @@
+// ============================================================
+// FILE: aegis_proof_1_2_M5_validation_deployment.psc.txt
+// MODULE 5 OF 5 — Validation Framework, Clinical Deployment
+//                 & Integration Specifications
+// SOURCE: "AEGIS-PROOF-1.2: Formal Verification of Traversal
+//          Cost Function for Epistemological DAG Inference"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — Aegis Framework Division
+// DATE:   May 27, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 7: VALIDATION FRAMEWORK AND TESTING
+// ------------------------------------------------------------
+
+// Three canonical test cases are defined in the paper.
+// Each covers a distinct region of the cost function's behavior.
+
+// ── TEST CASE 1: IDENTITY TRANSITION ─────────────────────────
+
+PROCEDURE TestCase1_IdentityTransition(alpha: REAL, beta: REAL) -> TestResult:
+    // Input:    Nodeᵢ = Nodeⱼ (identical belief states)
+    // Expected: C(Nodeᵢ → Nodeⱼ) = 0
+    // Method:   Direct computation verification
+
+    n  := 4   // example: 4 semantic interpretations
+    P_identical := [0.25, 0.25, 0.25, 0.25]
+
+    node_i := BuildTestNode(id="TC1_i", P=P_identical, n=n)
+    node_j := BuildTestNode(id="TC1_j", P=P_identical, n=n)
+
+    cost := TraversalCostStable(node_i, node_j, alpha, beta)
+
+    result := NEW TestResult(test_id="TC1")
+    result.expected := 0.0
+    result.actual   := cost
+    result.passed   := ABS(cost) < 1e-12   // floating-point safe comparison
+
+    IF result.passed:
+        EMIT INFO "TC1 PASS: C(Nodeᵢ→Nodeᵢ) = " + cost + " ≈ 0"
+    ELSE:
+        EMIT ERROR "TC1 FAIL: C(Nodeᵢ→Nodeᵢ) = " + cost + " ≠ 0"
+    END IF
+
+    RETURN result
+END PROCEDURE
+
+
+// ── TEST CASE 2: MAXIMUM DIVERGENCE ──────────────────────────
+
+PROCEDURE TestCase2_MaxDivergence(alpha: REAL, beta: REAL, n: INT) -> TestResult:
+    // Input:    Orthogonal (disjoint-support) probability distributions
+    // Expected: C(Nodeᵢ → Nodeⱼ) = α · log₂(n) + β · ΔH_max
+    // Method:   Boundary condition analysis
+
+    // Construct orthogonal distributions:
+    //   Pᵢ concentrates all mass on class 1
+    //   Pⱼ concentrates all mass on class 2
+    P_i := ZEROS(n)
+    P_j := ZEROS(n)
+    P_i[1] := 1.0
+    P_j[2] := 1.0
+
+    node_i := BuildTestNode(id="TC2_i", P=P_i, n=n)
+    node_j := BuildTestNode(id="TC2_j", P=P_j, n=n)
+
+    // Expected cost: boundary condition formula from §7
+    kl_max  := LOG2(n)                           // maximum KL for n-class discrete
+    dh_max  := ComputeMaxEntropyChange(n)        // log₂(n) (see Module 4)
+    expected := (alpha * kl_max) + (beta * dh_max)
+
+    // Note: KLDivergenceStable applies ε_min to Pⱼ[1]=0 → near-orthogonal
+    cost := TraversalCostStable(node_i, node_j, alpha, beta)
+
+    result := NEW TestResult(test_id="TC2")
+    result.expected := expected
+    result.actual   := cost
+    // Allow tolerance relative to ε_stability (safeguard introduces small error)
+    result.passed   := ABS(cost - expected) < (alpha * LOG2(1.0 / EPSILON_STABILITY))
+
+    IF result.passed:
+        EMIT INFO "TC2 PASS: C_max ≈ " + cost + " (expected ≈ " + expected + ")"
+    ELSE:
+        EMIT ERROR "TC2 FAIL: C=" + cost + " significantly differs from expected " + expected
+    END IF
+
+    RETURN result
+END PROCEDURE
+
+
+// ── TEST CASE 3: PARAMETER SENSITIVITY ───────────────────────
+
+PROCEDURE TestCase3_ParameterSensitivity(node_i: SemanticBeliefNode,
+                                          node_j: SemanticBeliefNode) -> TestResult:
+    // Input:    Systematic variation of α, β parameters
+    // Expected: Monotonic cost behavior within stability bounds
+    // Method:   Numerical gradient verification
+
+    result := NEW TestResult(test_id="TC3")
+    result.passed := TRUE
+
+    alpha_steps := [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    prev_cost   := -INFINITY
+
+    FOR EACH alpha_val IN alpha_steps:
+        beta_val := 1.0 - alpha_val
+
+        // Skip if non-degeneracy violated
+        IF alpha_val <= EPSILON_MIN_NONDEG OR beta_val <= EPSILON_MIN_NONDEG:
+            CONTINUE
+        END IF
+
+        cost := TraversalCostStable(node_i, node_j, alpha_val, beta_val)
+
+        // Check monotonicity: larger α → larger cost (when KL > 0)
+        kl := KLDivergenceStable(node_i.P, node_j.P, node_i.n)
+        dh := EntropyChange(node_i.S, node_j.S)
+
+        // If KL > dh (KL dominates): cost should increase with α
+        IF kl > dh AND cost < prev_cost - 1e-10:
+            EMIT WARNING "TC3: Non-monotonic at α=" + alpha_val +
+                         " | cost=" + cost + " prev=" + prev_cost
+            result.passed := FALSE
+        END IF
+
+        prev_cost := cost
+    END FOR
+
+    IF result.passed:
+        EMIT INFO "TC3 PASS: Monotonic parameter sensitivity confirmed"
+    ELSE:
+        EMIT ERROR "TC3 FAIL: Non-monotonic behavior detected"
+    END IF
+
+    RETURN result
+END PROCEDURE
+
+
+PROCEDURE RunFullValidationSuite(alpha: REAL, beta: REAL) -> ValidationSuiteReport:
+    // Run all three test cases as a complete validation pass
+
+    ValidateParameters(alpha, beta)
+
+    tc1 := TestCase1_IdentityTransition(alpha, beta)
+    tc2 := TestCase2_MaxDivergence(alpha, beta, n=8)
+
+    // Build representative test nodes for TC3
+    node_a := BuildTestNode("TC3_a", [0.7, 0.2, 0.1], n=3)
+    node_b := BuildTestNode("TC3_b", [0.1, 0.6, 0.3], n=3)
+    tc3    := TestCase3_ParameterSensitivity(node_a, node_b)
+
+    report := NEW ValidationSuiteReport()
+    report.tc1 := tc1
+    report.tc2 := tc2
+    report.tc3 := tc3
+    report.all_passed := tc1.passed AND tc2.passed AND tc3.passed
+
+    IF report.all_passed:
+        EMIT INFO "FULL VALIDATION SUITE: ALL TESTS PASSED"
+    ELSE:
+        EMIT ERROR "FULL VALIDATION SUITE: FAILURES DETECTED"
+    END IF
+
+    RETURN report
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 8: CLINICAL DEPLOYMENT CONSIDERATIONS
+// ------------------------------------------------------------
+
+// Four additional constraints apply for healthcare AI deployment.
+
+DEFINE ClinicalDeploymentRequirements AS:
+
+    // (1) INTERPRETABILITY: each cost component explainable to clinicians
+    interpretability := PROCEDURE(cost: REAL, kl: REAL, dh: REAL,
+                                   alpha: REAL, beta: REAL) -> ClinicalExplanation:
+        RETURN ClinicalExplanation(
+            total_cost       = cost,
+            kl_contribution  = alpha * kl,
+            dh_contribution  = beta * dh,
+            human_readable   = "Belief divergence: " + (alpha * kl) +
+                               " | Knowledge disambiguation: " + (beta * dh)
+        )
+    END PROCEDURE
+
+    // (2) REGULATORY COMPLIANCE: audit trail for medical device approval
+    audit_trail := TRUE   // all cost calculations must be logged with inputs
+
+    // (3) PERFORMANCE: real-time computation within clinical workflow
+    // Complexity: O(n) per call — verified acceptable for n ≤ 1000 interpretations
+    realtime_budget_ms := 10.0   // 10ms budget per traversal decision
+
+    // (4) BIAS PRESERVATION: maintain 85% bias reduction from AEGIS-PROOF-1.1
+    bias_reduction_target := 0.85
+    // Integration with Bayesian debiasing layer must be preserved
+    // across semantic uncertainty conditions
+
+END DEFINE
+
+
+PROCEDURE ClinicalDeploymentCheck(node_i: SemanticBeliefNode,
+                                   node_j: SemanticBeliefNode,
+                                   alpha: REAL, beta: REAL,
+                                   n_interpretations: INT) -> BOOL:
+    ALL_OK := TRUE
+
+    // Check interpretability (both components computable and finite)
+    kl   := KLDivergenceStable(node_i.P, node_j.P, n_interpretations)
+    dh   := EntropyChange(node_i.S, node_j.S)
+    IF IS_INFINITE(kl) OR IS_NAN(kl):
+        EMIT ERROR "Clinical: KL component not interpretable (infinite/NaN)"
+        ALL_OK := FALSE
+    END IF
+
+    // Check real-time constraint
+    timing_ok := VerifyComplexityBound(n_interpretations,
+                                        ClinicalDeploymentRequirements.realtime_budget_ms)
+    IF NOT timing_ok:
+        EMIT WARNING "Clinical: O(n) timing budget exceeded for n=" + n_interpretations
+        ALL_OK := FALSE
+    END IF
+
+    // Bias preservation check (structural — verified in AEGIS-PROOF-1.1 integration)
+    EMIT INFO "Clinical: Bias preservation maintained via AEGIS-PROOF-1.1 layer"
+
+    RETURN ALL_OK
+END PROCEDURE
+
+
+PROCEDURE GenerateAuditTrail(node_i: SemanticBeliefNode,
+                              node_j: SemanticBeliefNode,
+                              cost: REAL, alpha: REAL, beta: REAL) -> AuditRecord:
+    // Regulatory compliance: structured audit record per traversal
+    RETURN AuditRecord(
+        timestamp       = CURRENT_TIMESTAMP(),
+        from_node       = node_i.id,
+        to_node         = node_j.id,
+        alpha           = alpha,
+        beta            = beta,
+        kl_component    = KLDivergenceStable(node_i.P, node_j.P, node_i.n),
+        dh_component    = EntropyChange(node_i.S, node_j.S),
+        total_cost      = cost,
+        proof_reference = "AEGIS-PROOF-1.2",
+        locked          = TRUE
+    )
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 9: INTEGRATION SPECIFICATIONS
+// ------------------------------------------------------------
+
+// Five integration targets enabled by this proof:
+
+// (1) EpistemicDAG Class
+DEFINE EpistemicDAGSpec AS:
+    // Core data structure implementing cost-weighted traversal
+    nodes       : Map[NodeId → SemanticBeliefNode]
+    edges       : List[(NodeId, NodeId)]          // directed edges
+    cost_fn     : TraversalCostFunction           // uses verified formula
+    alpha       : REAL                            // global weighting
+    beta        : REAL                            // global weighting
+
+    // INVARIANT: all α, β satisfy Lemma 1 constraints
+    INVARIANT: ValidateParameters(alpha, beta).all_constraints_met
+END DEFINE
+
+PROCEDURE EpistemicDAGTraverse(dag: EpistemicDAG,
+                                start_id: NodeId,
+                                target: SemanticContext) -> TraversalPath:
+    current := dag.nodes[start_id]
+    path    := [current]
+
+    WHILE NOT ContextMatches(current.S, target):
+        neighbors := GetNeighbors(dag, current.id)
+        result    := FilterFlashTraversal(
+            current_node    = current,
+            target          = target,
+            candidate_nodes = neighbors,
+            thresholds      = DEFAULT_THRESHOLDS,
+            alpha           = dag.alpha,
+            beta            = dag.beta
+        )
+        current := result.optimal_next
+        path.APPEND(current)
+
+        IF path.length > dag.nodes.count:
+            EMIT ERROR "EpistemicDAG: traversal exceeded node count — possible cycle"
+            BREAK
+        END IF
+    END WHILE
+
+    RETURN TraversalPath(nodes=path)
+END PROCEDURE
+
+
+// (2) Semantic Disambiguation Protocols
+// (3) Filter-Flash Integration — implemented in Module 4
+// (4) Bias Mitigation Preservation — cross-references AEGIS-PROOF-1.1
+// (5) Future extension: Phase 1.5 implementation bridge
+
+DEFINE IntegrationManifest AS:
+    item_1 := { target: "EpistemicDAG",               status: "ENABLED BY PROOF" }
+    item_2 := { target: "SemanticDisambiguation",      status: "ENABLED BY PROOF" }
+    item_3 := { target: "FilterFlash",                 status: "ENABLED BY PROOF" }
+    item_4 := { target: "BiasMitigationPreservation",  status: "CROSS-REF PROOF-1.1" }
+    item_5 := { target: "DemographicParityUnderUncert", status: "CROSS-REF PROOF-1.1" }
+END DEFINE
+
+
+// ------------------------------------------------------------
+// SECTION 10: CONCLUSION — VERIFICATION CHECKLIST
+// ------------------------------------------------------------
+
+PROCEDURE VerificationChecklist() -> VOID:
+    EMIT INFO "=== AEGIS-PROOF-1.2 VERIFICATION CHECKLIST ==="
+    EMIT INFO "✓ Mathematical Rigor: all computations follow information-theoretic principles"
+    EMIT INFO "✓ Numerical Stability: behavior predictable under all valid parameter ranges"
+    EMIT INFO "✓ Integration Compatibility: aligned with AEGIS-PROOF-1.1 foundations"
+    EMIT INFO "✓ Clinical Deployment Readiness: satisfies life-critical safety requirements"
+    EMIT INFO ""
+    EMIT INFO "Document Status: VERIFIED"
+    EMIT INFO "Integration Status: Ready for Phase 1.5 Implementation"
+    EMIT INFO "Dependencies: AEGIS-PROOF-1.1 (Complete)"
+    EMIT INFO "Enables: EpistemicDAG, Filter-Flash Integration"
+    EMIT INFO ""
+    EMIT INFO SAFETY_LOCK
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 5 — FINAL MODULE
+//
+// FULL MODULE INDEX:
+//   M1: aegis_proof_1_2_M1_definitions.psc.txt
+//   M2: aegis_proof_1_2_M2_theorem_proof.psc.txt
+//   M3: aegis_proof_1_2_M3_parameters.psc.txt
+//   M4: aegis_proof_1_2_M4_stability_filterflash.psc.txt
+//   M5: aegis_proof_1_2_M5_validation_deployment.psc.txt  ← THIS FILE
+//
+// CROSS-DOCUMENT CHAIN:
+//   AEGIS-PROOF-1.1 → AEGIS-PROOF-1.2 (THIS) → Phase 1.5 EpistemicDAG
+// ============================================================

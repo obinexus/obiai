@@ -1,0 +1,293 @@
+// ============================================================
+// FILE: aegis_proof_3_1_3_2_M4_obiai_diram_integration.psc.txt
+// MODULE 4 OF 5 — OBIAI Integration, DIRAM Compatibility
+//                 & Validation Protocol
+// SOURCE: "AEGIS-PROOF-3.1 & 3.2: Mathematical Verification Suite"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4: INTEGRATION WITH OBIAI ARCHITECTURE
+// ------------------------------------------------------------
+
+// ── 4.1: EPISTEMIC VALIDATION FRAMEWORK ──────────────────────
+
+// The proven monotonicity (3.1) and convergence (3.2) properties
+// ensure the OBIAI Filter-Flash framework maintains mathematical
+// rigor required for safety-critical applications.
+
+DEFINE OBIAIValidationFramework AS:
+    // OBIAI = OBI AI stack: NSIGII gate + libpolycall routing + inference
+    // Filter-Flash cognitive evolution is the inference layer.
+
+    confidence_threshold : REAL    // ε = 0.954
+    diram_epsilon_bound  : REAL    // ε(x) ≤ 0.6
+
+    CONSTANT CONFIDENCE_THRESHOLD := 0.954
+    CONSTANT DIRAM_EPSILON_BOUND  := 0.6
+END DEFINE
+
+
+// ── PROPOSITION 1: DIRAM COMPATIBILITY ───────────────────────
+
+// PROPOSITION 1 (DIRAM Compatibility):
+//   The proven convergence properties are compatible with DIRAM
+//   memory governance constraints ε(x) ≤ 0.6.
+//
+//   Proof:
+//   Since J(vₙ, nₙ) → J* and J* represents the optimal cost
+//   configuration, the epistemic error bound is minimized, ensuring:
+//     ε(transition) ≤ 0.6  for large n.
+
+PROCEDURE VerifyDIRAMCompatibility(v_n: Verb, n_n: Noun,
+                                    J_star: REAL,
+                                    lambda_w: REAL, mu_w: REAL,
+                                    dag: EpistemicDAG,
+                                    iteration: INT) -> BOOL:
+    // Compute epistemic error bound ε(transition) at current state.
+    // ε must remain ≤ 0.6 (DIRAM governance constraint).
+
+    J_current       := J.Evaluate(v_n, n_n, lambda_w, mu_w, dag)
+    J_ratio         := (J_current - J_star) / MAX(ABS(J_star), 1e-12)
+
+    // Normalize error to [0, 1] scale for DIRAM compatibility
+    epsilon_trans   := J_ratio * OBIAIValidationFramework.DIRAM_EPSILON_BOUND
+
+    IF epsilon_trans > OBIAIValidationFramework.DIRAM_EPSILON_BOUND:
+        EMIT WARNING "DIRAM constraint violated at iter " + iteration +
+                     ": ε(transition)=" + epsilon_trans +
+                     " > 0.6 — continuing towards convergence"
+        RETURN FALSE
+    END IF
+
+    EMIT INFO "DIRAM compatible at iter " + iteration +
+              ": ε(transition)=" + epsilon_trans + " ≤ 0.6"
+    RETURN TRUE
+END PROCEDURE
+
+
+// PROOF-BASED GUARANTEE: once convergence is achieved (J → J*),
+// the error ratio J_ratio → 0, ensuring ε(transition) → 0 ≤ 0.6.
+PROCEDURE ProveAsymptoticDIRAMCompliance(convergence_result: ConvergenceResult,
+                                          J_star: REAL) -> BOOL:
+    IF convergence_result.converged:
+        final_error := ABS(convergence_result.final_J - J_star)
+        epsilon_final := final_error / MAX(ABS(J_star), 1e-12) *
+                         OBIAIValidationFramework.DIRAM_EPSILON_BOUND
+        ASSERT epsilon_final <= OBIAIValidationFramework.DIRAM_EPSILON_BOUND
+        EMIT INFO "Asymptotic DIRAM compliance proven: ε_final=" + epsilon_final
+        RETURN TRUE
+    END IF
+    EMIT WARNING "Convergence not achieved — DIRAM asymptotic compliance not proven"
+    RETURN FALSE
+END PROCEDURE
+
+
+// ── 4.2: PRINT-AND-TRACE VERIFICATION ────────────────────────
+
+PROCEDURE PrintAndTraceVerification(v_n: Verb, n_n: Noun,
+                                     p_conf: REAL,
+                                     iteration: INT,
+                                     dag: EpistemicDAG,
+                                     lambda_w: REAL, mu_w: REAL) -> TraceRecord:
+    // Structured trace entry for each hybrid update step.
+    // Required for audit compliance (NASA-STD-8739.8, §6.1).
+
+    grad_J    := J.Gradient(v_n, n_n, lambda_w, mu_w, dag)
+    grad_norm := NORM(grad_J)
+    J_val     := J.Evaluate(v_n, n_n, lambda_w, mu_w, dag)
+    mode      := SelectOptimalMode(p_conf)
+
+    record := TraceRecord(
+        iteration    = iteration,
+        verb         = v_n,
+        noun         = n_n,
+        p_conf       = p_conf,
+        mode         = mode,
+        J_value      = J_val,
+        grad_norm    = grad_norm,
+        alpha_n      = DiminishingLearningRate(iteration),
+        diram_ok     = (VerifyDIRAMCompatibility(v_n, n_n, J_STAR_APPROX,
+                                                   lambda_w, mu_w, dag, iteration)),
+        timestamp    = CURRENT_TIMESTAMP()
+    )
+
+    EMIT TRACE record
+    RETURN record
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 5: VALIDATION REQUIREMENTS AND TESTING PROTOCOL
+// ------------------------------------------------------------
+
+// ── 5.1: TRIANGI DATASET VALIDATION ─────────────────────────
+
+// Validation criterion (Triangi benchmark):
+//
+//   ValidationTriangi = (1/|T|) · Σ_{t∈T} I[p_conf(t) ≥ 0.954] ≥ 0.954
+//
+// Interpretation: at least 95.4% of test cases must meet the
+// 95.4% confidence threshold — a doubly-binding requirement.
+
+CONSTANT TRIANGI_THRESHOLD := 0.954   // 95.4% of cases must meet p_conf ≥ 0.954
+
+PROCEDURE ComputeTriangiValidation(test_set T: List[TestCase],
+                                    p_conf_fn: Function) -> REAL:
+    // ValidationTriangi = (1/|T|) · Σ I[p_conf(t) ≥ 0.954]
+
+    n_total  := LENGTH(T)
+    n_passed := 0
+
+    FOR EACH t IN T:
+        p_conf_t := p_conf_fn(t)
+        IF p_conf_t >= TRIANGI_THRESHOLD:
+            n_passed := n_passed + 1
+        END IF
+    END FOR
+
+    validation_score := n_passed / n_total
+    EMIT INFO "Triangi Validation: " + n_passed + "/" + n_total +
+              " = " + validation_score
+
+    IF validation_score >= TRIANGI_THRESHOLD:
+        EMIT INFO "TRIANGI BENCHMARK PASSED ✓"
+    ELSE:
+        EMIT ERROR "TRIANGI BENCHMARK FAILED: " + validation_score +
+                   " < " + TRIANGI_THRESHOLD
+    END IF
+
+    RETURN validation_score
+END PROCEDURE
+
+
+// ── 5.2: COMPUTATIONAL VERIFICATION TESTS ────────────────────
+
+// Three verification tests from §5.2:
+
+// TEST 1 — Monotonicity Test (AEGIS-PROOF-3.1 validation)
+PROCEDURE MonotonicityTest(dag: EpistemicDAG, C_runtime: Function,
+                            C_error: Function) -> TestResult:
+    // Verify Δ(p₁) ≤ Δ(p₂) for p₁ < p₂ across test scenarios
+
+    test_p_values := [0.1, 0.3, 0.5, 0.7, 0.9, 0.954, 0.99]
+    deltas := []
+    passed := TRUE
+
+    FOR EACH p IN test_p_values:
+        decomp := DecomposeCostAdvantage(p, C_runtime, C_error, dag)
+        deltas.APPEND((p, decomp.total_delta))
+    END FOR
+
+    // Check non-decreasing: each Δ(pᵢ) ≤ Δ(pᵢ₊₁)
+    FOR idx := 0 TO LENGTH(deltas) - 2:
+        (p1, d1) := deltas[idx]
+        (p2, d2) := deltas[idx + 1]
+        IF d1 > d2 + 1e-10:
+            EMIT WARNING "Monotonicity test: Δ(" + p1 + ")=" + d1 +
+                         " > Δ(" + p2 + ")=" + d2
+            passed := FALSE
+        END IF
+    END FOR
+
+    RETURN TestResult(name="MonotonicityTest", passed=passed,
+                      data=deltas)
+END PROCEDURE
+
+
+// TEST 2 — Convergence Test (AEGIS-PROOF-3.2 validation)
+PROCEDURE ConvergenceTest(dag: EpistemicDAG, v0: Verb, n0: Noun,
+                           J_star: REAL, lambda_w: REAL,
+                           mu_w: REAL) -> TestResult:
+    // Demonstrate ‖J(vₙ, nₙ) − J*‖ → 0 with measured convergence rate
+
+    result := RunHybridConvergenceLoop(
+        v0=v0, n0=n0, J_star=J_star,
+        lambda_w=lambda_w, mu_w=mu_w,
+        dag=dag, max_iterations=1000
+    )
+
+    final_error := ABS(result.final_J - J_star)
+    rate        := EstimateConvergenceRate(result.history, J_star)
+
+    passed := result.converged AND (final_error < EPSILON_TOL * 10)
+
+    RETURN TestResult(name="ConvergenceTest", passed=passed,
+                      data={ error: final_error, rate: rate,
+                             iterations: result.iterations })
+END PROCEDURE
+
+
+// TEST 3 — Stability Test (noise robustness)
+PROCEDURE StabilityTest(dag: EpistemicDAG, v0: Verb, n0: Noun,
+                         J_star: REAL, lambda_w: REAL, mu_w: REAL,
+                         noise_multipliers: List[REAL]) -> TestResult:
+    // Confirm bounded noise tolerance and robustness to parameter variations.
+    // Run convergence under increasing noise levels — should still converge.
+
+    passed := TRUE
+    FOR EACH noise_scale IN noise_multipliers:
+        // Temporarily scale noise variance
+        orig_variance := NOISE_VARIANCE
+        SET NOISE_VARIANCE := orig_variance * noise_scale
+
+        result := RunHybridConvergenceLoop(
+            v0=v0, n0=n0, J_star=J_star,
+            lambda_w=lambda_w, mu_w=mu_w,
+            dag=dag, max_iterations=2000
+        )
+
+        SET NOISE_VARIANCE := orig_variance    // restore
+
+        IF NOT result.converged:
+            EMIT WARNING "Stability test: convergence failed at noise_scale=" + noise_scale
+            passed := FALSE
+        END IF
+    END FOR
+
+    RETURN TestResult(name="StabilityTest", passed=passed,
+                      data={ noise_multipliers: noise_multipliers })
+END PROCEDURE
+
+
+// ── FULL VALIDATION SUITE ─────────────────────────────────────
+
+PROCEDURE RunValidationSuite(dag: EpistemicDAG, test_set T: List[TestCase],
+                               v0: Verb, n0: Noun, J_star: REAL,
+                               C_runtime: Function, C_error: Function,
+                               p_conf_fn: Function,
+                               lambda_w: REAL, mu_w: REAL) -> ValidationReport:
+
+    report := NEW ValidationReport()
+
+    // Triangi benchmark
+    report.triangi_score := ComputeTriangiValidation(T, p_conf_fn)
+    report.triangi_pass  := (report.triangi_score >= TRIANGI_THRESHOLD)
+
+    // Computational tests
+    report.monotonicity  := MonotonicityTest(dag, C_runtime, C_error)
+    report.convergence   := ConvergenceTest(dag, v0, n0, J_star, lambda_w, mu_w)
+    report.stability     := StabilityTest(dag, v0, n0, J_star, lambda_w, mu_w,
+                                          noise_multipliers=[1.0, 2.0, 5.0])
+
+    report.all_passed    := report.triangi_pass AND
+                            report.monotonicity.passed AND
+                            report.convergence.passed AND
+                            report.stability.passed
+
+    IF report.all_passed:
+        EMIT INFO "FULL VALIDATION SUITE PASSED — AEGIS-PROOF-3.1 & 3.2 VALIDATED"
+    ELSE:
+        EMIT ERROR "VALIDATION FAILURES DETECTED — review individual test results"
+    END IF
+
+    RETURN report
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: aegis_proof_3_1_3_2_M5_compliance_algorithm.psc.txt
+// ============================================================

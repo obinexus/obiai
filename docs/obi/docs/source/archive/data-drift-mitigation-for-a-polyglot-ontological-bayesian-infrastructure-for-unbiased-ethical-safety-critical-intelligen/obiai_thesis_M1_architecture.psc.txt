@@ -1,0 +1,251 @@
+// ============================================================
+// FILE: obiai_thesis_M1_architecture.psc.txt
+// MODULE 1 OF 5 — OBIAI Architecture: Filter/Flash/Storage Layers
+//                 & Data Drift Problem Definition
+// SOURCE: "Data Drift Mitigation for a Polyglot Ontological Bayesian
+//          Infrastructure for Unbiased Ethical Safety-Critical
+//          Intelligence Infrastructure as a Service"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing
+// VENUE:  University of Hull / University of Cambridge — PhD/MSc Thesis
+// DATE:   September 2025
+// ============================================================
+
+// ── DOCUMENT POSITION IN OBINEXUS CORPUS ─────────────────────
+//
+// This thesis is the primary theoretical synthesis document.
+// It positions OBIAI as a unifying framework integrating all
+// prior technical specifications:
+//
+//   Bayesian Debiasing    → bias mitigation backbone (PDF 1)
+//   Actor Class           → epistemic autonomy model (PDF 2)
+//   AEGIS-PROOF-1.2       → traversal cost function (PDF 3)
+//   AEGIS-PROOF-3.1/3.2   → monotonicity + convergence (PDF 4)
+//   AEGIS-PROOF-4.1       → hospital safety implementation (PDF 5)
+//   DAG Ephemeris Spec    → verb-noun cost + vexameneria (PDF 6)
+//   THIS THESIS (PDF 7)   → unified framework + drift mitigation
+
+DEFINE OBIAIContext AS:
+    full_name       := "Ontological Bayesian Intelligence Architecture Infrastructure"
+    short_name      := "OBIAI"
+    coherence_threshold := 0.954      // C = 0.954 — 95.4%
+    drift_bound_max := 12             // ±12 on bidirectional failure scale
+    validation_dataset := "Triangi"
+    compliance_refs := ["AEGIS-PROOF-3.1", "AEGIS-PROOF-3.2"]
+END DEFINE
+
+
+// ── CHAPTER 1: DATA DRIFT PROBLEM DEFINITION ─────────────────
+
+// §1.2: THE 95.4% COHERENCE THRESHOLD
+//
+//   C = 0.954 is the critical threshold for maintaining epistemic
+//   confidence in autonomous decision-making systems.
+//   Validated across: supervised, unsupervised, and RL paradigms.
+//   Cross-reference: EPISTEMIC_THRESHOLD = 0.954 (all AEGIS proofs).
+
+CONSTANT C_COHERENCE := 0.954     // coherence threshold
+CONSTANT C_THRESHOLD := C_COHERENCE   // alias for consistency with AEGIS chain
+
+
+// §1.3: THREE PRIMARY DRIFT VECTORS
+//
+//   (1) PHENOMENOLOGICAL DRIFT: raw sensory input deviation
+//   (2) CONTEXTUAL DRIFT:       social and environmental context shifts
+//   (3) EPISTEMIC DRIFT:        knowledge representation degradation
+
+DEFINE DriftVector AS ENUM:
+    PHENOMENOLOGICAL    // drift in raw input distribution
+    CONTEXTUAL          // drift in social/environmental framing
+    EPISTEMIC           // drift in knowledge representations
+END DEFINE
+
+DEFINE DriftObservation AS:
+    magnitude    : REAL          // scalar ∈ [-12, +12] (failure scale)
+    vector_type  : DriftVector
+    timestamp    : Timestamp
+    source       : DataStream
+END DEFINE
+
+PROCEDURE ClassifyDriftVector(x_current: DataPoint,
+                               x_baseline: DataPoint) -> DriftVector:
+    // Classify observed drift into one of three primary vectors.
+    // Uses feature-level analysis to determine source.
+
+    // Phenomenological: low-level feature distribution divergence
+    phenom_score := KLDivergence(x_current.raw_features,
+                                  x_baseline.raw_features, n=x_current.dim)
+
+    // Contextual: divergence in social/environmental metadata
+    context_score := KLDivergence(x_current.context_features,
+                                   x_baseline.context_features,
+                                   n=x_current.context_dim)
+
+    // Epistemic: divergence in knowledge representation embeddings
+    epistemic_score := CosineDissimilarity(x_current.knowledge_embedding,
+                                           x_baseline.knowledge_embedding)
+
+    scores := [phenom_score, context_score, epistemic_score]
+    max_idx := ARGMAX(scores)
+
+    MATCH max_idx:
+        CASE 0: RETURN PHENOMENOLOGICAL
+        CASE 1: RETURN CONTEXTUAL
+        CASE 2: RETURN EPISTEMIC
+    END MATCH
+END PROCEDURE
+
+
+// ── CHAPTER 3: OBIAI ARCHITECTURE ────────────────────────────
+
+// Three-layer architecture:
+//   Layer 1: FILTER  — persistent symbolic reasoning
+//   Layer 2: FLASH   — time-decaying ephemeral working memory
+//   Layer 3: STORAGE — deep memory with cultural anchoring
+
+// ── §3.1.1: FILTER LAYER ─────────────────────────────────────
+
+// Filter(x) = Σᵢ wᵢ · ϕᵢ(x) · verify(x)   (eq. 3.1)
+//
+//   ϕᵢ   — symbolic inference functions
+//   verify — epistemic validity checker
+//   wᵢ   — learned weights for each symbolic function
+
+PROCEDURE FilterLayer(x: DataPoint, weights: List[REAL],
+                       phi_functions: List[Function],
+                       verify: Function) -> REAL:
+    // Filter(x) = Σᵢ wᵢ · ϕᵢ(x) · verify(x)
+
+    // Epistemic validity check — single gate over all components
+    validity := verify(x)    // verify: DataPoint → {0, 1}
+    IF validity == 0:
+        EMIT WARNING "FilterLayer: epistemic validity failed for input x"
+        RETURN 0.0
+    END IF
+
+    n := LENGTH(phi_functions)
+    IF n != LENGTH(weights):
+        EMIT ERROR "FilterLayer: weight count ≠ function count"
+        RETURN 0.0
+    END IF
+
+    weighted_sum := 0.0
+    FOR i := 0 TO n-1:
+        phi_i := phi_functions[i].apply(x)
+        weighted_sum := weighted_sum + weights[i] * phi_i
+    END FOR
+
+    result := weighted_sum * validity   // validity ∈ {0,1} — gates all output
+    RETURN result
+END PROCEDURE
+
+PROCEDURE VerifyEpistemicValidity(x: DataPoint) -> {0, 1}:
+    // Checks whether input x satisfies epistemic validity constraints.
+    // Returns 1 (valid) or 0 (invalid — blocked from Filter).
+    confidence := MeasureInputConfidence(x)
+    IF confidence >= C_COHERENCE:
+        RETURN 1
+    ELSE:
+        RETURN 0
+    END IF
+END PROCEDURE
+
+
+// ── §3.1.2: FLASH LAYER ──────────────────────────────────────
+
+// Flash(x, t) = ephemeral(x) · e^(−λt)   (eq. 3.2)
+//
+//   Time-decaying working memory with decay constant λ.
+//   Content loses weight exponentially over time t.
+//   High λ → rapid forgetting (emergency reflex mode)
+//   Low λ → slower decay (soft ephemeral storage)
+
+CONSTANT LAMBDA_DECAY_DEFAULT := 0.5   // decay constant λ
+
+PROCEDURE FlashLayer(x: DataPoint, t: REAL,
+                      lambda_decay: REAL) -> REAL:
+    // Flash(x, t) = ephemeral(x) · e^(−λt)
+
+    ephemeral_val := EphemeralRepresentation(x)   // raw working memory value
+    decay_factor  := EXP(-lambda_decay * t)
+
+    result := ephemeral_val * decay_factor
+
+    // Post-condition: Flash output decays toward 0 as t → ∞
+    ASSERT result >= 0.0
+    RETURN result
+END PROCEDURE
+
+PROCEDURE EphemeralRepresentation(x: DataPoint) -> REAL:
+    // Maps input to a scalar ephemeral working memory value.
+    // Uses raw feature magnitude as proxy for working memory activation.
+    RETURN NORM(x.raw_features)
+END PROCEDURE
+
+PROCEDURE FlashAgeCheck(x: FlashMemoryEntry, current_t: REAL,
+                          lambda_decay: REAL,
+                          eviction_threshold: REAL) -> BOOL:
+    // Returns TRUE if Flash entry should be evicted (below threshold).
+    residual := x.initial_value * EXP(-lambda_decay * (current_t - x.birth_time))
+    RETURN residual < eviction_threshold
+END PROCEDURE
+
+
+// ── §3.1.3: STORAGE LAYER ────────────────────────────────────
+
+// Storage(x) = hash(x) ⊕ cultural_context(x) ⊕ love_anchors(x)   (eq. 3.3)
+//
+//   Deep memory persistence using XOR composition (⊕) of three components:
+//     hash(x)            — deterministic content hash
+//     cultural_context(x) — Nsibidi-grounded cultural encoding
+//     love_anchors(x)    — affective/relational long-term memory anchors
+
+PROCEDURE StorageLayer(x: DataPoint) -> StorageRecord:
+    // Storage(x) = hash(x) ⊕ cultural_context(x) ⊕ love_anchors(x)
+
+    h_x  := ContentHash(x)
+    cc_x := CulturalContext(x)    // Nsibidi-grounded (cross-ref: PDF 6 §1.3)
+    la_x := LoveAnchors(x)
+
+    // ⊕ operator: XOR-composition of bit-string representations
+    stored := XORCompose(h_x, cc_x, la_x)
+
+    record := StorageRecord(
+        content   = stored,
+        source    = x,
+        timestamp = CURRENT_TIMESTAMP(),
+        retrieval_key = h_x
+    )
+    RETURN record
+END PROCEDURE
+
+PROCEDURE ContentHash(x: DataPoint) -> BitString:
+    // Deterministic hash of content for storage indexing
+    RETURN SHA256(x.serialize())
+END PROCEDURE
+
+PROCEDURE CulturalContext(x: DataPoint) -> BitString:
+    // Nsibidi-grounded cultural encoding (cross-ref: NsibidiDistance, PDF 6)
+    glyph_encoding := GlyphEncode(x.cultural_metadata)
+    RETURN BitString.from_vector(glyph_encoding)
+END PROCEDURE
+
+PROCEDURE LoveAnchors(x: DataPoint) -> BitString:
+    // Affective relational anchors — long-term memory grounding.
+    // Encodes relational/emotional salience for persistent recall.
+    // "Love anchors" = high-salience relational memory tags.
+    salience := x.relational_salience_score
+    anchor_id := x.relational_entity_id
+    RETURN BitString.from_values(salience, anchor_id)
+END PROCEDURE
+
+PROCEDURE XORCompose(a: BitString, b: BitString, c: BitString) -> BitString:
+    // Bit-wise XOR composition of three encoded components
+    RETURN a XOR b XOR c
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: obiai_thesis_M2_diram_cascade_algorithm.psc.txt
+// ============================================================

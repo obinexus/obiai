@@ -1,0 +1,296 @@
+// ============================================================
+// FILE: obiai_thesis_M3_implementation_modules.psc.txt
+// MODULE 3 OF 5 — FilterFlashEngine Implementation & Real-World Modules
+// SOURCE: "Data Drift Mitigation for a Polyglot Ontological Bayesian
+//          Infrastructure..." (OBIAI Thesis)
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing
+// DATE:   September 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// CHAPTER 5: IMPLEMENTATION
+// ------------------------------------------------------------
+
+// ── §5.1: FILTER-FLASH ENGINE (Python listing formalized) ────
+
+// The thesis §5.1 presents a Python class FilterFlashEngine.
+// Formalized here as a typed pseudocode class.
+
+CLASS FilterFlashEngine:
+    // Core engine integrating Filter layer, Flash layer, and DIRAM cascade.
+    // Operates at the coherence threshold C = 0.954.
+
+    PRIVATE:
+        threshold      : REAL               // coherence_threshold = 0.954
+        filter_layer   : FilterLayerState   // persistent symbolic reasoning
+        flash_layer    : FlashLayerState    // ephemeral working memory
+        diram_cascade  : DIRAMCascade       // three-tier persona cascade
+
+    PUBLIC:
+
+        PROCEDURE Initialize(coherence_threshold: REAL) -> VOID:
+            self.threshold    := coherence_threshold    // default: 0.954
+            self.filter_layer := FilterLayerState()
+            self.flash_layer  := FlashLayerState()
+            self.diram_cascade := DIRAMCascade()
+            self.diram_cascade.Initialize()
+            EMIT INFO "FilterFlashEngine initialized | threshold=" + coherence_threshold
+        END PROCEDURE
+
+
+        PROCEDURE Process(input_data: DataPoint) -> ProcessedOutput:
+            // Main processing pipeline: confidence-gated Filter/Flash routing
+
+            // STEP 1: Measure epistemic confidence of input
+            confidence := self.MeasureConfidence(input_data)
+
+            IF confidence >= self.threshold:
+                // HIGH CONFIDENCE: Use persistent Filter mode
+                EMIT LOG "→ FILTER mode | confidence=" + confidence
+                RETURN self.filter_layer.Process(input_data)
+
+            ELSE:
+                // LOW CONFIDENCE: Use ephemeral Flash mode
+                EMIT LOG "→ FLASH mode | confidence=" + confidence
+                result := self.flash_layer.Process(input_data)
+
+                // Attempt elevation: can this Flash result be promoted to Filter?
+                IF self.CanPersist(result):
+                    self.filter_layer.Integrate(result)
+                    EMIT INFO "Flash result elevated to Filter"
+                END IF
+
+                RETURN result
+            END IF
+        END PROCEDURE
+
+
+        PROCEDURE MeasureConfidence(input_data: DataPoint) -> REAL:
+            // Delegate to DIRAM cascade for confidence measurement.
+            // Uses Bayesian update over current cascade state.
+            state := SystemState.fromDataPoint(input_data,
+                                                cascade=self.diram_cascade)
+            RETURN ComputeEpistemicConfidence(state)
+        END PROCEDURE
+
+
+        PROCEDURE CanPersist(result: ProcessedOutput) -> BOOL:
+            // Determines whether a Flash output has sufficient quality
+            // to be elevated to persistent Filter memory.
+            //
+            // Criteria:
+            //   (a) Coherence of result ≥ threshold
+            //   (b) DIRAM validation: ε(transition) ≤ 0.6
+            //   (c) Epistemic stability under re-evaluation
+
+            coherence_ok := MeasureCoherence(result) >= self.threshold
+
+            // DIRAM validation (cross-ref: aegis_proof_3_1_3_2 + dag_ephemeris)
+            transition  := StateTransition.fromFlashResult(result, self.diram_cascade)
+            diram_ok    := DIRAMValidate(transition) == COMMIT
+
+            // Re-evaluation stability: confidence doesn't drop on second pass
+            re_conf  := self.MeasureConfidence(result.as_datapoint)
+            stable   := re_conf >= self.threshold * 0.95   // allow 5% tolerance
+
+            RETURN coherence_ok AND diram_ok AND stable
+        END PROCEDURE
+
+END CLASS
+
+
+// ── FILTER LAYER STATE ────────────────────────────────────────
+
+CLASS FilterLayerState:
+    PRIVATE:
+        memory      : Map[DataID → StorageRecord]    // persistent memory store
+        phi_fns     : List[Function]                  // symbolic inference functions
+        weights     : List[REAL]                      // Σwᵢ = 1
+
+    PUBLIC:
+
+        PROCEDURE Process(x: DataPoint) -> ProcessedOutput:
+            // Filter(x) = Σᵢ wᵢ · ϕᵢ(x) · verify(x)   (eq. 3.1)
+            raw_output := FilterLayer(x, self.weights, self.phi_fns,
+                                       VerifyEpistemicValidity)
+            record := StorageLayer(x)
+            self.memory[x.id] := record
+            RETURN ProcessedOutput(value=raw_output, source=FILTER,
+                                    storage_record=record)
+        END PROCEDURE
+
+        PROCEDURE Integrate(flash_result: ProcessedOutput) -> VOID:
+            // Promote a Flash result into persistent Filter memory
+            x := flash_result.source_datapoint
+            record := StorageLayer(x)
+            self.memory[x.id] := record
+            EMIT INFO "FilterLayer integrated Flash result | id=" + x.id
+        END PROCEDURE
+
+        PROCEDURE Retrieve(id: DataID) -> StorageRecord:
+            IF id IN self.memory:
+                RETURN self.memory[id]
+            END IF
+            RETURN NULL
+        END PROCEDURE
+
+END CLASS
+
+
+// ── FLASH LAYER STATE ─────────────────────────────────────────
+
+CLASS FlashLayerState:
+    PRIVATE:
+        working_memory : Map[DataID → FlashMemoryEntry]
+        lambda_decay   : REAL    // decay constant λ
+
+    PUBLIC:
+
+        PROCEDURE Initialize(lambda_decay: REAL) -> VOID:
+            self.lambda_decay := lambda_decay
+            self.working_memory := {}
+        END PROCEDURE
+
+        PROCEDURE Process(x: DataPoint) -> ProcessedOutput:
+            // Flash(x, t) = ephemeral(x) · e^(−λt)   (eq. 3.2)
+            t_now     := CURRENT_TIME()
+            raw_value := FlashLayer(x, t=0.0, lambda_decay=self.lambda_decay)
+
+            entry := FlashMemoryEntry(
+                data        = x,
+                birth_time  = t_now,
+                initial_value = raw_value
+            )
+            self.working_memory[x.id] := entry
+
+            // Evict stale entries while we're here
+            self.EvictStaleEntries(t_now)
+
+            RETURN ProcessedOutput(value=raw_value, source=FLASH,
+                                    source_datapoint=x)
+        END PROCEDURE
+
+        PROCEDURE EvictStaleEntries(current_t: REAL) -> VOID:
+            CONSTANT EVICTION_THRESHOLD := 0.01    // below 1% → evict
+            stale_ids := []
+            FOR EACH (id, entry) IN self.working_memory:
+                IF FlashAgeCheck(entry, current_t, self.lambda_decay,
+                                  EVICTION_THRESHOLD):
+                    stale_ids.APPEND(id)
+                END IF
+            END FOR
+            FOR EACH id IN stale_ids:
+                self.working_memory.REMOVE(id)
+            END FOR
+            IF LENGTH(stale_ids) > 0:
+                EMIT LOG "Flash evicted " + LENGTH(stale_ids) + " stale entries"
+            END IF
+        END PROCEDURE
+
+END CLASS
+
+
+// ── §5.2.1: HOUSING CRISIS MODULE ────────────────────────────
+
+// The Housing Crisis Module distinguishes PHENOMENON from CONTEXT.
+// Cross-reference: Nnamdi's MCOL/Thurrock housing legal proceedings
+// (referenced in memory context — legal use case for OBIAI).
+//
+// Data flow: Phenomenon vs Context (Figure 5.1)
+//   PHENOMENON: raw observable housing facts (homelessness, benefit cuts)
+//   CONTEXT:    social/systemic framing (policy history, authority records)
+
+DEFINE HousingCrisisDataFlow AS:
+    PHENOMENON_FEATURES := [
+        "current_housing_status",
+        "eviction_notice_present",
+        "days_without_housing",
+        "immediate_physical_risk"
+    ]
+    CONTEXT_FEATURES := [
+        "local_authority_history",
+        "legislative_protections",    // e.g. Housing Act 1996, Section 117
+        "support_network_availability",
+        "prior_interactions_count"
+    ]
+END DEFINE
+
+PROCEDURE HousingCrisisAssessment(input: HousingDataPoint,
+                                   engine: FilterFlashEngine) -> HousingDecision:
+    // Separate phenomenon from context, process each, integrate.
+
+    phenomenon_dp := input.ExtractFeatures(HousingCrisisDataFlow.PHENOMENON_FEATURES)
+    context_dp    := input.ExtractFeatures(HousingCrisisDataFlow.CONTEXT_FEATURES)
+
+    // Process phenomenon (urgent, often Flash)
+    phenom_output := engine.Process(phenomenon_dp)
+
+    // Process context (persistent, often Filter)
+    context_output := engine.Process(context_dp)
+
+    // Integrate: weighted combination of phenomenon + context
+    decision := IntegrateHousingOutputs(phenom_output, context_output)
+
+    EMIT LOG "Housing assessment | phenomenon_mode=" + phenom_output.source +
+             " | context_mode=" + context_output.source
+
+    RETURN decision
+END PROCEDURE
+
+PROCEDURE IntegrateHousingOutputs(phenomenon: ProcessedOutput,
+                                    context: ProcessedOutput) -> HousingDecision:
+    // Phenomenon output weighted heavier for immediate risk assessment
+    urgency_weight := 0.7
+    context_weight := 0.3
+
+    combined_score := (urgency_weight * phenomenon.value) +
+                      (context_weight * context.value)
+
+    RETURN HousingDecision(
+        risk_level   = combined_score,
+        action_flags = DeriveHousingActions(combined_score),
+        compliance   = VerifyLegislativeCompliance(context.storage_record)
+    )
+END PROCEDURE
+
+
+// ── §5.2.2: FRIEND EVALUATION MODULE ─────────────────────────
+
+// Relationship assessment module for social network trust evaluation.
+// Applies OBI/tripolar framework to evaluate relationship quality.
+
+PROCEDURE FriendEvaluationAssessment(interaction_history: List[Interaction],
+                                      engine: FilterFlashEngine) -> RelationshipEvaluation:
+    // Evaluate a relationship across three poles:
+    //   Uche pole: intellectual/knowledge alignment
+    //   Eze pole:  leadership/direction compatibility
+    //   Obi pole:  emotional/community resonance
+
+    uche_score := EvaluateKnowledgePole(interaction_history)
+    eze_score  := EvaluateLeadershipPole(interaction_history)
+    obi_score  := EvaluateCommunityPole(interaction_history)
+
+    // Aggregate as input to FilterFlashEngine
+    relationship_dp := DataPoint(
+        features = [uche_score, eze_score, obi_score],
+        context  = interaction_history.summary()
+    )
+
+    output := engine.Process(relationship_dp)
+
+    RETURN RelationshipEvaluation(
+        overall_coherence = output.value,
+        uche_alignment    = uche_score,
+        eze_alignment     = eze_score,
+        obi_resonance     = obi_score,
+        mode              = output.source,
+        recommendation    = DeriveRelationshipRecommendation(output.value)
+    )
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: obiai_thesis_M4_drift_detection_safety.psc.txt
+// ============================================================

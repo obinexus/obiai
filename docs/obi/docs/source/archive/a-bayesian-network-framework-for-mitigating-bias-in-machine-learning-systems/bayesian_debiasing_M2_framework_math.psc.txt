@@ -1,0 +1,193 @@
+// ============================================================
+// FILE: bayesian_debiasing_M2_framework_math.psc.txt
+// MODULE 2 OF 5 — Bayesian Debiasing Framework: Math Foundation
+// SOURCE: "A Bayesian Network Framework for Mitigating Bias
+//          in Machine Learning Systems"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3.1: ARCHITECTURAL OVERVIEW
+// ------------------------------------------------------------
+
+// Traditional Pipeline (OPAQUE):
+//
+//   [Input Data] → [Black-Box Model] → [Biased Output]
+//
+// Bayesian Debiasing Pipeline (TRANSPARENT):
+//
+//   [Input Data]     ─┐
+//   [Confounders]    ─┤ → [Bayesian Network] → [Debiased Output]
+//   [Bias Params ϕ]  ─┘        ↑
+//                         (explicit DAG)
+
+// Core architectural principle:
+// Confounders and bias parameters are FIRST-CLASS citizens of the model,
+// not afterthoughts applied via post-processing.
+
+
+// ------------------------------------------------------------
+// SECTION 3.2.1: VARIABLE IDENTIFICATION
+// Domain exemplar: Cancer Detection
+// ------------------------------------------------------------
+
+// Domain variable declarations (typed, bounded):
+
+DEFINE S : BINARY          // Smoking status  — S ∈ {0, 1}
+DEFINE C : BINARY          // Cancer status   — C ∈ {0, 1}
+DEFINE T : REAL            // Test outcome    — T ∈ ℝ (continuous)
+DEFINE A : PROTECTED_SET   // Protected attributes — A ∈ 𝒜 (e.g., race, sex, age-group)
+
+// ϕ: bias factors (latent, to be marginalized)
+// θ: true risk parameters (target posterior)
+// α: hyperprior over θ
+// β: hyperprior over ϕ
+
+
+// ------------------------------------------------------------
+// SECTION 3.2.2: STRUCTURAL CAUSAL MODEL (DAG)
+// ------------------------------------------------------------
+
+// A Directed Acyclic Graph (DAG) G encodes conditional independence.
+// The joint probability factorizes along parental relationships:
+//
+//   P(S, C, T, A) = ∏ᵢ P(Xᵢ | Pa(Xᵢ))
+//
+// where Pa(Xᵢ) = parent nodes of variable Xᵢ in G.
+
+STRUCTURE DAG:
+    NODES    := {S, C, T, A, θ, ϕ}
+    EDGES    := {
+        S → C,        // Smoking influences cancer risk
+        A → C,        // Protected attribute is confounder for cancer
+        A → T,        // Protected attribute influences test calibration
+        C → T,        // Cancer status drives test outcome
+        ϕ → T,        // Bias parameter distorts test outcome
+        θ → C         // True risk parameter governs cancer probability
+    }
+END STRUCTURE
+
+// DAG enables identification of BACKDOOR PATHS that induce bias.
+// Example backdoor path: A → T (direct) bypasses C → T (causal),
+// creating spurious correlation if A is not conditioned upon.
+
+PROCEDURE IdentifyBackdoorPaths(DAG G, target_node Y, treatment_node X) -> PathList:
+    backdoor_paths := []
+    FOR EACH path P FROM X TO Y IN G:
+        IF P.has_arrow_into(X):   // path enters X via arrow (non-causal)
+            backdoor_paths.APPEND(P)
+        END IF
+    END FOR
+    RETURN backdoor_paths
+END PROCEDURE
+
+PROCEDURE BlockBackdoorPaths(DAG G, backdoor_paths: PathList,
+                              conditioning_set Z) -> BOOL:
+    // Apply do-calculus: condition on Z to block all backdoor paths
+    FOR EACH path P IN backdoor_paths:
+        IF NOT P.is_blocked_by(Z):
+            EMIT WARNING "Backdoor path not blocked: " + P.description
+            RETURN FALSE
+        END IF
+    END FOR
+    RETURN TRUE   // All backdoor paths blocked; identification achieved
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 3.2.3: HIERARCHICAL BAYESIAN PARAMETER ESTIMATION
+// ------------------------------------------------------------
+
+// Hierarchical structure:
+//
+//   θ | α  ~  P(θ | α)        ← prior over true risk parameters
+//   ϕ | β  ~  P(ϕ | β)        ← prior over bias factors
+//
+// Joint posterior:
+//   P(θ, ϕ | D)  ∝  P(D | θ, ϕ) · P(θ | α) · P(ϕ | β)
+//
+// Marginalization to obtain unbiased θ posterior:
+//   P(θ | D) = ∫ P(θ, ϕ | D) dϕ
+//
+// This integral "integrates out" bias — ϕ is accounted for
+// but does not contaminate θ.
+
+PROCEDURE ComputeUnbiasedPosterior(D: Dataset, α: Hyperprior, β: Hyperprior,
+                                    DAG G) -> Distribution_θ:
+
+    // Step 1: Specify joint prior
+    prior_θ := SAMPLE_PRIOR(α)         // θ ~ P(θ | α)
+    prior_ϕ := SAMPLE_PRIOR(β)         // ϕ ~ P(ϕ | β)
+
+    // Step 2: Compute joint posterior via Bayes' theorem
+    //   P(θ, ϕ | D) ∝ P(D | θ, ϕ) · P(θ | α) · P(ϕ | β)
+    joint_posterior := PROPORTIONAL_TO(
+        Likelihood(D, θ=prior_θ, ϕ=prior_ϕ) *
+        prior_θ *
+        prior_ϕ
+    )
+
+    // Step 3: Marginalize over ϕ (integrate out bias)
+    //   P(θ | D) = ∫ P(θ, ϕ | D) dϕ
+    marginal_θ := INTEGRATE(joint_posterior, over=ϕ)
+
+    RETURN marginal_θ
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 3.3: CONDITIONAL INFERENCE PIPELINE
+// ------------------------------------------------------------
+
+// Three inference modes supported by the framework:
+
+// Mode 1: Posterior Computation conditioned on observed confounders
+PROCEDURE PosteriorInference(θ: Parameters, confounders Z: ObservedSet,
+                              query X: Variable) -> Distribution:
+    // Compute P(X | Z, θ) by conditioning on known confounders
+    posterior := CONDITION(P(X | θ), on=Z)
+    RETURN posterior
+END PROCEDURE
+
+
+// Mode 2: Test Likelihood Modeling — P(T | C, S, A)
+PROCEDURE TestLikelihood(C: BINARY, S: BINARY, A: ProtectedAttr,
+                          θ: Parameters, ϕ: BiasParams) -> REAL:
+    // Model test outcome T as a function of true state + bias distortion
+    //   T = f(C, S, A ; θ) + noise(ϕ)
+    mu    := LinearCombination(C, S, A, weights=θ)
+    sigma := BiasDistortion(A, ϕ)     // bias inflates/deflates variance by group
+    RETURN GaussianPDF(T, mean=mu, std=sigma)
+END PROCEDURE
+
+
+// Mode 3: Uncertainty Quantification via posterior distributions
+PROCEDURE QuantifyUncertainty(posterior: Distribution_θ) -> UncertaintyReport:
+    report.mean       := EXPECTATION(posterior)
+    report.variance   := VARIANCE(posterior)
+    report.credible_interval_95 := CREDIBLE_INTERVAL(posterior, level=0.95)
+    report.entropy    := ENTROPY(posterior)      // higher entropy = more uncertainty
+    RETURN report
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 3: JOINT FACTORIZATION UTILITY
+// ------------------------------------------------------------
+
+PROCEDURE FactorizeJoint(DAG G, variables X: VariableList) -> Expression:
+    // Produce factorized joint P(X₁, ..., Xₙ) = ∏ P(Xᵢ | Pa(Xᵢ))
+    factored := PRODUCT()
+    FOR EACH variable Xᵢ IN X:
+        parents_i := G.parents(Xᵢ)
+        factored  := factored * ConditionalProbability(Xᵢ, given=parents_i)
+    END FOR
+    RETURN factored
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: bayesian_debiasing_M3_algorithm.psc.txt
+// ============================================================

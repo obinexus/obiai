@@ -1,0 +1,263 @@
+// ============================================================
+// FILE: diram_boolean_M4_hardware_implementation.psc.txt
+// MODULE 4 OF 5 — Hardware Implementation:
+//                 C Gate Code, Address Layout & Memory Evolution
+// SOURCE: "DIRAM Boolean Logic Truth Table - Memory Management Gates"
+// ORG:    OBINexus Aegis Project | Directed Instruction RAM
+// ============================================================
+
+// ------------------------------------------------------------
+// HARDWARE IMPLEMENTATION
+// ------------------------------------------------------------
+
+// DIRAM extends traditional RAM from PASSIVE to ACTIVE memory:
+//   Traditional RAM: responds to requests (passive)
+//   DIRAM:           makes intelligent decisions (active) using:
+//     (a) Binary logic gates for fast decision-making
+//     (b) Cache hit/miss prediction patterns
+//     (c) Governance constraints preventing resource exhaustion
+//     (d) Cryptographic traceability for security
+
+
+// ── C GATE CODE FORMALIZED ────────────────────────────────────
+
+// From the document (C implementation, decoded from obfuscated text):
+//
+//   #include "diram"
+//
+//   // Binary decision function
+//   uint8_t diram_memory_gate(uint8_t cache_state,
+//                              uint8_t governance_state) {
+//     uint8_t not_a   = !cache_state;
+//     uint8_t xor_ab  = cache_state ^ governance_state;
+//
+//     // Truth table logic: various combinations based on requirements
+//     return (not_a && !xor_ab) || (!not_a && xor_ab);
+//   }
+
+PROCEDURE DIRAMMemoryGate_C_Formalized(cache_state: UINT8,
+                                         governance_state: UINT8) -> UINT8:
+    // Direct pseudocode translation of the C implementation.
+    // Operates on 8-bit unsigned integers (binary: 0 or 1).
+
+    // Validate inputs are binary
+    ASSERT cache_state IN [0, 1]
+    ASSERT governance_state IN [0, 1]
+
+    // Gate computations
+    not_a  := (NOT cache_state) AND 0x01    // uint8_t !cache_state
+    xor_ab := cache_state XOR governance_state  // uint8_t xor
+
+    // Truth table output:
+    //   (not_a && !xor_ab) || (!not_a && xor_ab)
+    term_1 := not_a AND (NOT xor_ab AND 0x01)
+    term_2 := (NOT not_a AND 0x01) AND xor_ab
+    result := term_1 OR term_2
+
+    RETURN result AND 0x01    // ensure single-bit output
+END PROCEDURE
+
+
+// Compliance check (C code formalized):
+//   bool diram_check_sinphase_compliance(uint8_t heap_events,
+//                                         uint8_t max_events) {
+//     double epsilon = (double)heap_events / (double)max_events;
+//     return epsilon <= 0.5;
+//   }
+//   (See Module 3 for full implementation)
+
+
+// ── HARDWARE ADDRESS LAYOUT ───────────────────────────────────
+
+// The gates act as CHECKPOINTS — binary decisions on whether
+// information should be stored, passed through, or flipped.
+//
+// Hardware can see cache layout patterns:
+//   - Address tracing
+//   - LRU/MRU transitions (binary decisions based on access patterns)
+//   - Predictive allocation using historical patterns
+//   - Governance enforcement at hardware level
+
+DEFINE DIRAMMemoryLayout AS:
+    // Hardware memory address structure for DIRAM cache
+    address_width   : INT        // bits per address (e.g., 64)
+    cache_lines     : INT        // number of cache lines
+    line_size_bytes : INT        // bytes per cache line
+
+    // Address breakdown:
+    //   [tag bits | set index bits | block offset bits]
+    tag_bits        : INT
+    set_index_bits  : INT
+    offset_bits     : INT
+
+    // Governance metadata per address region:
+    epsilon_register  : REAL     // current ε for this memory region
+    lru_chain_pointer : Address  // pointer to LRU chain head for this set
+    sha_log_pointer   : Address  // pointer to SHA receipt log
+END DEFINE
+
+
+PROCEDURE ComputeAddressComponents(address: UINT64,
+                                    layout: DIRAMMemoryLayout) -> AddressComponents:
+    // Decompose a memory address into its tag/set/offset components.
+
+    offset_mask    := (1 << layout.offset_bits)    - 1
+    set_mask       := (1 << layout.set_index_bits) - 1
+    tag_mask       := (1 << layout.tag_bits)       - 1
+
+    block_offset   := address AND offset_mask
+    set_index      := (address >> layout.offset_bits) AND set_mask
+    tag            := (address >> (layout.offset_bits + layout.set_index_bits)) AND tag_mask
+
+    RETURN AddressComponents(tag=tag, set=set_index, offset=block_offset)
+END PROCEDURE
+
+
+// ── CACHE HIT PATTERN ANALYSIS ────────────────────────────────
+
+// From document:
+//   "Cache hit often aligns with predictable output patterns (like repeated 1s)"
+//   "Cache miss comes from unpredictable or rare signal paths — where XOR
+//    flips unexpectedly or NOT cancels out expected inputs"
+
+PROCEDURE AnalyzeAccessPattern(access_history: List[{A: {0,1}, B: {0,1}}]) -> PatternReport:
+    // Identify predictable vs. unpredictable access patterns.
+
+    n := LENGTH(access_history)
+    IF n == 0:
+        RETURN PatternReport(predictable=0, unpredictable=0)
+    END IF
+
+    hit_sequence     := [1 FOR (A, B) IN access_history IF A == 1]
+    miss_sequence    := [0 FOR (A, B) IN access_history IF A == 0]
+    xor_flips        := [XOR_AB(A, B) FOR (A, B) IN access_history]
+    not_cancellations := [1 FOR (A, B) IN access_history IF NOT_A(A) == 0 AND XOR_AB(A,B) == 0]
+
+    // Predictable: hits with low XOR activity
+    n_hits         := LENGTH(hit_sequence)
+    n_xor_flips    := SUM(xor_flips)
+    n_not_cancels  := LENGTH(not_cancellations)
+
+    hit_rate       := n_hits / n
+    xor_flip_rate  := n_xor_flips / n
+
+    predictability := hit_rate * (1.0 - xor_flip_rate)
+
+    EMIT INFO "Access pattern | hit_rate=" + hit_rate +
+              " | xor_flip_rate=" + xor_flip_rate +
+              " | predictability=" + predictability
+
+    RETURN PatternReport(
+        n_total        = n,
+        hit_rate       = hit_rate,
+        xor_flip_rate  = xor_flip_rate,
+        predictability = predictability,
+        n_not_cancels  = n_not_cancels,
+        predictable    = FLOOR(predictability * n),
+        unpredictable  = n - FLOOR(predictability * n)
+    )
+END PROCEDURE
+
+
+// ── MEMORY EVOLUTION: RANDOM → DIRECTED ──────────────────────
+
+// Traditional RAM vs. DIRAM comparison (from §"Memory Evolution"):
+
+DEFINE MemoryEvolution AS:
+
+    TRADITIONAL_RAM := {
+        model       : "Passive storage responding to requests",
+        decision    : "None — always serve if addressed",
+        governance  : "None",
+        traceability: "None",
+        prediction  : "None"
+    }
+
+    DIRAM := {
+        model       : "Active memory making intelligent decisions",
+        decision    : "Binary logic gates (NOT, XOR) → truth table",
+        governance  : "ε(x) ≤ 0.5 Sinphase constraint enforced at hardware",
+        traceability: "SHA-256 receipts for every cache operation",
+        prediction  : "Lookahead confidence scoring preloads likely data"
+    }
+
+    EVOLUTION_QUOTE := "Memory that doesn't just store—it thinks, predicts, and " +
+                       "governs its own allocation patterns using boolean logic."
+END DEFINE
+
+
+PROCEDURE CompareModels(address: UINT64, request: MemoryRequest) -> ComparisonResult:
+    // Demonstrate Traditional RAM vs DIRAM decision for same request.
+
+    // Traditional RAM: always serves
+    trad_result := MemoryResult(
+        served = TRUE,
+        decision = "ALWAYS_SERVE",
+        governance_checked = FALSE,
+        receipt = NULL
+    )
+
+    // DIRAM: gate-checked
+    heap_tracker  := HeapEventTracker.current()
+    A             := IF CacheContains(address) THEN 1 ELSE 0
+    B             := heap_tracker.GetGovernanceState()
+
+    diram_output  := LookupTruthTable(A, B)
+    receipt       := GenerateSHAReceipt(address.ToKey(), A, B, diram_output.value)
+
+    diram_result := MemoryResult(
+        served             = (diram_output.value == 1),
+        decision           = diram_output.action,
+        governance_checked = TRUE,
+        receipt            = receipt
+    )
+
+    RETURN ComparisonResult(
+        traditional = trad_result,
+        diram       = diram_result,
+        diverges    = (trad_result.served != diram_result.served)
+    )
+END PROCEDURE
+
+
+// ── PREDICTIVE ALLOCATION ─────────────────────────────────────
+
+// "Uses historical patterns to forecast future needs"
+// Confidence scoring aligns with the OBIAI epistemic framework:
+//   p_conf ≥ 0.954 → FILTER mode (persistent, deliberate)
+//   Applied here: prediction_confidence ≥ 0.5 → preload (matches ε ≤ 0.5)
+
+PROCEDURE PredictiveAllocationCycle(cache: DIRAMCache,
+                                     heap_tracker: HeapEventTracker,
+                                     pattern_report: PatternReport) -> AllocationPlan:
+    // Plan allocation for next cycle based on observed patterns.
+
+    governance_ok := heap_tracker.IsCompliant()
+
+    IF NOT governance_ok:
+        EMIT INFO "Predictive allocation skipped — governance violation"
+        RETURN AllocationPlan(preloads=[], reason="GOVERNANCE_BLOCKED")
+    END IF
+
+    // Use pattern predictability to decide preload depth
+    IF pattern_report.predictability >= 0.7:
+        preload_count := 4    // high predictability → preload more
+    ELSE IF pattern_report.predictability >= 0.5:
+        preload_count := 2    // medium predictability
+    ELSE:
+        preload_count := 0    // unpredictable → don't waste bandwidth
+    END IF
+
+    predicted_keys := cache.lookahead.PredictNextAccess(AccessContext.current())
+    keys_to_load   := predicted_keys[:preload_count]
+
+    EMIT INFO "Predictive allocation | count=" + preload_count +
+              " | keys=" + keys_to_load
+    RETURN AllocationPlan(preloads=keys_to_load, reason="PREDICTED")
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: diram_boolean_M5_obinexus_integration.psc.txt
+// ============================================================

@@ -1,0 +1,295 @@
+// ============================================================
+// FILE: aegis_proof_1_2_M4_stability_filterflash.psc.txt
+// MODULE 4 OF 5 — Numerical Stability, Edge Cases & Filter-Flash
+// SOURCE: "AEGIS-PROOF-1.2: Formal Verification of Traversal
+//          Cost Function for Epistemological DAG Inference"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — Aegis Framework Division
+// DATE:   May 27, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 5: NUMERICAL STABILITY AND EDGE CASE ANALYSIS
+// ------------------------------------------------------------
+
+// ── 5.1: HANDLING SINGULAR PROBABILITY DISTRIBUTIONS ─────────
+
+// When probability distributions approach singular cases (pⱼ,ₖ → 0),
+// the raw KL computation log(pᵢ,ₖ / pⱼ,ₖ) → ∞.
+//
+// SAFEGUARD: replace pⱼ,ₖ with max(pⱼ,ₖ, ε_min) to prevent
+//            division by zero while maintaining mathematical accuracy.
+//
+//   KL_stable(Pᵢ ‖ Pⱼ) = Σₖ pᵢ,ₖ · log₂(pᵢ,ₖ / max(pⱼ,ₖ, ε_min))
+
+CONSTANT EPSILON_STABILITY := 1e-12   // numerical floor for KL computation
+                                       // (distinct from Lemma 1 non-degeneracy ε)
+
+PROCEDURE KLDivergenceStable(Pi: Distribution, Pj: Distribution,
+                              n: INT) -> REAL:
+    // Numerically stable variant of KL divergence.
+    // ε_min = 10⁻¹² prevents division by zero.
+
+    kl := 0.0
+    FOR k := 1 TO n:
+        p_ik := Pi[k]
+        p_jk := Pj[k]
+
+        // Apply numerical safeguard: max(pⱼ,ₖ, ε_min)
+        p_jk_safe := MAX(p_jk, EPSILON_STABILITY)
+
+        IF p_ik > 0.0:
+            kl := kl + p_ik * LOG2(p_ik / p_jk_safe)
+        END IF
+        // if p_ik == 0: term = 0 by convention — no-op
+    END FOR
+
+    // Post-condition: still non-negative after safeguard
+    ASSERT kl >= 0.0
+    RETURN kl
+END PROCEDURE
+
+
+// ── EDGE CASE CATALOGUE ───────────────────────────────────────
+
+DEFINE EdgeCaseType AS ENUM:
+    IDENTICAL_DISTRIBUTIONS       // Pᵢ = Pⱼ → KL = 0
+    ORTHOGONAL_DISTRIBUTIONS      // disjoint support → KL = α·log₂(n) + β·ΔH_max
+    NEAR_SINGULAR_DISTRIBUTION    // some pⱼ,ₖ → 0 → numerical safeguard applies
+    UNIFORM_DISTRIBUTIONS         // Pᵢ = Pⱼ = Uniform(n) → KL = 0
+    ONE_HOT_DISTRIBUTIONS         // concentrated at a single class
+END DEFINE
+
+
+PROCEDURE HandleEdgeCase(Pi: Distribution, Pj: Distribution,
+                          n: INT, case_type: EdgeCaseType,
+                          alpha: REAL, beta: REAL) -> REAL:
+
+    MATCH case_type:
+
+        CASE IDENTICAL_DISTRIBUTIONS:
+            // KL = 0, ΔH = 0 → C = 0
+            kl   := 0.0
+            ASSERT KLDivergenceStable(Pi, Pj, n) < 1e-12
+            RETURN 0.0
+
+        CASE ORTHOGONAL_DISTRIBUTIONS:
+            // Maximum divergence case: Pᵢ and Pⱼ have disjoint support
+            // KL(Pᵢ ‖ Pⱼ) = α · log₂(n)  (maximum KL for n-class discrete)
+            // C = α · log₂(n) + β · ΔH_max
+            kl_max  := LOG2(n)   // upper bound on KL for n-class distributions
+            dh_max  := ComputeMaxEntropyChange(n)
+            cost_max := (alpha * kl_max) + (beta * dh_max)
+            EMIT INFO "ORTHOGONAL distributions: C_max=" + cost_max
+            RETURN cost_max
+
+        CASE NEAR_SINGULAR_DISTRIBUTION:
+            // Apply stable KL — ε_min clamps the near-zero denominator
+            kl   := KLDivergenceStable(Pi, Pj, n)
+            dh   := EntropyChange(ContextOf(Pi), ContextOf(Pj))
+            cost := (alpha * kl) + (beta * dh)
+            EMIT INFO "NEAR_SINGULAR: ε_min safeguard applied | KL=" + kl
+            RETURN cost
+
+        CASE UNIFORM_DISTRIBUTIONS:
+            // Uniform(n) → H = log₂(n), KL(Uniform ‖ Uniform) = 0
+            // If both are uniform: C = 0 (identical distributions)
+            kl   := KLDivergenceStable(Pi, Pj, n)
+            RETURN kl * alpha   // β·ΔH = 0 if contexts also uniform
+
+        CASE ONE_HOT_DISTRIBUTIONS:
+            // All probability mass at a single class
+            // KL = 0 if same class, log₂(1/pⱼ,ₖ) if different
+            kl   := KLDivergenceStable(Pi, Pj, n)
+            dh   := EntropyChange(ContextOf(Pi), ContextOf(Pj))
+            RETURN (alpha * kl) + (beta * dh)
+
+    END MATCH
+END PROCEDURE
+
+
+PROCEDURE ComputeMaxEntropyChange(n: INT) -> REAL:
+    // Maximum possible entropy change for n-class distribution:
+    // H_max = log₂(n) (uniform distribution)
+    // H_min = 0       (deterministic distribution)
+    // ΔH_max = log₂(n)
+    RETURN LOG2(n)
+END PROCEDURE
+
+
+// ── 5.2: COMPUTATIONAL COMPLEXITY ANALYSIS ───────────────────
+
+DEFINE ComplexityProfile AS:
+    time_complexity  := "O(n)"       // n = number of semantic interpretations
+    space_complexity := "O(1)"       // constant space per individual calculation
+    precision        := "STABLE"     // standard floating-point sufficient
+    // Rationale: single linear pass over n-dimensional distributions
+    // No recursive or exponential operations
+END DEFINE
+
+PROCEDURE VerifyComplexityBound(n: INT, timing_budget_ms: REAL) -> BOOL:
+    // For clinical real-time constraints, verify O(n) fits within budget.
+    // Time per traversal cost calculation ≈ c · n (constant factor c)
+    CONSTANT C_FACTOR := 0.001   // estimated ms per semantic interpretation
+    estimated_time_ms := C_FACTOR * n
+    IF estimated_time_ms > timing_budget_ms:
+        EMIT WARNING "Complexity: estimated " + estimated_time_ms +
+                     "ms exceeds budget " + timing_budget_ms + "ms for n=" + n
+        RETURN FALSE
+    END IF
+    RETURN TRUE
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 6: FILTER-FLASH FRAMEWORK INTEGRATION
+// ------------------------------------------------------------
+
+// The traversal cost function integrates with the Filter-Flash
+// consciousness model via two thresholds:
+//
+//   FILTER threshold: if cost < filter_threshold → apply semantic filter
+//   FLASH threshold:  if entropy gradient > flash_threshold → trigger flash event
+
+DEFINE FilterFlashThresholds AS:
+    filter_threshold : REAL    // cost below which semantic filter is applied
+    flash_threshold  : REAL    // entropy gradient above which flash triggers
+END DEFINE
+
+
+// ── ALGORITHM 1: FILTER-FLASH INTEGRATED TRAVERSAL ───────────
+
+PROCEDURE FilterFlashTraversal(current_node: SemanticBeliefNode,
+                                target: SemanticContext,
+                                candidate_nodes: List[SemanticBeliefNode],
+                                thresholds: FilterFlashThresholds,
+                                alpha: REAL, beta: REAL) -> TraversalResult:
+    // Algorithm 1 from §6 of AEGIS-PROOF-1.2
+
+    // Validate parameters before traversal
+    ValidateParameters(alpha, beta)
+    ValidateNode(current_node)
+
+    cost_map     := {}
+    filter_queue := []
+    flash_events := []
+
+    // ── CANDIDATE EVALUATION LOOP ─────────────────────────────
+    FOR EACH node_j IN candidate_nodes:
+
+        // Compute traversal cost (numerically stable variant)
+        cost_ij := TraversalCostStable(current_node, node_j, alpha, beta)
+        cost_map[node_j.id] := cost_ij
+
+        // FILTER decision: apply semantic filter if cost is below threshold
+        IF cost_ij < thresholds.filter_threshold:
+            ApplySemanticFilter(node_j)
+            filter_queue.APPEND(node_j)
+            EMIT INFO "FILTER applied to node " + node_j.id +
+                      " | cost=" + cost_ij
+        END IF
+
+        // FLASH decision: trigger flash event if entropy gradient is steep
+        entropy_gradient := ComputeEntropyGradient(current_node, node_j)
+        IF entropy_gradient > thresholds.flash_threshold:
+            TriggerFlashEvent(current_node, node_j)
+            flash_events.APPEND((current_node.id, node_j.id, entropy_gradient))
+            EMIT INFO "FLASH triggered: " + current_node.id + " → " + node_j.id +
+                      " | gradient=" + entropy_gradient
+        END IF
+
+    END FOR
+
+    // ── OPTIMAL PATH SELECTION ────────────────────────────────
+    optimal_node := MinCostPath(candidate_nodes, cost_map)
+    result := TraversalResult(
+        optimal_next   = optimal_node,
+        cost_map       = cost_map,
+        filter_applied = filter_queue,
+        flash_events   = flash_events,
+        min_cost       = cost_map[optimal_node.id]
+    )
+
+    RETURN result
+END PROCEDURE
+
+
+PROCEDURE TraversalCostStable(node_i: SemanticBeliefNode,
+                               node_j: SemanticBeliefNode,
+                               alpha: REAL, beta: REAL) -> REAL:
+    // Traversal cost with numerical stability safeguards applied
+    n       := node_i.n
+    kl_term := KLDivergenceStable(node_i.P, node_j.P, n)
+    dh_term := EntropyChange(node_i.S, node_j.S)
+    cost    := (alpha * kl_term) + (beta * dh_term)
+    ASSERT cost >= 0.0
+    RETURN cost
+END PROCEDURE
+
+
+PROCEDURE ComputeEntropyGradient(node_i: SemanticBeliefNode,
+                                  node_j: SemanticBeliefNode) -> REAL:
+    // Entropy gradient = rate of entropy change per unit semantic distance
+    dh   := EntropyChange(node_i.S, node_j.S)
+    dist := SemanticDistance(node_i, node_j)
+    IF ABS(dist) < 1e-12:
+        RETURN 0.0    // no gradient at zero distance
+    END IF
+    RETURN ABS(dh) / dist
+END PROCEDURE
+
+
+PROCEDURE ApplySemanticFilter(node: SemanticBeliefNode) -> VOID:
+    // Semantic filtering: reduces the effective probability mass
+    // to sharpen semantic interpretations (disambiguation step)
+    // Implementation: normalize distribution, suppress low-mass entries
+    threshold := EPSILON_STABILITY * 100    // filter floor
+    FOR k := 1 TO node.n:
+        IF node.P[k] < threshold:
+            node.P[k] := 0.0   // suppress near-zero mass
+        END IF
+    END FOR
+    // Re-normalize after filtering
+    total := SUM(node.P)
+    IF total > 0.0:
+        FOR k := 1 TO node.n:
+            node.P[k] := node.P[k] / total
+        END FOR
+    END IF
+END PROCEDURE
+
+
+PROCEDURE TriggerFlashEvent(node_i: SemanticBeliefNode,
+                             node_j: SemanticBeliefNode) -> VOID:
+    // Flash event: marks a high-entropy-gradient transition for
+    // heightened attention in the Filter-Flash consciousness model.
+    // Signals a significant epistemic shift between belief states.
+    EMIT ALERT "FLASH EVENT: " + node_i.id + " → " + node_j.id
+    // Further handling delegated to Filter-Flash framework runtime
+END PROCEDURE
+
+
+PROCEDURE MinCostPath(candidates: List[SemanticBeliefNode],
+                      cost_map: Map[NodeId → REAL]) -> SemanticBeliefNode:
+    // Return the candidate with minimum traversal cost
+    min_cost := POSITIVE_INFINITY
+    best_node := NULL
+
+    FOR EACH node IN candidates:
+        IF cost_map[node.id] < min_cost:
+            min_cost  := cost_map[node.id]
+            best_node := node
+        END IF
+    END FOR
+
+    IF best_node == NULL:
+        EMIT ERROR "No valid candidate nodes for traversal"
+    END IF
+    RETURN best_node
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: aegis_proof_1_2_M5_validation_deployment.psc.txt
+// ============================================================

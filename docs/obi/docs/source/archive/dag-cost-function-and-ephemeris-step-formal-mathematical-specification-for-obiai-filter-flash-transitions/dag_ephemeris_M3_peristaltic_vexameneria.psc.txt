@@ -1,0 +1,344 @@
+// ============================================================
+// FILE: dag_ephemeris_M3_peristaltic_vexameneria.psc.txt
+// MODULE 3 OF 5 — Peristaltic Cross-Referential Algorithm
+//                 & Vexameneria Quantification
+// SOURCE: "DAG Cost Function and Ephemeris Step: Formal Mathematical
+//          Specification for OBIAI Filter-Flash Transitions"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3: PERISTALTIC CROSS-REFERENTIAL ALGORITHM
+// ------------------------------------------------------------
+
+// PERISTALTIC: analogous to biological peristalsis — sequential,
+// wave-like processing through a tubular structure.
+// Here: cyclical propagation of concept connections through the DAG,
+// where each verb-noun observation advances the "wave" of resolution.
+//
+// The algorithm processes incoming (v, n) pairs continuously,
+// finding Hamiltonian cycles in the evolving cost graph to identify
+// maximally coherent concept groupings.
+
+
+// ── SECTION 3.1: HAMILTONIAN CYCLE DAG RESOLUTION ────────────
+
+// Algorithm 1: Peristaltic Cross-Referential Processing
+//
+//   INPUT:  Verb-noun pairs (vᵢ, nᵢ), confidence threshold θ = 0.954
+//   OUTPUT: Resolved concept graph G*
+
+PROCEDURE PeristalticCrossReferentialProcessing(
+    observation_stream: Stream[(SymbolicCapsule, SymbolicCapsule)],
+    theta: REAL) -> ConceptGraph:
+
+    // Initialize the DAG
+    G := InitializeDAG()
+    EMIT INFO "Peristaltic processing started | θ=" + theta
+
+    // Process each (vᵢ, nᵢ) pair from observation stream
+    FOR EACH (v_i, n_i) IN observation_stream:
+
+        // Compute cost_ij for all j (cross-reference every noun against vᵢ)
+        cost_matrix := ComputeCrossReferenceCosts(v_i, G)
+
+        // Find Hamiltonian cycle in G using cost matrix
+        cycle := FindHamiltonianCycle(G, cost_matrix)
+
+        // Compute epistemic confidence for this cycle
+        p_conf := ComputeCycleConfidence(cycle, G)
+
+        // Update DAG based on confidence
+        IF p_conf >= theta:
+            // FILTER UPDATE: persistent reasoning — integrate full cycle
+            G := FilterUpdate(G, cycle)
+            EMIT LOG "FILTER update | p_conf=" + p_conf +
+                     " | cycle_length=" + LENGTH(cycle.nodes)
+        ELSE:
+            // FLASH UPDATE: ephemeral — add current pair only
+            G := FlashUpdate(G, v_i, n_i)
+            EMIT LOG "FLASH update | p_conf=" + p_conf +
+                     " | added (" + v_i.id + ", " + n_i.id + ")"
+        END IF
+
+    END FOR
+
+    EMIT INFO "Peristaltic processing complete | nodes=" + G.node_count
+    RETURN G
+END PROCEDURE
+
+
+PROCEDURE InitializeDAG() -> ConceptGraph:
+    G := NEW ConceptGraph()
+    G.nodes := {}
+    G.edges := {}
+    G.cost_table := {}
+    RETURN G
+END PROCEDURE
+
+
+PROCEDURE ComputeCrossReferenceCosts(v_i: SymbolicCapsule,
+                                      G: ConceptGraph) -> CostMatrix:
+    // cost_ij = DAG_cost(vᵢ, nⱼ) for all nⱼ currently in G
+    // Creates a full row of costs from vᵢ to every noun node in G.
+
+    cost_row := {}
+    FOR EACH node_j IN G.nodes WHERE node_j.type == NOUN:
+        n_j             := node_j.capsule
+        cost_ij         := DAGCost(v_i, n_j, LAMBDA_DEFAULT, MU_DEFAULT,
+                                   BETA1_DEFAULT, BETA2_DEFAULT,
+                                   GAMMA1_DEFAULT, GAMMA2_DEFAULT)
+        cost_row[n_j.id] := cost_ij
+    END FOR
+    RETURN CostMatrix(verb=v_i.id, costs=cost_row)
+END PROCEDURE
+
+
+// ── HAMILTONIAN CYCLE RESOLUTION ─────────────────────────────
+
+// A Hamiltonian cycle visits every node in the DAG exactly once
+// and returns to the start. In this context, finding a low-cost
+// Hamiltonian cycle identifies the most coherent concept traversal
+// order — the peristaltic wave path.
+
+PROCEDURE FindHamiltonianCycle(G: ConceptGraph,
+                                cost_matrix: CostMatrix) -> Cycle:
+    // Approximate Hamiltonian cycle using nearest-neighbor heuristic
+    // (exact Hamiltonian is NP-hard; nearest-neighbor gives practical approximation).
+    //
+    // Time complexity: O(K · N · log N) — matches §7.1 specification.
+
+    IF G.node_count == 0:
+        RETURN EmptyCycle()
+    END IF
+
+    // Start from the verb node in cost_matrix
+    start_node  := G.GetNode(cost_matrix.verb)
+    cycle_nodes := [start_node]
+    visited     := {start_node.id}
+    current     := start_node
+
+    WHILE LENGTH(visited) < G.node_count:
+        // Find nearest unvisited node by cost
+        best_next  := NULL
+        best_cost  := POSITIVE_INFINITY
+
+        FOR EACH neighbor IN G.GetNeighbors(current):
+            IF neighbor.id NOT IN visited:
+                edge_cost := GetEdgeCost(G, current, neighbor, cost_matrix)
+                IF edge_cost < best_cost:
+                    best_cost := edge_cost
+                    best_next := neighbor
+                END IF
+            END IF
+        END FOR
+
+        IF best_next == NULL:
+            // No unvisited neighbors reachable — graph may be disconnected
+            EMIT WARNING "Hamiltonian cycle incomplete: isolated subgraph"
+            BREAK
+        END IF
+
+        cycle_nodes.APPEND(best_next)
+        visited.ADD(best_next.id)
+        current := best_next
+    END WHILE
+
+    // Close the cycle: return to start
+    cycle_nodes.APPEND(start_node)
+
+    cycle := Cycle(nodes=cycle_nodes, total_cost=SumCycleCost(G, cycle_nodes))
+    RETURN cycle
+END PROCEDURE
+
+
+PROCEDURE GetEdgeCost(G: ConceptGraph, from_node: Node,
+                       to_node: Node, cost_matrix: CostMatrix) -> REAL:
+    // Look up DAG cost for this directed edge.
+    // If not in cost_matrix (noun-to-noun edge), use stored edge cost.
+    IF to_node.type == NOUN AND from_node.id == cost_matrix.verb:
+        RETURN cost_matrix.costs[to_node.capsule.id]
+    END IF
+    // Fall back to pre-computed edge weight in G
+    RETURN G.GetEdgeWeight(from_node, to_node)
+END PROCEDURE
+
+
+PROCEDURE SumCycleCost(G: ConceptGraph, nodes: List[Node]) -> REAL:
+    total := 0.0
+    FOR i := 0 TO LENGTH(nodes) - 2:
+        total := total + G.GetEdgeWeight(nodes[i], nodes[i+1])
+    END FOR
+    RETURN total
+END PROCEDURE
+
+
+// ── DAG UPDATE PROCEDURES ─────────────────────────────────────
+
+PROCEDURE FilterUpdate(G: ConceptGraph, cycle: Cycle) -> ConceptGraph:
+    // Persistent update: integrate all cycle edges with confidence weighting.
+    // Existing edge weights are reinforced; new edges are added.
+
+    FOR i := 0 TO LENGTH(cycle.nodes) - 2:
+        from_node := cycle.nodes[i]
+        to_node   := cycle.nodes[i + 1]
+
+        IF G.HasEdge(from_node, to_node):
+            // Reinforce existing edge (increase weight)
+            old_w := G.GetEdgeWeight(from_node, to_node)
+            G.SetEdgeWeight(from_node, to_node, old_w * FILTER_REINFORCEMENT)
+        ELSE:
+            // Add new edge from cycle
+            G.AddEdge(from_node, to_node,
+                       weight=DEFAULT_EDGE_WEIGHT)
+        END IF
+    END FOR
+
+    CONSTANT FILTER_REINFORCEMENT := 1.05   // 5% weight increase per Filter visit
+    RETURN G
+END PROCEDURE
+
+
+PROCEDURE FlashUpdate(G: ConceptGraph,
+                       v: SymbolicCapsule, n: SymbolicCapsule) -> ConceptGraph:
+    // Ephemeral update: add only the current (vᵢ, nᵢ) pair as a new edge.
+    // Does not reinforce the broader cycle — transient integration.
+
+    v_node := G.GetOrCreateNode(v, type=VERB)
+    n_node := G.GetOrCreateNode(n, type=NOUN)
+
+    // Add directed edge v → n with low initial weight (ephemeral)
+    G.AddEdge(v_node, n_node, weight=FLASH_EDGE_WEIGHT)
+
+    CONSTANT FLASH_EDGE_WEIGHT := 0.1   // weak — will decay if not reinforced
+    RETURN G
+END PROCEDURE
+
+
+PROCEDURE ComputeCycleConfidence(cycle: Cycle, G: ConceptGraph) -> REAL:
+    // Confidence of a cycle = average epistemic confidence across cycle nodes.
+    IF LENGTH(cycle.nodes) == 0:
+        RETURN 0.0
+    END IF
+
+    confidence_sum := 0.0
+    FOR EACH node IN cycle.nodes:
+        state := G.GetNodeState(node)
+        confidence_sum := confidence_sum + ComputeEpistemicConfidence(state)
+    END FOR
+
+    RETURN confidence_sum / LENGTH(cycle.nodes)
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 3.2: VEXAMENERIA QUANTIFICATION
+// ------------------------------------------------------------
+
+// Vexameneria: a composite metric for verb-noun interaction strength.
+//
+//   vexameneria(v, n) = ω₁ · action_intensity(v)
+//                     + ω₂ · object_complexity(n)
+//                     + ω₃ · interaction_coherence(v, n)
+//
+//   action_intensity(v)       = ‖∇ᵥ semantic_field(v)‖₂
+//   object_complexity(n)      = H(n) · log(|attributes(n)|)
+//   interaction_coherence(v,n) = cos(embed(v), embed(n))
+
+PROCEDURE Vexameneria(v: SymbolicCapsule, n: SymbolicCapsule,
+                       omega1: REAL, omega2: REAL, omega3: REAL) -> REAL:
+    // vexameneria(v, n) = ω₁·action_intensity(v) + ω₂·object_complexity(n)
+    //                   + ω₃·interaction_coherence(v, n)
+
+    ai  := omega1 * ActionIntensity(v)
+    oc  := omega2 * ObjectComplexity(n)
+    ic  := omega3 * InteractionCoherence(v, n)
+
+    result := ai + oc + ic
+    EMIT LOG "Vexameneria(" + v.id + ", " + n.id + ") = " + result
+    RETURN result
+END PROCEDURE
+
+
+PROCEDURE ActionIntensity(v: SymbolicCapsule) -> REAL:
+    // action_intensity(v) = ‖∇ᵥ semantic_field(v)‖₂
+    //
+    // The L₂ norm of the gradient of v's semantic field.
+    // High gradient → verb with strong directional semantic pull
+    // (e.g., "slam" has higher action intensity than "place")
+
+    grad := GradientOfSemanticField(v)
+    RETURN NORM_L2(grad)
+END PROCEDURE
+
+PROCEDURE GradientOfSemanticField(v: SymbolicCapsule) -> Vector:
+    // Numerical gradient of the semantic field at v's embedding position.
+    // Semantic field: scalar function over embedding space mapping to
+    // "activation strength" of the concept.
+    field_fn  := v.semantic_field
+    delta     := 1e-4   // finite difference step
+    grad      := NumericalGradient(field_fn, at=v.embedding, step=delta)
+    RETURN grad
+END PROCEDURE
+
+
+PROCEDURE ObjectComplexity(n: SymbolicCapsule) -> REAL:
+    // object_complexity(n) = H(n) · log(|attributes(n)|)
+    //
+    // H(n): Shannon entropy of noun n's attribute distribution
+    //       (high entropy → more ambiguous noun — harder to pin down)
+    // log(|attributes(n)|): log of number of distinct attributes
+    //       (more attributes → more complex concept)
+
+    H_n             := ComputeNounEntropy(n)
+    n_attributes    := LENGTH(n.attributes)
+
+    IF n_attributes <= 0:
+        RETURN 0.0
+    END IF
+
+    RETURN H_n * LOG(n_attributes)
+END PROCEDURE
+
+PROCEDURE ComputeNounEntropy(n: SymbolicCapsule) -> REAL:
+    // Shannon entropy of noun n's attribute probability distribution.
+    // H(n) = −Σₐ P(a) · log P(a)
+    H := 0.0
+    total_weight := SUM(n.attributes.weights)
+    FOR EACH attr IN n.attributes:
+        p := attr.weight / MAX(total_weight, 1e-12)
+        IF p > 0:
+            H := H - p * LOG(p)
+        END IF
+    END FOR
+    RETURN H
+END PROCEDURE
+
+
+PROCEDURE InteractionCoherence(v: SymbolicCapsule,
+                                 n: SymbolicCapsule) -> REAL:
+    // interaction_coherence(v, n) = cos(embed(v), embed(n))
+    // High cosine similarity → verb and noun are semantically aligned
+    // (e.g., "drive car" more coherent than "drive symphony")
+
+    RETURN CosineSimilarity(v.embedding, n.embedding)
+END PROCEDURE
+
+
+// ── VEXAMENERIA NORMALIZED SCORING ────────────────────────────
+
+PROCEDURE VexameneriaScore(v: SymbolicCapsule, n: SymbolicCapsule) -> REAL:
+    // Normalized vexameneria using default equal weights (ω₁=ω₂=ω₃=1/3)
+    RETURN Vexameneria(v, n,
+                        omega1=1.0/3.0,
+                        omega2=1.0/3.0,
+                        omega3=1.0/3.0)
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: dag_ephemeris_M4_application_diram.psc.txt
+// ============================================================

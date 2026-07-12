@@ -1,0 +1,217 @@
+// ============================================================
+// AEGIS-PROOF-1.2: Formal Verification of Traversal Cost Function
+// for Epistemological DAG Inference
+// MODULE 1: Mathematical Framework, Definitions & Primary Theorem
+// Source: Formal_Verification_of_Traversal_Cost_Function_for_DAG.pdf
+// OBINexus Computing - Aegis Framework Division
+// Lead Mathematician: Nnamdi Michael Okpala | May 27, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// ABSTRACT — DOCUMENT PURPOSE AND SCOPE
+// ------------------------------------------------------------
+
+// AEGIS-PROOF-1.2 establishes formal mathematical verification of the
+// traversal cost function used in the Aegis DAG-based semantic inference engine.
+//
+// Four properties verified:
+//   1. Non-negativity:     C(Nodei → Nodej) ≥ 0 for all valid node pairs
+//   2. Identity:           C(Nodei → Nodei) = 0
+//   3. Monotonicity:       Cost increases with semantic divergence
+//   4. Numerical Stability: Bounded and computable under all valid parameters
+//
+// Architecture context:
+//   - Pure Bayesian DAG — NO cryptographic dependencies
+//   - Builds on AEGIS-PROOF-1.1 (Cost-Knowledge monotonicity)
+//   - Enables Phase 1.5 implementation of the epistemological framework
+
+DEFINE DOCUMENT_METADATA AS:
+    proof_id            = "AEGIS-PROOF-1.2"
+    predecessor         = "AEGIS-PROOF-1.1"
+    predecessor_result  = "Cost-Knowledge function C(Kt,S) = H(S)·exp(-Kt) verified"
+    status              = "VERIFIED — STRUCTURALLY LOCKED"
+    integration_status  = "Ready for Phase 1.5 Implementation"
+    enables:
+        EpistemicDAG_Class
+        Semantic_Disambiguation_Protocols
+        Filter_Flash_Integration
+        Bias_Mitigation_Preservation
+
+// Technical Safety Lock:
+// This traversal cost function is STRUCTURALLY LOCKED within the Aegis framework.
+// All implementations MUST reference this mathematical specification.
+// No heuristic approximations or architectural modifications are permitted
+// without formal proof revision.
+
+// ------------------------------------------------------------
+// SECTION 1.1 — PREDECESSOR: AEGIS-PROOF-1.1
+// ------------------------------------------------------------
+
+// The Cost-Knowledge function from AEGIS-PROOF-1.1 (Equation 1):
+// C(Kt, S) = H(S) · exp(-Kt)
+//
+// Where:
+//   Kt = knowledge accumulated at time t
+//   S  = semantic state
+//   H(S) = Shannon entropy of S
+//   exp(-Kt) = monotonically decreasing cost as knowledge increases
+//
+// AEGIS-PROOF-1.2 EXTENDS this to handle transitions between DISCRETE belief states.
+
+DEFINE COST_KNOWLEDGE_FUNCTION AS:
+    // From AEGIS-PROOF-1.1 (Equation 1)
+    C(Kt, S) = H(S) * exp(-Kt)
+    // Properties verified in 1.1: monotonicity under knowledge accumulation
+    // Current document extends to: inter-node transitions in DAG
+
+// ------------------------------------------------------------
+// SECTION 2 — MATHEMATICAL FRAMEWORK AND NOTATION
+// ------------------------------------------------------------
+
+// Definition 1 (Semantic Belief Node)
+// A Semantic Belief Node Nodei is a probabilistic state containing:
+//   1. Probability distribution Pi over semantic interpretations
+//   2. Entropy measure H(Pi)
+//   3. Semantic context Si (domain-specific knowledge state)
+
+DEFINE SEMANTIC_BELIEF_NODE AS STRUCT:
+    id          : STRING
+    P_i         : DISTRIBUTION          // Pi = {pi,1, pi,2, ..., pi,n}
+                                        // Probability over n semantic interpretations
+    H_Pi        : FLOAT                 // H(Pi) = -Σk pi,k · log2(pi,k)
+    S_i         : SEMANTIC_CONTEXT      // Domain-specific knowledge state
+
+PROCEDURE compute_node_entropy(node) -> FLOAT:
+    // H(Pi) = -Σ_{k=1}^{n} pi,k · log2(pi,k)
+    entropy = 0.0
+    FOR EACH k IN {1..n}:
+        p_k = node.P_i[k]
+        IF p_k > 0:     // Exclude zero-probability terms (0·log(0) = 0 by convention)
+            entropy -= p_k * log2(p_k)
+    RETURN entropy
+
+// Definition 2 (Traversal Cost Function) — Equation 2:
+// C(Nodei → Nodej) = α · KL(Pi ‖ Pj) + β · ΔH(Si,j)
+//
+// Where:
+//   KL(Pi ‖ Pj) = Kullback-Leibler divergence between Pi and Pj
+//   ΔH(Si,j)   = H(Si) - H(Sj) = entropy change between semantic contexts
+//   α, β ≥ 0   = weighting parameters (probabilistic vs. epistemic cost balance)
+
+DEFINE TRAVERSAL_COST_FUNCTION AS:
+    // C(Nodei → Nodej) = α · KL(Pi ‖ Pj) + β · ΔH(Si,j)
+    α           : FLOAT     // ≥ 0 — weight on KL divergence (probabilistic cost)
+    β           : FLOAT     // ≥ 0 — weight on entropy change (epistemic cost)
+    // Constraint (Lemma 1): α + β = 1, 0 ≤ α,β ≤ 1, α,β > ε
+
+PROCEDURE compute_traversal_cost(Node_i, Node_j, α, β) -> FLOAT:
+    // Step 1: Compute KL divergence component
+    KL_term = compute_KL_divergence_stable(Node_i.P_i, Node_j.P_i)
+
+    // Step 2: Compute entropy change component
+    delta_H = compute_entropy_change(Node_i.S_i, Node_j.S_i)
+
+    // Step 3: Weighted sum
+    cost = α * KL_term + β * delta_H
+
+    RETURN cost
+
+// ------------------------------------------------------------
+// SECTION 2.1 — KL DIVERGENCE COMPUTATION (Equation 3)
+// ------------------------------------------------------------
+
+// KL(Pi ‖ Pj) = Σ_{k=1}^{n} pi,k · log2(pi,k / pj,k)
+
+PROCEDURE compute_KL_divergence(P_i, P_j) -> FLOAT:
+    // Standard KL divergence (Equation 3)
+    kl = 0.0
+    FOR EACH k IN {1..n}:
+        p_ik = P_i[k]
+        p_jk = P_j[k]
+        IF p_ik > 0 AND p_jk > 0:
+            kl += p_ik * log2(p_ik / p_jk)
+        IF p_ik > 0 AND p_jk == 0:
+            RAISE NumericalInstability("KL divergence undefined: pj,k=0 with pi,k>0")
+            // Handled via stable version — see Module 2, Section 5.1
+    RETURN kl
+
+// ------------------------------------------------------------
+// SECTION 2.2 — ENTROPY CHANGE COMPUTATION (Equation 5)
+// ------------------------------------------------------------
+
+// ΔH(Si,j) = H(Si) - H(Sj)
+// Valid transitions represent semantic DISAMBIGUATION (knowledge accumulation).
+// Disambiguation reduces uncertainty → H(Sj) ≤ H(Si) → ΔH ≥ 0.
+
+PROCEDURE compute_entropy_change(S_i, S_j) -> FLOAT:
+    H_Si = compute_semantic_entropy(S_i)
+    H_Sj = compute_semantic_entropy(S_j)
+    delta_H = H_Si - H_Sj
+    // PROOF REQUIREMENT: delta_H ≥ 0 for valid disambiguation transitions
+    // If delta_H < 0: transition increases uncertainty — may indicate invalid edge
+    RETURN delta_H
+
+// ============================================================
+// SECTION 3 — PRIMARY THEOREM AND FORMAL PROOF
+// ============================================================
+
+// THEOREM 1 (Non-Negativity and Stability of Traversal Cost Function):
+// For any valid pair Pi, Pj and semantic transition Si,j, C satisfies:
+//   1. C(Nodei → Nodej) ≥ 0
+//   2. C(Nodei → Nodei) = 0
+//   3. semantic_distance ↑ ⟹ C ↑
+//   4. C is bounded and computable under all valid parameter ranges
+
+// PROOF OF PART 1: Non-negativity of KL Component
+// By Gibbs' inequality: KL(Pi ‖ Pj) ≥ 0 (Equation 4)
+// with equality iff Pi = Pj almost everywhere.
+
+THEOREM kl_non_negativity:
+    FOR ALL valid_distributions P_i, P_j:
+        KL(P_i, P_j) >= 0
+    EQUALITY_CONDITION: P_i == P_j    // Almost everywhere
+
+// PROOF OF PART 2: Non-negativity of Entropy Change
+// Semantic disambiguation reduces uncertainty → H(Sj) ≤ H(Si) (Equation 5)
+
+THEOREM entropy_change_non_negativity:
+    FOR ALL valid_disambiguation_transitions (S_i -> S_j):
+        delta_H(S_i, S_j) = H(S_i) - H(S_j) >= 0
+    // Proof: Disambiguation = information gain = entropy reduction in Sj
+
+// PROOF OF PART 3: Total Cost Non-negativity (Equation 6)
+// Since α,β ≥ 0 AND KL ≥ 0 AND ΔH ≥ 0:
+// C = α·KL + β·ΔH ≥ 0
+
+THEOREM total_cost_non_negativity(Node_i, Node_j, α, β):
+    ASSERT α >= 0 AND β >= 0
+    ASSERT compute_KL_divergence(Node_i.P_i, Node_j.P_i) >= 0
+    ASSERT compute_entropy_change(Node_i.S_i, Node_j.S_i) >= 0
+    cost = compute_traversal_cost(Node_i, Node_j, α, β)
+    ASSERT cost >= 0    // Follows from non-negativity of all components
+
+// PROOF OF PART 4: Identity Property (Equations 7-8)
+// KL(Pi ‖ Pi) = 0  AND  ΔH(Si,i) = H(Si) - H(Si) = 0
+// Therefore: C(Nodei → Nodei) = α·0 + β·0 = 0
+
+THEOREM identity_property(Node_i, α, β):
+    kl_self = compute_KL_divergence(Node_i.P_i, Node_i.P_i)
+    delta_h_self = compute_entropy_change(Node_i.S_i, Node_i.S_i)
+    ASSERT kl_self == 0.0           // KL(Pi ‖ Pi) = 0 by Gibbs
+    ASSERT delta_h_self == 0.0      // H(Si) - H(Si) = 0
+    self_cost = α * kl_self + β * delta_h_self
+    ASSERT self_cost == 0.0         // QED
+
+// PROOF OF PART 5: Monotonicity (Equation 9)
+// semantic_distance(Nodei, Nodej) ↑ ⟹ C(Nodei → Nodej) ↑
+// Follows from: KL monotonically increases as Pi, Pj diverge.
+
+THEOREM monotonicity(Node_a, Node_b, Node_c):
+    // If Nodec is semantically MORE distant from Nodea than Nodeb:
+    IF semantic_distance(Node_a, Node_c) > semantic_distance(Node_a, Node_b):
+        ASSERT compute_traversal_cost(Node_a, Node_c, α, β) >=
+               compute_traversal_cost(Node_a, Node_b, α, β)
+
+// ============================================================
+// END MODULE 1
+// ============================================================

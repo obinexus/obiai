@@ -1,0 +1,667 @@
+% ==============================================================================
+\documentclass[11pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{amsmath}
+\usepackage{longtable}
+\usepackage{hyperref}
+
+% Configure code listings for shell commands
+\lstdefinelanguage{shell}{
+  keywords={rift, git-raf, nlink, poly, aegis},
+  keywordstyle=\color{blue}\bfseries,
+  comment=[l]{\#},
+  commentstyle=\color{gray}\itshape,
+  string=[b]",
+  stringstyle=\color{red},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{lightgray!10}
+}
+
+\lstset{language=shell}
+
+\title{CLI Reference Guide for RIFT/Git-RAF Governance Operations}
+\author{OBINexus Computing - Aegis Project}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document provides comprehensive command-line interface documentation for the RIFT ecosystem governance operations. It covers Git-RAF cryptographic validation, RIFTlang governance contract compilation, nLink binary orchestration, and PolyBuild coordination middleware. The CLI reference supports waterfall methodology gate validation and stakeholder-specific operational workflows within the Aegis project framework.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ==============================================================================
+\section{Executive Overview}
+% ==============================================================================
+
+The RIFT ecosystem provides integrated command-line interfaces for governance-critical software development operations. These tools implement the stakeholder triangle model (Mission, Research, Development) through technical interfaces that enforce architectural constraints rather than procedural policies.
+
+The CLI architecture follows the waterfall methodology's gate-based validation approach, where each command represents a formal validation checkpoint within the development lifecycle. All operations generate cryptographic attestations compatible with AuraSeal verification and Git-RAF audit trail requirements.
+
+% ==============================================================================
+\section{Git-RAF Governance Version Control}
+% ==============================================================================
+
+Git-RAF extends standard Git operations with cryptographic governance enforcement and multi-signature validation. All Git-RAF commands integrate with the existing Git workflow while adding mandatory policy validation checkpoints.
+
+\subsection{Repository Initialization and Configuration}
+
+\begin{lstlisting}[language=shell, caption=Git-RAF Repository Setup Commands]
+# Initialize Git-RAF in existing repository
+git raf init --governance-level [minimal|standard|high|maximum]
+git raf init --governance-level standard --entropy-threshold 0.05
+
+# Configure governance policies for different branch types
+git raf config branch.main.policy maximum
+git raf config branch.release.policy high
+git raf config branch.develop.policy standard
+git raf config branch.feature.policy moderate
+
+# Set signature requirements and validation thresholds
+git raf config signature.minimum 2
+git raf config entropy.threshold 0.03
+git raf config rollback.auto true
+
+# Configure integration with external governance systems
+git raf config integration.riftlang enabled
+git raf config integration.polybuild enabled
+git raf config audit.endpoint "https://audit.company.com/api"
+\end{lstlisting}
+
+\subsection{Pre-Commit Governance Validation}
+
+\begin{lstlisting}[language=shell, caption=Pre-Commit Validation Commands]
+# Validate current changes against governance contracts
+git raf validate --strict
+git raf validate --show-details --include-entropy-analysis
+
+# Compute governance vector for staged changes
+git raf compute-vector --staged
+git raf compute-vector --staged --explain-scoring
+
+# Generate governance metadata for commit preparation
+git raf prepare-commit --policy-tag stable
+git raf prepare-commit --governance-ref security_policy.rift.gov
+
+# Validate specific files against governance contracts
+git raf validate-file src/cardiac_monitor.rift
+git raf validate-file --contract CardiacSensorValidator src/medical/*.rift
+\end{lstlisting}
+
+\subsection{Cryptographic Commit Operations}
+
+\begin{lstlisting}[language=shell, caption=AuraSeal Commit Commands]
+# Create governance-validated commit with AuraSeal
+git raf commit -m "Add cardiac monitoring feature" --aura-seal
+git raf commit -m "Security patch for authentication" --policy-tag breaking
+
+# Generate AuraSeal for existing commit
+git raf seal --commit HEAD
+git raf seal --commit a1b2c3d4e5f6 --include-entropy-analysis
+
+# Verify AuraSeal authenticity and completeness
+git raf verify --commit a1b2c3d4e5f6
+git raf verify --commit HEAD --public-key governance_authority.pub --detailed
+
+# Multi-signature approval workflow
+git raf approve --commit a1b2c3d4e5f6 --role security_reviewer
+git raf approve --commit HEAD --consensus-required
+git raf signature-status --commit a1b2c3d4e5f6
+\end{lstlisting}
+
+\subsection{Branch Policy Management}
+
+\begin{lstlisting}[language=shell, caption=Branch Governance Commands]
+# Check policy requirements for current branch
+git raf policy-status
+git raf policy-status --branch main --show-requirements
+
+# Validate cross-branch merge compatibility
+git raf merge-check feature/authentication main
+git raf merge-check --policy-inheritance --show-conflicts
+
+# Execute governance-validated merge
+git raf merge feature/authentication --validate-governance
+git raf merge --require-signatures 3 --entropy-check
+
+# Emergency rollback with governance justification
+git raf rollback --commit a1b2c3d4e5f6 --reason "critical_security_vulnerability"
+git raf rollback --emergency --governance-override --justification "patient_safety"
+\end{lstlisting}
+
+\subsection{Audit and Compliance Reporting}
+
+\begin{lstlisting}[language=shell, caption=Git-RAF Audit Commands]
+# Generate comprehensive compliance reports
+git raf report --from 2024-01-01 --to 2024-05-28 --format pdf
+git raf report --governance-summary --include-attestations
+
+# Create detailed audit trail for specific commits
+git raf audit-trail --commit a1b2c3d4e5f6 --detailed
+git raf audit-trail --date-range 2024-Q1 --security-focus
+
+# Export audit data for external compliance systems
+git raf export-audit --format json --include-cryptographic-proofs
+git raf export-audit --regulatory-format FDA_21CFR11
+
+# Repository-wide governance status analysis
+git raf status --all-branches --risk-assessment
+git raf status --entropy-analysis --governance-drift-detection
+\end{lstlisting}
+
+% ==============================================================================
+\section{RIFTlang Governance Contract Compilation}
+% ==============================================================================
+
+The RIFTlang compiler provides comprehensive governance contract validation and token triplet architecture compilation with integrated stakeholder alignment verification.
+
+\subsection{Contract Compilation and Validation}
+
+\begin{lstlisting}[language=shell, caption=RIFTlang Compilation Commands]
+# Compile RIFTlang source with governance validation
+rift compile --input cardiac_monitor.rift --governance-mode strict
+rift compile src/*.rift --output build/ --validate-contracts
+
+# Validate governance contracts without compilation
+rift validate --contract CardiacSensorValidator
+rift validate --contracts-dir governance/ --stakeholder-alignment
+
+# Generate contract templates for specific domains
+rift generate-template --domain medical_device --stakeholder mission
+rift generate-template --domain financial_system --stakeholder development
+
+# Cross-reference contract dependencies
+rift analyze-dependencies --input medical_system.rift
+rift analyze-dependencies --circular-check --governance-inheritance
+\end{lstlisting}
+
+\subsection{Token Triplet Architecture Operations}
+
+\begin{lstlisting}[language=shell, caption=Token Architecture Commands]
+# Analyze token triplet memory layout
+rift analyze-memory --input cardiac_sensor.rift
+rift analyze-memory --alignment-check --governance-spans
+
+# Validate type system governance constraints
+rift validate-types --input financial_transaction.rift
+rift validate-types --cross-type-interactions --bounds-checking
+
+# Generate entropy analysis for value constraints
+rift entropy-analysis --input sensor_data.rift
+rift entropy-analysis --baseline-generation --threshold-validation
+
+# Memory-first governance validation
+rift validate-memory-governance --input critical_system.rift
+rift validate-memory-governance --role-based-access --audit-trail
+\end{lstlisting}
+
+\subsection{Stakeholder-Specific Compilation Modes}
+
+\begin{lstlisting}[language=shell, caption=Stakeholder-Aligned Compilation]
+# Mission-focused compilation with safety emphasis
+rift compile --stakeholder mission --safety-critical --input life_support.rift
+rift compile --mission-alignment --regulatory-compliance FDA
+
+# Research-focused compilation with experimental features
+rift compile --stakeholder research --experimental-mode --input research_prototype.rift
+rift compile --research-framework --peer-review-validation
+
+# Development-focused compilation with productivity optimization
+rift compile --stakeholder development --optimization-level production
+rift compile --development-workflow --ci-cd-integration
+\end{lstlisting}
+
+% ==============================================================================
+\section{nLink Binary Orchestration}
+% ==============================================================================
+
+nLink provides governance-preserving binary orchestration with entropy monitoring and cryptographic attestation embedding for deployment-ready artifacts.
+
+\subsection{Binary Compilation and Governance Embedding}
+
+\begin{lstlisting}[language=shell, caption=nLink Binary Operations]
+# Compile governance-validated binary with embedded headers
+nlink compile --input medical_device.rift.ir --output medical_device.bin
+nlink compile --governance-headers --aura-seal-embed --entropy-preserve
+
+# Validate governance preservation through compilation
+nlink validate-preservation --input cardiac_monitor.rift.ir
+nlink validate-preservation --entropy-consistency --governance-metadata
+
+# Generate deployment-ready artifacts with attestations
+nlink package --input system_components/ --output deployable.pkg
+nlink package --regulatory-compliance --cryptographic-attestation
+
+# Cross-platform binary generation with governance consistency
+nlink cross-compile --target embedded_arm --governance-preserve
+nlink cross-compile --platform medical_device_cert --safety-critical
+\end{lstlisting}
+
+\subsection{Entropy and Performance Analysis}
+
+\begin{lstlisting}[language=shell, caption=nLink Analysis Commands]
+# Entropy analysis for governance compliance
+nlink entropy-check --input compiled_binary.bin
+nlink entropy-check --baseline-comparison --deviation-analysis
+
+# Performance impact assessment
+nlink performance-analysis --input optimized_binary.bin
+nlink performance-analysis --governance-overhead --optimization-report
+
+# Memory layout verification
+nlink memory-layout --input cardiac_device.bin
+nlink memory-layout --governance-segments --access-permissions
+\end{lstlisting}
+
+% ==============================================================================
+\section{PolyBuild Coordination Middleware}
+% ==============================================================================
+
+PolyBuild orchestrates multi-language builds while maintaining governance consistency across different runtime environments and dependency ecosystems.
+
+\subsection{Project Initialization and Configuration}
+
+\begin{lstlisting}[language=shell, caption=PolyBuild Project Setup]
+# Initialize polyglot project with governance framework
+poly init --languages [python,rust,go] --governance-level standard
+poly init --medical-device --regulatory-framework FDA_21CFR11
+
+# Configure language-specific bindings
+poly binding add python --stability paramental --governance-enforce
+poly binding add nodejs --stability zephyr --sandbox-isolate
+
+# Set up dependency validation pipeline
+poly dependency-policy --package-verification cryptographic
+poly dependency-policy --stability-enforcement strict --supply-chain-security
+\end{lstlisting}
+
+\subsection{Multi-Language Build Coordination}
+
+\begin{lstlisting}[language=shell, caption=PolyBuild Coordination Commands]
+# Execute coordinated multi-language build
+poly build --governance-validate --all-languages
+poly build --stakeholder mission --safety-critical-validation
+
+# Validate cross-language governance consistency
+poly validate-cross-language --governance-contracts
+poly validate-cross-language --memory-alignment --type-consistency
+
+# Generate unified governance report across languages
+poly report --cross-language-governance --compliance-summary
+poly report --dependency-audit --supply-chain-analysis
+\end{lstlisting}
+
+\subsection{Dependency and Supply Chain Management}
+
+\begin{lstlisting}[language=shell, caption=Supply Chain Security Commands]
+# Validate external dependencies
+poly deps validate --cryptographic-verification
+poly deps validate --stability-classification --governance-compliance
+
+# Supply chain security analysis
+poly security-scan --dependencies --vulnerability-assessment
+poly security-scan --supply-chain-audit --malware-detection
+
+# Dependency governance enforcement
+poly deps enforce-policy --paramental-only --production-deployment
+poly deps enforce-policy --experimental-sandbox --development-only
+\end{lstlisting}
+
+% ==============================================================================
+\section{Integrated Workflow Commands}
+% ==============================================================================
+
+These commands demonstrate complete workflows that integrate multiple RIFT ecosystem components for end-to-end governance validation.
+
+\subsection{Medical Device Development Workflow}
+
+\begin{lstlisting}[language=shell, caption=Medical Device Development Pipeline]
+# Initialize medical device project with FDA compliance
+git raf init --governance-level maximum --regulatory-framework FDA
+poly init --medical-device --languages [rift,c] --safety-critical
+
+# Develop cardiac monitoring feature with governance contracts
+rift generate-template --domain cardiac_monitoring --stakeholder mission
+rift compile cardiac_sensor.rift --safety-critical --validation strict
+
+# Validate and commit with medical-grade attestation
+git raf validate --medical-device-compliance --entropy-strict
+git raf commit -m "Add cardiac arrhythmia detection" --medical-attestation
+
+# Build deployment-ready medical device binary
+nlink compile cardiac_system.rift.ir --medical-grade --fda-compliance
+nlink validate-preservation --entropy-medical-grade --safety-verification
+
+# Generate regulatory compliance documentation
+git raf report --medical-device --regulatory-submission --format FDA_510K
+poly report --supply-chain-medical --dependency-verification-medical
+\end{lstlisting}
+
+\subsection{Financial System Development Workflow}
+
+\begin{lstlisting}[language=shell, caption=Financial System Development Pipeline]
+# Initialize financial system with SOX compliance
+git raf init --governance-level high --regulatory-framework SOX
+poly init --financial-system --languages [rift,go,python] --audit-critical
+
+# Develop transaction processing with governance
+rift generate-template --domain financial_transaction --stakeholder development
+rift compile transaction_processor.rift --audit-trail --financial-compliance
+
+# Multi-signature approval for financial system changes
+git raf commit -m "Add transaction validation" --financial-control
+git raf approve --role financial_controller --compliance SOX
+
+# Coordinate multi-language financial system build
+poly build --financial-compliance --audit-trail-comprehensive
+nlink compile financial_system.ir --audit-embed --compliance-attestation
+
+# Generate SOX compliance audit trail
+git raf report --financial-controls --sox-compliance --audit-trail
+poly report --financial-dependencies --compliance-verification
+\end{lstlisting}
+
+% ==============================================================================
+\section{Troubleshooting and Diagnostics}
+% ==============================================================================
+
+Diagnostic commands for identifying and resolving governance validation issues within the RIFT ecosystem.
+
+\subsection{Governance Validation Diagnostics}
+
+\begin{lstlisting}[language=shell, caption=Diagnostic Commands]
+# Diagnose governance contract compilation failures
+rift diagnose --contract-compilation --verbose
+rift diagnose --memory-alignment-issues --stakeholder-conflicts
+
+# Git-RAF governance validation troubleshooting
+git raf diagnostic --governance-failures --entropy-violations
+git raf diagnostic --signature-validation --aura-seal-integrity
+
+# PolyBuild coordination issue analysis
+poly diagnose --language-binding-failures --governance-inconsistency
+poly diagnose --dependency-validation-failures --supply-chain-issues
+
+# nLink binary orchestration troubleshooting
+nlink diagnose --governance-preservation-failures --entropy-deviation
+nlink diagnose --memory-layout-issues --attestation-failures
+\end{lstlisting}
+
+\subsection{Performance and Optimization Analysis}
+
+\begin{lstlisting}[language=shell, caption=Performance Diagnostic Commands]
+# Analyze governance overhead impact
+rift performance-profile --governance-overhead --optimization-opportunities
+git raf performance-analysis --validation-bottlenecks --aura-seal-overhead
+
+# Memory utilization analysis
+nlink memory-profile --governance-segments --optimization-analysis
+poly memory-analysis --cross-language-overhead --binding-efficiency
+
+# Entropy monitoring performance impact
+rift entropy-profile --monitoring-overhead --threshold-optimization
+nlink entropy-analysis --performance-impact --optimization-recommendations
+\end{lstlisting}
+
+% ==============================================================================
+\section{Advanced Operations}
+% ==============================================================================
+
+Advanced command patterns for complex governance scenarios and enterprise deployment requirements.
+
+\subsection{Enterprise Integration Commands}
+
+\begin{lstlisting}[language=shell, caption=Enterprise Integration]
+# LDAP/Active Directory integration for governance authorities
+git raf auth-integration --ldap --governance-roles-mapping
+git raf auth-integration --active-directory --multi-factor-required
+
+# Enterprise audit system integration
+git raf audit-integration --splunk --governance-events
+poly audit-integration --elasticsearch --compliance-monitoring
+
+# Regulatory reporting automation
+git raf regulatory-integration --framework [FDA|SOX|HIPAA|PCI_DSS]
+poly regulatory-reporting --automated --compliance-dashboard
+
+# Enterprise PKI integration for cryptographic operations
+git raf pki-integration --enterprise-ca --certificate-validation
+nlink pki-integration --hardware-security-module --attestation-signing
+\end{lstlisting}
+
+\subsection{Disaster Recovery and Business Continuity}
+
+\begin{lstlisting}[language=shell, caption=Disaster Recovery Commands]
+# Governance state backup and recovery
+git raf backup --governance-state --cryptographic-integrity
+git raf restore --governance-state --integrity-verification
+
+# Distributed governance authority failover
+git raf failover-config --authority-redundancy --consensus-requirements
+git raf failover-test --governance-continuity --authority-availability
+
+# Emergency governance override procedures
+git raf emergency-override --justification "system_safety_critical"
+git raf emergency-override --authority-consensus-required --audit-comprehensive
+
+# Business continuity governance validation
+poly continuity-test --governance-degraded-mode --essential-operations
+nlink continuity-validation --governance-minimal --safety-preservation
+\end{lstlisting}
+
+% ==============================================================================
+\section{Command Reference Tables}
+% ==============================================================================
+
+\subsection{Git-RAF Command Summary}
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Command} & \textbf{Category} & \textbf{Description} \\
+\hline
+\endhead
+
+\texttt{git raf init} & Setup & Initialize Git-RAF governance in repository \\
+\hline
+\texttt{git raf validate} & Validation & Validate changes against governance contracts \\
+\hline
+\texttt{git raf compute-vector} & Analysis & Calculate governance risk vector for changes \\
+\hline
+\texttt{git raf commit} & Operations & Create governance-validated commit with AuraSeal \\
+\hline
+\texttt{git raf seal} & Attestation & Generate AuraSeal for existing commit \\
+\hline
+\texttt{git raf verify} & Verification & Verify AuraSeal authenticity and completeness \\
+\hline
+\texttt{git raf approve} & Workflow & Add signature approval to commit \\
+\hline
+\texttt{git raf merge} & Operations & Execute governance-validated merge \\
+\hline
+\texttt{git raf rollback} & Recovery & Emergency rollback with governance justification \\
+\hline
+\texttt{git raf report} & Reporting & Generate compliance and audit reports \\
+\hline
+\texttt{git raf audit-trail} & Auditing & Create detailed audit trail documentation \\
+\hline
+\texttt{git raf policy-status} & Status & Check branch policy requirements and status \\
+\hline
+\end{longtable}
+
+\subsection{RIFTlang Compiler Command Summary}
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Command} & \textbf{Category} & \textbf{Description} \\
+\hline
+\endhead
+
+\texttt{rift compile} & Compilation & Compile RIFTlang with governance validation \\
+\hline
+\texttt{rift validate} & Validation & Validate governance contracts independently \\
+\hline
+\texttt{rift generate-template} & Development & Generate governance contract templates \\
+\hline
+\texttt{rift analyze-memory} & Analysis & Analyze token triplet memory layout \\
+\hline
+\texttt{rift validate-types} & Validation & Validate type system governance constraints \\
+\hline
+\texttt{rift entropy-analysis} & Analysis & Generate entropy analysis for value constraints \\
+\hline
+\texttt{rift diagnose} & Troubleshooting & Diagnose governance compilation issues \\
+\hline
+\texttt{rift performance-profile} & Optimization & Analyze governance performance overhead \\
+\hline
+\end{longtable}
+
+\subsection{PolyBuild Command Summary}
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Command} & \textbf{Category} & \textbf{Description} \\
+\hline
+\endhead
+
+\texttt{poly init} & Setup & Initialize polyglot project with governance \\
+\hline
+\texttt{poly binding add} & Configuration & Add language-specific governance binding \\
+\hline
+\texttt{poly build} & Operations & Execute coordinated multi-language build \\
+\hline
+\texttt{poly validate-cross-language} & Validation & Validate cross-language governance consistency \\
+\hline
+\texttt{poly deps validate} & Security & Validate external dependencies \\
+\hline
+\texttt{poly security-scan} & Security & Supply chain security analysis \\
+\hline
+\texttt{poly report} & Reporting & Generate unified governance reports \\
+\hline
+\texttt{poly diagnose} & Troubleshooting & Diagnose coordination issues \\
+\hline
+\end{longtable}
+
+% ==============================================================================
+\section{Configuration File Examples}
+% ==============================================================================
+
+\subsection{Git-RAF Configuration (.gitraf.toml)}
+
+\begin{lstlisting}[language=shell, caption=Git-RAF Configuration File]
+[governance]
+level = "standard"
+entropy_threshold = 0.05
+signature_minimum = 2
+rollback_auto = true
+
+[branches]
+main = { policy = "maximum", signatures = 5 }
+release = { policy = "high", signatures = 3 }
+develop = { policy = "standard", signatures = 2 }
+feature = { policy = "moderate", signatures = 1 }
+
+[integration]
+riftlang = true
+polybuild = true
+audit_endpoint = "https://audit.company.com/api"
+
+[compliance]
+regulatory_framework = ["FDA_21CFR11", "SOX", "HIPAA"]
+audit_retention_years = 7
+cryptographic_standard = "FIPS_140_2"
+\end{lstlisting}
+
+\subsection{PolyBuild Project Configuration (polybuild.yaml)}
+
+\begin{lstlisting}[language=shell, caption=PolyBuild Configuration File]
+project:
+  name: "medical-device-system"
+  governance_level: "safety_critical"
+  regulatory_framework: "FDA_21CFR11"
+
+languages:
+  rift:
+    stability: "paramental"
+    governance_enforce: true
+    contracts_dir: "./governance"
+    
+  python:
+    stability: "paramental"
+    binding: "PyPolycol"
+    sandbox_isolate: true
+    
+  c:
+    stability: "paramental"
+    memory_safety: "enforced"
+    
+dependencies:
+  verification: "cryptographic"
+  stability_enforcement: "strict"
+  supply_chain_security: true
+  
+build:
+  stakeholder_alignment: "mission"
+  safety_critical_validation: true
+  entropy_monitoring: "continuous"
+\end{lstlisting}
+
+% ==============================================================================
+\section{Best Practices and Workflow Integration}
+% ==============================================================================
+
+\subsection{Waterfall Methodology Integration}
+
+The RIFT CLI tools integrate seamlessly with waterfall methodology gates:
+
+\begin{enumerate}
+\item \textbf{Requirements Phase}: Use \texttt{rift generate-template} to create stakeholder-aligned governance contracts
+\item \textbf{Design Phase}: Validate governance architecture with \texttt{rift validate-types} and \texttt{nlink memory-layout}
+\item \textbf{Implementation Phase}: Continuous validation with \texttt{git raf validate} and \texttt{poly build}
+\item \textbf{Testing Phase}: Comprehensive validation with \texttt{git raf report} and \texttt{nlink entropy-check}
+\item \textbf{Deployment Phase}: Production deployment with \texttt{nlink package} and regulatory compliance reporting
+\item \textbf{Maintenance Phase}: Ongoing governance monitoring and audit trail maintenance
+\end{enumerate}
+
+\subsection{CI/CD Pipeline Integration}
+
+\begin{lstlisting}[language=shell, caption=CI/CD Pipeline Integration Examples]
+# Pre-commit hooks for governance validation
+#!/bin/bash
+# .git/hooks/pre-commit
+git raf validate --strict || exit 1
+rift validate --contracts-dir governance/ || exit 1
+
+# Continuous integration governance checks
+#!/bin/bash
+# ci/governance-validation.sh
+poly build --governance-validate --all-languages
+git raf compute-vector --all-changes
+nlink entropy-check --baseline-comparison
+
+# Deployment pipeline governance verification
+#!/bin/bash
+# deploy/governance-verify.sh
+git raf verify --commit $DEPLOY_COMMIT --detailed
+nlink validate-preservation --entropy-consistency
+poly report --compliance-verification --regulatory-submission
+\end{lstlisting}
+
+% ==============================================================================
+\section{Conclusion}
+% ==============================================================================
+
+The RIFT ecosystem CLI provides comprehensive governance operations that integrate seamlessly with existing development workflows while enforcing architectural constraints through technical mechanisms rather than procedural policies. The command interfaces support the complete software development lifecycle within the waterfall methodology framework, ensuring that governance requirements are validated at each phase gate.
+
+The integration of Git-RAF cryptographic validation, RIFTlang governance contracts, nLink binary orchestration, and PolyBuild coordination provides a unified command-line environment for developing governance-critical systems. These tools enable development teams to maintain high security and compliance standards while preserving development velocity through automation and clear validation checkpoints.
+
+As the Aegis project continues development, these CLI interfaces will evolve to support additional governance scenarios and regulatory frameworks while maintaining backward compatibility and consistent operational patterns across the toolchain.
+
+\end{document}

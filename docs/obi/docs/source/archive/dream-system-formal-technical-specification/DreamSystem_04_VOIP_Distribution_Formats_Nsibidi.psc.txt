@@ -1,0 +1,339 @@
+// ============================================================
+// DREAM SYSTEM: Formal Technical Specification
+// Cognitive Observability Platform v0.3
+// MODULE 4: OBICall-VOIP, Distribution System, File Formats & Nsibidi CSL
+// Source: Dream_System___Formal_Technical_Specification.pdf
+// OBINexus Engineering Team | May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 8 — OBICALL-VOIP PROTOCOL WITH END-TO-END ENCRYPTION
+// ------------------------------------------------------------
+
+DEFINE SecureOBICallVOIP AS CLASS:
+
+    STATE:
+        protocol_version    : STRING  = "1.0-secure"
+        supported_codecs    : LIST    = ["opus", "g.711", "speex"]
+        encryption          : STRING  = "AES-256-GCM"
+        key_exchange        : STRING  = "ECDH-P256"
+
+    PROCEDURE establish_secure_session(user_id, dream_session_id, auth_credentials) -> DICT:
+        // Step 1: Authenticate user identity
+        IF NOT authenticate_user(user_id, auth_credentials):
+            RAISE SecurityException("Authentication failed")
+
+        // Step 2: Generate fresh session keys
+        session_keys = generate_session_keys()
+        // Returns: { encryption: key, mac: key }
+
+        // Step 3: Build session record
+        session = {
+            id:               generate_session_id(),
+            user:             user_id,
+            dream_ref:        dream_session_id,
+            state:            "processing",
+            codec:            negotiate_codec(),        // Best of supported_codecs
+            encryption_key:   session_keys.encryption,
+            mac_key:          session_keys.mac,
+            session_token:    generate_session_token()
+        }
+
+        // Step 4: Initialize E2E encryption channel
+        init_e2e_encryption(session)
+
+        RETURN session
+
+    PROCEDURE secure_voice_to_intent(encrypted_audio, session) -> DICT:
+        // Step 1: Verify MAC integrity of audio stream
+        IF NOT verify_session_mac(encrypted_audio, session):
+            RAISE SecurityException("Session integrity check failed")
+
+        // Step 2: Decrypt audio stream
+        audio_stream = decrypt_audio(encrypted_audio, session)
+
+        // Step 3: Speech-to-text with privacy preservation
+        transcript = privacy_preserving_stt(audio_stream)
+        // NOTE: privacy_preserving_stt ensures raw audio is not persisted
+
+        // Step 4: Extract intent with security validation
+        intent = extract_validated_intent(transcript)
+
+        // Step 5: Audit trail
+        audit_logger.log_voice_interaction(
+            session_id      = session.id,
+            intent_type     = intent.type,
+            security_level  = intent.security_level
+        )
+
+        // Step 6: Route to U agent
+        RETURN route_to_secure_u_agent(intent)
+
+// ------------------------------------------------------------
+// SECTION 8.1.2 — SECURE WAKE INTERACTION FLOW
+// ------------------------------------------------------------
+
+// This is the complete workflow from user awakening to U response.
+
+PROCEDURE wake_interaction_flow():
+
+    // Step 1: Wake Detection
+    // Dream Band detects user awakening (accelerometer + HR pattern)
+    event = dream_band.detect_awakening()
+    IF event.awake == FALSE:
+        RETURN  // Continue sleep monitoring
+
+    // Step 2: Biometric Verification
+    voice_sample = capture_voice_sample()
+    IF NOT verify_voice_biometric(voice_sample):
+        LOG "Biometric verification failed"
+        RETURN
+
+    // Step 3: Session Initiation
+    session = establish_secure_session(
+        user_id         = current_user.id,
+        dream_session_id= current_dream.id,
+        auth_credentials= { voice_biometric: voice_sample }
+    )
+
+    // Step 4: Video Processing
+    // Dream visualization renders with user-specific watermarking
+    visualization = render_dream_visualization(current_dream)
+    apply_invisible_watermark(visualization, current_user.id)
+
+    // Step 5: Voice Interaction (encrypted)
+    encrypted_command = capture_encrypted_voice_command(session)
+
+    // Step 6: Intent Processing — permission-gated
+    intent = secure_voice_to_intent(encrypted_command, session)
+
+    DISPATCH intent.type:
+        "show_moment":      // "Show me the moment with water"
+            REQUIRE permission: READ
+            execute_read_intent(intent)
+
+        "heart_rate_query": // "What was my heart rate during the chase?"
+            REQUIRE permission: ANALYTICS
+            execute_analytics_intent(intent)
+
+        "save_dream":       // "Save this dream to family collection"
+            REQUIRE permission: SHARE
+            execute_share_intent(intent)
+
+        "schedule_therapist": // "Schedule discussion with sleep therapist"
+            REQUIRE permission: MEDICAL
+            execute_medical_intent(intent)
+
+        DEFAULT:
+            LOG "Unknown intent type: " + intent.type
+
+    // Step 7: U Response — encrypted voice feedback
+    response = u_agent.generate_response(intent.result)
+    send_encrypted_voice_response(response, session)
+
+// ------------------------------------------------------------
+// SECTION 8.2 — TECHNICAL REQUIREMENTS WITH SECURITY (Table 4)
+// ------------------------------------------------------------
+
+DEFINE VOIP_TECHNICAL_REQUIREMENTS AS:
+    latency         : LESS_THAN 150ms   // Round-trip INCLUDING crypto overhead
+    audio_quality   : MINIMUM 16kHz_sample_rate
+    bandwidth       : 32-64_kbps_adaptive + encryption_overhead
+    security:
+        e2e_encryption          = MANDATORY
+        perfect_forward_secrecy = REQUIRED
+    availability    : 99.9% SLA
+    key_rotation    : EVERY 24_hours OR every 1000_messages
+                      // Whichever comes first
+
+// ------------------------------------------------------------
+// SECTION 9 — SECURE OBI AGENT DISTRIBUTION SYSTEM
+// ------------------------------------------------------------
+
+// Distribution channels for dream data exports.
+// Each channel has independent security requirements.
+
+// ------------------------------------------------------------
+// SECTION 9.1.1 — DISTRIBUTION SECURITY REQUIREMENTS
+// ------------------------------------------------------------
+
+DEFINE DISTRIBUTION_CHANNELS AS:
+
+    CHANNEL family_investment:
+        encryption          = "E2E encryption for all shared content"
+        identity_proof      = "Cryptographic proof of relationship"
+        access_tokens       = "Revocable with expiration timestamps"
+        audit               = "Full audit trail of all access events"
+
+    CHANNEL medical_specialist:
+        encryption          = "HIPAA-compliant: at-rest + in-transit"
+        credential_check    = "Verified medical professional credentials required"
+        integrity           = "Digital signatures on all data"
+        audit               = "Comprehensive logging for HIPAA compliance"
+
+    CHANNEL social_sharing:
+        privacy             = "Zero-knowledge proof for privacy preservation"
+        access_tokens       = "Time-bound only"
+        watermarking        = "Content watermarking for protection"
+        permissions         = "Granular per-content, per-user permission controls"
+
+// ------------------------------------------------------------
+// SECTION 9.2 — SECURE EXPORT FILE FORMAT SPECIFICATIONS
+// ------------------------------------------------------------
+
+// SECTION 9.2.1 — ENCRYPTED FILE FORMATS (Table 5)
+DEFINE EXPORT_FILE_FORMATS AS:
+
+    DreamVideo:
+        extension       = ".dvm"
+        encryption      = "AES-256"
+        features        = ["signed metadata", "invisible watermark"]
+
+    DreamAudio:
+        extension       = ".dau"
+        encryption      = "AES-256-GCM"
+        features        = ["integrity verification"]
+
+    DreamVisual:
+        extension       = ".dvs"
+        encryption      = "visual encryption"
+        features        = ["tamper detection"]
+
+    DreamConverse:
+        extension       = ".dcv"
+        encryption      = "E2E"
+        features        = ["encrypted conversation logs"]
+
+    DreamBundle:
+        extension       = ".dbx"
+        encryption      = "AES-256-GCM"
+        features        = ["comprehensive package", "ECDSA signatures", "all sub-formats"]
+
+// SECTION 9.2.2 — SECURE FILE FORMAT STRUCTURE (.dbx)
+DEFINE DREAM_BUNDLE_STRUCTURE AS:
+
+    SecureDreamBundle:
+        version         = "1.0"
+        algorithm       = "AES-256-GCM"
+
+        Metadata [ENCRYPTED]:
+            UserID              : encrypted_identifier
+            Timestamp           : ISO8601_datetime
+            FlashConfidence     : FLOAT (e.g. 95.4)
+            Duration            : INTEGER (seconds)
+            IntegrityHash       : "SHA3-256: ..."
+
+        SecurityEnvelope:
+            EncryptionKey       : "ECDH-derived-key-reference"
+            Signature:
+                algorithm       = "ECDSA-P256"
+                value           : BYTES
+            Certificate         : "X.509 user certificate"
+
+        EncryptedComponents:
+            Video [ENCRYPTED]:
+                codec           = "h265"
+                resolution      = "1920x1080"
+                tracks:
+                    visual      : "dream_visual.dvs.enc"
+                    audio       : "dream_audio.dau.enc"
+                Watermark:
+                    type        = "invisible"
+                    value       = user_specific_id
+
+            Conversation [ENCRYPTED]:
+                format          = "json"
+                Dialog:
+                    agent       = "U"
+                    timestamp   = "relative"
+                    entries     : LIST[EncryptedEntry]
+
+            BrainwaveData [ENCRYPTED]:
+                format          = "edf"
+                channels:
+                    delta       : encrypted_data
+                    theta       : encrypted_data
+                    alpha       : encrypted_data
+                    beta        : encrypted_data
+                    gamma       : encrypted_data
+
+        Permissions:
+            family_share:
+                enabled         = TRUE
+                expires         = "ISO8601 expiration date"
+            medical_share:
+                enabled         = FALSE     // Default off
+            social_share:
+                enabled         = FALSE     // Default off
+            AuditLog:
+                entries:
+                    - { timestamp, action="created", user }
+
+// ------------------------------------------------------------
+// SECTION 10 — NSIBIDI CONCEPTUAL SYMBOLIC LAYER WITH SECURITY
+// ------------------------------------------------------------
+
+// Nsibidi is an Igbo/Cross River symbolic writing system.
+// The Dream System uses it as a semantic layer for dream analysis.
+// Access to cultural knowledge is permission-controlled.
+
+DEFINE SecureNsibidiCSL AS CLASS:
+
+    STATE:
+        verb_noun_dict      : ENCRYPTED_DICTIONARY
+        igbo_symbols        : PROTECTED_SYMBOL_TABLE
+        access_controller   : SymbolicAccessController
+
+    PROCEDURE init():
+        verb_noun_dict  = load_encrypted_dictionary()
+        igbo_symbols    = load_protected_symbols()
+        access_controller = NEW SymbolicAccessController()
+
+    PROCEDURE analyze_dream_segment_secure(dream_event, user_context) -> DICT:
+        // Step 1: Verify cultural access permissions
+        IF NOT access_controller.verify_cultural_access(user_context):
+            RETURN get_generic_interpretation()  // Graceful fallback
+
+        // Step 2: Decrypt event with user's key
+        decrypted_event = decrypt_with_verification(
+            dream_event,
+            user_context.decryption_key
+        )
+
+        // Step 3: Extract verb and noun with privacy preservation
+        verb = extract_verb_private(decrypted_event)
+        noun = extract_noun_private(decrypted_event)
+
+        // Step 4: Map to Nsibidi symbol
+        symbol = secure_nsibidi_mapping(verb, noun, user_context)
+
+        // Step 5: Apply cultural cosmology layer (permission-gated depth)
+        meaning = apply_protected_cosmology(symbol, {
+            verb:           verb,
+            noun:           noun,
+            context:        decrypted_event.context,
+            cultural_level: user_context.cultural_access_level
+        })
+
+        // Step 6: Audit cultural access
+        audit_logger.log_cultural_access(
+            user         = user_context.user_id,
+            symbol       = symbol.id,
+            access_level = user_context.cultural_access_level
+        )
+
+        RETURN {
+            surface:        verb + " + " + noun,
+            symbol:         symbol,
+            meaning:        meaning,
+            cultural_layer: get_permitted_significance(symbol, user_context.cultural_access_level),
+            security_level: "protected"
+        }
+
+    // Note: cultural_access_level controls depth of Nsibidi interpretation
+    // Higher access = deeper cosmological significance returned
+    // Lower access = surface-level symbolic mapping only
+
+// ============================================================
+// END MODULE 4
+// ============================================================

@@ -1,0 +1,254 @@
+// ============================================================
+// DREAM SYSTEM: Formal Technical Specification
+// Cognitive Observability Platform v0.3
+// MODULE 2: Core Concepts — Flash-Filter Architecture & Dimensional Game Theory
+// Source: Dream_System___Formal_Technical_Specification.pdf
+// OBINexus Engineering Team | May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3.1 — FLASH-FILTER ARCHITECTURE
+// ------------------------------------------------------------
+
+// The Flash-Filter Architecture is the central cognitive processing model.
+// Two complementary subsystems: Filter (pre-processing) and Flash (event detection).
+
+// ------------------------------------------------------------
+// SECTION 3.1.1 — FLASH RECOGNITION
+// ------------------------------------------------------------
+
+// A Flash is a VALIDATED cognitive resonance event.
+// Brainwave patterns must exceed defined confidence thresholds.
+
+DEFINE FLASH_CONFIDENCE_THRESHOLDS AS:
+    BASE_THRESHOLD      = 95.4%         // Hard Mode baseline
+
+    HARD_MODE:
+        condition       = confidence >= 95.4%
+        security_level  = "Biometric + MFA"     // From gamification model
+        description     = "Maximum confidence — fully validated cognitive event"
+
+    MEDIUM_MODE:
+        condition       = confidence >= (2/3 × 95.4%)
+        computed_min    = 63.6%                 // ≈ 63.5% from Figure 3
+        security_level  = "MFA Required"
+        description     = "Moderate confidence — partial cognitive resonance"
+
+    EASY_MODE:
+        condition       = confidence >= (1/2 × 2/3 × 95.4%)
+        computed_min    = 31.8%                 // ≈ 31.75% from Figure 3
+        security_level  = "Basic Auth"
+        description     = "Low confidence threshold — introductory mode"
+
+PROCEDURE classify_flash(confidence_C) -> FlashMode:
+    IF confidence_C >= 95.4%:
+        RETURN HARD_MODE
+    ELSE IF confidence_C >= 63.5%:
+        RETURN MEDIUM_MODE
+    ELSE IF confidence_C >= 31.75%:
+        RETURN EASY_MODE
+    ELSE:
+        RETURN NOT_A_FLASH    // Below all thresholds — discard
+
+DEFINE SECURE_FLASH_EVENT AS STRUCT:
+    data:
+        node_id         : STRING
+        confidence      : FLOAT
+        timestamp       : ISO8601_STRING
+        user_id         : STRING
+        session_id      : STRING
+    signature           : BYTES             // ECDSA-P256 signature
+    primitive           : STRING = "ECDSA-P256"
+
+// ------------------------------------------------------------
+// SECTION 3.1.2 — FILTER MECHANISM
+// ------------------------------------------------------------
+
+// The Filter is a pre-processing layer applied BEFORE flash recognition.
+// Operates on raw EEG streams and prepares them for the Flash engine.
+
+PROCEDURE apply_filter_pipeline(raw_eeg_data) -> FilteredEEGData:
+
+    // Step 1: Validate incoming EEG data integrity
+    IF NOT validate_data_integrity(raw_eeg_data):
+        LOG_ERROR("EEG data integrity check failed")
+        RETURN NULL
+
+    // Step 2: Categorize brainwave patterns by frequency band
+    bands = categorize_brainwave_bands(raw_eeg_data)
+    // Bands: delta, theta, alpha, beta, gamma
+
+    // Step 3: Apply noise reduction algorithms
+    denoised = apply_noise_reduction(bands)
+    // TODO: Clarify from source PDF — specific noise reduction algorithm (e.g., ICA, wavelet)
+
+    // Step 4: Prepare data for flash recognition
+    prepared = prepare_for_flash_engine(denoised)
+
+    RETURN prepared
+
+DEFINE BRAINWAVE_BANDS AS:
+    delta   // Deep sleep, unconscious processing
+    theta   // REM sleep, drowsiness, memory consolidation
+    alpha   // Relaxed wakefulness
+    beta    // Active thinking, focus
+    gamma   // High-level cognitive processing
+
+// ------------------------------------------------------------
+// SECTION 3.2 — OBJECTIVE VS. SUBJECTIVE PROCESSING FRAMEWORK
+// ------------------------------------------------------------
+
+// The system maintains a strict separation between what is MEASURED
+// and what is INTERPRETED. The user retains interpretive authority.
+
+DEFINE PROCESSING_FRAMEWORK AS:
+
+    OBJECTIVE_PROCESSING:
+        definition      = "Quantifiable brainwave metrics validated against established patterns"
+        measurement     = "EEG frequency bands, amplitude, coherence"
+        authority       = AI_VALIDATOR         // AI has authority over objective data
+        output          = "Confidence scores, pattern matches"
+
+    SUBJECTIVE_PROCESSING:
+        definition      = "User-interpreted meaning and personal significance"
+        measurement     = "User tagging, emotional resonance, memory association"
+        authority       = USER                 // User (dreamer) has SOLE authority
+        output          = "Personal insights, shared narratives"
+
+    INVARIANT:
+        // AI MUST NOT conflate objective output with subjective meaning
+        AI_ROLE = validation
+        USER_ROLE = interpretation
+        NEVER allow AI_ROLE = interpretation
+
+// ------------------------------------------------------------
+// SECTION 4.1 — DIMENSIONAL GAME THEORY FOR EPISTEMIC REASONING
+// ------------------------------------------------------------
+
+// Dream System implements Dimensional Game Theory to enable EA actors
+// to navigate complex decision spaces with strategic reasoning.
+
+// ------------------------------------------------------------
+// SECTION 4.1.1 — DIMENSIONAL ACTION SPACE DEFINITION
+// ------------------------------------------------------------
+
+// Adim = union over i=1..n of (Ai × Di)
+
+DEFINE DIMENSIONAL_ACTION_SPACE AS:
+    // Adim is the cross-product of action spaces and decision domains
+    // across all active dimensions n.
+
+    FOR EACH dimension i IN {1 .. n}:
+        Ai = action_space[i]        // Set of possible actions in dimension i
+        Di = decision_domain[i]     // Set of valid decision contexts in dimension i
+
+    Adim = UNION(i=1 to n) OF (Ai × Di)
+    // Each element of Adim is a (action, decision_context) pair
+
+// ------------------------------------------------------------
+// SECTION 4.1.2 — GAME-THEORETIC EPISTEMIC COST FUNCTION
+// ------------------------------------------------------------
+
+// E_game_cost governs when an EA actor engages on a task.
+// Actor engages when E_secure_cost < τ_threshold (default: 0.3)
+
+DEFINE EPISTEMIC_COST_FUNCTION_GAME AS:
+
+    // Numerator components (INCREASE cost — reasons to hesitate):
+    Aambiguity      // Ambiguity score of input context (0-1)
+    Ccomplexity     // Complexity score of processing required (0-1)
+    Gstrategic      // Strategic complexity from game theory analysis (0-1)
+
+    // Denominator components (DECREASE cost — reasons to act):
+    Fconfidence     // Confidence score from Flash validation (0-1)
+    Uintent         // User intent clarity score (0-1)
+    Nequilibrium    // Nash equilibrium stability measure (0-1)
+
+    // Weighting parameters:
+    α   // Ambiguity weight
+    β   // Complexity weight
+    λ   // Game theory strategic weight
+    γ   // Confidence weight
+    δ   // Intent weight
+    μ   // Equilibrium weight
+
+    // Formula (Equation 5):
+    E_game_cost = (α·Aambiguity + β·Ccomplexity + λ·Gstrategic)
+                / (γ·Fconfidence + δ·Uintent + μ·Nequilibrium)
+
+// Security-enhanced version (Equation 8) adds security dimensions:
+DEFINE EPISTEMIC_COST_FUNCTION_SECURE AS:
+
+    // Additional security numerator component:
+    Srisk           // Security risk score (0-1) — INCREASES cost if risky
+
+    // Additional security denominator component:
+    Ttrust          // Trust level based on authentication strength (0-1)
+
+    // Additional weighting:
+    σ               // Security risk weight
+    ρ               // Trust weight
+
+    // Formula:
+    E_secure_cost = (α·Aambiguity + β·Ccomplexity + λ·Gstrategic + σ·Srisk)
+                  / (γ·Fconfidence + δ·Uintent + μ·Nequilibrium + ρ·Ttrust)
+
+    // Engagement threshold:
+    ENGAGE_THRESHOLD = 0.3      // τ_threshold
+    EA_ACTOR_ENGAGES WHEN E_secure_cost < ENGAGE_THRESHOLD
+
+// ------------------------------------------------------------
+// SECTION 4.2 — DAG TRAVERSAL WITH GAME-THEORETIC OPTIMIZATION
+// ------------------------------------------------------------
+
+// DAG traversal cost function integrates information-theoretic
+// and game-theoretic components.
+
+// ------------------------------------------------------------
+// SECTION 4.2.1 — TRAVERSAL COST FUNCTION (Equation 6)
+// ------------------------------------------------------------
+
+// C(Node_i → Node_j) = α·KL(Pi‖Pj) + β·ΔH(Si,j) + η·Γgame(i,j)
+
+DEFINE DAG_TRAVERSAL_COST(Node_i, Node_j) -> FLOAT:
+
+    // Term 1: Kullback-Leibler divergence between node probability distributions
+    KL_term     = KL_divergence(Pi, Pj)     // Information gain of transition
+
+    // Term 2: Entropy change during state transition
+    delta_H     = entropy_change(Si, Sj)    // Si, Sj = states at nodes i, j
+
+    // Term 3: Game-theoretic strategic cost component
+    gamma_game  = compute_strategic_cost(i, j)
+
+    // Weighting parameters α, β, η
+    cost = α * KL_term + β * delta_H + η * gamma_game
+
+    RETURN cost
+
+// ------------------------------------------------------------
+// SECTION 4.2.2 — STRATEGIC COST COMPONENT (Equation 7)
+// ------------------------------------------------------------
+
+// Γgame(i,j) = Σ_{k∈K} wk · Regretk(si, sj)
+
+DEFINE compute_strategic_cost(i, j) -> FLOAT:
+
+    // K = set of other EA actors in the system
+    // Regret_k = strategic regret of transitioning si -> sj given actor k's actions
+
+    total_strategic_cost = 0.0
+
+    FOR EACH actor_k IN other_EA_actors:
+        regret_k = compute_regret(actor_k, state_i=si, state_j=sj)
+        total_strategic_cost += weight(actor_k) * regret_k
+
+    RETURN total_strategic_cost
+
+// NOTE: "Regret" here is the game-theoretic concept —
+// the cost of a decision relative to the best alternative
+// an opponent actor could exploit.
+
+// ============================================================
+// END MODULE 2
+// ============================================================

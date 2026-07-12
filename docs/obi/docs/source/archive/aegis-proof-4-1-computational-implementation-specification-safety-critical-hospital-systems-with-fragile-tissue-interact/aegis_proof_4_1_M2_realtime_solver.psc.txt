@@ -1,0 +1,277 @@
+// ============================================================
+// FILE: aegis_proof_4_1_M2_realtime_solver.psc.txt
+// MODULE 2 OF 5 — Real-Time Matrix Solver & Filter-Flash Medical
+// SOURCE: "AEGIS-PROOF-4.1: Computational Implementation Specification
+//          Safety-Critical Hospital Systems with Fragile Tissue Interaction"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3.1: REAL-TIME MATRIX SOLVER — ALGORITHM 1
+// ------------------------------------------------------------
+
+// ALGORITHM 1: AEGIS Fragile Tissue Pressure Controller
+//
+//   INPUTS:
+//     patient: PatientProfile {age, bone_density, tissue_compliance, ...}
+//     target : InteractionTarget {xd, yd, zd}
+//
+//   OUTPUT:
+//     Safe pressure application with ε_safety ≤ 0.6
+//
+//   LOOP:
+//     1. Solve   x_current = A_safety⁻¹ · b_current
+//     2. Verify  checkFragilityBounds(x_current)
+//     3. Clamp   if bounds violated
+//     4. Mode    Filter-Flash decision via confidence
+//     5. Update  tissue model from feedback
+
+// ── SAFETY MATRIX INITIALIZATION ─────────────────────────────
+
+PROCEDURE ComputeSafetyMatrix(patient: PatientProfile) -> Matrix3x3:
+    // Builds A_safety from the pressure application matrix A,
+    // modified by patient-specific fragility parameters.
+
+    A_base := BuildPressureMatrix(patient)
+
+    // Scale rows by fragility factors to tighten force bounds
+    // Row 1: bone-related — scale by (1 - age_factor · bone vulnerability)
+    bone_scale := 1.0 - (patient.age_factor * (1.0 - patient.bone_density))
+
+    // Row 2: soft tissue — scale by tissue compliance
+    soft_scale := 1.0 - (patient.tissue_compliance * patient.vascularity_index)
+
+    // Row 3: already patient-specific (αp, βp, γp) — no additional scaling
+    A_safety := ScaleRows(A_base, scales=[bone_scale, soft_scale, 1.0])
+
+    // Verify conditioning before use
+    cond := MatrixConditionNumber(A_safety)
+    IF cond >= 1e12:
+        EMIT ERROR "A_safety is ill-conditioned: cond=" + cond +
+                   " ≥ 10¹² — numerical instability risk"
+    ELSE:
+        EMIT INFO "A_safety condition number: " + cond + " (stable)"
+    END IF
+
+    RETURN A_safety
+END PROCEDURE
+
+
+PROCEDURE DeriveConstraints(target: InteractionTarget,
+                              patient: PatientProfile) -> Vector3:
+    // Derive b_baseline = [12, 13, P_target] with patient-specific P_target
+    P_target := ComputeTargetPressure(target, patient)
+    RETURN Vector3(12.0, 13.0, P_target)
+END PROCEDURE
+
+
+PROCEDURE ComputeTargetPressure(target: InteractionTarget,
+                                 patient: PatientProfile) -> REAL:
+    // P_target = min(P_desired, P_bruise_threshold)
+    // Always upper-bounded by patient's bruise threshold
+    P_desired := target.desired_pressure
+    P_max     := ComputeBruiseThreshold(patient, LAMBDA_DEFAULT)
+    RETURN MIN(P_desired, P_max)
+END PROCEDURE
+
+
+// ── MATRIX SOLVE: x = A⁻¹ · b ───────────────────────────────
+
+PROCEDURE SolveLinearSystem(A: Matrix3x3, b: Vector3) -> (Vector3, BOOL):
+    // Solve Ax = b using Gaussian elimination with partial pivoting.
+    // Returns (x_solution, success_flag).
+    //
+    // Time budget: < 100µs for 3×3 system (see §8 benchmarks).
+
+    // Check for singularity before attempting solve
+    det := Determinant3x3(A)
+    IF ABS(det) < 1e-12:
+        EMIT ERROR "Matrix A is singular (det ≈ 0) — cannot solve"
+        RETURN (ZERO_VECTOR, FALSE)
+    END IF
+
+    x := GaussianEliminationPivot(A, b)
+    RETURN (x, TRUE)
+END PROCEDURE
+
+
+PROCEDURE GaussianEliminationPivot(A: Matrix3x3, b: Vector3) -> Vector3:
+    // Gaussian elimination with partial pivoting for 3×3 system.
+    // Augmented matrix [A | b]
+    aug := AugmentedMatrix(A, b)   // 3×4
+
+    FOR col := 0 TO 1:    // forward elimination (3×3 needs 2 passes)
+        // Find pivot (max absolute value in column ≥ col)
+        pivot_row := ArgMaxAbs(aug, col_index=col, start_row=col)
+        SwapRows(aug, col, pivot_row)
+
+        // Eliminate below pivot
+        FOR row := col + 1 TO 2:
+            IF ABS(aug[col][col]) > 1e-12:
+                factor := aug[row][col] / aug[col][col]
+                aug[row] := aug[row] - factor * aug[col]
+            END IF
+        END FOR
+    END FOR
+
+    // Back substitution
+    x := BackSubstitution(aug)
+    RETURN x
+END PROCEDURE
+
+
+// ── MAIN CONTROLLER LOOP (Algorithm 1) ───────────────────────
+
+PROCEDURE AEGISFragileTissueController(patient: PatientProfile,
+                                        target: InteractionTarget,
+                                        constraints: FragilityConstraints,
+                                        sensor_feed: SensorStream) -> VOID:
+
+    // INITIALIZATION
+    A_safety   := ComputeSafetyMatrix(patient)
+    b_baseline := DeriveConstraints(target, patient)
+    b_current  := b_baseline
+
+    EMIT INFO "AEGIS-4.1 Controller initialized | Patient: " + patient.patient_id
+
+    // MAIN INTERACTION LOOP
+    WHILE interaction_active(sensor_feed):
+
+        // STEP 4: Solve x_current = A_safety⁻¹ · b_current
+        (x_current, solve_ok) := SolveLinearSystem(A_safety, b_current)
+        IF NOT solve_ok:
+            TriggerEmergencyStop(patient, reason="Matrix solve failed")
+            BREAK
+        END IF
+
+        // STEP 5: Verify fragility bounds
+        F_bone := ExtractBoneForce(x_current)
+        P_soft := ExtractSoftTissuePressure(x_current)
+        F_dot  := EstimateForceRate(x_current, sensor_feed.previous)
+
+        bounds_check := ValidateForceAgainstFragility(
+            F_bone, P_soft, F_dot, patient, constraints
+        )
+
+        // STEP 6-9: Clamp if bounds violated
+        IF NOT bounds_check.all_safe:
+            x_current := SafetyClamp(x_current, patient, constraints)
+            LogIncident("Safety override triggered", x_current, patient)
+        END IF
+
+        // STEP 10: Filter-Flash mode selection (§3.2)
+        confidence := ComputeMedicalConfidence(sensor_feed, patient)
+        mode       := EphemerisStep(confidence)
+        EMIT LOG "Mode=" + mode + " | confidence=" + confidence
+
+        // STEP 11: Update tissue model from feedback
+        feedback    := sensor_feed.current_reading
+        b_current   := AdaptCompliance(b_current, feedback, patient)
+
+    END WHILE
+END PROCEDURE
+
+
+// ── SAFETY CLAMP ─────────────────────────────────────────────
+
+PROCEDURE SafetyClamp(x: Vector3, patient: PatientProfile,
+                       constraints: FragilityConstraints) -> Vector3:
+    // Scale force vector to bring all components within safe bounds
+
+    F_fracture := ComputeFractureThreshold(patient, constraints.kappa)
+    P_bruise   := ComputeBruiseThreshold(patient, constraints.lambda_v)
+
+    F_current := NORM(x)
+
+    // Scale down if maximum force exceeds safest threshold
+    safe_max  := MIN(F_fracture, P_bruise)
+    IF F_current > safe_max:
+        scale   := safe_max / MAX(F_current, 1e-12)
+        x_clamped := x * scale
+        EMIT INFO "SafetyClamp: force scaled by " + scale
+        RETURN x_clamped
+    END IF
+    RETURN x
+END PROCEDURE
+
+
+PROCEDURE AdaptCompliance(b: Vector3, feedback: SensorReading,
+                           patient: PatientProfile) -> Vector3:
+    // Update constraint vector based on real-time tissue response.
+    // If tissue shows signs of stress, reduce P_target.
+    stress_indicator := feedback.tissue_stress_level
+
+    // Bayesian update on P_target: reduce proportionally to stress
+    P_current := b[2]
+    P_adapted := P_current * (1.0 - stress_indicator * patient.tissue_compliance)
+    P_adapted := MAX(P_adapted, 0.0)    // cannot be negative
+
+    RETURN Vector3(b[0], b[1], P_adapted)
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 3.2: FILTER-FLASH INTEGRATION FOR MEDICAL SAFETY
+// ------------------------------------------------------------
+
+// Medical confidence = min(epistemic confidence, safety confidence)
+//   confidence_medical = min(confidence_epistemic, confidence_safety)
+//
+// Mode selection:
+//   FILTER : if confidence_medical ≥ 0.954  (persistent reasoning)
+//   FLASH  : if confidence_medical < 0.954  (rapid reflexive response)
+
+PROCEDURE ComputeMedicalConfidence(sensor_feed: SensorStream,
+                                    patient: PatientProfile) -> REAL:
+    // confidence_medical = min(confidence_epistemic, confidence_safety)
+
+    // Epistemic confidence: from DAG inference (inherited from AEGIS-PROOF-3.1)
+    confidence_epistemic := sensor_feed.epistemic_confidence
+
+    // Safety confidence: derived from current force margin
+    F_current := sensor_feed.current_force_magnitude
+    F_max     := ComputeFractureThreshold(patient, KAPPA_DEFAULT)
+    safety_margin := 1.0 - (F_current / MAX(F_max, 1e-12))
+    confidence_safety := CLAMP(safety_margin, 0.0, 1.0)
+
+    confidence_medical := MIN(confidence_epistemic, confidence_safety)
+    RETURN confidence_medical
+END PROCEDURE
+
+
+PROCEDURE EphemerisStep(confidence_medical: REAL) -> CognitionMode:
+    // Ephemeris decision rule (eq. 9):
+    //   FILTER if confidence_medical ≥ 0.954
+    //   FLASH  if confidence_medical < 0.954
+
+    IF confidence_medical >= 0.954:
+        RETURN FILTER    // persistent symbolic reasoning (precise, deliberate)
+    ELSE:
+        RETURN FLASH     // ephemeral rapid response (reflexive withdrawal)
+    END IF
+END PROCEDURE
+
+
+// ── LOGGING UTILITY ───────────────────────────────────────────
+
+PROCEDURE LogIncident(message: STRING, x: Vector3,
+                       patient: PatientProfile) -> VOID:
+    // Structured incident log (required for ISO 13485 + NASA-STD audit trail)
+    EMIT INCIDENT_LOG {
+        timestamp  : CURRENT_TIMESTAMP(),
+        patient_id : patient.patient_id,
+        message    : message,
+        force_x    : x[0],
+        force_y    : x[1],
+        force_z    : x[2],
+        proof_ref  : "AEGIS-PROOF-4.1"
+    }
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: aegis_proof_4_1_M3_polymer_interface.psc.txt
+// ============================================================

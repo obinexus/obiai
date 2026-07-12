@@ -1,0 +1,194 @@
+// ============================================================
+// FILE: actor_class_M1_definition.psc.txt
+// MODULE 1 OF 5 — Epistemic Imperative & Actor Class Definition
+// SOURCE: "The Actor Class: A Categorical Foundation for
+//          Epistemic AI Systems with Continuous Space Navigation
+//          and Dimensional Innovation"
+// AUTHOR: OBINexus Computing
+// CLASSIFICATION: Foundational Architecture / Patent Filing
+// DATE: 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 1: AXIOM OF AGENT INSUFFICIENCY
+// ------------------------------------------------------------
+
+// AXIOM 1 (Insufficiency of Agent Architecture):
+//
+//   Let G be the class of conventional AI agents operating in
+//   fixed dimensional frameworks.
+//
+//   For any agent g ∈ G with action space Ag = {a₁, a₂, ..., aₙ}:
+//
+//     ∀g ∈ G, ∃π ∈ Π : ∄a ∈ Ag such that solve(g, π, a) = TRUE
+//
+//   Meaning: for every agent, there exists a problem class Π
+//   that the agent CANNOT solve because no action in its fixed
+//   action space leads to a solution.
+
+DEFINE AgentClass G AS:
+    // Conventional AI agent — operates in finite, predetermined action spaces
+    action_space    : FiniteSet        // Ag = {a₁, ..., aₙ}
+    dimensional_framework : FIXED      // cannot be extended at runtime
+END DEFINE
+
+
+PROCEDURE AttemptAgentSolve(g: Agent, π: Problem, a: Action) -> BOOL:
+    // Can agent g solve problem π using action a?
+    IF a NOT IN g.action_space:
+        RETURN FALSE    // action outside predefined set — unsolvable
+    END IF
+    result := g.execute(a, π)
+    RETURN result.solved
+END PROCEDURE
+
+
+THEOREM AgentInsufficiency:
+    // There exists a problem class Π such that no agent in G can solve it
+    FOR ALL g IN AgentClass G:
+        THERE_EXISTS π IN ProblemClass Π:
+            FOR ALL a IN g.action_space:
+                ASSERT AttemptAgentSolve(g, π, a) == FALSE
+            END FOR
+    END FOR
+    //
+    // Root cause: dimensional innovation is IMPOSSIBLE within a fixed Ag.
+    // The Actor class is the necessary evolutionary response.
+END THEOREM
+
+
+// ------------------------------------------------------------
+// SECTION 2: FORMAL DEFINITION OF THE ACTOR CLASS
+// ------------------------------------------------------------
+
+// DEFINITION 1 (Actor):
+//
+//   An Actor is a 5-tuple:
+//     α = (S, C, Φ, Ψ, ε)
+//
+//   where:
+//     S      — infinite-dimensional semantic manifold
+//     C      — continuous navigation functor: C : S → S
+//     Φ      — static cost validation function: Φ : S × ℝ⁺ → {0, 1}
+//     Ψ      — dynamic cost computation function: Ψ : S × S → ℝ⁺
+//     ε ≥ 0.954 — epistemic confidence threshold
+//
+//   such that α satisfies the DIMENSIONAL INNOVATION PROPERTY:
+//     ∃τ : S → S where τ ∉ span(C)
+//
+//   Interpretation: there exists a transformation τ that is NOT
+//   expressible as a linear combination of existing navigation
+//   paths — genuinely novel capability emerges.
+
+DEFINE ActorClass A AS:
+    S       : InfiniteDimensionalManifold    // semantic space (unbounded)
+    C       : Functor[S → S]                // navigation functor (continuous)
+    Phi     : Function[S × Real+ → {0,1}]   // static cost validator
+    Psi     : Function[S × S → Real+]       // dynamic cost computer
+    epsilon : REAL                           // epistemic threshold ≥ 0.954
+
+    INVARIANT: epsilon >= 0.954
+    INVARIANT: DimensionalInnovationProperty(self)
+END DEFINE
+
+
+PROCEDURE DimensionalInnovationProperty(α: Actor) -> BOOL:
+    // Verify that there EXISTS a transformation τ NOT in span(C)
+    // i.e., τ cannot be constructed from existing navigation basis vectors
+
+    span_C := ComputeSpan(α.C)              // basis of C's reachable transforms
+    τ      := FindInnovativeTransform(α.S)  // attempt to locate novel τ
+
+    IF τ == NULL:
+        EMIT WARNING "No innovative transform found — dimensional innovation unconfirmed"
+        RETURN FALSE
+    END IF
+
+    IF τ IN span_C:
+        EMIT WARNING "Candidate τ is expressible in span(C) — not genuinely novel"
+        RETURN FALSE
+    END IF
+
+    EMIT INFO "Dimensional Innovation Property satisfied: τ ∉ span(C)"
+    RETURN TRUE
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// THEOREM 1: ACTOR-AGENT DISTINCTION (Category Theory)
+// ------------------------------------------------------------
+
+// THEOREM 1 (Actor-Agent Distinction):
+//   The Actor class A and Agent class G form DISTINCT CATEGORIES
+//   with NO isomorphism between them.
+//
+// PROOF SKETCH:
+//   Consider the forgetful functor F : A → G that maps actors to
+//   agents by restricting to finite action spaces.
+//   Suppose G : G → A is a proposed inverse functor.
+//   For any agent g with finite action space Ag, G(g) must navigate
+//   an infinite-dimensional manifold S.
+//   But any functor from finite to infinite dimensions CANNOT preserve
+//   the Dimensional Innovation Property:
+//     Let τ be an innovative transform in G(g).
+//     Since g has finite computational basis, τ must be expressible
+//     as a finite combination of basis elements.
+//     This CONTRADICTS the innovation requirement.
+//   Therefore no such G exists → A ≇ G.
+
+THEOREM ActorAgentDistinction:
+    F      := ForgetfulFunctor[A → G]       // strips infinite-dimensional structure
+    G_inv  := NULL                           // proposed inverse functor
+
+    // Attempt to construct inverse
+    FOR ALL g IN AgentClass:
+        G_candidate := ATTEMPT_CONSTRUCT_INVERSE(F, g)
+
+        // Verify Dimensional Innovation Property is preserved
+        IF DimensionalInnovationProperty(G_candidate(g)) == FALSE:
+            EMIT PROOF "Inverse functor cannot preserve DIP for agent: " + g.id
+            G_inv := NULL   // no valid inverse exists
+            BREAK
+        END IF
+    END FOR
+
+    // Conclusion
+    IF G_inv == NULL:
+        ASSERT ActorClass A NOT_ISOMORPHIC_TO AgentClass G
+        EMIT PROOF "A ≇ G — no categorical isomorphism exists"
+    END IF
+
+END THEOREM
+
+
+// ------------------------------------------------------------
+// ACTOR INSTANTIATION PROCEDURE
+// ------------------------------------------------------------
+
+PROCEDURE InstantiateActor(S: Manifold, C: Functor, Phi: Function,
+                            Psi: Function, epsilon: REAL) -> Actor:
+
+    // Validate epistemic confidence threshold
+    IF epsilon < 0.954:
+        EMIT ERROR "Epistemic threshold ε=" + epsilon + " < 0.954 — invalid Actor"
+        RETURN NULL
+    END IF
+
+    α := NEW Actor(S=S, C=C, Phi=Phi, Psi=Psi, epsilon=epsilon)
+
+    // Verify Dimensional Innovation Property holds at instantiation
+    IF NOT DimensionalInnovationProperty(α):
+        EMIT ERROR "Dimensional Innovation Property not satisfied — Actor rejected"
+        RETURN NULL
+    END IF
+
+    EMIT INFO "Actor instantiated successfully | ε=" + epsilon
+    RETURN α
+
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: actor_class_M2_navigation.psc.txt
+// ============================================================

@@ -1,0 +1,36 @@
+{
+  "name": "obi-documentation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "docs/public/index.html",
+  "description": "Static documentation toolchain for OBI - Ontological Bayesian Intelligence.",
+  "window": {
+    "title": "OBI - Ontological Bayesian Intelligence",
+    "width": 1200,
+    "height": 800,
+    "position": "center"
+  },
+  "scripts": {
+    "clean": "node scripts/clean-docs.mjs",
+    "docs:populate": "python scripts/populate-docs.py",
+    "docs:build": "node scripts/build-docs.mjs",
+    "docs:serve": "node scripts/serve-docs.mjs",
+    "docs:serve:html": "python scripts/serve-source-html.py",
+    "docs:index": "node scripts/index-docs.mjs",
+    "docs:validate": "node scripts/validate-docs.mjs",
+    "publish:check": "npm run docs:populate && npm run docs:build && npm run docs:validate",
+    "nw:start": "npx nw .",
+    "nw:build": "echo \"NW.js packaging placeholder\""
+  },
+  "keywords": [
+    "OBI",
+    "OBINexus",
+    "Ontological Bayesian Intelligence",
+    "documentation",
+    "Bayesian reasoning",
+    "semantic graphs"
+  ],
+  "author": "Nnamdi Michael Okpala / OBINexus",
+  "license": "MIT"
+}

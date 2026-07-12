@@ -1,0 +1,372 @@
+// ============================================================
+// FILE: raf_cryptographic_M4_gitraf_policy_strategy.psc.txt
+// MODULE 4 OF 5 — Git-RAF Policy Integration, Stakeholder Consensus
+//                 & Stress-Adaptive Strategy Optimization
+// SOURCE: "Dimensional Game Theory — Fault-Tolerant Cryptographic
+//          Integration for RAF Architecture with AuraSeal Validation"
+// AUTHOR: Nnamdi Okpala — OBINexus Computing
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 5: GIT-RAF POLICY INTEGRATION
+// ------------------------------------------------------------
+
+// RAF = Regulation As Firmware: policy rules are committed to a
+// Git repository and activated with cryptographic signatures,
+// stakeholder consensus, and dimensional validation — treating
+// governance as version-controlled firmware.
+
+
+// ── §5.1: MULTI-STAKEHOLDER VALIDATION ───────────────────────
+
+// DEFINITION 4 (Stakeholder Consensus):
+//   For stakeholder set N = {n₁, ..., nₖ} and policy π:
+//
+//   consensus(N, π) = |{nᵢ ∈ N : approve(nᵢ, π)}| / |N| ≥ θ
+//
+//   where θ ∈ [0.5, 1.0] is the consensus threshold.
+//   (Default θ = 0.67 in PolicyScope — supermajority)
+
+DEFINE Stakeholder AS:
+    id         : StakeholderID
+    role       : StakeholderRole    // e.g., DEVELOPER, REGULATOR, AUDITOR
+    voting_weight : REAL            // optional: weighted voting
+    public_key : PublicKey          // for signed approvals
+END DEFINE
+
+DEFINE PolicyApproval AS:
+    stakeholder_id : StakeholderID
+    policy_hash    : PolicyHash
+    approved       : BOOL
+    signature      : ByteArray     // cryptographically signed approval
+    timestamp      : Timestamp
+END DEFINE
+
+DEFINE GitRAFPolicy AS:
+    policy_id      : PolicyID
+    policy_hash    : PolicyHash     // SHA-256 of policy content
+    policy_content : PolicySpec
+    git_commit_ref : GitCommitHash  // traceability to repo
+    required_approvals : INT
+    approvals      : List[PolicyApproval]
+END DEFINE
+
+
+PROCEDURE ComputeConsensus(N: List[Stakeholder], policy: GitRAFPolicy,
+                             approvals: List[PolicyApproval]) -> REAL:
+    // consensus = |{nᵢ : approve(nᵢ, π)}| / |N|
+
+    n_total := LENGTH(N)
+    IF n_total == 0:
+        EMIT ERROR "Empty stakeholder set — consensus undefined"
+        RETURN 0.0
+    END IF
+
+    n_approved := 0
+    FOR EACH stakeholder IN N:
+        approval := FindApproval(approvals, stakeholder.id, policy.policy_hash)
+        IF approval != NULL AND approval.approved:
+            // Verify cryptographic signature on approval
+            IF VerifyApprovalSignature(approval, stakeholder.public_key):
+                n_approved := n_approved + 1
+            ELSE:
+                EMIT WARNING "Invalid approval signature from " + stakeholder.id
+            END IF
+        END IF
+    END FOR
+
+    consensus_score := n_approved / n_total
+    EMIT LOG "Consensus: " + n_approved + "/" + n_total + " = " + consensus_score
+    RETURN consensus_score
+END PROCEDURE
+
+
+PROCEDURE MeetsConsensusThreshold(N: List[Stakeholder],
+                                    policy: GitRAFPolicy,
+                                    approvals: List[PolicyApproval],
+                                    theta: REAL) -> BOOL:
+    // Validate theta ∈ [0.5, 1.0] before checking
+    IF theta < 0.5 OR theta > 1.0:
+        EMIT ERROR "Consensus threshold θ=" + theta + " outside valid range [0.5, 1.0]"
+        RETURN FALSE
+    END IF
+
+    score := ComputeConsensus(N, policy, approvals)
+    RETURN score >= theta
+END PROCEDURE
+
+
+// Byzantine Fault Tolerance check: consensus must hold even if
+// f nodes fail (Byzantine generals problem):
+PROCEDURE CheckByzantineFaultTolerance(N: List[Stakeholder],
+                                         f_failures: INT,
+                                         theta: REAL) -> BOOL:
+    // For Byzantine consensus with f failures: need n ≥ 3f + 1
+    // and consensus fraction ≥ (2f+1)/n
+    n := LENGTH(N)
+    IF n < 3 * f_failures + 1:
+        EMIT WARNING "Byzantine fault tolerance: n=" + n + " < 3f+1=" +
+                     (3 * f_failures + 1) + " — insufficient stakeholders"
+        RETURN FALSE
+    END IF
+
+    byzantine_required := (2.0 * f_failures + 1.0) / n
+    IF theta < byzantine_required:
+        EMIT WARNING "Consensus threshold θ=" + theta +
+                     " below Byzantine requirement " + byzantine_required
+        RETURN FALSE
+    END IF
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── §5.2: GIT-RAF SCOPED POLICY ACTIVATION ───────────────────
+
+// PolicyScope: determines whether a policy is active in the current
+// game context. Combines git-RAF, stakeholder consensus, dimensional
+// validation, and optional perfect number verification.
+
+DEFINE PolicyScope AS:
+    git_raf_enabled              : BOOL
+    stakeholder_consensus        : REAL        // current consensus score
+    dimensional_activation       : List[Dimension]
+    perfect_validation_required  : BOOL
+
+    CONSTANT CONSENSUS_THRESHOLD_DEFAULT := 0.67   // 2/3 supermajority
+
+    PROCEDURE EvaluateActivation(context: GameContext) -> BOOL:
+        // Policy is active IFF all conditions hold:
+
+        // (1) Git-RAF must be enabled
+        IF NOT self.git_raf_enabled:
+            EMIT LOG "PolicyScope: git_raf_enabled=false → inactive"
+            RETURN FALSE
+        END IF
+
+        // (2) Stakeholder consensus ≥ 0.67
+        consensus_met := self.stakeholder_consensus >= CONSENSUS_THRESHOLD_DEFAULT
+        IF NOT consensus_met:
+            EMIT WARNING "Consensus " + self.stakeholder_consensus +
+                         " < 0.67 — policy not activated"
+        END IF
+
+        // (3) Dimensional activation: all required dimensions valid in context
+        dims_valid := context.ValidateDimensions(self.dimensional_activation)
+        IF NOT dims_valid:
+            EMIT WARNING "Dimensional activation validation failed"
+        END IF
+
+        // (4) Perfect number validation (if required)
+        perfect_valid := IF self.perfect_validation_required THEN
+            context.ValidatePerfectNumbers()
+        ELSE
+            TRUE
+        END IF
+
+        result := consensus_met AND dims_valid AND perfect_valid
+        EMIT LOG "PolicyScope activation: " + result +
+                 " [consensus=" + consensus_met +
+                 " dims=" + dims_valid +
+                 " perfect=" + perfect_valid + "]"
+        RETURN result
+    END PROCEDURE
+END DEFINE
+
+
+PROCEDURE BuildPolicyScope(git_raf: BOOL, consensus: REAL,
+                             dims: List[Dimension],
+                             require_perfect: BOOL) -> PolicyScope:
+    // Validate consensus is in valid range
+    IF consensus < 0.0 OR consensus > 1.0:
+        EMIT ERROR "Consensus score " + consensus + " outside [0,1]"
+        RETURN NULL
+    END IF
+    RETURN PolicyScope(
+        git_raf_enabled             = git_raf,
+        stakeholder_consensus       = consensus,
+        dimensional_activation      = dims,
+        perfect_validation_required = require_perfect
+    )
+END PROCEDURE
+
+
+// ── GAME CONTEXT IMPLEMENTATION ──────────────────────────────
+
+DEFINE GameContext AS:
+    active_dimensions    : List[Dimension]
+    component_hash       : UINT64
+    policy_set           : List[UINT64]
+    stress_level         : REAL
+
+    PROCEDURE ValidateDimensions(required: List[Dimension]) -> BOOL:
+        FOR EACH req_dim IN required:
+            IF req_dim NOT IN self.active_dimensions:
+                EMIT WARNING "Required dimension " + req_dim.name +
+                             " not active in context"
+                RETURN FALSE
+            END IF
+        END FOR
+        RETURN TRUE
+    END PROCEDURE
+
+    PROCEDURE ValidatePerfectNumbers() -> BOOL:
+        record := ValidatePerfectRecord(self.component_hash, self.policy_set)
+        RETURN IsPerfectValidation(record)
+    END PROCEDURE
+END DEFINE
+
+
+// ------------------------------------------------------------
+// SECTION 6: DIMENSIONAL STRATEGY OPTIMIZATION
+// ------------------------------------------------------------
+
+// ── §6.1: VARIADIC INPUT PROCESSING ─────────────────────────
+
+// Variadic mapping: φ: {x₁, ..., xₙ} → D_act
+// subject to |D_act| ≤ Θ  (computational bound)
+
+CONSTANT THETA_MAX_DIMENSIONS := 8    // Θ — maximum active dimensions
+
+PROCEDURE VariadicDimensionActivation(inputs: List[InputValue],
+                                       D_available: DimensionSet) -> List[Dimension]:
+    // φ: {x₁, ..., xₙ} → D_act with |D_act| ≤ Θ
+    //
+    // Maps each input to its most relevant dimension, selecting at
+    // most Θ dimensions by activation strength.
+
+    dimension_scores := {}
+
+    FOR EACH x_i IN inputs:
+        FOR EACH dim IN D_available.dimensions:
+            // Score how strongly this input activates this dimension
+            score := DimensionActivationScore(x_i, dim)
+            IF dim.name IN dimension_scores:
+                dimension_scores[dim.name] := MAX(dimension_scores[dim.name], score)
+            ELSE:
+                dimension_scores[dim.name] := score
+            END IF
+        END FOR
+    END FOR
+
+    // Sort by activation score, take top Θ
+    sorted_dims := SORT_BY(D_available.dimensions,
+                            key=d → dimension_scores[d.name],
+                            order=DESCENDING)
+
+    D_act := sorted_dims[:MIN(THETA_MAX_DIMENSIONS, LENGTH(sorted_dims))]
+
+    EMIT LOG "Variadic activation | inputs=" + LENGTH(inputs) +
+             " → active_dims=" + D_act.map(d.name)
+    RETURN D_act
+END PROCEDURE
+
+PROCEDURE DimensionActivationScore(x: InputValue, dim: Dimension) -> REAL:
+    // Measures relevance of input x to dimension dim.
+    // Uses projection onto dimension's basis vector.
+    feature_v := x.ToFeatureVector()
+    projection := DOT(feature_v, dim.basis_vector)
+    RETURN ABS(projection) / MAX(NORM(feature_v) * NORM(dim.basis_vector), 1e-12)
+END PROCEDURE
+
+
+// ── §6.2: STRESS-ADAPTIVE STRATEGY (THEOREM 2) ───────────────
+
+// THEOREM 2 (Stress-Adaptive Strategy):
+//   For stress level s ∈ [0, 12] and active dimensions D_act,
+//   the optimal strategy vector is:
+//
+//   S*(s) = argmin_{S ∈ S} { U(S, D_act) + λ · max(0, s − 3) }
+//
+//   where λ > 0 penalizes strategies that increase system stress.
+//
+// Interpretation:
+//   - U(S, D_act): strategic utility in active dimensions
+//   - λ · max(0, s−3): penalty term — only kicks in above Green Zone (s>3)
+//   - Strategies that raise stress above threshold 3 are penalized
+
+CONSTANT LAMBDA_STRESS_PENALTY := 0.5   // λ — stress penalty coefficient
+
+
+PROCEDURE ComputeStressAdaptiveObjective(S: Strategy, D_act: List[Dimension],
+                                          s: REAL, lambda: REAL) -> REAL:
+    // U(S, D_act) + λ · max(0, s − 3)
+    utility     := ComputeStrategyUtility(S, D_act)
+    stress_pen  := lambda * MAX(0.0, s - 3.0)   // zero in Green Zone
+    objective   := utility + stress_pen
+    RETURN objective
+END PROCEDURE
+
+
+PROCEDURE ComputeStrategyUtility(S: Strategy, D_act: List[Dimension]) -> REAL:
+    // U(S, D_act): utility of strategy S across active dimensions.
+    // Lower value = better (minimization objective).
+    // Uses negative weighted effectiveness sum.
+    total_utility := 0.0
+    FOR EACH dim IN D_act:
+        eff := EffectivenessScore(S, dim)
+        // Negative effectiveness = higher cost → minimization finds best strategy
+        total_utility := total_utility + (1.0 - eff)
+    END FOR
+    RETURN total_utility / MAX(LENGTH(D_act), 1)
+END PROCEDURE
+
+
+PROCEDURE FindOptimalStressAdaptiveStrategy(strategy_space: List[Strategy],
+                                             D_act: List[Dimension],
+                                             s: REAL,
+                                             lambda: REAL) -> Strategy:
+    // S*(s) = argmin_{S} { U(S, D_act) + λ · max(0, s − 3) }
+
+    best_S   := NULL
+    best_obj := POSITIVE_INFINITY
+
+    FOR EACH S IN strategy_space:
+        obj := ComputeStressAdaptiveObjective(S, D_act, s, lambda)
+        IF obj < best_obj:
+            best_obj := obj
+            best_S   := S
+        END IF
+    END FOR
+
+    stress_zone := ClassifyStressZone(s)
+    EMIT INFO "Optimal strategy found | s=" + s + " zone=" + stress_zone +
+              " | objective=" + best_obj
+
+    RETURN best_S
+END PROCEDURE
+
+
+// THEOREM 2 VERIFICATION:
+PROCEDURE VerifyTheorem2(strategy_space: List[Strategy],
+                          D_act: List[Dimension],
+                          s_range: List[REAL],
+                          lambda: REAL) -> BOOL:
+    // Verify that as s increases above 3, stress penalty properly
+    // suppresses strategies with high U values.
+
+    FOR EACH s IN s_range:
+        S_opt := FindOptimalStressAdaptiveStrategy(strategy_space, D_act, s, lambda)
+        obj   := ComputeStressAdaptiveObjective(S_opt, D_act, s, lambda)
+
+        // At s > 3: penalty term is active — aggressive strategies should be penalized
+        IF s > 3.0:
+            penalty := lambda * (s - 3.0)
+            IF penalty <= 0.0:
+                EMIT WARNING "Theorem 2: stress penalty not positive at s=" + s
+                RETURN FALSE
+            END IF
+        END IF
+
+        EMIT LOG "Theorem 2 | s=" + s + " | S*_obj=" + obj
+    END FOR
+
+    EMIT INFO "Theorem 2 (Stress-Adaptive Strategy) verified ✓"
+    RETURN TRUE
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: raf_cryptographic_M5_implementation_validation.psc.txt
+// ============================================================

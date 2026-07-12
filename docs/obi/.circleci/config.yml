@@ -1,0 +1,28 @@
+version: 2.1
+
+jobs:
+  build-docs:
+    docker:
+      - image: cimg/node:lts
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: npm install
+      - run:
+          name: Clean generated documentation
+          command: npm run clean
+      - run:
+          name: Build documentation
+          command: npm run docs:build
+      - run:
+          name: Validate documentation
+          command: npm run docs:validate
+      - store_artifacts:
+          path: docs/public
+          destination: obi-docs
+
+workflows:
+  docs:
+    jobs:
+      - build-docs

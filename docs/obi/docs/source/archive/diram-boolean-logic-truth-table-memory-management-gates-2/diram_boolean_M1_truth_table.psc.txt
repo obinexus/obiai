@@ -1,0 +1,172 @@
+// ============================================================
+// FILE: diram_boolean_M1_truth_table.psc.txt
+// MODULE 1 OF 5 — DIRAM Boolean Logic Truth Table
+//                 Input Definitions & 4-Row Specification
+// SOURCE: "DIRAM Boolean Logic Truth Table — Memory Management Gates"
+// ORG:    OBINexus — Aegis Project | Directed Instruction RAM
+// GOVERNANCE: epsilon(x) <= 0.5 | Binary Logic: 2-Input, 1-Output
+// ============================================================
+
+// CORPUS POSITION
+//
+// DIRAM is referenced throughout the OBINexus corpus:
+//   PDF 2  (Actor Class):        Sinphase governance epsilon(x) <= 0.6
+//   PDF 3  (AEGIS-PROOF-1.2):   DIRAM epsilon <= 0.6 in EpistemicDAG
+//   PDF 4  (AEGIS-3.1/3.2):     DIRAM compatibility Proposition 1
+//   PDF 6  (DAG Ephemeris):     DIRAM COMMIT/ROLLBACK (eq. 31)
+//   PDF 7  (OBIAI Thesis):      DIRAM cascade governance
+//   PDF 9  (RAF Crypto):        AuraSeal entropy_coefficient <= 0.5
+//   PDF 12 (THIS):              DIRAM BOOLEAN GATE — full hardware spec
+//
+// CONSTRAINT NOTE:
+//   epsilon <= 0.5 — DIRAM hardware gate / Sinphase strict bound (PDFs 9, 12)
+//   epsilon <= 0.6 — corpus-wide DIRAM soft bound (PDFs 2-7)
+//   The PDF explicitly states: "Updated constraint (not 0.6)"
+
+DEFINE DIRAMContext AS:
+    full_name        := "Directed Instruction RAM"
+    abbreviation     := "DIRAM"
+    project          := "OBINexus Aegis"
+    gate_type        := "2-Input, 1-Output Boolean Logic"
+    governance_bound := 0.5    // epsilon(x) <= 0.5 (hardware-level strict)
+    corpus_soft_bound := 0.6   // epsilon <= 0.6 (software/AEGIS-chain)
+END DEFINE
+
+
+// INPUT DEFINITIONS
+
+// Input A: CACHE STATE
+//   A = 0 -> Cache Miss (data not present, fetch required)
+//   A = 1 -> Cache Hit  (data present, immediate access)
+
+DEFINE CacheState AS ENUM:
+    MISS = 0    // A=0: data absent
+    HIT  = 1    // A=1: data present
+END DEFINE
+
+// Input B: GOVERNANCE STATE (Sinphase epsilon check)
+//   B = 0 -> epsilon <= 0.5 Compliant (safe memory allocation limits)
+//   B = 1 -> epsilon > 0.5 Violation  (too many heap events, throttle)
+
+DEFINE GovernanceState AS ENUM:
+    COMPLIANT = 0    // B=0: epsilon(x) <= 0.5
+    VIOLATION = 1    // B=1: epsilon(x) > 0.5
+END DEFINE
+
+// Output: MEMORY ACTION
+//   Output = 0 -> Block / Defer allocation
+//   Output = 1 -> Allow / Process immediately
+
+DEFINE MemoryAction AS ENUM:
+    BLOCK_DEFER   = 0    // Output=0
+    ALLOW_PROCESS = 1    // Output=1
+END DEFINE
+
+
+// TRUTH TABLE (4 ROWS)
+//
+//  A  | B  | NOT A | A XOR B | Output | Meaning
+//  0  | 0  |   1   |    0    |   1    | Cache Miss + Compliant -> ALLOW
+//  0  | 1  |   1   |    1    |   0    | Cache Miss + Violation -> BLOCK
+//  1  | 0  |   0   |    1    |   1    | Cache Hit  + Compliant -> ALLOW
+//  1  | 1  |   0   |    0    |   0    | Cache Hit  + Violation -> BLOCK
+//
+// Output formula:
+//   Output = (NOT_A AND NOT(XOR_AB)) OR (NOT(NOT_A) AND XOR_AB)
+
+DEFINE DIRAMTruthTable AS:
+
+    ROW_1 := {
+        A = MISS, B = COMPLIANT,
+        NOT_A = 1, XOR_AB = 0, output = ALLOW_PROCESS,
+        description = "Cache Miss + Compliant -> Fetch data, update cache"
+    }
+
+    ROW_2 := {
+        A = MISS, B = VIOLATION,
+        NOT_A = 1, XOR_AB = 1, output = BLOCK_DEFER,
+        description = "Cache Miss + Violation -> Defer allocation"
+    }
+
+    ROW_3 := {
+        A = HIT, B = COMPLIANT,
+        NOT_A = 0, XOR_AB = 1, output = ALLOW_PROCESS,
+        description = "Cache Hit + Compliant -> Process immediately"
+    }
+
+    ROW_4 := {
+        A = HIT, B = VIOLATION,
+        NOT_A = 0, XOR_AB = 0, output = BLOCK_DEFER,
+        description = "Cache Hit + Violation -> Even hits blocked during severe violation"
+    }
+
+    ALL_ROWS := [ROW_1, ROW_2, ROW_3, ROW_4]
+END DEFINE
+
+
+// GATE PRIMITIVES
+
+PROCEDURE NOT_Gate(a: UINT8) -> UINT8:
+    ASSERT a IN {0, 1}
+    RETURN 1 - a
+END PROCEDURE
+
+PROCEDURE XOR_Gate(a: UINT8, b: UINT8) -> UINT8:
+    ASSERT a IN {0, 1}
+    ASSERT b IN {0, 1}
+    RETURN a XOR b
+END PROCEDURE
+
+PROCEDURE DIRAMOutputGate(cache_state: UINT8, governance_state: UINT8) -> UINT8:
+    // Output = (NOT_A AND NOT(XOR_AB)) OR (NOT(NOT_A) AND XOR_AB)
+    not_a  := NOT_Gate(cache_state)
+    xor_ab := XOR_Gate(cache_state, governance_state)
+    RETURN (not_a AND NOT_Gate(xor_ab)) OR (NOT_Gate(not_a) AND xor_ab)
+END PROCEDURE
+
+
+// TRUTH TABLE VERIFICATION
+
+PROCEDURE VerifyTruthTableLogic() -> BOOL:
+    ALL_PASS := TRUE
+    FOR EACH row IN DIRAMTruthTable.ALL_ROWS:
+        computed_NOT_A  := NOT_Gate(row.A)
+        computed_XOR_AB := XOR_Gate(row.A, row.B)
+        computed_output := DIRAMOutputGate(row.A, row.B)
+
+        IF computed_NOT_A  != row.NOT_A:
+            EMIT ERROR "NOT A mismatch: " + row.description
+            ALL_PASS := FALSE
+        END IF
+        IF computed_XOR_AB != row.XOR_AB:
+            EMIT ERROR "XOR AB mismatch: " + row.description
+            ALL_PASS := FALSE
+        END IF
+        IF computed_output != row.output:
+            EMIT ERROR "Output mismatch: " + row.description
+            ALL_PASS := FALSE
+        END IF
+    END FOR
+
+    IF ALL_PASS:
+        EMIT INFO "DIRAM Truth Table: all 4 rows verified"
+    END IF
+    RETURN ALL_PASS
+END PROCEDURE
+
+
+PROCEDURE LookupMemoryAction(cache: CacheState,
+                               governance: GovernanceState) -> MemoryAction:
+    output := DIRAMOutputGate(cache, governance)
+    IF output == 1:
+        RETURN ALLOW_PROCESS
+    ELSE:
+        RETURN BLOCK_DEFER
+    END IF
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: diram_boolean_M2_cache_lru_mru.psc.txt
+// ============================================================

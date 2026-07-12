@@ -1,0 +1,310 @@
+// ============================================================
+// DIRAM (Directed Instruction RAM)
+// MODULE 4: CLI Interface, REPL, and Detached Daemon Mode
+// Source: Directed_Instruction_RAM.pdf (README.md, 2025-07-03)
+// OBINexus Aegis Project | License: MIT
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4.1 — CLI ENTRY POINT AND ARGUMENT PARSING
+// ------------------------------------------------------------
+
+PROCEDURE main(argc, argv[]):
+    args = parse_cli_arguments(argv)
+
+    // Step 1: Load configuration
+    load_configuration()
+    IF args.config_file != NULL:
+        diram_config_load_file(args.config_file, CONFIG_SOURCE_CLI)
+
+    IF NOT diram_config_validate():
+        PRINT_ERROR diram_config_get_errors()
+        EXIT(1)
+
+    // Step 2: Apply ASLR if configured
+    IF global_config.aslr_enabled:
+        enable_address_space_randomization()
+
+    // Step 3: Route to correct operational mode
+    IF args.has_flag("--init"):
+        run_init_mode()
+
+    ELSE IF args.has_flag("--detach"):
+        run_detached_daemon_mode(args)
+
+    ELSE IF args.has_flag("--repl"):
+        run_repl_mode(args)
+
+    ELSE IF args.has_flag("--trace"):
+        run_trace_mode()
+
+    ELSE:
+        print_usage_help()
+        EXIT(0)
+
+// ------------------------------------------------------------
+// SECTION 4.2 — CLI FLAG DEFINITIONS
+// ------------------------------------------------------------
+
+DEFINE CLI_FLAGS AS:
+    "--init"            // Initialize DIRAM with standard governance
+    "--trace"           // Enable SHA-256 tracing during execution
+    "--repl"            // Launch interactive REPL session
+    "--detach"          // Run as background daemon
+    "--config" | "-c"   // Specify path to .drc config file
+    "--verbose"         // Enable verbose computation tracing (upcoming feature)
+    "--debug"           // Enable debug build behavior (make DEBUG=1 equivalent)
+
+// ------------------------------------------------------------
+// SECTION 4.3 — INIT MODE
+// ------------------------------------------------------------
+
+PROCEDURE run_init_mode():
+    PRINT "Initializing DIRAM with standard governance..."
+    diram_config_init()
+    initialize_allocation_table()
+    initialize_epoch_state()
+    initialize_memory_spaces()
+    IF global_config.zero_trust:
+        initialize_zero_trust_subsystem()
+    PRINT "DIRAM initialized. Memory space: " + global_config.memory_space
+    EXIT(0)
+
+// ------------------------------------------------------------
+// SECTION 4.4 — DETACHED DAEMON MODE
+// ------------------------------------------------------------
+
+// DIRAM can run as a background daemon with full audit logging.
+// Logs are written to three separate files.
+
+DEFINE DAEMON_LOG_PATHS AS:
+    stdout_log  = global_config.log_dir + "/diram.out.log"
+    stderr_log  = global_config.log_dir + "/diram.err.log"
+    trace_log   = global_config.log_dir + "/alloc_trace.log"  // If trace enabled
+
+PROCEDURE run_detached_daemon_mode(args):
+    // Step 1: Fork process
+    child_pid = fork()
+
+    IF child_pid < 0:
+        PRINT_ERROR "Fork failed"
+        EXIT(1)
+
+    IF child_pid > 0:
+        // Parent process — exits immediately, child runs in background
+        PRINT "DIRAM daemon started with PID " + child_pid
+        EXIT(0)
+
+    // --- Child process continues below ---
+
+    // Step 2: Create new session (detach from terminal)
+    setsid()
+
+    // Step 3: Redirect standard streams to log files
+    ensure_directory_exists(global_config.log_dir)
+    redirect_stdout(stdout_log)
+    redirect_stderr(stderr_log)
+
+    IF global_config.trace_enabled:
+        open_trace_log(trace_log)
+
+    // Step 4: Enforce PID binding for fork safety
+    IF global_config.pid_binding == "strict":
+        register_pid_binding(get_current_pid())
+
+    // Step 5: Initialize DIRAM subsystems
+    run_init_mode_silent()
+
+    // Step 6: Set daemon timeout watchdog
+    IF global_config.detach_timeout > 0:
+        SET timeout_alarm = global_config.detach_timeout  // Seconds
+        ON timeout_alarm TRIGGER:
+            LOG_INFO "Detached process self-terminating (timeout reached)"
+            cleanup_and_exit()
+
+    // Step 7: Handle async promise persistence
+    IF global_config.detach.persist_promise_receipts:
+        load_persisted_promise_receipts()
+
+    // Step 8: Main daemon event loop
+    WHILE daemon_running:
+        process_pending_promises()
+        emit_telemetry_if_due()
+        check_resilience_retry_queue()
+        sleep(DAEMON_POLL_INTERVAL_MS)
+
+    cleanup_and_exit()
+
+// ------------------------------------------------------------
+// SECTION 4.5 — RESILIENCE AND RETRY LOGIC
+// ------------------------------------------------------------
+
+DEFINE RETRY_STATE AS STRUCT:
+    attempt_count   : INTEGER = 0
+    last_attempt_ts : UINT64
+    backoff_ms      : INTEGER = 100     // Initial backoff
+
+PROCEDURE process_with_resilience(operation):
+    IF NOT global_config.resilience.retry_on_transient_failure:
+        RETURN operation()
+
+    retry_state = NEW RETRY_STATE
+
+    WHILE retry_state.attempt_count < global_config.resilience.max_retry_attempts:
+        result = TRY operation()
+        IF result.success:
+            RETURN result.value
+
+        retry_state.attempt_count += 1
+        LOG_WARNING "Transient failure, attempt " + retry_state.attempt_count
+
+        IF global_config.resilience.exponential_backoff:
+            sleep(retry_state.backoff_ms)
+            retry_state.backoff_ms *= 2     // Exponential doubling
+
+    LOG_ERROR "Max retry attempts exhausted"
+    RETURN FAILURE
+
+// ------------------------------------------------------------
+// SECTION 4.6 — INTERACTIVE REPL MODE
+// ------------------------------------------------------------
+
+PROCEDURE run_repl_mode(args):
+    PRINT "DIRAM REPL v1.0.0"
+    PRINT "Type 'help' for commands, 'exit' to quit"
+
+    IF args.has_flag("--trace"):
+        enable_trace_output()
+
+    WHILE repl_active:
+        INPUT line FROM user WITH prompt "diram> "
+        tokens = tokenize(line)
+
+        IF tokens IS EMPTY:
+            CONTINUE
+
+        command = tokens[0]
+        DISPATCH command TO repl_dispatch_table
+
+DEFINE repl_dispatch_table AS:
+    "alloc"         -> repl_alloc_command
+    "free"          -> repl_free_command
+    "trace"         -> repl_trace_command
+    "config"        -> repl_config_display
+    "help"          -> repl_help_command
+    "exit" | "quit" -> repl_exit
+    // --- FUTURE COMMANDS (upcoming releases) ---
+    "set"           -> repl_set_operand_command     // FUTURE
+    "get"           -> repl_get_value_command       // FUTURE
+    "multiply"      -> repl_multiply_regions        // FUTURE
+    DEFAULT         -> PRINT "Unknown command. Type 'help'."
+
+// ------------------------------------------------------------
+// SECTION 4.7 — REPL COMMAND IMPLEMENTATIONS
+// ------------------------------------------------------------
+
+PROCEDURE repl_alloc_command(tokens):
+    // Syntax: alloc <size> <tag>
+    IF tokens.length < 3:
+        PRINT "Usage: alloc <size> <tag>"
+        RETURN
+
+    size = parse_integer(tokens[1])
+    tag  = tokens[2]
+
+    IF size <= 0:
+        PRINT "Error: size must be positive"
+        RETURN
+
+    ptr = diram_alloc(size, tag)
+
+    IF ptr == NULL:
+        PRINT "Allocation failed (governance constraint or memory exhaustion)"
+    ELSE:
+        alloc_record = allocation_table[ptr]
+        PRINT "Allocated " + size + " bytes at " + hex(ptr) +
+              " (SHA: " + alloc_record.sha256_receipt[0:16] + "...)"
+
+PROCEDURE repl_free_command(tokens):
+    // Syntax: free <addr>
+    IF tokens.length < 2:
+        PRINT "Usage: free <addr>"
+        RETURN
+
+    addr = parse_hex_address(tokens[1])
+    diram_free(addr)
+    PRINT "Freed memory at " + hex(addr)
+
+PROCEDURE repl_trace_command(tokens):
+    // Display all active allocations with SHA receipts
+    IF allocation_table IS EMPTY:
+        PRINT "No active allocations."
+        RETURN
+
+    PRINT "Active allocations:"
+    FOR EACH ptr, record IN allocation_table:
+        PRINT "  " + hex(ptr) + ": " + record.size + " bytes" +
+              ", tag=" + record.tag +
+              ", SHA=" + record.sha256_receipt[0:16] + "..."
+
+PROCEDURE repl_help_command():
+    PRINT "Commands:"
+    PRINT "  alloc <size> <tag>   Allocate traced memory"
+    PRINT "  free <addr>          Free allocated memory"
+    PRINT "  trace                Show allocation trace"
+    PRINT "  config               Show current configuration"
+    PRINT "  exit / quit          Exit REPL"
+
+PROCEDURE repl_exit():
+    PRINT "Exiting DIRAM REPL."
+    SET repl_active = FALSE
+    cleanup_and_exit()
+
+// ------------------------------------------------------------
+// SECTION 4.8 — FUTURE REPL COMMANDS (SPECIFICATION)
+// ------------------------------------------------------------
+
+// These features are planned for upcoming REPL enhancement releases.
+// They enable real-time memory register manipulation.
+
+// FUTURE: set <operand_name> <hex_address>
+PROCEDURE repl_set_operand_command(tokens):
+    // Syntax: set <operand_name> <hex_address>
+    // Binds a named operand to a memory address for subsequent operations
+    operand_name    = tokens[1]
+    address         = parse_hex_address(tokens[2])
+    operand_registry[operand_name] = address
+    // TODO: Clarify from source PDF — operand lifetime and scope rules
+
+// FUTURE: get <operand_name>
+PROCEDURE repl_get_value_command(tokens):
+    // Syntax: get <result_operand>
+    // Reads and displays the value at the operand's registered address
+    operand_name = tokens[1]
+    IF operand_name NOT IN operand_registry:
+        PRINT "Error: unknown operand '" + operand_name + "'"
+        RETURN
+    addr = operand_registry[operand_name]
+    PRINT "Value at " + hex(addr) + ": " + read_memory_value(addr)
+
+// FUTURE: multiply <left_operand> <right_operand> <result_operand>
+PROCEDURE repl_multiply_regions(tokens):
+    // Syntax: multiply <left> <right> <result>
+    // Performs region arithmetic and stores result at registered address
+    left_addr   = operand_registry[tokens[1]]
+    right_addr  = operand_registry[tokens[2]]
+    result_name = tokens[3]
+
+    left_val    = read_memory_value(left_addr)
+    right_val   = read_memory_value(right_addr)
+    product     = left_val * right_val
+
+    result_ptr  = diram_alloc(sizeof(product), result_name)
+    write_memory_value(result_ptr, product)
+    operand_registry[result_name] = result_ptr
+    EMIT cryptographic_receipt FOR result_ptr
+    // TODO: Clarify from source PDF — exact arithmetic semantics for region operands
+
+// ============================================================
+// END MODULE 4
+// ============================================================

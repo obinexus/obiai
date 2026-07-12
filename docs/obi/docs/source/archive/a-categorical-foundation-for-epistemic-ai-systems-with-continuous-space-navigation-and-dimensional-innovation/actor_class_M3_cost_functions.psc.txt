@@ -1,0 +1,228 @@
+// ============================================================
+// FILE: actor_class_M3_cost_functions.psc.txt
+// MODULE 3 OF 5 — Static & Dynamic Cost Function Duality
+// SOURCE: "The Actor Class: A Categorical Foundation for
+//          Epistemic AI Systems with Continuous Space Navigation
+//          and Dimensional Innovation"
+// AUTHOR: OBINexus Computing
+// CLASSIFICATION: Foundational Architecture / Patent Filing
+// DATE: 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4: COST FUNCTION DUALITY
+// ------------------------------------------------------------
+
+// DEFINITION 3 (Cost Function Duality):
+//
+//   An actor employs DUAL cost functions as epistemic boundaries:
+//
+//   Static Cost:
+//     Φ(s, c) = 1   if c ≤ θ_s
+//               0   otherwise
+//
+//     where θ_s is the state-dependent cost threshold.
+//     Φ is a HARD BOUNDARY — binary gate (permit/block).
+//
+//   Dynamic Cost:
+//     Ψ(s₁, s₂) = α · KL(P_s₁ ‖ P_s₂) + β · ΔH(s₁, s₂)
+//
+//     where:
+//       KL(P_s₁ ‖ P_s₂) = Kullback-Leibler divergence
+//       ΔH(s₁, s₂)      = entropy change between states
+//       α, β             = weighting coefficients
+//     Ψ is a SOFT BOUNDARY — continuous cost measure.
+
+
+// ── STATIC COST FUNCTION Φ ────────────────────────────────────
+
+PROCEDURE StaticCost(s: State, c: REAL, theta_s: REAL) -> {0, 1}:
+    // Hard validation gate: permits state s only if cost c ≤ threshold θ_s
+    //
+    // Φ(s, c) = 1   if c ≤ θ_s   → state PERMITTED
+    //           0   otherwise      → state BLOCKED
+
+    IF c <= theta_s:
+        RETURN 1    // permitted
+    ELSE:
+        RETURN 0    // blocked
+    END IF
+END PROCEDURE
+
+
+PROCEDURE ComputeStateDependentThreshold(s: State) -> REAL:
+    // θ_s is derived from the state's local manifold curvature and
+    // the Sinphase governance constraint: ε(x) ≤ 0.6
+    // (see Theorem 2 below for the 0.6 derivation)
+
+    curvature := s.manifold_curvature()
+    base_threshold := SINPHASE_GOVERNANCE_BOUND    // 0.6 (from Sinphase constraint)
+    theta_s := base_threshold * (1.0 - curvature)
+    RETURN CLAMP(theta_s, 0.0, SINPHASE_GOVERNANCE_BOUND)
+END PROCEDURE
+
+
+// ── DYNAMIC COST FUNCTION Ψ ───────────────────────────────────
+
+CONSTANT SINPHASE_GOVERNANCE_BOUND := 0.6   // from Sinphase constraint ε(x) ≤ 0.6
+
+PROCEDURE DynamicCost(s1: State, s2: State, alpha_w: REAL, beta_w: REAL) -> REAL:
+    // Measures cost of transitioning from state s1 to state s2
+    //
+    // Ψ(s₁, s₂) = α · KL(P_s₁ ‖ P_s₂) + β · ΔH(s₁, s₂)
+
+    kl_divergence := KLDivergence(s1.distribution, s2.distribution)
+    delta_entropy := EntropyChange(s1, s2)
+
+    psi := (alpha_w * kl_divergence) + (beta_w * delta_entropy)
+    RETURN psi
+END PROCEDURE
+
+
+PROCEDURE KLDivergence(P: Distribution, Q: Distribution) -> REAL:
+    // KL(P ‖ Q) = Σₓ P(x) · log(P(x) / Q(x))
+    // Measures information loss when Q approximates P.
+    // NOTE: KL is asymmetric — KL(P‖Q) ≠ KL(Q‖P) in general.
+
+    kl := 0.0
+    FOR EACH x IN P.support:
+        IF P(x) > 0 AND Q(x) > 0:
+            kl := kl + P(x) * LOG(P(x) / Q(x))
+        ELSE IF P(x) > 0 AND Q(x) == 0:
+            RETURN INFINITY    // P has mass where Q has none — infinite divergence
+        END IF
+    END FOR
+    RETURN kl
+END PROCEDURE
+
+
+PROCEDURE EntropyChange(s1: State, s2: State) -> REAL:
+    // ΔH(s₁, s₂) = H(s₂) − H(s₁)
+    // Positive: entropy increases (more uncertainty after transition)
+    // Negative: entropy decreases (more certainty after transition)
+
+    H_s1 := ShannonEntropy(s1.distribution)
+    H_s2 := ShannonEntropy(s2.distribution)
+    RETURN H_s2 - H_s1
+END PROCEDURE
+
+
+PROCEDURE ShannonEntropy(P: Distribution) -> REAL:
+    // H(P) = −Σₓ P(x) · log₂(P(x))
+    H := 0.0
+    FOR EACH x IN P.support:
+        IF P(x) > 0:
+            H := H - P(x) * LOG2(P(x))
+        END IF
+    END FOR
+    RETURN H
+END PROCEDURE
+
+
+// ── THEOREM 2: COST-BOUNDED INNOVATION ───────────────────────
+
+// THEOREM 2 (Cost-Bounded Innovation):
+//
+//   For any actor α, dimensional innovation τ is PERMISSIBLE
+//   if and only if:
+//
+//     Φ(τ(s), Ψ(s, τ(s))) = 1   AND   Ψ(s, τ(s)) ≤ 0.6
+//
+//   Proof:
+//     Φ enforces hard boundaries on acceptable states.
+//     Ψ measures transition feasibility (continuous cost).
+//     The threshold 0.6 derives from the Sinphase governance
+//     constraint ε(x) ≤ 0.6, ensuring innovations remain within
+//     operational bounds while enabling creative exploration.
+
+PROCEDURE IsInnovationPermissible(α: Actor, s: State, tau: Transform,
+                                   alpha_w: REAL, beta_w: REAL) -> BOOL:
+    // Compute target state after applying innovation τ
+    s_prime := tau.apply(s)
+
+    // Compute dynamic cost of the transition
+    psi_cost := DynamicCost(s, s_prime, alpha_w, beta_w)
+
+    // Apply static cost gate using psi_cost as the cost argument
+    theta_s  := ComputeStateDependentThreshold(s_prime)
+    phi_gate := StaticCost(s_prime, psi_cost, theta_s)
+
+    // Sinphase governance bound check
+    sinphase_ok := (psi_cost <= SINPHASE_GOVERNANCE_BOUND)
+
+    IF phi_gate == 1 AND sinphase_ok:
+        EMIT INFO "Innovation τ is PERMISSIBLE at state s | Ψ=" + psi_cost
+        RETURN TRUE
+    ELSE:
+        EMIT INFO "Innovation τ is BLOCKED at state s | Ψ=" + psi_cost +
+                  " | Φ=" + phi_gate + " | Sinphase=" + sinphase_ok
+        RETURN FALSE
+    END IF
+END PROCEDURE
+
+
+// ── DUALITY INTERACTION: HOW Φ AND Ψ WORK TOGETHER ──────────
+
+// The two cost functions serve complementary roles:
+//
+//   Ψ (dynamic) : measures HOW COSTLY a transition is
+//                 → continuous, graduated, context-sensitive
+//                 → used to EVALUATE candidate innovations
+//
+//   Φ (static)  : makes a BINARY DECISION on acceptability
+//                 → discontinuous, threshold-based
+//                 → used to GATE whether innovation proceeds
+//
+// Relationship: Ψ feeds INTO Φ as its cost argument c.
+// Φ(τ(s), Ψ(s, τ(s))) treats the dynamic cost as the
+// input cost value that Φ tests against threshold θ_s.
+
+PROCEDURE EvaluateInnovation(α: Actor, s: State, τ: Transform) -> InnovationDecision:
+    decision := NEW InnovationDecision()
+
+    s_prime        := τ.apply(s)
+    decision.psi   := DynamicCost(s, s_prime, alpha_w=0.5, beta_w=0.5)
+    decision.theta := ComputeStateDependentThreshold(s_prime)
+    decision.phi   := StaticCost(s_prime, decision.psi, decision.theta)
+
+    decision.permissible := (decision.phi == 1) AND
+                            (decision.psi <= SINPHASE_GOVERNANCE_BOUND)
+
+    decision.explanation := IF decision.permissible THEN
+        "APPROVED: Ψ=" + decision.psi + " ≤ 0.6 and Φ=1"
+    ELSE IF decision.phi == 0 THEN
+        "BLOCKED by Φ: cost " + decision.psi + " exceeds threshold " + decision.theta
+    ELSE
+        "BLOCKED by Sinphase: Ψ=" + decision.psi + " > 0.6"
+    END IF
+
+    RETURN decision
+END PROCEDURE
+
+
+// ── COST FUNCTION CONFIGURATION UTILITY ──────────────────────
+
+PROCEDURE ConfigureCostFunctions(boundary_states B: Set[State]) -> (Phi, Psi):
+    // Configure Φ to BLOCK all states outside boundary set B
+    // Ensures "No System Breach" guarantee (see Module 4)
+
+    Phi_configured := PROCEDURE(s: State, c: REAL) -> {0, 1}:
+        IF s IN B.complement:           // s ∈ Bᶜ (outside boundary)
+            RETURN 0                    // always block — hard wall
+        END IF
+        theta_s := ComputeStateDependentThreshold(s)
+        RETURN StaticCost(s, c, theta_s)
+    END PROCEDURE
+
+    Psi_configured := PROCEDURE(s1: State, s2: State) -> REAL:
+        RETURN DynamicCost(s1, s2, alpha_w=0.5, beta_w=0.5)
+    END PROCEDURE
+
+    RETURN (Phi_configured, Psi_configured)
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: actor_class_M4_deployment_turing.psc.txt
+// ============================================================

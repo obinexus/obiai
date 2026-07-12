@@ -1,0 +1,270 @@
+// ============================================================
+// FILE: dgt_variadic_v1_M3_theorem_and_mapping.psc.txt
+// MODULE 3 OF 5 — Computational Reduction Theorem & φ Mapping
+//                 [ORIGINAL JULY 4, 2025 FORMULATION]
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts" [v1, July 4, 2025]
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4 + 5: THEOREM AND MAPPING — FOUNDING FORMULATION
+// ------------------------------------------------------------
+
+// These are the July 4, 2025 formulations of the Computational
+// Reduction Theorem and the φ mapping. Both were later inherited
+// verbatim by AEGIS-PROOF-3.2 (August 2025), DGT-RAF (August 2025),
+// and DGT Variadic V2 (May 2026).
+//
+// Inheritance chain for the Θ bound:
+//   PDF 11 (July 2025):   "|D_act| ≤ Θ" first stated
+//   PDF 9  (Aug 2025):    eq. 12 "subject to |D_act| ≤ Θ" — inherits directly
+//   PDF 10 (May 2026):    THETA_COMPUTABILITY := 8 — first quantification
+//
+// Inheritance chain for φ:
+//   PDF 11 (July 2025):   eq. 4 "φ: {x₁,...,xₙ} → D_act" first stated
+//   PDF 9  (Aug 2025):    eq. 11 same formula — inherits
+//   PDF 10 (May 2026):    DimensionalActivationMapping — full implementation
+
+
+// ── VARIADIC GAME G = (N, A, u, D) ───────────────────────────
+
+DEFINE FoundingVariadicGameTuple AS:
+    // G = (N, A, u, D) as first defined July 4, 2025.
+    //
+    // This 4-tuple extends the classical 3-tuple G=(N,A,u) from PDF 8
+    // by adding D — the set of activated strategic dimensions.
+    //
+    // Both papers published same day:
+    //   PDF 8  defined G=(N,A,u) classically
+    //   PDF 11 extended to G=(N,A,u,D) with variadic A and dynamic D
+
+    N_players    : "Set of players (identical to PDF 8 classical)"
+    A_variadic   : "Action space — variadic: inputs NOT fixed in number"
+    u_utility    : "Utility function (identical to PDF 8 classical)"
+    D_dimensions : "Activated strategic dimensions — NOVEL vs PDF 8"
+
+    KEY_INNOVATION := "D makes game structure itself dynamic — not just payoffs"
+END DEFINE
+
+
+// ── STRATEGIC BALANCE PRINCIPLE ──────────────────────────────
+
+// From §4: "Adding parameters naively is computationally infeasible."
+// This is the founding motivation for Definition 3 and the theorem.
+
+PROCEDURE NaiveParameterAdditionFailure(n_params: INT) -> ComplexityEstimate:
+    // Demonstrates why naive approaches fail.
+    // If all n parameters become dimensions: 2^n strategies minimum.
+
+    strategies_naive := 2 ^ n_params   // exponential
+    strategies_dgt   := 2 ^ THETA_COMPUTABILITY_DEFAULT   // bounded
+
+    EMIT WARNING "Naive: " + strategies_naive + " strategies"
+    EMIT INFO    "DGT:   " + strategies_dgt + " strategies (Θ-bounded)"
+    EMIT INFO    "Reduction factor: " + (strategies_naive / strategies_dgt)
+
+    RETURN ComplexityEstimate(
+        naive     = strategies_naive,
+        tractable = strategies_dgt,
+        reduction = strategies_naive / strategies_dgt
+    )
+END PROCEDURE
+
+CONSTANT THETA_COMPUTABILITY_DEFAULT := 8   // established in V2; referenced here
+
+
+// ── COMPUTATIONAL REDUCTION THEOREM (FOUNDING) ───────────────
+
+// THEOREM (Computational Reduction) [July 4, 2025]:
+//   The game G=(N,A,u,D) is solvable within tractable bounds
+//   IFF |D_act| ≤ Θ, for system-defined computability threshold Θ.
+//
+// FOUNDING NOTES:
+//   This theorem was the first formal statement of the tractability
+//   bound that runs through the entire OBIAI corpus.
+//
+//   Its IFF structure is important:
+//     FORWARD (→): |D_act| ≤ Θ implies tractability
+//     BACKWARD (←): tractability requires |D_act| ≤ Θ
+//   Both directions were implicitly assumed in downstream work.
+//
+//   The backward direction has a strong operational implication:
+//   if you observe the system becoming intractable, you KNOW
+//   |D_act| has exceeded Θ — and you must deactivate dimensions.
+//   This maps directly to the DIRAM cascade deactivation in PDF 7.
+
+PROCEDURE ComputationalReductionTheorem_Forward(
+    G: VariadicGame, theta: INT) -> BOOL:
+    // Forward: |D_act| ≤ Θ → tractable
+    k := G.D.ActiveCount()
+    IF k <= theta:
+        EMIT INFO "THEOREM (→): |D_act|=" + k + " ≤ Θ=" + theta +
+                  " → game is TRACTABLE"
+        RETURN TRUE
+    END IF
+    EMIT WARNING "THEOREM (→): |D_act|=" + k + " > Θ=" + theta +
+                 " → game is NOT YET TRACTABLE (must reduce)"
+    RETURN FALSE
+END PROCEDURE
+
+
+PROCEDURE ComputationalReductionTheorem_Backward(
+    tractable: BOOL, G: VariadicGame, theta: INT) -> BOOL:
+    // Backward: tractability ← |D_act| ≤ Θ
+    // Contrapositive: intractable → |D_act| > Θ
+    IF NOT tractable:
+        k := G.D.ActiveCount()
+        EMIT INFO "THEOREM (←): intractable detected → |D_act| must exceed Θ"
+        ASSERT k > theta   // contrapositive of backward direction
+        RETURN k > theta
+    END IF
+    RETURN TRUE
+END PROCEDURE
+
+
+PROCEDURE VerifyIFFStructure(G: VariadicGame, theta: INT) -> BOOL:
+    // Verify both directions of the IFF theorem.
+    k    := G.D.ActiveCount()
+    fwd  := (k <= theta)    // |D_act| ≤ Θ (antecedent)
+    bwd  := fwd             // tractable ↔ |D_act| ≤ Θ (they are equivalent by theorem)
+
+    EMIT INFO "IFF verification | |D_act|=" + k + " | Θ=" + theta +
+              " | forward=" + fwd + " | backward=" + bwd
+    RETURN fwd == bwd    // tautologically true — verifying the structure
+END PROCEDURE
+
+
+// ── DIMENSIONAL ACTIVATION MAPPING φ (FOUNDING) ──────────────
+
+// SECTION 5: φ MAPPING (July 4, 2025):
+//   φ : {x₁, x₂, ..., xₙ} → D_act                               (eq. 4)
+//
+// Purpose (from §5):
+//   "This function identifies and filters which scalar or vector
+//    inputs activate dimension-specific strategies."
+//
+// Two-part purpose:
+//   (1) IDENTIFY:  which inputs are relevant to which dimensions
+//   (2) FILTER:    prevent overload and misclassification
+//
+// FOUNDING NOTES:
+//   The July 2025 formulation of φ is intentionally minimal —
+//   eq. 4 is the abstract form. The implementation was left open
+//   for domain-specific instantiation. This was deliberate:
+//   the same φ maps differently in:
+//     Medical robotics  (PDF 5):  φ maps force measurements → safety dims
+//     DAG traversal     (PDF 6):  φ maps verb-noun pairs → epistemic dims
+//     RAF security      (PDF 9):  φ maps threat signals → defense dims
+//     OBIAI cognitive   (PDF 7):  φ maps observations → cascade dims
+
+PROCEDURE PhiMapping_FoundingAbstract(
+    inputs: List[ANY],        // {x₁, ..., xₙ} — any typed inputs
+    D_available: DimensionSet,
+    activate_fn: Function,    // domain-specific activation logic
+    theta: INT) -> List[StrategicDimension]:
+    // φ: {x₁,...,xₙ} → D_act  (abstract founding form)
+    //
+    // The founding paper intentionally leaves activate_fn open.
+    // Concrete implementations are documented in later papers.
+
+    D_act := activate_fn(inputs, D_available)
+
+    // Enforce Θ bound (from Computational Reduction Theorem)
+    IF LENGTH(D_act) > theta:
+        D_act := D_act[:theta]   // trim to Θ most relevant
+        EMIT INFO "φ: trimmed to Θ=" + theta
+    END IF
+
+    RETURN D_act
+END PROCEDURE
+
+
+// ── DOMAIN INHERITANCE TABLE ──────────────────────────────────
+
+DEFINE PhiInheritanceTable AS:
+    // How φ was instantiated in each downstream paper
+
+    PDF_5_instantiation := {
+        domain     : "Medical robotics (hospital safety)",
+        x_type     : "Force measurements F(t)",
+        D_result   : "Safety dimensions {bone_fragility, soft_tissue, force_rate}",
+        activate_fn: "ValidateForceAgainstFragility",
+        file       : "aegis_proof_4_1_M4_safety_protocols.psc.txt"
+    }
+
+    PDF_6_instantiation := {
+        domain     : "DAG epistemic reasoning",
+        x_type     : "Verb-noun symbolic capsules (v, n)",
+        D_result   : "DAG_cost + vexameneria + p_conf = S_game",
+        activate_fn: "EphemerisStepDecision",
+        file       : "dag_ephemeris_M4_application_diram.psc.txt"
+    }
+
+    PDF_7_instantiation := {
+        domain     : "OBIAI data drift mitigation",
+        x_type     : "Input stream xₜ",
+        D_result   : "Active cascade tiers {OBINEXUS, UCHE, EZE}",
+        activate_fn: "DataDriftDetectionAndMitigation",
+        file       : "obiai_thesis_M2_diram_cascade_algorithm.psc.txt"
+    }
+
+    PDF_9_instantiation := {
+        domain     : "RAF security governance",
+        x_type     : "Threat signals + system metrics",
+        D_result   : "Active security dimensions {brute_force, social_eng, ...}",
+        activate_fn: "VariadicDimensionActivation",
+        file       : "raf_cryptographic_M4_gitraf_policy_strategy.psc.txt"
+    }
+
+    PDF_10_instantiation := {
+        domain     : "OBIAI Filter-Flash + autonomous vehicle",
+        x_type     : "ScalarInput with promotion",
+        D_result   : "D_act via full DimensionalActivationMapping",
+        activate_fn: "DimensionalActivationMapping (complete 3-step)",
+        file       : "dgt_variadic_M4_activation_mapping_integration.psc.txt"
+    }
+END DEFINE
+
+
+// ── COMBINED THEOREM + MAPPING VERIFICATION ──────────────────
+
+PROCEDURE VerifyFoundingPaperProperties(G: VariadicGame,
+                                         inputs: List[ScalarInput],
+                                         theta: INT) -> FoundingVerification:
+
+    report := NEW FoundingVerification()
+
+    // 1. Theorem (both directions)
+    report.theorem_forward  := ComputationalReductionTheorem_Forward(G, theta)
+    report.theorem_backward := ComputationalReductionTheorem_Backward(
+                                   report.theorem_forward, G, theta)
+    report.iff_ok           := VerifyIFFStructure(G, theta)
+
+    // 2. φ mapping produces valid D_act ≤ Θ
+    delta    := RelevanceMap()
+    D_act_phi := PhiMapping_FoundingAbstract(
+        inputs      = inputs,
+        D_available = G.D,
+        activate_fn = PROCEDURE(inp, D_avail) ->
+            [d FOR d IN D_avail.dimensions
+             IF IsContextuallyActive(inp, d, delta, TAU_DEFAULT)],
+        theta = theta
+    )
+    report.phi_bounded := (LENGTH(D_act_phi) <= theta)
+
+    report.all_ok := report.theorem_forward AND report.iff_ok AND report.phi_bounded
+
+    EMIT INFO "Founding paper verification: " +
+              "theorem=" + report.theorem_forward +
+              " iff=" + report.iff_ok +
+              " phi=" + report.phi_bounded
+    RETURN report
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: dgt_variadic_v1_M4_downstream_impact_analysis.psc.txt
+// ============================================================

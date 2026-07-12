@@ -1,0 +1,295 @@
+// ============================================================
+// FILE: diram_boolean_M2_cache_mechanics.psc.txt
+// MODULE 2 OF 5 — Cache Hit/Miss Mechanics, LRU/MRU Logic
+//                 & Lookahead Prediction
+// SOURCE: "DIRAM Boolean Logic Truth Table - Memory Management Gates"
+// ORG:    OBINexus Aegis Project | Directed Instruction RAM
+// ============================================================
+
+// ------------------------------------------------------------
+// CACHE HIT / MISS MECHANICS
+// ------------------------------------------------------------
+
+// DIRAM uses lookahead memory logic to predict and preload data
+// before it is requested. Two outcomes exist when a memory access
+// is attempted:
+
+
+// ── CACHE HIT ────────────────────────────────────────────────
+
+// CACHE HIT (A=1):
+//   The requested data is already in cache — no extra fetch needed.
+//   System stays fast. Triggers:
+//     (a) Memory confirms access
+//     (b) State adjustment
+//     (c) Nudges related predictions
+//     (d) LRU/MRU: promotes item to Most Recently Used position
+
+DEFINE CacheHitRecord AS:
+    key          : CacheKey
+    value        : CacheValue
+    access_time  : Timestamp
+    previous_mru_position : INT
+
+    PROCEDURE OnHit(cache: DIRAMCache) -> VOID:
+        // (a) Memory confirms access
+        EMIT INFO "Cache HIT | key=" + key
+        cache.RecordAccess(key, access_time)
+
+        // (b) Update state
+        cache.UpdateAccessState(key)
+
+        // (c) Nudge related predictions
+        cache.lookahead.NudgePrediction(key, confidence_delta=+0.1)
+
+        // (d) Promote to MRU
+        cache.lru_chain.PromoteToMRU(key)
+        EMIT LOG "Promoted to MRU: " + key
+    END PROCEDURE
+END DEFINE
+
+
+// ── CACHE MISS ───────────────────────────────────────────────
+
+// CACHE MISS (A=0):
+//   Data not in cache — system must fetch from main memory or disk.
+//   Slower — must wait for fresh data load. Triggers:
+//     (a) Lookup fails — no immediate response
+//     (b) Fetch from main memory / disk
+//     (c) LRU/MRU: must evict Least Recently Used item to make space
+//     (d) Load fresh data into cache
+//     (e) Update lookahead predictor (miss = prediction failure)
+
+DEFINE CacheMissRecord AS:
+    key          : CacheKey
+    miss_time    : Timestamp
+    fetch_source : {MAIN_MEMORY, DISK}
+    evicted_key  : CacheKey OR NULL
+
+    PROCEDURE OnMiss(cache: DIRAMCache,
+                      governance_ok: BOOL) -> MissResult:
+        EMIT LOG "Cache MISS | key=" + key
+
+        // Check governance before fetching
+        IF NOT governance_ok:
+            // Row 2 in truth table: A=0, B=1 → BLOCK
+            EMIT WARNING "Cache miss blocked by governance violation | key=" + key
+            RETURN MissResult(fetched=FALSE, reason="GOVERNANCE_VIOLATION")
+        END IF
+
+        // Row 1: A=0, B=0 → ALLOW — fetch and update
+        // (c) Evict LRU item if cache full
+        evicted := NULL
+        IF cache.IsFull():
+            evicted := cache.lru_chain.EvictLRU()
+            self.evicted_key := evicted
+            EMIT INFO "Evicted LRU: " + evicted
+        END IF
+
+        // (b) Fetch from main memory or disk
+        value := FetchFromSource(key, self.fetch_source)
+
+        // (d) Load into cache
+        cache.Insert(key, value)
+
+        // (e) Update lookahead — miss = predictor gap
+        cache.lookahead.RecordMiss(key, miss_time)
+
+        RETURN MissResult(fetched=TRUE, evicted=evicted, value=value)
+    END PROCEDURE
+END DEFINE
+
+
+// ── LRU/MRU CHAIN ────────────────────────────────────────────
+
+CLASS LRUMRUChain:
+    // Doubly-linked list ordered by access recency.
+    // Head = Most Recently Used (MRU)
+    // Tail = Least Recently Used (LRU)
+
+    PRIVATE:
+        chain   : DoublyLinkedList[CacheKey]
+        index   : Map[CacheKey → ListNode]
+
+    PUBLIC:
+
+        PROCEDURE PromoteToMRU(key: CacheKey) -> VOID:
+            // Move item to head of chain (MRU position)
+            IF key IN index:
+                node := index[key]
+                chain.MoveToHead(node)
+                EMIT LOG "LRU/MRU: promoted " + key + " to MRU"
+            END IF
+        END PROCEDURE
+
+        PROCEDURE EvictLRU() -> CacheKey:
+            // Remove and return tail item (Least Recently Used)
+            IF chain.IsEmpty():
+                EMIT WARNING "LRU chain empty — nothing to evict"
+                RETURN NULL
+            END IF
+            lru_key := chain.Tail().key
+            chain.RemoveTail()
+            index.REMOVE(lru_key)
+            EMIT INFO "LRU evicted: " + lru_key
+            RETURN lru_key
+        END PROCEDURE
+
+        PROCEDURE Insert(key: CacheKey) -> VOID:
+            // Insert new item at MRU position
+            node := chain.InsertHead(key)
+            index[key] := node
+        END PROCEDURE
+
+        PROCEDURE GetMRU() -> CacheKey:
+            RETURN chain.Head().key
+        END PROCEDURE
+
+        PROCEDURE GetLRU() -> CacheKey:
+            RETURN chain.Tail().key
+        END PROCEDURE
+END CLASS
+
+
+// ── LOOKAHEAD HARDWARE PREDICTION ────────────────────────────
+
+CLASS DIRAMLookahead:
+    // Predicts future cache needs — preloads data it suspects
+    // the system will ask for. Raises hit rate over time.
+    // Uses confidence scoring aligned with DIRAM's epistemic model
+    // (cross-ref: p_conf ≥ 0.954 in AEGIS/OBIAI chain).
+
+    PRIVATE:
+        prediction_table : Map[CacheKey → REAL]   // key → confidence ∈ [0,1]
+        hit_history      : List[CacheKey]          // recent hits
+        miss_history     : List[CacheKey]          // recent misses
+
+    PUBLIC:
+
+        PROCEDURE PredictNextAccess(context: AccessContext) -> List[CacheKey]:
+            // Return keys likely to be accessed soon, by confidence rank.
+            predictions := SORT_BY(prediction_table,
+                                    key=entry → entry.value,
+                                    order=DESCENDING)
+            CONSTANT PREDICTION_THRESHOLD := 0.5   // matches ε ≤ 0.5 boundary
+            RETURN [k FOR (k, conf) IN predictions IF conf >= PREDICTION_THRESHOLD]
+        END PROCEDURE
+
+        PROCEDURE NudgePrediction(key: CacheKey, confidence_delta: REAL) -> VOID:
+            // Adjust confidence for key based on observed access.
+            current := IF key IN prediction_table THEN prediction_table[key] ELSE 0.0
+            prediction_table[key] := CLAMP(current + confidence_delta, 0.0, 1.0)
+        END PROCEDURE
+
+        PROCEDURE RecordMiss(key: CacheKey, t: Timestamp) -> VOID:
+            // Miss = prediction failure — reduce confidence
+            miss_history.APPEND(key)
+            self.NudgePrediction(key, confidence_delta=-0.05)
+        END PROCEDURE
+
+        PROCEDURE PreloadPredicted(cache: DIRAMCache,
+                                    governance_ok: BOOL) -> INT:
+            // Preload predicted items into cache (if governance permits).
+            IF NOT governance_ok:
+                EMIT INFO "Lookahead preload skipped — governance violation"
+                RETURN 0
+            END IF
+
+            predicted := PredictNextAccess(AccessContext.current())
+            preloaded := 0
+            FOR EACH key IN predicted:
+                IF key NOT IN cache.keys:
+                    value := FetchFromSource(key, MAIN_MEMORY)
+                    cache.Insert(key, value)
+                    preloaded := preloaded + 1
+                END IF
+            END FOR
+            EMIT INFO "Lookahead preloaded " + preloaded + " items"
+            RETURN preloaded
+        END PROCEDURE
+
+END CLASS
+
+
+// ── DIRAM CACHE STRUCTURE ─────────────────────────────────────
+
+CLASS DIRAMCache:
+    PRIVATE:
+        store      : Map[CacheKey → CacheValue]
+        capacity   : INT
+        lru_chain  : LRUMRUChain
+        lookahead  : DIRAMLookahead
+        sha_receipt_log : List[SHA256Receipt]   // cryptographic traceability
+
+    PUBLIC:
+
+        PROCEDURE Access(key: CacheKey, governance_state: {0, 1}) -> DIRAMOutput:
+            // Primary DIRAM access operation.
+            // Applies truth table logic: (A=cache_state, B=governance_state)
+
+            A := IF key IN store THEN 1 ELSE 0   // cache state
+            B := governance_state
+
+            // Apply DIRAM gate
+            decision := LookupTruthTable(A, B)
+
+            IF decision.value == 1:
+                IF A == 1:
+                    // Cache hit + allowed
+                    hit := CacheHitRecord(key=key, access_time=CURRENT_TIME())
+                    hit.OnHit(self)
+                ELSE:
+                    // Cache miss + allowed → fetch
+                    miss := CacheMissRecord(key=key, miss_time=CURRENT_TIME())
+                    miss.OnMiss(self, governance_ok=TRUE)
+                END IF
+            ELSE:
+                EMIT WARNING "DIRAM BLOCKED | " + decision.action + " | key=" + key
+            END IF
+
+            // Generate SHA-256 receipt for traceability
+            receipt := GenerateSHAReceipt(key, A, B, decision.value)
+            sha_receipt_log.APPEND(receipt)
+
+            RETURN decision
+        END PROCEDURE
+
+        PROCEDURE IsFull() -> BOOL:
+            RETURN LENGTH(store) >= capacity
+        END PROCEDURE
+
+        PROCEDURE Insert(key: CacheKey, value: CacheValue) -> VOID:
+            IF IsFull():
+                evicted := lru_chain.EvictLRU()
+                store.REMOVE(evicted)
+            END IF
+            store[key] := value
+            lru_chain.Insert(key)
+        END PROCEDURE
+
+END CLASS
+
+
+// ── CACHE DECISION FLOW (from document) ──────────────────────
+
+PROCEDURE CacheDecisionFlow(cache: DIRAMCache, key: CacheKey) -> STRING:
+    // "Cache Full? → Need Eviction → Check LRU Chain → Remove Oldest"
+    // "Cache Hit?  → Promote Item → Move to MRU Position → Update Chain"
+
+    IF key IN cache.store:
+        cache.lru_chain.PromoteToMRU(key)
+        RETURN "Cache Hit → Promoted to MRU → Chain updated"
+    ELSE:
+        IF cache.IsFull():
+            evicted := cache.lru_chain.EvictLRU()
+            RETURN "Cache Full → Eviction → LRU removed: " + evicted
+        END IF
+        RETURN "Cache Miss → Fetch → Insert at MRU position"
+    END IF
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: diram_boolean_M3_governance_compliance.psc.txt
+// ============================================================

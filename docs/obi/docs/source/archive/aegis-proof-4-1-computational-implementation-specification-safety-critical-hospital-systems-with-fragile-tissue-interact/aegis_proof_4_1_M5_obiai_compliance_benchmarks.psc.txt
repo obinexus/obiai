@@ -1,0 +1,357 @@
+// ============================================================
+// FILE: aegis_proof_4_1_M5_obiai_compliance_benchmarks.psc.txt
+// MODULE 5 OF 5 — OBIAI Integration, NASA Compliance Extensions
+//                 & Performance Benchmarks
+// SOURCE: "AEGIS-PROOF-4.1: Computational Implementation Specification
+//          Safety-Critical Hospital Systems with Fragile Tissue Interaction"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 7: INTEGRATION WITH OBIAI ARCHITECTURE
+// ------------------------------------------------------------
+
+// ── 7.1: FILTER-FLASH MEDICAL DECISION FRAMEWORK ─────────────
+
+// Three cognitive decision streams in medical context:
+//
+//   (12) medical_confidence = bayesian_update(prior_safety, sensor_data)
+//   (13) Filter_activation  = persistent_reasoning(patient_history, procedure)
+//   (14) Flash_activation   = rapid_response(emergency_signal, reflexive_withdrawal)
+
+PROCEDURE ComputeMedicalConfidenceBayesian(prior_safety: Distribution,
+                                            sensor_data: SensorReading,
+                                            patient_history: PatientHistory) -> REAL:
+    // Eq. 12: Bayesian update of safety prior with current sensor evidence
+    //   medical_confidence = Bayesian_update(prior_safety, current_sensor_data)
+
+    // Prior: historical safety profile of this patient
+    prior_mean := prior_safety.mean
+    prior_var  := prior_safety.variance
+
+    // Likelihood: current sensor reading relative to thresholds
+    sensor_signal   := sensor_data.normalized_force_level    // ∈ [0, 1]
+    likelihood_safe := 1.0 - sensor_signal   // higher force → lower likelihood of safety
+
+    // Gaussian conjugate update (simplified):
+    //   posterior_mean ∝ (prior_mean/prior_var + likelihood/sensor_var)
+    sensor_var    := 0.01    // sensor noise variance
+    posterior_precision := (1.0 / prior_var) + (1.0 / sensor_var)
+    posterior_mean := ((prior_mean / prior_var) + (likelihood_safe / sensor_var)) /
+                       posterior_precision
+
+    confidence := CLAMP(posterior_mean, 0.0, 1.0)
+    EMIT LOG "Bayesian confidence update: prior=" + prior_mean +
+             " | sensor=" + sensor_signal + " → posterior=" + confidence
+    RETURN confidence
+END PROCEDURE
+
+
+PROCEDURE FilterActivation(patient_history: PatientHistory,
+                            procedure_protocol: MedicalProtocol,
+                            current_state: SystemState) -> FilterDecision:
+    // Eq. 13: persistent_reasoning(patient_history, procedure_protocol)
+    // Filter mode = deliberate, rule-governed, full patient context applied.
+    //
+    // Uses: prior interactions, medication schedule, contraindications
+
+    contraindications := patient_history.contraindications
+    procedure_steps   := procedure_protocol.current_step
+    safe_force_range  := procedure_protocol.force_range_for_step(procedure_steps)
+
+    decision := FilterDecision(
+        mode          = FILTER,
+        reasoning     = "Persistent protocol adherence",
+        force_target  = safe_force_range.nominal,
+        force_ceiling = safe_force_range.maximum,
+        contraindications_checked = TRUE
+    )
+    RETURN decision
+END PROCEDURE
+
+
+PROCEDURE FlashActivation(emergency_signal: BOOL,
+                           current_force: REAL,
+                           F_max: REAL) -> FlashDecision:
+    // Eq. 14: rapid_response(emergency_signal, reflexive_withdrawal)
+    // Flash mode = immediate, reflex-like, minimal deliberation.
+    //
+    // Triggered by: sudden force spike, emergency signal, confidence drop
+
+    IF emergency_signal OR current_force > F_max * 0.95:
+        decision := FlashDecision(
+            mode       = FLASH,
+            action     = REFLEXIVE_WITHDRAWAL,
+            urgency    = HIGH,
+            reasoning  = "Emergency: force spike or explicit emergency signal"
+        )
+    ELSE:
+        decision := FlashDecision(
+            mode       = FLASH,
+            action     = CAUTIOUS_HOLD,
+            urgency    = MEDIUM,
+            reasoning  = "Low confidence: applying conservative hold"
+        )
+    END IF
+    RETURN decision
+END PROCEDURE
+
+
+// ── INTEGRATED MEDICAL COGNITIVE LOOP ────────────────────────
+
+PROCEDURE MedicalCognitiveStep(state: SystemState,
+                                patient_history: PatientHistory,
+                                procedure_protocol: MedicalProtocol,
+                                sensor_data: SensorReading,
+                                patient: PatientProfile) -> CognitiveDecision:
+    // Unified decision-making step integrating all three streams
+
+    // Compute Bayesian medical confidence
+    prior_safety := patient_history.GetSafetyPrior()
+    confidence   := ComputeMedicalConfidenceBayesian(prior_safety, sensor_data,
+                                                      patient_history)
+
+    // Select cognitive mode
+    mode := EphemerisStep(confidence)
+
+    MATCH mode:
+        CASE FILTER:
+            RETURN FilterActivation(patient_history, procedure_protocol,
+                                    state).AsCognitiveDecision()
+        CASE FLASH:
+            F_max := ComputeFractureThreshold(patient, KAPPA_DEFAULT)
+            RETURN FlashActivation(sensor_data.emergency_flag,
+                                   sensor_data.current_force_magnitude,
+                                   F_max).AsCognitiveDecision()
+    END MATCH
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 7.2: NASA-STD-8739.8 COMPLIANCE EXTENSIONS (MEDICAL)
+// ------------------------------------------------------------
+
+// Medical context adds four requirements BEYOND the base NASA compliance
+// established in AEGIS-PROOF-3.1/3.2 Module 5:
+
+DEFINE MedicalNASAComplianceExtensions AS:
+
+    // (1) DETERMINISTIC SAFETY: all force calculations auditable
+    PROPERTY deterministic_safety := TRUE
+    PROPERTY deterministic_evidence := "Ax=b has unique solution when cond(A) < 10¹²"
+
+    // (2) FAULT TOLERANCE: single-point failure must not cause harm
+    // Redundancy layers:
+    //   - Software safety clamp (Module 2: SafetyClamp)
+    //   - Hardware dermis circuit (Module 3: TriggerHardwareEmergencyShutdown)
+    //   - Concurrent emergency monitor (Module 4: EmergencyResponseMonitor)
+    PROPERTY fault_tolerant := TRUE
+    PROPERTY redundancy_layers := 3
+
+    // (3) REAL-TIME CONSTRAINTS: < 10ms for safety-critical decisions
+    PROPERTY realtime_budget_ms := 10.0
+    // Sub-budgets (§8 table):
+    PROPERTY matrix_solve_budget_us   := 100.0   // < 100µs
+    PROPERTY safety_verify_budget_us  :=  50.0   // < 50µs
+    PROPERTY emergency_stop_budget_ms :=   1.0   // < 1ms
+    PROPERTY filterflash_budget_us    := 500.0   // < 500µs
+
+    // (4) MEDICAL TRACEABILITY: complete audit trail for regulatory compliance
+    PROPERTY audit_trail_required := TRUE
+    PROPERTY regulatory_standards := ["ISO 13485:2016", "NASA-STD-8739.8",
+                                       "IEEE Medical Robotics 2025"]
+
+END DEFINE
+
+
+PROCEDURE VerifyMedicalNASACompliance(run_result: ControllerRunResult,
+                                       timing_data: TimingReport) -> ComplianceReport:
+    report := NEW ComplianceReport()
+
+    // (1) Deterministic: all solve operations must have succeeded
+    report.deterministic := (run_result.failed_solves == 0)
+    IF NOT report.deterministic:
+        EMIT ERROR "Medical(1): " + run_result.failed_solves + " matrix solve failures"
+    END IF
+
+    // (2) Fault tolerance: verify all three redundancy layers are active
+    report.fault_tolerant := (
+        SoftwareSafetyClamp.is_active() AND
+        HardwareDermisCircuit.is_active() AND
+        EmergencyMonitor.is_active()
+    )
+
+    // (3) Real-time: all operations within budget
+    report.rt_matrix_ok   := timing_data.max_matrix_solve_us   < 100.0
+    report.rt_safety_ok   := timing_data.max_safety_verify_us  < 50.0
+    report.rt_estop_ok    := timing_data.max_emergency_stop_ms < 1.0
+    report.rt_mode_ok     := timing_data.max_filterflash_us    < 500.0
+    report.realtime_ok    := report.rt_matrix_ok AND report.rt_safety_ok AND
+                              report.rt_estop_ok AND report.rt_mode_ok
+
+    // (4) Audit trail: verify incident log is populated and complete
+    report.audit_trail_ok := (run_result.incident_log.length > 0 OR
+                               run_result.clean_run == TRUE)
+    // Clean run with no incidents still passes if run_result.clean_run is set
+
+    report.all_compliant := report.deterministic AND report.fault_tolerant AND
+                            report.realtime_ok AND report.audit_trail_ok
+
+    IF report.all_compliant:
+        EMIT INFO "Medical NASA-STD-8739.8 compliance: ALL REQUIREMENTS MET ✓"
+    ELSE:
+        EMIT ERROR "Medical NASA-STD-8739.8 compliance: FAILURES — see report"
+    END IF
+
+    RETURN report
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 8: PERFORMANCE BENCHMARKS
+// ------------------------------------------------------------
+
+// From §8.1 Performance Targets table:
+//
+//   Operation              Target Time    Safety Margin
+//   ─────────────────────────────────────────────────────
+//   Matrix solve (3×3)     < 100µs        10× real-time
+//   Safety verification    < 50µs         20× real-time
+//   Emergency stop         < 1ms          Medical standard
+//   Filter-Flash decision  < 500µs        Cognitive response
+
+DEFINE PerformanceBenchmarks AS:
+    MATRIX_SOLVE_TARGET_US  :=  100.0    // 100µs
+    SAFETY_VERIFY_TARGET_US :=   50.0    // 50µs
+    EMERGENCY_STOP_TARGET_MS :=   1.0    // 1ms
+    FILTERFLASH_TARGET_US   :=  500.0    // 500µs
+
+    // Safety margins:
+    MATRIX_SOLVE_MARGIN     := 10.0     // 10× real-time headroom
+    SAFETY_VERIFY_MARGIN    := 20.0     // 20× real-time headroom
+END DEFINE
+
+
+PROCEDURE BenchmarkAllOperations(patient: PatientProfile,
+                                  target: InteractionTarget,
+                                  n_trials: INT) -> BenchmarkReport:
+    report := NEW BenchmarkReport()
+
+    // (1) Matrix solve benchmark
+    A := ComputeSafetyMatrix(patient)
+    b := DeriveConstraints(target, patient)
+    solve_times := []
+    FOR i := 1 TO n_trials:
+        t0 := TIMESTAMP_NANOSECONDS()
+        SolveLinearSystem(A, b)
+        solve_times.APPEND((TIMESTAMP_NANOSECONDS() - t0) / 1000.0)
+    END FOR
+    report.matrix_solve_max_us  := MAX(solve_times)
+    report.matrix_solve_avg_us  := MEAN(solve_times)
+    report.matrix_solve_ok      := report.matrix_solve_max_us < MATRIX_SOLVE_TARGET_US
+
+    // (2) Safety verification benchmark
+    x_test := SolveLinearSystem(A, b).first
+    verify_times := []
+    FOR i := 1 TO n_trials:
+        t0 := TIMESTAMP_NANOSECONDS()
+        ValidateForceAgainstFragility(
+            ExtractBoneForce(x_test),
+            ExtractSoftTissuePressure(x_test),
+            0.0, patient, DEFAULT_CONSTRAINTS
+        )
+        verify_times.APPEND((TIMESTAMP_NANOSECONDS() - t0) / 1000.0)
+    END FOR
+    report.safety_verify_max_us := MAX(verify_times)
+    report.safety_verify_ok     := report.safety_verify_max_us < SAFETY_VERIFY_TARGET_US
+
+    // (3) Emergency stop benchmark — hardware path (measured separately)
+    // Note: hardware latency must be measured with physical test equipment
+    // Software path upper-bound is logged here:
+    EMIT INFO "Emergency stop benchmark requires physical hardware measurement"
+    report.emergency_stop_note := "Hardware measurement required; software path < 0.5ms"
+
+    // (4) Filter-Flash decision benchmark
+    mode_times := []
+    FOR i := 1 TO n_trials:
+        t0 := TIMESTAMP_NANOSECONDS()
+        EphemerisStep(confidence_medical=0.96)
+        mode_times.APPEND((TIMESTAMP_NANOSECONDS() - t0) / 1000.0)
+    END FOR
+    report.filterflash_max_us := MAX(mode_times)
+    report.filterflash_ok     := report.filterflash_max_us < FILTERFLASH_TARGET_US
+
+    report.all_benchmarks_met := report.matrix_solve_ok AND
+                                  report.safety_verify_ok AND
+                                  report.filterflash_ok
+
+    EMIT INFO "=== BENCHMARK RESULTS ==="
+    EMIT INFO "Matrix solve:    max=" + report.matrix_solve_max_us  + "µs (target<100µs) | " +
+              (IF report.matrix_solve_ok  THEN "PASS ✓" ELSE "FAIL ✗")
+    EMIT INFO "Safety verify:   max=" + report.safety_verify_max_us + "µs (target<50µs)  | " +
+              (IF report.safety_verify_ok THEN "PASS ✓" ELSE "FAIL ✗")
+    EMIT INFO "Filter-Flash:    max=" + report.filterflash_max_us   + "µs (target<500µs) | " +
+              (IF report.filterflash_ok   THEN "PASS ✓" ELSE "FAIL ✗")
+
+    RETURN report
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 9: CONCLUSION — NEXT PHASE IMPLEMENTATION STEPS
+// ------------------------------------------------------------
+
+DEFINE ImplementationRoadmap AS:
+    STEP_1 := "Matrix solver optimization for real-time constraints"
+    STEP_2 := "Polymer material characterization and testing"
+    STEP_3 := "Filter-Flash integration with medical decision protocols"
+    STEP_4 := "Regulatory documentation preparation for hospital deployment"
+
+    // Reference standards for Step 4:
+    REGULATORY_REFS := [
+        "ISO 13485:2016 — Medical Devices Quality Management",
+        "NASA-STD-8739.8 — Software Assurance Standard",
+        "IEEE Robotics and Automation Society Medical Robotics 2025"
+    ]
+END DEFINE
+
+
+PROCEDURE PrintImplementationChecklist() -> VOID:
+    EMIT INFO "=== AEGIS-PROOF-4.1 IMPLEMENTATION CHECKLIST ==="
+    EMIT INFO "✓ Matrix-based pressure calculation: Ax=b formalized"
+    EMIT INFO "✓ Tissue fragility constraints: F_bone, P_soft, F_dot bounded"
+    EMIT INFO "✓ Real-time solver: 3×3 Gaussian elimination < 100µs"
+    EMIT INFO "✓ Filter-Flash medical integration: confidence_medical = min(ε_ep, ε_safe)"
+    EMIT INFO "✓ Polymer 3-layer interface: Epidermis/Dermis/Hypodermis specified"
+    EMIT INFO "✓ Kelvin-Voigt force model: k·x + b·ẋ + η·nonlinear implemented"
+    EMIT INFO "✓ Fragility 3×3 matrix: f_ij ∈ [0,1] computed per patient"
+    EMIT INFO "✓ Emergency response: Algorithm 2 with hardware redundancy"
+    EMIT INFO "✓ 4-simulant test protocol: Levels 1–4 defined"
+    EMIT INFO "✓ NASA-STD-8739.8 medical extensions: 4 properties verified"
+    EMIT INFO "✓ Performance benchmarks: all targets < 1ms response chain"
+    EMIT INFO ""
+    EMIT INFO "Epistemic confidence threshold: 95.4% (inherited AEGIS-PROOF-3.1)"
+    EMIT INFO "DIRAM ε bound: 0.6 (inherited AEGIS chain)"
+    EMIT INFO "Status: READY FOR Phase Deployment"
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 5 — FINAL MODULE
+//
+// FULL MODULE INDEX (AEGIS-PROOF-4.1):
+//   M1: aegis_proof_4_1_M1_foundation.psc.txt
+//   M2: aegis_proof_4_1_M2_realtime_solver.psc.txt
+//   M3: aegis_proof_4_1_M3_polymer_interface.psc.txt
+//   M4: aegis_proof_4_1_M4_safety_protocols.psc.txt
+//   M5: aegis_proof_4_1_M5_obiai_compliance_benchmarks.psc.txt  ← THIS FILE
+//
+// COMPLETE AEGIS PROOF CHAIN (all sessions, all PDFs):
+//   PDF 1 (Bayesian Debiasing)     : bayesian_debiasing_M1–M5
+//   PDF 2 (Actor Class)            : actor_class_M1–M5
+//   PDF 3 (AEGIS-PROOF-1.2)        : aegis_proof_1_2_M1–M5
+//   PDF 4 (AEGIS-PROOF-3.1 & 3.2) : aegis_proof_3_1_3_2_M1–M5
+//   PDF 5 (AEGIS-PROOF-4.1)        : aegis_proof_4_1_M1–M5  ← THIS
+// ============================================================

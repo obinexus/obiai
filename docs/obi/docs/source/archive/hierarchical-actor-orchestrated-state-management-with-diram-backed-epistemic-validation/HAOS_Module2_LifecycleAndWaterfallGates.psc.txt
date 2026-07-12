@@ -1,0 +1,282 @@
+// ============================================================
+// FILE: HAOS_Module2_LifecycleAndWaterfallGates.psc.txt
+// SOURCE: Hierarchical_Actor_Orchestrated_State_Management_with_DIRAM_Backed_Epistemic_Validation.pdf
+//         Section III
+// AUTHOR: OBINexus Computing — Aegis Framework Division
+// COMPLIANCE: NASA-STD-8739.8, AEGIS-PROOF-1.2
+// CLASSIFICATION: Production Infrastructure
+// PURPOSE: Pseudocode for the State Transition Automaton,
+//          Theorem 1 (Lifecycle Soundness), and all three
+//          Waterfall Gate enforcement procedures
+// ============================================================
+
+MODULE HAOS_LifecycleAndWaterfallGates
+
+// ============================================================
+// SECTION III — TASK LIFECYCLE MANAGEMENT WITH WATERFALL GATES
+// ============================================================
+
+// ============================================================
+// SECTION III.A — State Transition Automaton
+// ============================================================
+
+// THEOREM 1 (Lifecycle Soundness):
+// For any state s ∈ S with confidence c_s ≥ 0.954,
+// the transition function L guarantees:
+//   L(s, C) = s'  implies  verify-trace-Φ(s → s') = TRUE
+//
+// PROOF:
+//   Each transition invokes audit-transition-Φ which validates
+//   the epistemic signature Φ before permitting state advancement.
+//   The DIRAM trace function T generates cryptographic proof
+//   of transition validity.
+
+DEFINE WaterfallGate AS ENUM {
+    GATE_1_TODO_VALIDATION,   // Entry gate — must pass before DOING
+    GATE_2_DOING_PROGRESS,    // Progress gate — monitors success:failure ratio
+    GATE_3_DONE_VERIFICATION  // Completion gate — commits to DIRAM
+}
+
+DEFINE StateTransition AS ENUM {
+    TRANSITION_ADVANCE,   // Normal forward progression
+    TRANSITION_ROLLBACK,  // Rollback cascade initiated
+    TRANSITION_BLOCKED,   // State blocked on dependency or confidence failure
+    TRANSITION_COMPLETED  // State successfully reached DONE
+}
+
+// Core lifecycle automaton:
+// L : S × C → S  (from Definition 1)
+FUNCTION lifecycle_automaton(
+    state:   HierarchicalState,
+    context: ConceptualContext
+) -> StateTransition:
+
+    // Pre-condition: validate epistemic signature before ANY transition
+    // Maps to audit-transition-Φ in the verb-noun glossary
+    audit_result := audit_transition(state)
+    IF NOT audit_result.valid THEN
+        state.status_flag := STATE_BLOCKED
+        emit_trace("LIFECYCLE_AUDIT_FAIL", state.state_id)
+        RETURN TRANSITION_BLOCKED
+    END IF
+
+    // Route to appropriate gate based on current lifecycle position
+    SWITCH state.status_flag:
+        CASE STATE_TODO:
+            gate_result := enforce_waterfall_gate(state, GATE_1_TODO_VALIDATION)
+            IF gate_result == 0 THEN
+                state.status_flag := STATE_DOING
+                RETURN TRANSITION_ADVANCE
+            ELSE
+                RETURN TRANSITION_BLOCKED
+            END IF
+
+        CASE STATE_DOING:
+            gate_result := enforce_waterfall_gate(state, GATE_2_DOING_PROGRESS)
+            IF gate_result == 0 THEN
+                state.status_flag := STATE_DONE
+                enforce_waterfall_gate(state, GATE_3_DONE_VERIFICATION)
+                RETURN TRANSITION_COMPLETED
+            ELSE
+                RETURN TRANSITION_ROLLBACK
+            END IF
+
+        CASE STATE_DONE:
+            // Already terminal — no further transitions
+            RETURN TRANSITION_COMPLETED
+
+        CASE STATE_BLOCKED:
+            // Resolve dependencies, then retry
+            RETURN TRANSITION_BLOCKED
+
+        CASE STATE_ROLLEDBACK:
+            // After rollback, state resets to TODO for retry
+            state.status_flag := STATE_TODO
+            RETURN TRANSITION_ADVANCE
+    END SWITCH
+
+END FUNCTION
+
+// Verify cryptographic integrity of transition history:
+// Maps to verify-trace-Φ in the verb-noun glossary
+FUNCTION verify_trace(
+    state:           HierarchicalState,
+    transition_hist: List<StateTransitionRecord>
+) -> Boolean:
+    // Validate that the SHA-256 chain is unbroken from root to current state
+    expected_hash := state.parent_state_hash
+
+    FOR EACH record IN transition_hist DO
+        computed_hash := sha256(record.state_id || record.timestamp || record.phi_sig)
+        IF computed_hash != expected_hash THEN
+            RETURN FALSE  // Chain integrity violation
+        END IF
+        expected_hash := computed_hash
+    END FOR
+
+    RETURN TRUE
+END FUNCTION
+
+// Inspect state lifecycle compliance with confidence metrics:
+// Maps to audit-transition-Φ in the verb-noun glossary
+FUNCTION audit_transition(state: HierarchicalState) -> AuditResult:
+    // Checks epistemic signature Φ before permitting state advancement
+    confidence_ok := state.proof_confidence >= EPISTEMIC_THRESHOLD
+    phi_ok        := validate_phi_vector(state.intent.phi_vector)
+
+    RETURN AuditResult {
+        valid:              confidence_ok AND phi_ok,
+        confidence:         state.proof_confidence,
+        phi_validation:     phi_ok,
+        state_id:           state.state_id
+    }
+END FUNCTION
+
+FUNCTION validate_phi_vector(phi: Float[8]) -> Boolean:
+    // All phi vector components must represent sound epistemic confidence
+    FOR EACH component IN phi DO
+        IF component < 0.90 THEN   // Individual component floor
+            RETURN FALSE
+        END IF
+    END FOR
+    RETURN TRUE
+END FUNCTION
+
+
+// ============================================================
+// SECTION III.B — Waterfall Gate Implementation
+// ============================================================
+
+// Three gates enforce progression:
+//   Gate 1 (TODO_VALIDATION):   Block if confidence < 0.954
+//   Gate 2 (DOING_PROGRESS):    Rollback cascade if ratio < 0.5
+//   Gate 3 (DONE_VERIFICATION): Emit proof and commit to DIRAM
+
+CONSTANT SUCCESS_FAILURE_ROLLBACK_THRESHOLD := 0.5  // Below 1:2 ratio triggers rollback
+
+FUNCTION enforce_waterfall_gate(
+    state: HierarchicalState,
+    gate:  WaterfallGate
+) -> Integer:   // Returns 0 on pass, -1 on fail
+
+    SWITCH gate:
+
+        // -------------------------------------------------------
+        // GATE 1: TODO → DOING Validation
+        // Blocks state if proof_confidence is below epistemic threshold
+        // -------------------------------------------------------
+        CASE GATE_1_TODO_VALIDATION:
+            IF state.proof_confidence < EPISTEMIC_THRESHOLD THEN
+                // Confidence insufficient — block this state
+                state.status_flag := STATE_BLOCKED
+                emit_trace("GATE_1_FAILED", state.state_id)
+                RETURN -1
+            END IF
+            // Gate passed — state may advance to DOING
+            emit_trace("GATE_1_PASSED", state.state_id)
+            RETURN 0
+
+        // -------------------------------------------------------
+        // GATE 2: DOING Progress Monitoring
+        // Initiates cascade rollback if success:failure ratio < 0.5
+        // -------------------------------------------------------
+        CASE GATE_2_DOING_PROGRESS:
+            ratio := calculate_success_failure_ratio(state)
+            // compute-ratio-Φ: calculate success:failure metrics
+            IF ratio < SUCCESS_FAILURE_ROLLBACK_THRESHOLD THEN
+                // Ratio below 1:2 threshold — initiate cascade rollback
+                initiate_cascade_rollback(state)
+                RETURN -1
+            END IF
+            // Ratio acceptable — state may advance to DONE
+            emit_trace("GATE_2_PASSED_RATIO_" + ratio, state.state_id)
+            RETURN 0
+
+        // -------------------------------------------------------
+        // GATE 3: DONE Verification and DIRAM Commit
+        // Emits verification proof and persists state
+        // -------------------------------------------------------
+        CASE GATE_3_DONE_VERIFICATION:
+            // emit-verification-proof → commit-state-Φ
+            emit_verification_proof(state)
+            commit_state_to_diram(state)
+            RETURN 0
+
+    END SWITCH
+
+END FUNCTION
+
+// Calculate the success:failure ratio for a state:
+// Maps to compute-ratio-Φ in the verb-noun glossary
+FUNCTION calculate_success_failure_ratio(
+    state: HierarchicalState
+) -> Float:
+    // Ratio = successful sub-transitions / total transitions attempted
+    total_transitions   := count_transitions(state.state_id)
+    success_transitions := count_successful_transitions(state.state_id)
+
+    IF total_transitions == 0 THEN
+        RETURN 1.0  // No failures yet — default to passing
+    END IF
+
+    RETURN success_transitions / total_transitions
+
+END FUNCTION
+
+// Emit verification proof when state reaches DONE:
+FUNCTION emit_verification_proof(state: HierarchicalState):
+    // Generate comprehensive proof record for AEGIS-PROOF-1.2 compliance
+    proof := VerificationProof {
+        state_id:         state.state_id,
+        final_confidence: state.proof_confidence,
+        sha256_receipt:   generate_receipt(state),
+        phi_signature:    state.intent.phi_vector,
+        timestamp:        timestamp_now()
+    }
+    proof_log.append(proof)
+    emit_trace("VERIFICATION_PROOF_EMITTED", state.state_id)
+END FUNCTION
+
+// Finalize state persistence to DIRAM with receipt generation:
+// Maps to commit-state-Φ in the verb-noun glossary
+FUNCTION commit_state_to_diram(state: HierarchicalState):
+    // Commit the completed state to DIRAM with cryptographic receipt
+    ASSERT state.status_flag == STATE_DONE
+    ASSERT state.proof_confidence >= EPISTEMIC_THRESHOLD
+
+    allocation := diram_allocate_state_memory(state, intent_tag="COMMIT_DONE")
+    IF allocation IS NULL THEN
+        RAISE EpistemicCommitFailure("DIRAM commit rejected: confidence too low")
+    END IF
+
+    // Anchor to hardware for forensic traceability
+    anchor_hardware(state)  // anchor-hardware-Φ
+
+    emit_trace("STATE_COMMITTED_TO_DIRAM", state.state_id)
+END FUNCTION
+
+// Emit trace event to the DIRAM audit log:
+FUNCTION emit_trace(event_tag: String, state_id: UInt64):
+    trace_entry := TraceEntry {
+        event:     event_tag,
+        state_id:  state_id,
+        timestamp: timestamp_now(),
+        receipt:   sha256(event_tag || state_id || timestamp_now())
+    }
+    diram_log.append(trace_entry)  // Append-only — immutable
+END FUNCTION
+
+// Validate confidence against 95.4% threshold:
+// Maps to validate-confidence-Φ in the verb-noun glossary
+FUNCTION validate_confidence(state: HierarchicalState) -> Boolean:
+    // Assess proof_confidence against the 95.4% epistemic threshold
+    IF state.proof_confidence >= EPISTEMIC_THRESHOLD THEN
+        emit_trace("CONFIDENCE_VALID_" + state.proof_confidence, state.state_id)
+        RETURN TRUE
+    ELSE
+        emit_trace("CONFIDENCE_FAIL_" + state.proof_confidence, state.state_id)
+        RETURN FALSE
+    END IF
+END FUNCTION
+
+END MODULE HAOS_LifecycleAndWaterfallGates

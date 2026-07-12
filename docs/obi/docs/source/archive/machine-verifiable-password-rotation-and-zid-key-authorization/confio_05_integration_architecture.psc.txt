@@ -1,0 +1,220 @@
+// ============================================================
+// FILE: confio_05_integration_architecture.psc.txt
+// MODULE 5: Integration Architecture, Data Flow & Performance Requirements
+// SOURCE: Machine_Verifiable_Password_Rotation_and_ZID_Key_Authorization.pdf
+// Sections: 7.2 (Performance), 9 (Integration Architecture), 11 (Conclusion)
+// Legal Architect: Nnamdi Michael Okpala | OBINexus Computing
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 7.2: PERFORMANCE REQUIREMENTS (Requirement 7.1)
+// ------------------------------------------------------------
+
+PERFORMANCE_BASELINE = {
+    Authentication_Latency_Max  : 100ms,            // End-to-end auth must complete < 100ms
+    Rotation_Overhead_Max       : 500ms,            // Password rotation must complete < 500ms
+    Memory_Per_Session_Max      : 10MB,             // Per-session memory ceiling
+    Cryptographic_Operations    : O(1) amortized    // Crypto ops must not scale with load
+}
+
+// Enforcement: All modules are validated against these thresholds
+//              in PolyCore v2 QA (Module 4: module.meets_performance_baseline())
+
+// ------------------------------------------------------------
+// SECTION 9.1 / 9.2: SYSTEM INTEGRATION ARCHITECTURE & DATA FLOW
+// ------------------------------------------------------------
+
+// Component Map:
+//
+//   [User]
+//     |
+//     | (1) Submit credentials: (P, metadata)
+//     v
+//   [Confio Core — CRUD Engine]
+//     |
+//     | (2) Validate password against CRUD lifecycle (Module 2)
+//     v
+//   [ThreadProof — ZID Engine]
+//     |
+//     | (3) Generate / Verify ZID binding (Module 3)
+//     v
+//   [Constitutional Compliance Engine]
+//     |
+//     | (4) Validate operation constitutionally (Module 4)
+//     v
+//   [Result: Authorized / Blocked + Cryptographic Proof]
+//     |
+//     v
+//   [User / Caller]
+//
+// Diagram inferred from Section 9.1 component interaction description.
+
+// ------------------------------------------------------------
+// TOP-LEVEL AUTHENTICATION PIPELINE
+// ------------------------------------------------------------
+
+FUNCTION confio_authenticate(user_id, plaintext_password, metadata) -> AuthResult:
+
+    // --- Phase 1: CRUD Password Validation ---
+    // Load current password record for the user
+    history     = load_history(user_id)
+    current_rec = get_current_record(history)
+
+    IF current_rec IS NULL THEN
+        RETURN AuthResult { status = BLOCKED, reason = "No credential record found" }
+    END IF
+
+    // Verify password hash match (constant-time)
+    IF NOT password_read(plaintext_password, current_rec) THEN
+        audit_log(event="AUTH_FAILURE_HASH", user=user_id, timestamp=now())
+        RETURN AuthResult { status = BLOCKED, reason = "Password hash mismatch" }
+    END IF
+
+    // Check rotation deadline — enforce annual rotation
+    IF rotation_is_due(current_rec) THEN
+        // Rotation is mandatory; authentication blocked until rotation completes
+        RETURN AuthResult { status = ROTATION_REQUIRED, reason = "Annual rotation overdue" }
+    END IF
+
+    // --- Phase 2: ThreadProof ZID Verification ---
+    zid_record = load_zid_record(user_id)
+
+    IF zid_record IS NULL THEN
+        RETURN AuthResult { status = BLOCKED, reason = "No ZID record found" }
+    END IF
+
+    // Derive ZID and verify binding
+    zid_authorized = authorize_credentials(plaintext_password, zid_record.zid, { user_id = user_id })
+
+    IF NOT zid_authorized THEN
+        audit_log(event="AUTH_FAILURE_ZID", user=user_id, timestamp=now())
+        RETURN AuthResult { status = BLOCKED, reason = "ZID binding verification failed" }
+    END IF
+
+    // --- Phase 3: Constitutional Compliance Gate ---
+    operation = build_operation(type="read", actor=user_id, credentials_valid=TRUE, timestamp=now())
+    monitor   = ConstitutionalComplianceMonitor()
+    op_status = monitor.monitor_operation(operation)
+
+    IF op_status != OperationStatus.APPROVED THEN
+        // Violation consequence already executed inside monitor_operation (Module 4)
+        RETURN AuthResult { status = BLOCKED, reason = "Constitutional compliance failure" }
+    END IF
+
+    // --- Phase 4: Generate Cryptographic Proof and Return ---
+    proof = generate_auth_proof(user_id, zid_record, operation)
+
+    audit_log(event="AUTH_SUCCESS", user=user_id, timestamp=now())
+
+    RETURN AuthResult {
+        status  = AUTHORIZED,
+        zid     = zid_record.zid,
+        proof   = proof,
+        session = create_session(user_id, expires_in=SESSION_TTL)
+    }
+
+END FUNCTION
+
+// ------------------------------------------------------------
+// TOP-LEVEL ROTATION PIPELINE
+// ------------------------------------------------------------
+
+FUNCTION confio_rotate_password(user_id, old_password, new_password) -> RotationResult:
+
+    // Step 1: Authenticate with old credentials first
+    auth = confio_authenticate(user_id, old_password, {})
+    IF auth.status NOT IN { AUTHORIZED, ROTATION_REQUIRED } THEN
+        RETURN RotationResult { status = BLOCKED, reason = "Authentication failed before rotation" }
+    END IF
+
+    // Step 2: Constitutional compliance check for UPDATE operation
+    operation = build_operation(type="update", actor=user_id, timestamp=now())
+    monitor   = ConstitutionalComplianceMonitor()
+    IF monitor.monitor_operation(operation) != OperationStatus.APPROVED THEN
+        RETURN RotationResult { status = BLOCKED, reason = "Constitutional gate rejected rotation" }
+    END IF
+
+    // Step 3: Perform CRUD UPDATE — enforces history and annual constraints
+    result = password_update(user_id, new_password)
+    IF result != RESULT.SUCCESS THEN
+        RETURN RotationResult { status = BLOCKED, reason = result }
+    END IF
+
+    // Step 4: Re-bind ZID to new password
+    new_zid_record = zid_password_binding_protocol(new_password, { user_id = user_id })
+
+    // Step 5: Invalidate old ZID binding (cryptographic erasure)
+    old_zid = load_zid_record(user_id)
+    IF old_zid IS NOT NULL THEN
+        secure_zero_memory(old_zid.binding)
+        secure_zero_memory(old_zid.zid)
+    END IF
+
+    // Step 6: Persist new ZID record
+    persist_zid_record(user_id, new_zid_record)
+
+    audit_log(event="ROTATION_COMPLETE", user=user_id, timestamp=now())
+
+    RETURN RotationResult { status = SUCCESS, new_zid = new_zid_record.zid }
+
+END FUNCTION
+
+// ------------------------------------------------------------
+// CRYPTOGRAPHIC PROOF GENERATION
+// ------------------------------------------------------------
+
+FUNCTION generate_auth_proof(user_id, zid_record: ZIDRecord, operation) -> BYTES:
+    // Produces a compact, verifiable attestation that:
+    //   - The user was authenticated
+    //   - ZID binding was verified
+    //   - Constitutional compliance was satisfied
+    // TODO: Clarify from source PDF — specific proof format (SNARK, STARK, signature)
+    //       not explicitly specified beyond "cryptographic proof"
+    proof_data = SERIALIZE({
+        user_id         : user_id,
+        zid             : zid_record.zid,
+        compliance_hash : zid_record.compliance_hash,
+        operation_hash  : SHA3_512(SERIALIZE(operation)),
+        timestamp       : current_unix_timestamp_microseconds()
+    })
+    RETURN SIGN(proof_data, SYSTEM_PRIVATE_KEY)
+END FUNCTION
+
+// ------------------------------------------------------------
+// DATA FLOW SUMMARY (Specification-style)
+// ------------------------------------------------------------
+
+// Flow Step 1: User submits (P, metadata) to Confio endpoint
+// Flow Step 2: Confio CRUD Engine validates P against stored hash and rotation schedule
+// Flow Step 3: ThreadProof ZID Engine generates or verifies ZID binding
+// Flow Step 4: Constitutional Compliance Engine validates the operation
+// Flow Step 5: Result is returned with cryptographic proof of compliance
+
+// All five steps must succeed for AUTHORIZED status.
+// Any step failure results in BLOCKED with audit logging and, where applicable,
+// automated constitutional enforcement (Module 4).
+
+// ------------------------------------------------------------
+// SYSTEM-LEVEL INVARIANTS
+// ------------------------------------------------------------
+
+// INV-1: Every authentication attempt is logged — no silent accepts or denies.
+// INV-2: Human intervention is structurally impossible — no API endpoint exists for override.
+// INV-3: All cryptographic operations are constant-time — no timing side channels.
+// INV-4: Coordinate system is always Cartesian — enforced at ZID generation.
+// INV-5: Blockchain audit trail is append-only — no deletions permitted.
+// INV-6: Execution is deterministic — given same inputs, always produces same outputs.
+// INV-7: Resource usage is bounded — memory < 10MB/session, latency < 100ms auth.
+// INV-8: Compliance standard: NASA-STD-8739.8 safety-critical distributed systems.
+
+// ============================================================
+// END MODULE 5 — END OF CONFIO PSEUDOCODE SPECIFICATION
+// ============================================================
+//
+// Module Index:
+//   confio_01_system_model.psc.txt          — State machine & system overview
+//   confio_02_password_rotation.psc.txt     — CRUD lifecycle & attack resistance
+//   confio_03_zid_authorization.psc.txt     — ZID binding & lattice authorization
+//   confio_04_constitutional_compliance.psc.txt — Governance engine & legal protocols
+//   confio_05_integration_architecture.psc.txt  — Pipeline, data flow & performance
+// ============================================================

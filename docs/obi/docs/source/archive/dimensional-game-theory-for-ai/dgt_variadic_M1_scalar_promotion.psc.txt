@@ -1,0 +1,220 @@
+// ============================================================
+// FILE: dgt_variadic_M1_scalar_promotion.psc.txt
+// MODULE 1 OF 5 — Scalar Promotion & Variadic Game Foundation
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   May 24, 2026
+// ============================================================
+
+// ── CORPUS POSITION (PDF 10 of 10) ───────────────────────────
+//
+// This paper is the most recent in the OBINexus corpus and
+// completes the Dimensional Game Theory sub-series:
+//
+//   PDF 8  — Dimensional Game Theory (formal game definitions,
+//             Nash equilibrium, Theorem 1 perfect game outcome)
+//   PDF 9  — DGT + RAF Cryptographic Integration (stress zones,
+//             AuraSeal, Theorem 2 stress-adaptive strategy)
+//   PDF 10 — DGT Variadic Strategy (THIS) — scalar promotion,
+//             contextual activation, computational reduction
+//
+// This paper extends PDF 8's Definition 5 (Strategic Dimension)
+// and PDF 9's variadic input mapping (eq. 11: φ: {x₁,...,xₙ}→D_act)
+// with formal scalar promotion semantics and contextual activation
+// thresholds.
+//
+// Cross-reference map:
+//   Definition 1 (Scalar Promotion) → OBIAI Flash Layer (eq. 3.2):
+//     scalars in working memory become full dimensional embeddings
+//   Definition 2 (Contextual Activation) → DAG Ephemeris vexameneria:
+//     δ(xⱼ, Dᵢ) = relevance score maps to EffectivenessScore(slot, dim)
+//   Theorem (Computational Reduction) → AEGIS-PROOF-3.2 complexity:
+//     |D_act| ≤ Θ parallels O(K·N·log N) tractability bound
+
+DEFINE VariadicDGTContext AS:
+    paper_title   := "Dimensional Game Theory: Variadic Strategy in Multi-Domain Contexts"
+    date          := "May 24, 2026"
+    builds_on     := ["PDF 8: DGT Formal", "PDF 9: DGT-RAF"]
+    key_contrib   := [
+        "Scalar-to-dimension promotion semantics",
+        "Contextual activation thresholds",
+        "Computational reduction theorem",
+        "Variadic φ mapping formalization"
+    ]
+END DEFINE
+
+
+// ── SECTION 1: INTRODUCTION ───────────────────────────────────
+
+// Problem: Traditional game theory fails when inputs are:
+//   (a) DYNAMIC: the input space changes during play
+//   (b) SPARSE:  most inputs are irrelevant at any given moment
+//   (c) CONTEXTUALLY UNLOCKED: a dimension becomes active only
+//       when certain preconditions are satisfied
+//
+// Solution: dimension-configured framework — the structure of
+// the game itself shifts based on which dimensions are active.
+
+DEFINE FailureModeOfTraditionalGameTheory AS:
+    DYNAMIC_INPUTS   := "Input space shifts during play — static A fails"
+    SPARSE_INPUTS    := "Most variables irrelevant — treating all equally wastes compute"
+    CONTEXTUAL_UNLOCK := "Dimensions activate conditionally — not a priori known"
+END DEFINE
+
+DEFINE ApplicationDomains AS:
+    // Domains where variadic DGT applies (from §1):
+    AI_COORDINATION  := "Multi-agent AI systems with evolving shared state"
+    ADAPTIVE_DEFENSE := "Cybersecurity with context-specific threat surfaces"
+    MARKET_REACTION  := "Trading systems where relevant signals shift by regime"
+END DEFINE
+
+
+// ── SECTION 2: FROM SCALARS TO DIMENSIONS ────────────────────
+
+// Motivating example (§2):
+//   Voice in a tactical simulation starts as a binary toggle
+//   (present/absent — a scalar). Once active, it contributes a
+//   rich vector: emotion, intent, deception → a full dimension.
+//
+// This is the SCALAR PROMOTION phenomenon.
+
+DEFINE ScalarInput AS:
+    // An input that begins as a scalar (single value)
+    // but may be promoted to a full strategic dimension.
+    id          : InputID
+    raw_value   : REAL            // scalar representation
+    embedding   : Vector          // promoted vector (null if not yet promoted)
+    is_promoted : BOOL
+
+    PROCEDURE CurrentRepresentation() -> REAL OR Vector:
+        IF is_promoted:
+            RETURN embedding
+        ELSE:
+            RETURN raw_value
+        END IF
+    END PROCEDURE
+END DEFINE
+
+
+// DEFINITION 1 (Scalar Promotion):
+//   An input x is promoted to dimension D if:
+//
+//     ∃f : x → v⃗_D ∈ ℝⁿ  such that  ‖v⃗_D‖ > ε
+//
+//   where ε is a threshold defining significance in the game context.
+//
+//   Interpretation:
+//     - f is the promotion function (context-specific)
+//     - v⃗_D is the resulting dimensional vector
+//     - ‖v⃗_D‖ > ε: the promoted vector must be non-trivial
+//       (have sufficient magnitude to matter strategically)
+
+PROCEDURE ScalarPromotion(x: ScalarInput, D: StrategicDimension,
+                           f: PromotionFunction,
+                           epsilon: REAL) -> PromotionResult:
+    // Attempt to promote scalar x to dimension D via function f.
+    //
+    // Returns: PromotionResult with success flag and v⃗_D if promoted.
+
+    // Apply promotion function: f(x) → v⃗_D ∈ ℝⁿ
+    v_D := f.Apply(x.raw_value, D)
+
+    // Check significance threshold: ‖v⃗_D‖ > ε
+    norm_v := NORM(v_D)
+    IF norm_v > epsilon:
+        x.embedding   := v_D
+        x.is_promoted := TRUE
+        EMIT INFO "Scalar promoted | input=" + x.id +
+                  " → dim=" + D.name + " | ‖v⃗_D‖=" + norm_v
+        RETURN PromotionResult(success=TRUE, vector=v_D, norm=norm_v)
+    ELSE:
+        EMIT LOG "Scalar NOT promoted | input=" + x.id +
+                 " | ‖v⃗_D‖=" + norm_v + " ≤ ε=" + epsilon
+        RETURN PromotionResult(success=FALSE, vector=NULL, norm=norm_v)
+    END IF
+END PROCEDURE
+
+
+PROCEDURE VerifyScalarPromotionDefinition(x: ScalarInput,
+                                           D: StrategicDimension,
+                                           f: PromotionFunction,
+                                           epsilon: REAL) -> BOOL:
+    // Formally verify Definition 1 conditions hold after promotion attempt.
+    result := ScalarPromotion(x, D, f, epsilon)
+
+    IF result.success:
+        // Must have ∃f such that ‖v⃗_D‖ > ε
+        ASSERT result.norm > epsilon
+        ASSERT result.vector != NULL
+        ASSERT LENGTH(result.vector) > 0   // v⃗_D ∈ ℝⁿ for n > 0
+        EMIT INFO "Definition 1 satisfied: ‖v⃗_D‖=" + result.norm + " > ε=" + epsilon
+        RETURN TRUE
+    END IF
+    RETURN FALSE
+END PROCEDURE
+
+
+// ── PROMOTION FUNCTION CATALOGUE ─────────────────────────────
+
+// Domain-specific promotion functions f: scalar → vector
+
+PROCEDURE VoiceTacticalPromotion(toggle: REAL,
+                                   audio_features: AudioFeatureVector) -> Vector:
+    // Voice presence (0/1 scalar) → [emotion, intent, deception] vector
+    // Only meaningful when toggle > 0 (voice is active)
+    IF toggle <= 0:
+        RETURN ZERO_VECTOR(3)
+    END IF
+    emotion   := audio_features.EmotionScore()
+    intent    := audio_features.IntentScore()
+    deception := audio_features.DeceptionScore()
+    RETURN Vector([emotion, intent, deception])
+END PROCEDURE
+
+
+PROCEDURE MarketSignalPromotion(price: REAL,
+                                  market_history: PriceHistory) -> Vector:
+    // Single price value → [momentum, mean_reversion, volatility] vector
+    momentum      := ComputeMomentum(price, market_history, window=20)
+    mean_rev      := ComputeMeanReversion(price, market_history, window=50)
+    volatility    := ComputeVolatility(price, market_history, window=10)
+    RETURN Vector([momentum, mean_rev, volatility])
+END PROCEDURE
+
+
+PROCEDURE StressScalarPromotion(stress_level: REAL) -> Vector:
+    // Stress scalar (from RAF stress formula) → dimensional vector
+    // Maps to: [entropy_component, complexity_component, violation_component]
+    // This bridges PDF 9's stress formula back into DGT dimensional space.
+    e := DEFAULT_ALPHA * stress_level / 12.0
+    c := DEFAULT_BETA  * stress_level / 12.0
+    v := DEFAULT_GAMMA * stress_level / 12.0
+    RETURN Vector([e, c, v])
+END PROCEDURE
+
+
+// ── SIGNIFICANCE THRESHOLD MANAGEMENT ────────────────────────
+
+DEFINE PromotionThreshold AS:
+    // ε: domain-specific threshold for scalar promotion significance
+
+    PROCEDURE DefaultEpsilon() -> REAL:
+        RETURN 0.1    // 10% of unit vector norm — general default
+    END PROCEDURE
+
+    PROCEDURE GameContextEpsilon(context: GameContext) -> REAL:
+        // Scale threshold by current stress level:
+        //   Higher stress → lower ε (more inputs get promoted — need more info)
+        //   Green zone   → higher ε (only strongly relevant inputs promoted)
+        stress_scale := context.stress_level / 12.0
+        base_epsilon := 0.1
+        RETURN base_epsilon * (1.0 - stress_scale * 0.5)
+    END PROCEDURE
+END DEFINE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: dgt_variadic_M2_variadic_game_framework.psc.txt
+// ============================================================

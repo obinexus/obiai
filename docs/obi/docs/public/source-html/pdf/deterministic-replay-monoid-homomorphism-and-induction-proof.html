@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deterministic Replay Monoid Homomorphism and Induction Proof | OBI Source HTML</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --surface: #ffffff;
+      --text: #202321;
+      --muted: #626962;
+      --accent: #147d7e;
+      --border: #d9ddd4;
+      --code: #eef1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    header, main, footer { max-width: 1060px; margin: 0 auto; padding: 1.25rem; }
+    header { border-bottom: 4px solid var(--accent); background: #161819; color: #f5f7f2; max-width: none; }
+    header > div { max-width: 1060px; margin: 0 auto; }
+    a { color: #0f5f60; }
+    header a { color: inherit; }
+    main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 1.25rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p, li { max-width: 78ch; }
+    img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    pre { overflow: auto; background: #20251f; color: #f7fbf2; padding: 1rem; border-radius: 8px; }
+    code { background: var(--code); padding: 0.12rem 0.25rem; border-radius: 5px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--border); padding: 0.45rem 0.6rem; text-align: left; }
+    blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding-left: 1rem; color: var(--muted); }
+    .skip-link { position: absolute; left: 1rem; top: 0.75rem; transform: translateY(-200%); }
+    .skip-link:focus { transform: translateY(0); background: var(--surface); color: var(--text); padding: 0.5rem; }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header>
+    <div>
+      <a href="../index.html">OBI Source HTML</a>
+      <h1>Deterministic Replay Monoid Homomorphism and Induction Proof</h1>
+      <p>Generated from Markdown with Python tooling and Pandoc-compatible source preservation.</p>
+    </div>
+  </header>
+  <main id="content" tabindex="-1">
+    <h1 id="deterministic-replay-monoid-homomorphism-and-induction-proof">Deterministic Replay Monoid Homomorphism and Induction Proof</h1>
+<p>Original PDF: <a href="../../pdf/Deterministic_Replay___Monoid_Homomorphism_and_Induction_Proof.pdf">Deterministic_Replay___Monoid_Homomorphism_and_Induction_Proof.pdf</a></p>
+<h2 id="page-1">Page 1</h2>
+<p>Deterministic Replay: Monoid Homomorphism and
+Induction Proof
+Definition 0.1 (State space). Let B = {0,1}. Let Σ denote the system
+state space (finite or otherwise well-typed).
+Definition 0.2 (Events, event monoid). Let T be a finite set of transi-
+tion labels and let I be the set of input tokens (including recorded external
+responses, binding/router identifiers, timestamps, etc.). Define the event set
+E := T ×I ×M,
+where M is an environment metadata space. The free monoid E∗ consists of
+all finite sequences (strings) of events with concatenation · and empty word
+ε.
+Definition 0.3 (Endomorphism monoid). Let End(Σ) denote the monoid
+of endomorphisms on Σ under composition ◦, with identity id .
+Σ
+Definition 0.4 (Per-event semantics). For each transition label τ ∈ T de-
+fine a pure transition function
+ϕ : Σ×I ×R×M → Σ,
+τ
+where R denotes a deterministic random-output domain (the PRNG output
+space). For an event e = (τ,i,η) ∈ E and a PRNG sample r ∈ R the
+per-event endomorphism is
+F(e;r) : Σ → Σ, F(e;r)(σ) := ϕ (σ,i,r,η).
+τ
+Definition 0.5 (Telemetry record). A telemetry record is a tuple R =
+(g,s,w,∆) where
+• g is a GUID trace identifier,
+• s is a cryptographic seed (integer),
+• w = e e ...e ∈ E∗ is the ordered event log,
+1 2 n
+• ∆ is an optional set of snapshot state(s) (checkpoint(s)).
+Associated to seed s and a deterministic PRNG is a sequence of outputs
+(r ,r ,...).
+1 2
+1</p>
+<h2 id="page-2">Page 2</h2>
+<p>Assumption 0.6 (Completeness of recorded nondeterminism). All sources
+of nondeterminism present in the original execution are either:
+1. explicitly recorded in w or ∆, or
+2. deterministically derivable from the seed s via the PRNG.
+Assumption 0.7 (Purity of replay semantics). During replay, the bind-
+ing implementations used to compute ϕ are pure functions of their explicit
+τ
+inputs: prior state, input token, PRNG output, and environment meta-
+data. Externalsideeffectsarereplacedbyrecordedresponsesordeterministic
+stubs.
+Definition 0.8 (ExtensionofF tosequences). Fix a record R = (g,s,w,∆)
+and PRNG outputs (r ,r ,...,r ). For event e define F(e ) := F(e ;r ) ∈
+1 2 n j j j j
+End(Σ). Extend F multiplicatively to sequences by
+F(e e ···e ) := F(e )◦F(e )◦···◦F(e ).
+1 2 n n n−1 1
+By convention, F(ε) := id .
+Σ
+Lemma 0.9 (Monoid homomorphism). The map
+F : (E∗,·,ε) −→ (End(Σ),◦,id )
+Σ
+defined above is a monoid homomorphism: for all u,v ∈ E∗,
+F(u·v) = F(v)◦F(u), F(ε) = id .
+Σ
+Proof. Immediate from the definition. The empty word maps to identity by
+definition. Concatenation u·v corresponds to the sequential application of
+event endomorphisms; by definition of composition ordering we have F(u·
+v) = F(v)◦F(u). Hence F preserves the monoid structure.
+Theorem0.10(DeterministicReplay—formalstatement). LetR = (g,s,w,∆)
+be a telemetry record satisfying the stated assumptions. Let w = e e ···e
+1 2 n
+and let (r ,...,r ) be the PRNG outputs deterministically generated from
+1 n
+seed s according to the agreed indexing convention. Then there exists a de-
+terministic replay procedure Replay(R) that reconstructs the unique state
+sequence
+σ − e →1 σ − e →2 ··· − e →n σ ,
+0 1 n
+where σ = F(e ···e )(σ ) and σ equals the snapshot in ∆ (if provided) or
+j 1 j 0 0
+the canonical initial state.
+Proof. We prove by induction on n = |w| that replay reconstructs the same
+states as the original execution.
+2</p>
+<h2 id="page-3">Page 3</h2>
+<p>Base case (n = 0). If w = ε then F(w) = id and the replayed state
+Σ
+sequenceisthesingleton{σ }whereσ isthesnapshotin∆(orthecanonical
+0 0
+initial state). Equality with the original trivially holds.
+Inductive hypothesis. Assume for some k ≥ 0 that for any telemetry
+record whose event log length is k the replay procedure reconstructs the
+original states σ ,σ ,...,σ satisfying
+0 1 k
+σ = F(e ···e )(σ ) for 0 ≤ j ≤ k.
+j 1 j 0
+Inductive step (k → k +1). Consider a record with w = e ···e e
+1 k k+1
+and associated PRNG outputs (r ,...,r ). By the inductive hypothesis,
+1 k+1
+replaying the prefix e ···e produces the state σ = F(e ···e )(σ ). For
+1 k k 1 k 0
+step k+1 the replay computes
+σ′ := F(e ;r )(σ ),
+k+1 k+1 k+1 k
+where F(e ;r ) is the per-event endomorphism computed with the
+k+1 k+1
+recorded input token, environment metadata, and the PRNG output r .
+k+1
+By the assumptions:
+• the PRNG output r equals the original run’s r (determinism of
+k+1 k+1
+PRNG given seed s),
+• the input token and environment metadata match the original values
+(they are recorded),
+• the per-event function ϕ is pure and deterministic for the given
+τ
+k+1
+arguments.
+Thus σ′ = σ , where σ is the state the original execution produced
+k+1 k+1 k+1
+after event e . This completes the inductive step.
+k+1
+Therefore,bymathematicalinduction,replayreconstructsthesamestate
+sequence for all n.
+Corollary 0.11 (Closureunderconcatenation). If R = (g ,s ,w ,∆ ) and
+1 1 1 1 1
+R = (g ,s ,w ,∆ ) are replayable traces and the concatenation w ·w is
+2 2 2 2 2 1 2
+provided with a consistent PRNG indexing scheme (or equivalent combined
+seed), then the concatenated trace is replayable and
+F(w ·w ) = F(w )◦F(w ).
+1 2 2 1
+3</p>
+<h2 id="page-4">Page 4</h2>
+<p>Remark 0.12 (Practical caveats). The theorem is only valid under the
+stated assumptions. In practice, ensure:
+• explicit recording of external responses and wall-clock values if they
+influence ϕ ;
+τ
+• deterministichandling(orrecording)ofconcurrencyinterleavings(vec-
+tor clocks, global counters, or total-order logs);
+• PRNGoutputsareindexedand/orrecordedsothemappingeventindex
+(cid:55)→ r is unambiguous.
+j
+Failure to observe these requirements yields partial or no reproducibility.
+4</p>
+  </main>
+  <footer>
+    <p>Generated artifact: <code>pdf/deterministic-replay-monoid-homomorphism-and-induction-proof</code></p>
+  </footer>
+</body>
+</html>

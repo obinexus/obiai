@@ -1,0 +1,1288 @@
+So I'm recording this as an audio script. Okay. Beijian knowledge driven ontologies
+0:088 secondsa framework for fusion of semantic knowledge under uncertainty and uncompleteness.
+0:1515 secondsA basian network is a probability graph.
+0:1818 secondsUh the kind of graph I'll give you is uh a markoff chain.
+0:2424 secondsUh markoff chain. So I'm not saying oh wait uh I'm getting this wrong. So you get Beijian network which is
+0:3232 secondsprobability. So they have uh probistic uh edges and uh uh stoastic nodes
+0:4040 secondsuh which give um stoastic nodes. So uh definition so let me try to define this.
+0:4646 secondsSo a basian uh network is a probabistic graph. A graph has uh node and edges.
+0:5656 secondsUh and uh this can be uh any type of it can be a colorable graph too. So uh it can be colorable. So it can be uh
+1:041 minute, 4 secondsbiparted or triparted based on the edge or node coloring. So this my invention
+1:121 minute, 12 secondsuh basically I made this. I invented this and whether they like it or not it's not a problem but it solves the problem.
+1:191 minute, 19 secondsa basian knowledge driven ontologies.
+1:211 minute, 21 secondsWell, ontologies is in philosophy. Uh but this is not formally defined. So ontologies is like uh ontological means
+1:291 minute, 29 secondssemantic uh no no uh ontologics are semantic graphs. Uh but the Beijing aspect means they're properly driven. Uh probability uh probabilistic in nature.
+1:411 minute, 41 secondsSo probabilistic means they are uh they use stochastic they are variatic. Uh they very they are um let me try and
+1:481 minute, 48 secondsgive examples. So stochastic uh definition let me use a stoastic
+1:551 minute, 55 secondsuh probability man. So having a random distributed a pro distribution or pattern that may allow statically but
+2:022 minutes, 2 secondsmay not be predicted precisely of having a a a random probability
+2:102 minutes, 10 secondsdistribution or pattern that analyses and mathematically but not be uh produc
+2:162 minutes, 16 secondsbut not be uh but not be presically uh probability theory u
+2:252 minutes, 25 secondsbased Uh I love the base theorem but you know um I'm not taking it seriously. So you know the fact of the matter is um
+2:322 minutes, 32 secondsthe probability distriution is respect the the for modeling uncertainty and the the uncertainty is probabilistic uh
+2:422 minutes, 42 secondsprobability range from 0 to one uh of uh uh 0 to one and theity and incompleteness of system is what you
+2:512 minutes, 51 secondsworry about. So you know once you get 100% right it's it's a model it's a working model but you know uh a
+2:572 minutes, 57 secondsclassification of 0.5 um based on how you train it shows that you are modeling this um document properly. So this is a
+3:043 minutes, 4 secondsa document I I found online explaining what I'm trying to do you know but you know it's not written by me. So you know
+3:113 minutes, 11 secondssemantic contextes u basically graphs are are biparted they are they are they are bipartite by design and by bipartite
+3:203 minutes, 20 secondsI mean they are uh two colorable two way two colorable they are red can have a color have an edge that's red color red
+3:283 minutes, 28 secondsand that's uh black um red red black edge representing information or semantic interpretation meaning that it
+3:373 minutes, 37 secondshas meaning has meaning um this is what I'm So I'm read I'm going through. So this paper is by uh
+3:443 minutes, 44 secondsthe NCBI nlm.nh.gov uh government uh institution uh the
+3:523 minutes, 52 secondsmodern of sustained information is an open problem. Yes. The modern offset of certain information is an open problem
+3:593 minutes, 59 secondsin ontology research. Ontology uh is semantic because you know the this is the domain of ontology. I'm referring to
+4:074 minutes, 7 secondsuh what is the automology because the semantic of meaning uh system uh uh uh
+4:134 minutes, 13 secondsuh uh uh ontology is like um if you look at philosophically system notes itself
+4:204 minutes, 20 secondsuh philosophically ontologies are uh uh
+4:274 minutes, 27 secondsare are stuff but it's context boundally domain bound. So you know um it doesn't really make any sense uh
+4:364 minutes, 36 secondsuh philosophically but we're analyzing systematically. So uh ontologies are uh open problems such as open problems that
+4:454 minutes, 45 secondsnot binary questions are naturally probabilistic. So modeling them refers to uh uh needs a framework and that's ontological basian intelligence.
+4:594 minutes, 59 secondsuh but you know it's not it's not that system is poor describe it properly uh ineffectively
+5:055 minutes, 5 secondsum the the goal of the research paper uh is to explore uh this I'm just
+5:135 minutes, 13 secondsbecause this sums up this I read this paper and I love this so much like I sum it up properly so the model of information is an open world problem
+5:205 minutes, 20 secondsopen problem like it's not a closed question it's not a closed problem it's not a binary it's not just it's an open you got open question you go closed
+5:275 minutes, 27 secondsquestion and by modeling it properly you are exploring um the hurdles um or the problems in
+5:365 minutes, 36 secondsresearch based on semantic uh uh interpretation you know and in theoretic obstacles uh
+5:445 minutes, 44 secondsbased on de probability ontological bas intelligence. So thisology is not a current ontologies do not have models of
+5:525 minutes, 52 secondsuncertainty. Yes, you can be you can make a way AI model that uh that uh predict makes a wrong that make a force
+6:006 minutesclassification of true positive, true negative, false positive and false um uh classification because um classification is negative because it's not just
+6:096 minutes, 9 secondsdesigned to run. These are models. These are uh data structure models. These are way of doing stuff. Um um the model has to fit the problem.
+6:206 minutes, 20 secondsBut when you model your model has to face the problem because you cannot model something con you cannot you cannot have a constantation of a system
+6:286 minutes, 28 secondsuh that uh that so the system drift it's called drift so you have uh semantic drift you have data drift uh uh because
+6:386 minutes, 38 secondsyou can can have the margin of error based on your data set uh when you uh train a model
+6:486 minutes, 48 secondsum because on uh Okay. Because uncertainty is on the present. Yes.
+6:526 minutes, 52 secondsUncertainty. Okay. Current ontologies do not have model uncertainty. So socality subjects matter must either be normalized or rejected entirely.
+7:067 minutes, 6 secondsStoastic subject matters must either be normalized. Uh normalized means um uh uh
+7:137 minutes, 13 secondsmarginalized. We say no marginaliz normalized. So we say uh 0 to1 probability uh uh 0 to1 is normalization
+7:217 minutes, 21 secondsvector but you want 0.1. So you want to uh reject it uh entirely or normalize
+7:287 minutes, 28 secondsthe distribution uh making 0.01 in the year model because you cannot remove the bias from the system you know I'm not
+7:357 minutes, 35 secondssaying you can't remove the bias in the system. I'm saying this by in the system in a data set you know based on who say what who said you know u who said what
+7:447 minutes, 44 secondsthe subject matter is it's based it's a bijian probability uh it's a it's a basian inference of the subject matter
+7:517 minutes, 51 secondsso you uh based on how the story was told interpretation of store because you can have the tripartite interpretation cuz my one is a tripartite system uh a
+8:008 minutestripartite uh b three color three colorable graph so you can have colors like uh of the edge
+8:078 minutes, 7 secondsof the node that probability based on zero, one based on red, green and blue qualities, you know. So consensual yes
+8:158 minutes, 15 secondsno maybe but the model has to acknowledge that the omnipresent of uh
+8:238 minutes, 23 secondsis definitely present in the rural and uh because of certainty not knowing lack of lack of uh uncertaintity uh if you
+8:318 minutes, 31 secondshave like a certain like a a linear scale certain uncertain you know that's
+8:388 minutes, 38 secondsnot this very bad example uh actually let me use a graph so if uncertainties uh oras you know you are you are some of
+8:478 minutes, 47 secondsthe models reduce the problem to a scalar vector so dimensional game theory is meant to uh dimensional game theory theoretically which is I made zero some
+8:568 minutes, 56 secondsgames u meant to use um to remove the uncertaintity but that's why my onlogical be because you got the game
+9:039 minutes, 3 secondstheory on top uh but you know people are researching this properly now so this is a formal framework for describing uh
+9:119 minutes, 11 secondsmachine learning models in the behavior uh of systems in the real world. Uh um
+9:189 minutes, 18 secondsuh some games are two perfect games make it a match. You know you know so the
+9:269 minutes, 26 secondsdilemma because promises in the real world
+9:349 minutes, 34 secondsknowledge also faced with the dilemma of performing prohibitively low certific so it's definitely present in the real world is definitely present yes
+9:429 minutes, 42 secondsdefinitely present that's what means% present um normalized project you don't
+9:499 minutes, 49 secondswant to you want the to make you stick in the real world so because present In rural knowledge engineers are faced with dilemmas of performing prohibitively
+9:579 minutes, 57 secondslabor intensive research. Yes, the research is uh you know prohibitively means it can cross the lines of ethics.
+10:0710 minutes, 7 secondsethics you know I love this work because you know the the labor is cross but to get the right know your private life you
+10:1410 minutes, 14 secondsknow if something invades a human's private life the AI is unethical you know because the data and people down the line you know if you're consent to
+10:2210 minutes, 22 secondsit uh you can get more data and build a better model
+10:2910 minutes, 29 secondsyou know uh language model uh you know um or or AI system or or video visual um
+10:3710 minutes, 37 secondsuh something car model car like a robotic car you know if theologist can explain it could model real uncertainty
+10:4510 minutes, 45 secondsyes real world uncertaintity is a big big factor which I forgot to mention uh it's a big
+10:5210 minutes, 52 secondsfactor because real uncertaintity is what can make or break your uh your
+10:5910 minutes, 59 secondsuh your quality assurance uh of uh uh what is it does because the Blue word
+11:0611 minutes, 6 secondsdescribes information you know the rule contains and the uncertainty that incorporates it into reasoning uh okay what's uh
+11:1511 minutes, 15 secondspreferably if you can explain the rule incorporated into reason yes reasoning the biggest point of this is reason can the AI reason uh a probe can ask
+11:2511 minutes, 25 secondsquestion so we got dimension gory and probing uh if you can ask question can start to reason you know like you know
+11:3111 minutes, 31 secondsif it's the temperature of a of a valve Uh um uh no no if the temperature I'm
+11:3811 minutes, 38 secondssaying uh if the needle uh um if a car is reading uh is at 25 35 miles an hour
+11:4611 minutes, 46 secondsuh it's a speedway uh let's say the 83 uh that's the reason uh uh that's a steady speed
+11:5411 minutes, 54 secondsif go 60 m an hour uh you know if you say 60 uh that's too fast uh let me say 45
+12:0212 minutes, 2 secondsyou know there has to be uh let's say 60 uh 813 uh 60 is the markman.
+12:1012 minutes, 10 secondsNo 35 to 40 you know uh you know he has to uh gauge transition but he has to um
+12:1912 minutes, 19 secondslook around. He has to be always observant of the environment while driving at that speed. What?
+12:2512 minutes, 25 secondsSorry to interrupt you. star thing.
+12:3312 minutes, 33 secondsYeah. Yeah. Like can your voice upstairs?
+12:3812 minutes, 38 secondsI love my voice. Okay. So, is it preferable uh so uh um uh the
+12:4812 minutes, 48 secondsrunning of the risk uh is that what am I saying? I'm not explaining this prop.
+12:5412 minutes, 54 secondsSo, this paper is very beautiful. You know it explains uh how lab research are running the risk of rejection uh
+13:0113 minutes, 1 secondcoration and accepted inquiry information through uh true uh false positive true uh false positive.
+13:1313 minutes, 13 secondsa false positive, a true positive and false negative, you know, or type one type and two errors uh based on a
+13:2113 minutes, 21 secondsquestion uh both of the is a power a link between assertion and
+13:3013 minutes, 30 secondsrandom variables because a scalar is dimension. If that scaler can be promoted to a vector
+13:3913 minutes, 39 secondsyou know then we have to keep anchoring a vector that vector uh belongs to uh a
+13:4613 minutes, 46 secondsmarov chain probabilistically which describe the subject uh uh the
+13:5413 minutes, 54 secondssubjective uh uh uh the subject uh the reasoning of the subject uh of what is uh of the
+14:0314 minutes, 3 secondsobject of the objective world like you know like you know uh subject matter of the of the uh of this world but it's
+14:1114 minutes, 11 secondsit's localized it's localized so it's localized uh because it's localized uh because it's localized to
+14:2014 minutes, 20 secondsthe system state uh system being system environment you know uh where the where where the information is being processed in real time.
+14:3114 minutes, 31 secondsSo the the synthesis uh what it would be
+14:3814 minutes, 38 secondspreferably if ontology could play a model sensitive blah blah blah that into reasoning reasoning making sense of the real world represent ontological
+14:4714 minutes, 47 secondsframework I presented before I presented before you I want you to call me for my paper represent ontological framework
+14:5514 minutes, 55 secondswhich is based on semantics synthesis and description lage and progressive semantics for wait one sec the uh ontology
+15:0415 minutes, 4 secondsassertion and random variables of automated construction of probability which are suitable for interference.
+15:1015 minutes, 10 secondsFurthermore, our our approach designs how to represent stocastic uncertain and incompet
+15:1815 minutes, 18 secondsyou. I'm studying base Europe but I do love your paper you know because the same thing I don't the term fuse the
+15:2615 minutes, 26 secondsterm fuse um uh yeah I discuss how to fuse multiple okay uh constructive
+15:3315 minutes, 33 secondsstable for interference probability distribution or stoastic suitable for interferencing.
+15:4315 minutes, 43 secondsFurthermore, our approach defines how to present stocastic uncertain or incomplete subject matters. Yes,
+15:5215 minutes, 52 secondsthings that the AI can't really classify, you know, because the information isn't complete, you know, because that's where
+15:5915 minutes, 59 secondsthe uh comes in. But you know, if you're using that as a domain, it could I believe it's called something matter.
+16:0516 minutes, 5 secondsSo, the terminator is right here. But this word not really this abstract is abstract. So you know uh essentially
+16:1416 minutes, 14 secondsthis is the uh uh the formal heading of the actual paper summary of the document what the paper describes how to fuse multiple cones on into a single knowledge base.
+16:2516 minutes, 25 secondsYes. This basically if you f you know uh normal knowledge base uh can reasons are methods or interesting.
+16:3516 minutes, 35 secondsYes. Inferencing. Yes. Probability intercept basian theorem base theorem uh
+16:4116 minutes, 41 secondsp given uh uh probability of p of a given b is b * a
+16:5016 minutes, 50 seconds* p * b a given b. So basically is that's what inference is about. It's not just a formula of inferencing.
+16:5816 minutes, 58 secondsInferencing means is like interpreting, you know, having a a interpretation based on the kind of information that
+17:0617 minutes, 6 secondsyou're presenting. You infer based on what it is.
+17:1117 minutes, 11 secondsSo you infer without the full uh information uh you know uh uh this group
+17:1817 minutes, 18 secondsof semantics to conflict assession the eliminator. Okay, let me go to the introduction cuz you know I read the
+17:2617 minutes, 26 secondsdomains draw given the domain. So in our framework emerging inferencing can be made of infused ontology will not prevent uh an individualist providing
+17:3517 minutes, 35 secondsnovel insights of given you know given domain. Yes that's true.
+17:4017 minutes, 40 secondsSo this about AI robotic systems you know this ES can build uh build itself up build itself up because it learns from the real world you know that's what
+17:4817 minutes, 48 secondsthat means uh because it handles uncertainty ontologically uh uh using proistic graphs uh known as
+17:5717 minutes, 57 secondsbijian networks uh or bas graphs bijian graphs uh intelligence meaning art as he
+18:0418 minutes, 4 secondsknows he knows how to uh infer because it can uh it doesn't trade on the real world you can start to see uh more you
+18:1218 minutes, 12 secondsknow more predictably uh like a human being does you know ontological ontologies the foundation of semantic oh is this engine
+18:2118 minutes, 21 secondsontologies the foundation of semantic graphs well are widely wait is this recording recording yeah uh are widely
+18:3018 minutes, 30 secondsused in machine learning yes the new 4j um resource description framework you
+18:3818 minutes, 38 secondsknow I I was going to get into it but I never got into it you know very well uh new forj is a graph uh a graphy library
+18:4618 minutes, 46 secondsuh a a graph database and I have to learn to write cipher
+18:5318 minutes, 53 secondswhich is new for 4j's uh graphy language so I haven't really um explained explain how cipher can in my domain but you know
+19:0119 minutes, 1 secondit's used for a lot of things uh but you know I would love to learn cipher which is a domain specific language for neuroj
+19:0919 minutes, 9 secondsOkay. Uh cipher cy one. So uh it's a domain language and using new 4j and we haven't got installed actually.
+19:1819 minutes, 18 secondsSo the the domain is graph graph databases and how they are
+19:2519 minutes, 25 secondsyou know useful ontologies foundation of semantic web are widely used in machine learning.
+19:3119 minutes, 31 secondsThey are used to define uh classes and relationships uh between their members within a domain.
+19:4019 minutes, 40 secondsYes. Reason algorithm receive implement knowledge in a model according to the rule of descriptive language DL. Yeah, I
+19:4819 minutes, 48 secondsnever heard of D before but I would say uh it uh with the subject of predict
+19:5519 minutes, 55 secondspredicate calculus is that like lambda calculus because calculus is uh the the model of
+20:0320 minutes, 3 secondschange you can have a function change u you go like uh lambda calculus but I believe um because they have discretive
+20:1020 minutes, 10 secondslogic in lambda calculus um it's framed as something that um
+20:1720 minutes, 17 secondsformulate because uh lambda calculus ensures am I recording this uh that u theological like you know uh will ensure
+20:2620 minutes, 26 secondsthat something given a tree uh can be mapped to a monat and a monoid which are
+20:3220 minutes, 32 secondsuh uh functional composition uh that uh describe
+20:4120 minutes, 41 secondsuh the data. So you get like fx fx * gx x x= f composition of f x s. So that's
+20:5020 minutes, 50 secondsthe reduced form in lambda calculus is basically fg of x um uh that's one uh but you know these are composition of
+20:5920 minutes, 59 secondsrelationship that model object relationships the group logics I'm I'm referring to such as uh composition
+21:0821 minutes, 8 secondsuh composition aggregation uh singleton
+21:1421 minutes, 14 secondsand other on graph you know the scene Here is predical calculus uh ent of
+21:2321 minutes, 23 secondspredical calculus uh should descriptive logic. Unfortunately, D was not conventionally represented on sensitive.
+21:3221 minutes, 32 secondsYeah, because you're using the wrong framework. Duh.
+21:4021 minutes, 40 secondsOkay, that's not that's not the question.
+21:4521 minutes, 45 secondsUm unfortunately the does not convention represent an associative the assistant of multiple conflicting possibility of state of domain.
+21:5921 minutes, 59 secondsThey are approaches introducing strong uncertain semantics in DL.
+22:0622 minutes, 6 secondsYeah. Yeah. This old Yeah. Yeah.
+22:1122 minutes, 11 secondsD. Where's D? Let me try to this link here called DL.
+22:1722 minutes, 17 secondsSo DL doesn't uh uh Oh, I can publish Google Scholars.
+22:2522 minutes, 25 secondsUh I can publish papers to Google Scholars and get a review.
+22:3222 minutes, 32 secondsUh these are all papers that people read to uh clarify some things. um uh real knowledge system.
+22:4222 minutes, 42 secondsSo I'm working on agentic models. I'm not working on act uh dimensional. I'm working on a models
+22:5022 minutes, 50 secondsbecause I have a framework for agentic models already. You know I started because I started ontological bas intelligence a long time ago. I started
+22:5722 minutes, 57 secondsas a as for my ESSM. So the proof is already there for me. So I'm exploring how this works. So you get for me in my
+23:0523 minutes, 5 secondsframework we go to classes we have uh top down reason or bottom up reasoning
+23:1223 minutes, 12 secondswhich are uh uh bipartite by design
+23:2223 minutes, 22 secondsuh by design but I'm going to try so you have top down reasoning uh or and bottom up reason if then interaction these are
+23:3023 minutes, 30 secondsgood stuff I already know these things So uh uh so the the framework I'm expressing oh does it start? No problem.
+23:4123 minutes, 41 secondsI'll be fine. You fine. Okay. Thank you. Cuz I I don't know.
+23:5123 minutes, 51 secondsOkay. Unfortunately does not representity the most of conflicting state.
+24:0024 minutesThere are more several approaches in a strong ass in semantics of the to uh so top down reasoning and uh bottom
+24:0924 minutes, 9 secondsreason bottom stands with the uh with an aum uh uh subject it's not an aum is not an
+24:1724 minutes, 17 secondsaum uh uh uh because aum is uh is not is taken as truth uh without proof.
+24:2724 minutes, 27 secondsSo if you can derive an axial from a set of rules.
+24:3224 minutes, 32 secondsSo basically if you have a production rule you can divide an axial and that's your inference. That's where inference starts.
+24:4024 minutes, 40 secondsNow top down takes information. Okay. Uh so the actual example let me give you an example. Uh uh oh I've never uh uh uh let's say uh the predicate uh is uh no.
+24:5524 minutes, 55 secondsI don't use the white swan. All all swans are black. All swans are white because in the det
+25:0425 minutes, 4 secondsthere's no one black. So when I come to take a picture of black sw it will have to reason that it's a swan based on the
+25:1225 minutes, 12 secondssilhouette to determine just a black swan because the vibration of it being a black swan is ontological.
+25:2225 minutes, 22 secondsIt's ontological.
+25:2425 minutes, 24 secondsIt's not interfering based on the production rule of the grammar internal grammar refining information as interference.
+25:3525 minutes, 35 secondsOkay. So the bottom of reasoning uh uh starts with
+25:4225 minutes, 42 secondsthe localized information which can be spanned into dimension game theory.
+25:4725 minutes, 47 secondsDimension game theory explores how the how the scalar can be put into a vector.
+25:5425 minutes, 54 secondsUh example how a data point can be product into a vector.
+26:0026 minutesVector the vector would then be used to determine whether to reason bottom up or top down.
+26:1026 minutes, 10 secondsYou know the which is which is probably because it's by you have two ways but you know the triparter setting you can
+26:1726 minutes, 17 secondshave top down reasoning bottom up reasoning and uh and u two sequences of
+26:2526 minutes, 25 secondsfilter and flash in the I use the term filter and flash a lot you know because um
+26:3226 minutes, 32 secondsuh it's resource so uh on the eus proofs uh let me try to log into my account let me go to overleaf.
+26:4426 minutes, 44 secondsOne second guys, let me log into my account.
+26:4726 minutes, 47 secondsPost uh sign in uh my login.
+26:5826 minutes, 58 secondsUm this is it.
+27:0127 minutes, 1 secondI'll get so the proof is here. These were the proofs here unbiased AI filter flash. So
+27:1027 minutes, 10 secondsthis is filter flash cognitive u evolution. Uh these are all my proofs or these are a proof. So this is 3.1.
+27:1927 minutes, 19 secondsLet me uh uh type cat. Let me find the type cat documentation.
+27:2527 minutes, 25 secondsUh the type cat documentation. uh dimension gum for AI.
+27:3627 minutes, 36 secondsUh so a vector has a magnitude and direction. So it's a scalar it has two components. It can be a vector vector in
+27:4527 minutes, 45 secondsthis sense is can be into two components a magnitude induction a magnitude and direction but about the data set itself
+27:5227 minutes, 52 secondsthe domains because if you uh in linear algebra in uh in semantic
+27:5927 minutes, 59 secondsgraph they are they have they can be modeled two way they can be uh uh have
+28:0728 minutes, 7 secondstwo uh two data set that describe information so this is Agus proofs uh this proof one
+28:1528 minutes, 15 secondsages proof 1.2 two this is my work basically uh you can follow my github github.com patterns uh
+28:2428 minutes, 24 secondsI won't work but you know this is my work so uh this document present the formulation of transversal cost function
+28:3328 minutes, 33 secondsof a dag so it's a dag it's a draph but it's pro of semantic in inference in
+28:3928 minutes, 39 secondsJeff so the production rule determines um of grammar because grammar. If you go
+28:4728 minutes, 47 secondsto language grammar, the language grammar dictates how language.
+28:5728 minutes, 57 secondsSo the grammar detects how language made up. with the position rule. The position rule of a grammar
+29:0429 minutes, 4 secondsuh there set of symbols that uh that that's uh yes a set of
+29:1029 minutes, 10 secondssymbols that you need to uh produce uh uh uh that are part of the grammar that
+29:1729 minutes, 17 secondsused to produce uh meaning for that uh symbol
+29:2329 minutes, 23 secondsuh for that uh for that uh expression or for that model what what the meaning was what the uh what's it called? What
+29:3129 minutes, 31 secondsstoastic meaning was stoastically the data graph uh um
+29:4029 minutes, 40 secondsis uh this is graph uh this is a form of fabrication of trans function via epistomology.
+29:5129 minutes, 51 secondsSo this is proof. So this is the formal location that a travel of use that um
+29:5829 minutes, 58 secondsuses understands uh understands information inference uh uh uh inference
+30:0630 minutes, 6 secondslike he knows it can it can come up with uh a define this action by production rule
+30:1330 minutes, 13 secondswhich is uh the how the language is made up the structure of a language you can come up with an aum you have a a zero
+30:2330 minutes, 23 secondsyou already come up with a foundational principle uh that uh you really understand some of information a bit of information and you can build a better
+30:3130 minutes, 31 secondspicture based on if I can if if this if this can define like uh the product rule can define like 10 grammarss uh um 10
+30:4030 minutes, 40 secondsaums not just one a I'm about one a like 10 sets of aums uh you know which which
+30:4630 minutes, 46 secondsI'm defining uh as something that's unproven but true uh true cuz 1 plus one is two
+30:5530 minutes, 55 secondsbut then prove 1.1 is two. No, it's more of an aum you know uh you know you know
+31:0131 minutes, 1 secondbecause it's it's taken as granted uh because uh because as a starting point for proven algorithm so that's what aums
+31:0931 minutes, 9 secondsare. So you can derive some code derivation of aums using lambda calculus you can infer the domination language uh
+31:1831 minutes, 18 secondsof an engine it's um something is uh working uh there so this is uh this my paper here
+31:2731 minutes, 27 secondsuh on the on the theorem and proof uh uh of the system but you know how I how I wrote rule of this I uh I I I use I
+31:3631 minutes, 36 secondsverbalized it use AI and then trans I used I'm going to be honest I used uh to write a paper but I it was all
+31:4431 minutes, 44 secondsverbalized I wrote it down while sitting down facing my computer uh uh and doing
+31:5131 minutes, 51 secondssome kind of review on my own work but it's all grounded in science it's called scientifically this is my work so this
+31:5931 minutes, 59 secondsis uh the proof of the theorem and it's such a beautiful code it's not paper this a proof of one you know it's called a proofs of uh of
+32:0832 minutes, 8 secondsunderstanding of that inference because the ASM understands information that's why you can derive that that's why you can derive those aums of that
+32:1532 minutes, 15 secondsinformation you know because it's true and if you can use an econom
+32:2332 minutes, 23 secondsaums too it goes to the paper I also I like so this is not my summary but this is
+32:3032 minutes, 30 secondsprominent in explaining why the system works the last for the notion of fuzzy set members on fuzzy. Yes, fuzzy sets.
+32:4232 minutes, 42 secondsFuzzy sets are set members are proistically uh probability
+32:5232 minutes, 52 secondsa fuz certain sex I don't can be fuzzy. I I never got into
+32:5932 minutes, 59 secondsit. You got a posterior uh and posterior information actually are are prone to fuzziness or f being
+33:0633 minutes, 6 secondsfuzzy. Uh is it fores u uh uh posterior posterior in probability?
+33:1733 minutes, 17 secondsUh posterior first updated uh uh believe uh hypness uh yes posterior
+33:2433 minutes, 24 secondstake new vectors. Okay. Fuzziness fuzzy improbability framework
+33:3133 minutes, 31 secondsfy logic and probability of a sudden arising from both vaguess and randomness. So that's right. So I'm right. So I'm right. Okay. Definition.
+33:4133 minutes, 41 secondsSo FY to information but the actual story. So if the if you can if the M
+33:5033 minutes, 50 secondstheorem you started with you've got no proof and system is sustainable under
+33:5733 minutes, 57 secondsthe uh proof of certainty or uncertainty itself you know so because the proof will determine how this work. So this is an um system. So capture more complic.
+34:0834 minutes, 8 secondsSo if them supply chain if then so instead of an if else you go to the if then very important this is how policies
+34:1534 minutes, 15 secondswork cuz if you got if you do the then clause ensures you are branching.
+34:2034 minutes, 20 secondsSo if you go if else that's a binary decision okay but this a descriptive if then describes information of the logic.
+34:3134 minutes, 31 secondsNow you're having uncertainty.
+34:3534 minutes, 35 secondsSo between variables one uncertainty theory
+34:4534 minutes, 45 secondswhich proposing yes lossy reasoning is a big problem.
+34:5234 minutes, 52 secondsBig big problem. I I I I I you know because you if you have a lot of data sets you know losing reasoning is very
+34:5934 minutes, 59 secondsfuzzy reason or have counter institution you know like you know if you have a lossy algorithm
+35:0635 minutes, 6 secondsyou have a loss in reasoning a lossy interference that you know that you can't compress oh that's a good thing I believe you know uh no no because
+35:1635 minutes, 16 secondsinformation must be reduced okay lots of reason in learning calculus you can uh dimension to you can reduce problems to
+35:2335 minutes, 23 secondscertain domains. I think of them as P versus NP complete problems. You can always reduce problems but the proof of
+35:3135 minutes, 31 secondsreducing uh the proof of reason I'm calling lossless and loss you can compress those reasoning you know and in
+35:3835 minutes, 38 secondsAI models flexibility of the reasoning is proistic they are based nomic logic
+35:4535 minutes, 45 secondsfor experience decay in relative position doing loy expression operation so the the I don't like uh lossy
+35:5435 minutes, 54 secondsreasoning because you can't reduce problems cuz the problem has no time.
+36:0036 minutesAnd this problem can be mapped to the growth scale of the computational cost um the uh the scaling of a of a uh of a language model.
+36:1236 minutes, 12 secondsUm yeah, I think to end this now. Oh, is this recording? Yeah, it's recording.
+36:1936 minutes, 19 secondsThe basian network approaches the bian out you know I don't know this method con
+36:2636 minutes, 26 secondsof granulative mismatch yes because the smaller details are taken out this is also true this is all the point this is
+36:3336 minutes, 33 secondsnot repeating itself this is dry principle this person is writing with the intent and I love it uh bian networks require complete speech
+36:4436 minutes, 44 secondsof the domain proistic distriution with no incompleteness Ontologies
+36:5136 minutes, 51 secondsontological have a final granularity which allows for incomplete or so beautiful.
+36:5836 minutes, 58 secondsSo domain in the uh incomplete define relationship become the onlyation network space frameworks by overdefining
+37:0737 minutes, 7 secondsthem. Yes. Because if they're losing you defining so much things by definition you are uh you are adding more than you need.
+37:1737 minutes, 17 secondsyou're adding more and by need um that is uh the the descriptive language you're using to describe the data set in
+37:2537 minutes, 25 secondsthe production room with the production room uh mismatches the uh based on belief of the uh you
+37:3537 minutes, 35 secondsknow the epistemology because the semantic drift
+37:4137 minutes, 41 secondsdoesn't cluster the data set you It doesn't. No, it isn't. So, you
+37:4937 minutes, 49 secondsare you are you're shooting up your your system is evolving incorrect incoherently. Yeah. It's just evolving
+37:5637 minutes, 56 secondswhen based on the data based on stoastic uncertainty, not the other not theory.
+38:0438 minutes, 4 secondsNow, there exist knowledge uh relation unified in Beijing knowledge basis the BKB.
+38:1338 minutes, 13 secondsI never heard of BKB. But the whole problem with AI is a data.
+38:2138 minutes, 21 secondsIt's a data. Where you going to get to give you free AI data?
+38:2538 minutes, 25 secondsI have the time to build this. You know, data comes from the real world. You know, it's not uncertainty that it can't be removed
+38:3338 minutes, 33 secondsis that something can be removed from an system. Yes. But the real world, you know, if it's basically trade on that
+38:4038 minutes, 40 secondssystem cuz uh on so that's what I'm saying.
+38:4738 minutes, 47 secondsThis conforms. Okay. Uh uh this part two bro
+38:5438 minutes, 54 secondsuh work fuzzy logic. Uh fuzzy logic is a a big thing. A big thing. Okay. Let me
+39:0139 minutes, 1 secondread this. Uh class C and P elements of 0 and one such that A is element of C given P. Um this is a set notation.
+39:1339 minutes, 13 secondsOkay. Where did I stop? I stopped uh uh on the job. Let me finish the draw.
+39:1739 minutes, 17 secondsYeah. Uh let me finish the second second uh release work. Oh, this is this is a big big big document.
+39:2539 minutes, 25 secondsOmega of Q gamma of M given I
+39:3339 minutes, 33 secondsM N J is this is for uh individuals set aware asserting knowledge
+39:4539 minutes, 45 secondsokay so this is just the way no I guys I'm going to put the link here I
+39:5239 minutes, 52 secondsrecommend you read this document some you know as as a community reader because reading a document shows what
+39:5939 minutes, 59 secondsI'm working on but you know you know theological basian intelligence is systemic kind of uh uh reason based on
+40:0840 minutes, 8 secondsonlogical uh principles which are defined uh again
+40:1540 minutes, 15 secondsum um uh because can prove itself it can update it belief uh and that will not regress on the data set it will
+40:2540 minutes, 25 secondsyou know uh it's like you know it's not thinking it's not conscious it's not aware it's just
+40:3340 minutes, 33 secondscuz I'm it's not it's not thinking it's not aware is not where it's not cuz we really understand the thinking and
+40:4040 minutes, 40 secondsthoughts and modeling ourselves we can't we don't know all the premises involved here you know you know we don't know
+40:5040 minutes, 50 secondsbut we don't need to know we do need to know eventually But you know it's what it is for now. So it's
+40:5740 minutes, 57 secondsnot aware, it's not alive, it's not uh uh it's just that it's probability
+41:0541 minutes, 5 secondsand probability theory basically uh express system
+41:1241 minutes, 12 secondsuh oh so I'm going to I'm going to summarize this document. So no let me just uh get this here.
+41:2241 minutes, 22 secondsThese are all good. someone knows what they're doing. A model of a domain. A domain is a set of inputs.
+41:3241 minutes, 32 secondsNo, a domain is input itself. But the inputs uh have to be kind and a model
+41:4141 minutes, 41 secondsuh for domain Q for an input Q a final set of individuals I and final set of C
+41:4941 minutes, 49 secondsclasses lexicons. uh lexicons which are uh lexims uh that become lexicons when
+41:5641 minutes, 56 secondsthey are identified by a lexa equals item C a combination of the individual character set of the classification of
+42:0542 minutes, 5 secondsset item C where I and C are become a lexical definition using I so to get I a
+42:1242 minutes, 12 secondsset of functions um that independently okay that makes sense
+42:2042 minutes, 20 secondsbut why would I can see this is mathematics guys. I love this people. Okay, I'm going to end this video on this note. I am not
+42:2842 minutes, 28 secondsbuilding AI. I'm not building conscious systems.
+42:3242 minutes, 32 secondsI am building aic models, robotic systems for the human you know uh but it's going to work in going to work in warehouse going to work in farms going to be working in the real world.
+42:4442 minutes, 44 secondsam based on the principles of ontology occupation intelligence. The AI is called you in reflection of myself. It
+42:5242 minutes, 52 secondsis you and it uh it assist in our everyday uh uh uh uh uh labor uh blessing things
+43:0243 minutes, 2 secondsthat do um uh you know hard work you know caring for people at a point of time people don't do those things every
+43:0943 minutes, 9 secondsday propensive like you know it's a gent so a gently it's an agent it's meant to
+43:1543 minutes, 15 secondsassist you um basically you go to agent and you get actuators people that um things that uh you know uh uh because
+43:2443 minutes, 24 secondsyes we determine the uh I prefer a I prefer uh a model actuators I said but
+43:3143 minutes, 31 secondsyou know I'm not going to build actuators here um actuators here you know because those work sensor dimensional sensor I'm not I'm going to
+43:3943 minutes, 39 secondsbuild robots um that can uh perform to the degree I need them to perform for humanitarian aid and that's a benchmark of progress Yes.
+43:5243 minutes, 52 secondsThank you for watching the video.
+43:5643 minutes, 56 secondsThank you. Thank you. So, I'm not building awareness systems. I'm building robotics interface systems.
+44:0544 minutes, 5 secondsUm, and I also want to peer review my proof. So, if you care enough, you can peer review my work. Someone's coming.
+44:1244 minutes, 12 secondsThank you for watching this video. If you come, you can peer review my work.
+44:1644 minutes, 16 secondsyou know, uh, I've got it on this repository here. I got it in my my, uh, GitHub, github.com/patterns,
+44:2444 minutes, 24 secondsbut reach me directly on, uh, cuz I'm autistic, okay, I'm on a spectrum. Reach
+44:3044 minutes, 30 secondsdirect me on uh, uh, uh, o k p a l a n at proton
+44:3844 minutes, 38 secondsproton mail.com. O for Oscar, K for Kilo, P for Papa, A for Alpha, L for Lima, A for Alpha, N for November at
+44:4644 minutes, 46 secondsProton, P for Papa, R for Romeo, O for Oscar, Chief for Oscar mail.com.
+44:5444 minutes, 54 secondsThank you for watching this video.
+45:5545 minutes, 55 secondsGood.
+
+Sync to video time
+
+0:044 secondsuh vision knowledge ontologies fusion and semantic knowledge under
+0:1111 secondscertainty I mean in computeness [ __ ] off abstract
+0:1818 secondsthe modeling of um the modeling of information from theological research and uh is a
+0:2727 secondstheoretical obstacle to truly uh uh uh to uh to create a truly semantic
+0:3434 secondsweb currently ontologies. Okay, I'm trying. Okay, I'm going to read the abstract not going well
+0:4444 secondsbecause you know this is a perfect document or near perfect document. Let me start again.
+0:5252 secondsSo I'm recording this as an old script.
+0:5454 secondsOkay. Beijian knowledge driven ontologies a framework for fusion of semantic
+1:021 minute, 2 secondsknowledge under uncertainty and uncompleteness. A vision or network is a proistic graph.
+1:101 minute, 10 secondsUh the kind of graph I'll give you is uh a markoff chain
+1:161 minute, 16 secondsuh markoff chain. So I'm not saying oh wait I'm getting this wrong. So you get Bayian network which is a pro. So they
+1:241 minute, 24 secondshave probabilistic uh edges and uh uh stochastic nodes
+1:311 minute, 31 secondsuh which give um stoastic nodes. So uh definition so let me try to define this.
+1:371 minute, 37 secondsSo a basian uh network is a proistic graph. A graph has a node and edges
+1:481 minute, 48 secondsuh and uh this can be uh any type of graph. It can be a colorable graph too.
+1:521 minute, 52 secondsSo uh it can be colorable. So it can be a bipartis based on the edge or node coloring. So
+2:012 minutes, 1 secondthis my invention uh basically I made this. I invented this whether they like this or not it's not a problem but it
+2:082 minutes, 8 secondssolves the problem. Uh evasion driven ontologies. Ontologies are in philosophy but this is not formally defined. So
+2:172 minutes, 17 secondsontologies is like uh uh ontological means semantic uh no no uh ontologies
+2:232 minutes, 23 secondsare semantic graphs. Uh but the Beijing aspect mean they are properly driven uh probability uh probabilistic in nature.
+2:322 minutes, 32 secondsSo probabilistic means they are uh they use stoastic they are variatic uh they very they are um let me try and give an
+2:402 minutes, 40 secondsexample. So stochastic uh definition let me use a stocastic uh probability m. So having a random
+2:492 minutes, 49 secondsdistributed a pro distribution or pattern that may allow statistically but may not be predicted precisely
+2:582 minutes, 58 secondsof having a random prom pattern that analyses
+3:053 minutes, 5 secondsmathematically but not be uh produc but not be uh but not
+3:113 minutes, 11 secondsbe typically uh probability theory uh or based uh I love the base theorem but you
+3:183 minutes, 18 secondsknow um I'm not seriously so you know the fact is um the probability distriution is respect the of for
+3:273 minutes, 27 secondsmodeling uncertainty and the the uncertaintity is probabilistic uh probability from zero to one of
+3:373 minutes, 37 seconds0 to one and incomplete our system is what you worry about so you know once it gets 100% right it's it's a model it's
+3:463 minutes, 46 secondsworking But you know uh uh classification of 0.5 based on how you train it shows that you are modeling this um document properly.
+3:553 minutes, 55 secondsSo this is a document I found online explaining what I'm trying to do you know but you know it's not written by me. So you know semantic contextes are
+4:044 minutes, 4 secondsbasically graphs are are bypassed. They are they are they are bypassed by design
+4:104 minutes, 10 secondsand bypassed I mean they are uh too colorable too way too colorable. They are red can have a color have an edge
+4:184 minutes, 18 secondsthat's red color red and another that's black red red black edge representative
+4:244 minutes, 24 secondsinformation or semantic interpretation meaning that it has meaning there's meaning um this is what I'm saying so
+4:314 minutes, 31 secondsI'm going through so this paper is by uh the NCBI NLM
+4:394 minutes, 39 secondsnhgo uh government uh institution the model of sustaination is an open problem. Yes,
+4:464 minutes, 46 secondsthe modern offset of certain information is an open problem and ontology research. ontology uh is semantically
+4:544 minutes, 54 secondsbecause you know this is uh the domain of ontology I'm referring to whatology because the semantic of meaning system
+5:035 minutes, 3 secondsuh uh uh uh uh uh ontology is like if you look at philosophy you look at system of notes and stuff uh
+5:125 minutes, 12 secondsphilosophically ontologies are uh uh
+5:185 minutes, 18 secondsare simil stuff but it's context bound basically domain bound. So you know um it doesn't really make any sense uh
+5:275 minutes, 27 secondsphilosophically analyzing systematically. So uh ontologies are uh open problems such as open problems that
+5:365 minutes, 36 secondsnot binary questions are naturally probistic. So modeling them refers to a uh uh needs a framework and that's ontological basian intelligence.
+5:505 minutes, 50 secondsuh but you know it's not it's not that system is poor doesn't describe it properly uh ineffectively
+5:575 minutes, 57 secondsum the the goal of the research paper it's uh it's explore uh this I'm doing
+6:046 minutes, 4 secondsit because this is a recent paper and I love this so much and I I summed it up properly so the model was information open world problem open problem like
+6:136 minutes, 13 secondsit's not a closed question it's not a closed problem it's not a binary it's not just um it's an open you got open question you got closed And by modeling it properly, you are
+6:226 minutes, 22 secondsexploring u the hurdles um or the problems in research based on semantic uh uh
+6:316 minutes, 31 secondsinterpretation you know and in theoretic obstacles uh based on dem of probability ontological
+6:376 minutes, 37 secondsvision intelligence. So thisology is not ontologies do not have models of uncertainty. Yes, you can be you can
+6:466 minutes, 46 secondsmake a roy model that uh that uh predict make a wrong make a force predation of true positive true negative force
+6:556 minutes, 55 secondspositive and force um uh calcation because um calcation is negative because it's not just designed to run. These are
+7:027 minutes, 2 secondsmodels. These are uh data structure models. These are way of doing stuff. Um the model has to fit the problem.
+7:127 minutes, 12 secondsBut when your model your model has to fit the problem because you cannot model something you cannot you cannot have a
+7:187 minutes, 18 secondsconsolation of a system uh that uh that sort of system drift. It's called drift.
+7:247 minutes, 24 secondsSo you have a semantic drift, you have a data drift uh uh because you can can have the margin of error based on your
+7:327 minutes, 32 secondsdata set uh when you uh train a model.
+7:397 minutes, 39 secondsUm because uh okay because uncertainty is of the presence. Yes, uncertainty.
+7:447 minutes, 44 secondsOkay. Current ontologies do not have modity. So, so subjects matter and must
+7:527 minutes, 52 secondseither be normalized or rejected entirely.
+7:577 minutes, 57 secondsStoastic subject matters must either be normalized uh normalized means uh uh uh
+8:058 minutes, 5 secondsmarginaliz marginaliz normalized we say uh 0 to one probability uh uh 0 to one
+8:128 minutes, 12 secondsis normalization vector but you want 0.1 so you want to uh reject it uh entirely
+8:188 minutes, 18 secondsor normalize the distribution uh make it 0.01 01 in the year model because you cannot remove the bias from the system
+8:268 minutes, 26 secondsyou know I'm not saying you can't remove the bias from the system I'm saying there's bias in the system in the data set you know based on who say what who
+8:338 minutes, 33 secondssaid you know uh who said what subject matter is is based it's a basian probability uh it's a it's a basian
+8:418 minutes, 41 secondsinference of the matter so you uh based on how the story was told interpretation was told because you can have the tripartite information because my one is
+8:508 minutes, 50 secondsa tripart a tripartite three color three colorable graph. So you can have colors like uh of the edge
+8:598 minutes, 59 secondsof the node that probability based on zero one based on red green and blue.
+9:049 minutes, 4 secondsuses you know for consensual yes no maybe but the model has to acknowledge
+9:109 minutes, 10 secondsthat the on the presence of uh is definitely present in the rural and uh because of certainty not knowing lack of
+9:209 minutes, 20 secondslack of uh uncertaintity uh if you have like a certain like a linear scale certain uncertain
+9:289 minutes, 28 secondsyou know that's not this very bad example uh actually let me use a graph so if uncert is uh uh you know you are
+9:379 minutes, 37 secondsyou are some of the models reduce the problem to a scalar vector. So dimensional game theory is meant to uh dimensional game theory theoretically
+9:469 minutes, 46 secondswhich is why I made zero some games meant to use um to prove the uncertaintity but that's why my
+9:539 minutes, 53 secondsonlogical basian say because you got to do theory on top uh but you know people are researching this properly now so this is a formal framework for
+10:0010 minutesdescribing uh machine learning models in the uh behavior uh of systems in the
+10:0710 minutes, 7 secondsreal world uh um uh zero sum games uh play two perfect games make it a a match
+10:1510 minutes, 15 secondsnow know. So the dilemma because the cert is already in the real
+10:2410 minutes, 24 secondsworld knowledge also faced with the dilemma of performing prohibitively low certificates.
+10:4610 minutes, 46 secondsare faced with dilemas of performing prohibitively labor intensive research.
+10:5010 minutes, 50 secondsYes, the research is uh you know prohibitly means it can cross the line
+10:5710 minutes, 57 secondsof ethics ethics you know I love this word because you know the the labor is cross but to get the right because you know because your private life you know
+11:0611 minutes, 6 secondsit's not invas private life the unethical you know because down the line you know if you consent to
+11:1411 minutes, 14 secondsit uh you can get more data and build a better model,
+11:2111 minutes, 21 secondsyou know, uh language model, uh you know, um or or AI system or or visual visual model or uh something or car
+11:2911 minutes, 29 secondsmodel car like a robotic car, you know, probably if the onlogies can explain model rewards uncertainty. Yes, real
+11:3811 minutes, 38 secondsworld uncertainty is a big big factor which I forgot to mention. Uh it's a big factor because real necessity
+11:4711 minutes, 47 secondsis what can make or break your uh your uh your quality assurance uh of uh uh
+11:5511 minutes, 55 secondswhat is it does because the real world describes information you know the rule continuation
+12:0212 minutes, 2 secondsand the certainty incorporates into reasoning say uh perfectly if you can rule incorporate it into reason. Yes,
+12:1012 minutes, 10 secondsreasoning. The biggest point of this is reason. Can the ear reason? Uh a pro can ask question. So we got dimension theory
+12:1812 minutes, 18 secondsand probing. Uh if you can ask a question can start to reason. You know, like you know, if it's the temperature
+12:2412 minutes, 24 secondsof a of a valve uh um uh No, no. If the temperature What am I saying? Uh if the
+12:3112 minutes, 31 secondsneedle uh um if if a car is reading uh is at 25 miles an hour, uh it's a
+12:3812 minutes, 38 secondsspeedway. Uh let's say the A13 uh that's the reason uh uh that's a steady speed on E13. Uh if it's if doesn't mean we go
+12:4812 minutes, 48 seconds60 miles an hour uh you know say 60 uh that's fast let me say 45 you know there
+12:5512 minutes, 55 secondshas to be uh let's say it's 60 uh 813 uh 60 is the maximum
+13:0213 minutes, 2 secondsno 35 to 40 you know uh no it has to uh gauge transition but the has to look
+13:1013 minutes, 10 secondsaround has to be always observant of the environment while driving at that What?
+13:2513 minutes, 25 secondsYeah.
+13:2913 minutes, 29 secondsI love my voice. Okay. So, is it preferable? Uh
+13:3613 minutes, 36 secondsso, uh um uh the running of the rest uh is that what am I saying? I'm reading this. I'm not explaining this properly.
+13:4613 minutes, 46 secondsSo this paper is very beautiful you know it explains uh how labs are running risk of rejection
+13:5413 minutes, 54 secondsand accept information through uh true uh false positive true uh false positive true negative.
+14:0514 minutes, 5 secondsthe false positive, the true positive and false negative you know or type one and type two errors uh based on the
+14:1314 minutes, 13 secondsquestion which was uh the static is a power a link between
+14:2014 minutes, 20 secondsassertion and random variables because uh a scala is dimension if that scaler
+14:2814 minutes, 28 secondscan be promoted to a vector you know then you have to keep anchor to vector
+14:3414 minutes, 34 secondsthat vector uh belongs to uh marov chain probabilistically
+14:4314 minutes, 43 secondswhich describe the subject uh uh the subjective uh uh uh subject uh the
+14:5014 minutes, 50 secondsreasoning of the subject uh of what is uh of the object of the objective world like you
+14:5714 minutes, 57 secondsknow like you know uh subjective matter of the of the uh objective world but it's it's localized It's localized.
+15:0615 minutes, 6 secondsSo it's localized uh because it's localized uh because it's localized to the system state uh system being system
+15:1515 minutes, 15 secondsenvironment you know uh where the where where the information is being processed in real time.
+15:2215 minutes, 22 secondsSo the the the synthesis uh what it would
+15:3015 minutes, 30 secondsbe preferably if ontology was played among the reality blah blah that into reasoning reasoning making sense of the real world we present ontological
+15:3815 minutes, 38 secondsframework of average before I present before you I want you to call me for my paper we present ontological framework
+15:4615 minutes, 46 secondswhich is based on semantics synthesis of and descriptive lage and progressive semantics for wait one sec the synthetic ontologic
+15:5515 minutes, 55 secondsassertion and random variables of automated construction of which are suitable for interference.
+16:0216 minutes, 2 secondsFurthermore, our approach defines how to represent stocastic uncertain and incompet matter.
+16:0916 minutes, 9 secondsI already done this before you. I'm studying base theorem but I do like your paper you know because we're going to
+16:1516 minutes, 15 secondstake it I don't fuse the term fuse um uh here
+16:2116 minutes, 21 secondshow to fuse multiple complicate uh stable interference
+16:2916 minutes, 29 secondsprobability distribution or stoastic suitable for interferencing.
+16:3516 minutes, 35 secondsFurthermore, our approach decides how to stocastic uncertain or incomplete subject matters. Yes, this
+16:4416 minutes, 44 secondsis that the AI can't really classify you know because the information is incomplete you know because that's where
+16:5116 minutes, 51 secondsthe uh comes in but you know if you're using that as a domain it's called I believe it's called something matter so the terminology is right here but this
+17:0017 minutesword not really after so you know uh additionally
+17:0617 minutes, 6 secondsthis is the the more heading of the summary of the document what go the paper describes how to use multiple concept to single knowledge base. Yes.
+17:1717 minutes, 17 secondsThe side wrong you know base uh uh reasons are methods to confirm interesting. Yes. Inferencing.
+17:2817 minutes, 28 secondsYes. Promising intercept bas base theorem uh p given uh uh probability of
+17:3617 minutes, 36 secondsp of a given b is b * a
+17:4217 minutes, 42 seconds* p * b a given b. So basically that's what inference is about. It's not the formula of inferencing. Inferencing
+17:5017 minutes, 50 secondsmeans it's like interpreted, you know, having a a interpretation based on the kind of information that
+17:5817 minutes, 58 secondsyou're presenting. You infer based on what it is.
+18:0318 minutes, 3 secondsSo you infer without the full uh information uh you know uh uh this
+18:1018 minutes, 10 secondspollution semantic to conflate assession.
+18:1418 minutes, 14 secondsI mean it's okay let me go to the introduction because you know I read the domains very well given a domain so in
+18:2118 minutes, 21 secondsour framework emerging inferencing can be made of confused will not prevent uh individual authorities providing no sight of g you know given domain yes
+18:3018 minutes, 30 secondsthat's true so this AI robotic systems you know this you can build uh build itself up you
+18:3718 minutes, 37 secondsknow build itself up because it learns from the real world you know that's what that means uh because it handles certainties is ontologically
+18:4618 minutes, 46 secondsuh uh using progressive graphs uh known as vision networks uh or based graphs vision graphs uh intelligence we need as
+18:5518 minutes, 55 secondsartificial need notes in order to uh fair because it can uh it doesn't trade on the real world you know certainty uh
+19:0419 minutes, 4 secondsmore you know more predictably uh like a human being does you know ontological ontology the foundational semantic or
+19:1119 minutes, 11 secondsthis idiots um ontologies the foundation of semantic graphs well are widely wait is this
+19:1919 minutes, 19 secondsyeah uh uh are widely used in machine learning yes the neo4j um uh resource
+19:2719 minutes, 27 secondsdescription framework you know I I was going to get into it but I never got into it you know very well uh new is a
+19:3519 minutes, 35 secondsgraph uh graphing library uh a graph database
+19:4219 minutes, 42 secondsAnd I have to learn to write cipher which in 4J's uh graphy language. So I
+19:4919 minutes, 49 secondshaven't really um explained how cypher can my domain but you know it's used for a lot of things. Uh but you know I would
+19:5619 minutes, 56 secondslove to learn cyher which is a domain specific language for newj uh that's what cypher is cy. So uh it's a domain
+20:0520 minutes, 5 secondslanguage and using new 4j and we're going to install actually.
+20:1020 minutes, 10 secondsSo the the domain is graph graph databases and how they are
+20:1720 minutes, 17 secondsyou know useful ontologies foundational semantic web are widely used in machine learning. They are used to find uh classes and
+20:2520 minutes, 25 secondsrelationships uh between their members within a domain.
+20:3120 minutes, 31 secondsYes. Reason algorithm people know emerge in the model accordance to the rule of descriptive language DL. Yeah. I never
+20:4020 minutes, 40 secondsheard of D before but I will say uh it's with the subject of predict predicate
+20:4720 minutes, 47 secondscalculus is that like lambda calculus because calculus is uh the the model of
+20:5520 minutes, 55 secondsyou have a function change you go like lambda calculus but I believe um because we have this logic in lambda calculus um
+21:0521 minutes, 5 secondsit's framed as something that um D formula because uh lambda calculus
+21:1221 minutes, 12 secondsensures I'm recording this uh that u theological like you know will show that
+21:1821 minutes, 18 secondssomething given to can be a map to mod and monoid which are uh uh functional
+21:2621 minutes, 26 secondscomposition uh that uh describe
+21:3321 minutes, 33 secondsuh you got like fx fx time gx x= f composition of f x s. So that's the
+21:4321 minutes, 43 secondsreduced form in lambda calculus basically fg of x um that's one but you know these are composition objects that
+21:5121 minutes, 51 secondsmodel object relationships the script logics I'm I'm referring to such as uh composition
+22:0022 minutesuh composition aggregation uh singleton
+22:0622 minutes, 6 secondsand other other graph you know the thing is saying here is predical calculus uh a
+22:1422 minutes, 14 secondssource of predical calculus uh should description logic unfortunately is not conventionally representing
+22:2222 minutes, 22 secondsuncertaintity yeah because you're using the wrong framework the
+22:3222 minutes, 32 secondsokay that's not that's not the question um
+22:3922 minutes, 39 secondsunfortunately D does not commission represent uncertaintity. The assistant of multiple conflicting possibility as of domain.
+22:5122 minutes, 51 secondsThey are approaches introducing strong uncertain semantics in DL.
+22:5822 minutes, 58 secondsYeah. Yeah. This old Yeah. Yeah. True. 200 DL. Where is DL? Let me try to this link here. O DL.
+23:0923 minutes, 9 secondsSo J doesn't uh uh oh I can publish Google Scholars
+23:1723 minutes, 17 secondsuh I can publish papers Google Scholars and get a review.
+23:2323 minutes, 23 secondsUh these are all papers that people read to uh classify some things uh uh knowledge system.
+23:3423 minutes, 34 secondsSo I'm working on logistic models. I'm not working on act dimensional. I'm working on agency
+23:4123 minutes, 41 secondsmodels because I have a framework for agency models already. You know, I started because I started ontological based intelligence a long time ago. I
+23:4923 minutes, 49 secondsstarted as a as my system. So the proof is already there for me. So I'm exploring how this work. So you guess
+23:5623 minutes, 56 secondsfor me in my experiment go to school we have uh top down region or bottom up reasoning
+24:0424 minutes, 4 secondswhich are uh uh bipartite by design
+24:1424 minutes, 14 secondsuh by design. So you have top down reasoning uh or and bottom up reason if they're interaction these are good stuff
+24:2224 minutes, 22 secondsalready know these things. So uh uh so the the framework I'm discussing Oh, does he stop? No,
+24:3124 minutes, 31 secondsI f Okay, thank you.
+24:3924 minutes, 39 secondsI don't know.
+24:4324 minutes, 43 secondsOkay, unfortunately does not compete.
+24:5224 minutes, 52 secondsThere are more several approaches using strong.
+24:5724 minutes, 57 secondsUh so top down reasoning and bottom reason bottom one stands with an aum
+25:0625 minutes, 6 secondsuh uh subject it's not an aum uh uh because an aum is uh is not is statements as truth without proof.
+25:1925 minutes, 19 secondsSo if you can derive an axial from a set of rules.
+25:2425 minutes, 24 secondsSo basically you have a production group can define an axial and that's your inference that's inference starts.
+25:3225 minutes, 32 secondsNow top down takes information. Okay. Uh so actual example let me give you an
+25:3825 minutes, 38 secondsexample. Uh uh I've never uh uh let's say uh the predicate uh is uh noises.
+25:4725 minutes, 47 secondsI don't use the white swan. Uh all all swans are black. All swans are white because in the data I've classified
+25:5625 minutes, 56 secondsthere's no one black. So when I come to take off black it will have to reason
+26:0226 minutes, 2 secondsthat this is one based on the silhouette just a black swan because the variation of it being a black swan is ontological.
+26:1426 minutes, 14 secondsIt's ontological.
+26:1626 minutes, 16 secondsIt starts interfering based on the production rule of the grammar internal grammar refining information as interference.
+26:2726 minutes, 27 secondsOkay. So the bottom up reasoning uh uh starts with
+26:3426 minutes, 34 secondsthe localized information which can be spanned dimensional game theory.
+26:3926 minutes, 39 secondsDimensional game theory explores how the how the scalar can be put into a factor.
+26:4626 minutes, 46 secondsuh example how a data point can be producted into a vector vector. The vector
+26:5526 minutes, 55 secondswould then be used to determine whether to reason bottom up or top down.
+27:0227 minutes, 2 secondsYou know the pro which is a problem because it's by passing you have two ways but you know the triparter set you
+27:0927 minutes, 9 secondscan have a top down reason bottom up reason and uh and uh two sequences of
+27:1727 minutes, 17 secondsfilter and flash in the I use flash a lot you know because uh
+27:2427 minutes, 24 secondsuh it's allocation so uh on the eag proofs let me try to log into my account let me go to over leaf.
+27:3627 minutes, 36 secondsOne second guys, let me lo into my account. Pause.
+27:4227 minutes, 42 secondsSo the proof is here. These are the proofs here on Vice AI filter flash. So this is filter flash cognitive uh evolution. Uh these are all my proofs.
+27:5227 minutes, 52 secondsOh, these are a proof. So this is 3.1.
+27:5627 minutes, 56 secondsLet me uh uh type cat. Let me find the type documentation.
+28:0328 minutes, 3 secondsuh the type cast documentation uh the machine for AI
+28:1428 minutes, 14 secondsuh so a vector has the magnitude and direction so it's a scalar uh it has two components can be a vector in this can
+28:2428 minutes, 24 secondstwo components magnitude direction magnitude and direction about the data set itself the domain Because even you
+28:3128 minutes, 31 secondscan compute uh in linear algebra in uh in semantic graph they are they have they can be
+28:3928 minutes, 39 secondsmodeled two way they can be uh uh have two uh two data set that describe
+28:4628 minutes, 46 secondsinformation so this is a proofs uh this proof one ais proof 1.2 to
+28:5628 minutes, 56 secondsthis is my work basically uh you can on my github github.com ubin patterns uh I want to uh you know this is my work so
+29:0529 minutes, 5 secondsuh this document present the formulation of transversal cost function of a dag so
+29:1129 minutes, 11 secondsthis it's a dag it's a dagram automatic inter inference engine so the
+29:1829 minutes, 18 secondsproduction rule determines uh a grammar Because a grammar if you got a language
+29:2529 minutes, 25 secondsgrammar, the language grammar dictates how grammar.
+29:3429 minutes, 34 secondsSo the grammar this is how made up rule rule of a grammar
+29:4129 minutes, 41 secondsuh there's a set of symbols that uh that that's uh yes symbols that
+29:4929 minutes, 49 secondsyou need to uh produce uh uh uh that are part of that used to produce uh meaning
+29:5729 minutes, 57 secondsfor that uh symbol uh for that uh for that uh expression of
+30:0530 minutes, 5 secondswhat that model what what the meaning was what the uh what's meaning was stoastically
+30:1330 minutes, 13 secondsthe dio graph uh um is uh this is diary graph uh this is a a
+30:2230 minutes, 22 secondsform of fabrication of trans function via amology
+30:2830 minutes, 28 secondsfirst so so this is one so this is the formal application that of technology
+30:3530 minutes, 35 secondsthat uses understands uh understands information inference uh uh uh inference
+30:4330 minutes, 43 secondsthat he knows you can come up with uh actions. You can define this action by a production rule
+30:5030 minutes, 50 secondswhich is uh the how the language is made up the structure of a language. the company
+30:5630 minutes, 56 secondsaction you have a a zero you already come up with a foundational principle uh
+31:0431 minutes, 4 secondsthat uh you already understand some of information a bit better of information I can build a better picture based on if I can if if this if that can define like
+31:1231 minutes, 12 secondsu rule can define like 10 grammars uh um 10 aums not just one aum I'm talking
+31:1931 minutes, 19 secondsabout one a like 10 set of actions uh you know which are which I'm defining uh has something that's unproven
+31:2831 minutes, 28 secondsbut true or true because 1 plus 1 is two but then prove 1.1 is two. No, it's more
+31:3531 minutes, 35 secondsof an axum you know uh you know you know because it's mimic as granted because uh because
+31:4331 minutes, 43 secondsas a starting point for provision so that's what aums are. So you can the right derivation of aums using lambda
+31:5031 minutes, 50 secondscalculus you can infer the dominating language uh of an engine it's um something is uh a
+31:5931 minutes, 59 secondsworking uh there so this is a this my paper here uh on the on the theorem and proof uh uh
+32:0832 minutes, 8 secondsof the system but you know how I how I wrote this I uh I I I use I verbalized it use AI
+32:1732 minutes, 17 secondsand then trans uh I used I'm gonna be honest I used uh people but I it was all verbalized I wrote it down while sitting
+32:2432 minutes, 24 secondsdown facing my computer uh uh and doing some kind of review on my own work but
+32:3232 minutes, 32 secondsit's all grounded in science it's all done scientifically this is my work so this is uh the proof of the theorem and it's just a beautiful quot this a proof
+32:4032 minutes, 40 secondsof one you know it's called a proof of uh of view ofology understanding of that inference because the ASM understands
+32:4832 minutes, 48 secondsinformation that's why it can derive that that's why it can derive those aums of that information you know because it's taken as true
+32:5632 minutes, 56 secondsand if you can use it system terms of a too
+33:0333 minutes, 3 secondsI like so this is not my summary but this solution is uh prominent in explaining why the system works the last for notion of for set members on fuzzy.
+33:1633 minutes, 16 secondsYes, fuzzy sets.
+33:2033 minutes, 20 secondsFuzzy sets are set members are proistically uh probability
+33:2933 minutes, 29 secondsa fuzzy set on certain sets I don't know this can be fuzzy I I never
+33:3633 minutes, 36 secondsgot into you got a posterior and posterior information actually approach fuzziness or being fuzzy uh is
+33:4533 minutes, 45 secondsit fuzz uh posterior posterior in probability
+33:5533 minutes, 55 secondsposterior supposed to believe uh happiness. Yes. Posterior
+34:0234 minutes, 2 secondstake new vectors. Okay. Fuzziness fuzzy improbability frame
+34:0934 minutes, 9 secondslogic probability arising from both vagueness and randomness. So that's right. So I'm right. So I'm right. Okay.
+34:1734 minutes, 17 secondsDefinition So first information but the actual solid. So if
+34:2434 minutes, 24 secondsthe if you can if the pro mum you started with you've got no proof and the
+34:3134 minutes, 31 secondssystem is sustainable under the uh proof of certainty or uncertainty itself you
+34:3834 minutes, 38 secondsknow so because the proof will determine how this work. So this is an um system. So help more complication.
+34:4534 minutes, 45 secondsSo if them supply chain if then so instead of if else you go if then very important this is how policies work
+34:5334 minutes, 53 secondsbecause if you got if you do the then clause shows you branching.
+34:5834 minutes, 58 secondsIf you got if else that's a binary decision but this descriptive operations we got if then describe information of the logic.
+35:0935 minutes, 9 secondsNow you're having uncertainty.
+35:1335 minutes, 13 secondsSo between variables one uncertain theory
+35:2435 minutes, 24 secondsis lossy reasoning. Yes, lossy reasoning is a big problem. Big big problem. I I I
+35:3135 minutes, 31 secondsI I you know because you if if you have a lot of data sets you know lossy reasoning is very f reason
+35:3935 minutes, 39 secondsyou know like you know if you have a lossy algorithm you have a lossy reasoning a lossy
+35:4635 minutes, 46 secondsinterference that you know that you can't compress oh that's a good thing I believe you know uh no no because
+35:5335 minutes, 53 secondsinformation must be reduced okay lots of reason you can uh dem reduce problems to
+36:0136 minutes, 1 secondcertain domains. Think of them as P versus NP complete problems. You can always reduce problems but the proof of
+36:0836 minutes, 8 secondsreducing uh the pro lossless and loss you can compress good reasoning you know and in AI models flexibility of the
+36:1736 minutes, 17 secondsreasoning is producing the basic logic for experience okay in relative
+36:2536 minutes, 25 secondsposition doing lossy due to expression operation so the the I don't like lossy
+36:3236 minutes, 32 secondsreason because you can't reduce problems because the problem has no be and this problem can be mapped to the growth
+36:4036 minutes, 40 secondsscale of the computational cost um the uh the scaling of a of a uh of a language model
+36:5036 minutes, 50 secondsum yeah I think I have to end this now oh is this recording yes recording the
+36:5636 minutes, 56 secondsbases the bas you know I don't know this consideration
+37:0337 minutes, 3 secondsof relative to this match. Yes, because the smaller details are taken out. This is also true. These are all the points.
+37:1137 minutes, 11 secondsThis is no repeating this. This is a dry principle. This person is writing with the intent and I love it. Uh vision
+37:1837 minutes, 18 secondsnetworks require complete domain proic no incompleteness.
+37:2637 minutes, 26 secondsOntologies ontological have a final granularity which allows for incomplete or so beautiful.
+37:3637 minutes, 36 secondsSo domain in the uh incomplete defined relation the only provision based frameworks by overdefining them.
+37:4537 minutes, 45 secondsYes. Because if they're losing you defining so much things by definition you are uh you are adding more than you need.
+37:5437 minutes, 54 secondsyou model and by need um that is uh the the language you use to describe the
+38:0138 minutes, 1 seconddata set in the production rule with the production room uh mismatches
+38:0938 minutes, 9 secondsthe uh based on the belief of the you know the epistemology because the semantic drift
+38:1838 minutes, 18 secondsdoesn't cluster the data set you So it doesn't exist. So you are you
+38:2738 minutes, 27 secondsare you are you you're choosing not you your system is evolving correctly coherently you know it's just evolving well uh based on the data of stoastic
+38:3738 minutes, 37 secondsuncertainty not the other not the this now there exist another probability
+38:4438 minutes, 44 secondsknowledge uh relation unified basian knowledge bas BKB.
+38:5138 minutes, 51 secondsI never heard of BKB.
+38:5438 minutes, 54 secondsBut the whole problem with AI is the data.
+38:5938 minutes, 59 secondsThe data where you could give you free AI data. I have know I have the time you know data comes from the real world. You
+39:0639 minutes, 6 secondsknow it's not uncertainty that can't be removed.
+39:1139 minutes, 11 secondsIt's that uncertainty can be removed from an AI system. Yes. But the real world you know if you basically train on
+39:1739 minutes, 17 secondsthat system because uh on so that's why I'm saying
+39:2539 minutes, 25 secondsthis is okay uh uh this part
+39:3139 minutes, 31 secondsuh what fuzzy logic fuzzy logic is a big thing a big thing okay let me read this
+39:3939 minutes, 39 secondsuh class C and P elements 01 such that a is length of c of p. Uh this is a set notation.
+39:5139 minutes, 51 secondsOkay. Where did I stop? I stopped uh on the shop.
+39:5539 minutes, 55 secondsYeah. Uh let me second second uh this is work. Oh, this this is a big big document.
+40:0340 minutes, 3 secondsOmega of q gamma of m given i.
+40:1140 minutes, 11 secondsM N JR is this is for individuals
+40:1740 minutes, 17 secondswhere asserting knowledge okay so this is just the work you know I
+40:2640 minutes, 26 secondsI read I'm going to put the link here I recommend you read this document some reason you know I recommend you read it
+40:3440 minutes, 34 secondsbecause document shows what I'm working on but you know you know theological bas intelligence is some different kind of
+40:4440 minutes, 44 secondsuh reason onlogical uh principles which are defined uh again
+40:5340 minutes, 53 secondsum um because if can probe itself it can update his beliefs uh and that will not regress on the data set it will not you
+41:0241 minutes, 2 secondsknow uh you know it's not thinking it's not conscious it's not aware it's just
+41:1141 minutes, 11 secondsIt's not it's not thinking it's not aware.
+41:1441 minutes, 14 secondsIt's no we really understand the uh thinking and thoughts and modeling ourselves. We can't because we don't know all the purpose involved yet you
+41:2341 minutes, 23 secondsknow you know we don't know but we don't need to know.
+41:3141 minutes, 31 secondsWe do need to know eventually but you know it's what it is for now. So it's not aware it's not a lie. is not uh uh
+41:3841 minutes, 38 secondsit's just that it's what's the probability and probability we basically uh uh
+41:4641 minutes, 46 secondsexpress uh system uh oh so I'm going to I'm going to summarize
+41:5541 minutes, 55 secondsso no let me just uh get this here these are all good someone knows what
+42:0242 minutes, 2 secondsthey're doing model of a domain a domain is a set of inputs
+42:0942 minutes, 9 secondsNo, a domain is in itself for the input uh have to be on a model.
+42:1942 minutes, 19 secondsuh for domain Q for an input Q a a final set of individual's eye a final set of C
+42:2642 minutes, 26 secondsclass lexicons uh lexicons which are lex uh that become lexicons when they are
+42:3442 minutes, 34 secondsidentified by lexa equals item C a combination of the individual character
+42:4042 minutes, 40 secondsset of the classification say item C where I and C are become a lexical definition if you're using I uh so to
+42:4942 minutes, 49 secondsget I sentence that independently okay that makes sense
+42:5742 minutes, 57 secondsbut why would you use I* C this is beautiful mathematics guys I love this okay I'm going to end this video on this note I am not building AI I'm not
+43:0743 minutes, 7 secondsbuilding conscious systems I'm building aic models robotic systems for the numerous city you know uh but
+43:1643 minutes, 16 secondsyou're going to work going to work in warehouse going to work in farms going to be working in the real world and based on our principles of anthology
+43:2543 minutes, 25 secondsconvasion intelligence the AI is called you the reflection of myself it is you
+43:3143 minutes, 31 secondsand it uh it assists in uh everyday uh uh uh uh labor uh blood things that do u
+43:4143 minutes, 41 secondsuh you know hard work you know caring for people there's a point of time people don't do those things every first
+43:4743 minutes, 47 secondsstep like you know it's a gent so a gently it's an agent it's meant to assist you um basically you go to agent
+43:5643 minutes, 56 secondsand you get actuators people that um things that uh you know uh uh because you have to determine I prefer a I
+44:0544 minutes, 5 secondsprefer uh a model actuators I actu but you know I'm not going to build actuators here um actuators here know
+44:1344 minutes, 13 secondsbecause those were sensor dimensional sensor I'm not I'm going to build robots um that can uh perform to the degree I
+44:2144 minutes, 21 secondsneed to perform for humanitarian aid and that's the benchmark of progress to me
+44:2944 minutes, 29 secondsfor progress. Thank you for watching this video.
+44:3444 minutes, 34 secondsThank you. Thank you. So I'm not building awareness systems, I'm building robotic interface systems.
+44:4244 minutes, 42 secondsUm and I also want to peer review my proof. So if you care enough, you can peer review my work. So just come in.
+44:5044 minutes, 50 secondsThank you for watching this video. If you come, you can peer review my work.
+44:5444 minutes, 54 secondsYou know, uh I've got it's on this repository here. I got it on my my uh GitHub
+45:0045 minutesgithub.com pattern. So reach me directly on because I'm autistic. I'm spectrum.
+45:0845 minutes, 8 secondsdirect me on uh uh uh o k p a l a n at proton
+45:1645 minutes, 16 secondsproton mail.com O for oscar for kilo p for papa for alpha al for lima for alpha
+45:2245 minutes, 22 secondsnvember at proton p for papa alpha romeo for oscar for oscar mail.com
+45:3245 minutes, 32 secondsthank you for watching this
+Welcome back to everyone to OB Nexus. Um today I'm going to talk about computing um an AI model of development. Um at OBS
+0:1212 secondswe strike we do everything from the heart. If you don't know now you know everything is with human touch and a human position. First OB means heart and
+0:2121 secondsnexus means connection. OB is heart in ebook and nexus mean connection. two or more things. OB Nexus is hydration
+0:3030 secondsservices. Today I want to describe one of one new innovation called one one new innovation called um the OBS AI system
+0:3939 secondsfor AI OB AI system uh uh for OBS
+0:4545 secondsarchitecture and OBS tooling. In this in this video we want to explore the
+0:5252 secondsconcept of AI the AI blackbox in depth without without um without bias. You wait for it. The idea of the
+1:021 minute, 2 secondsOrbin XS AI system is to make sure that when we when we beat AI to we ensure that we are
+1:101 minute, 10 secondsbuilding this for with human we building it u for humans by
+1:211 minute, 21 secondshumans. The idea this although
+1:271 minute, 27 secondsalthough although oh sorry one key problem in AI development is opening is AI information processing done by AI.
+1:371 minute, 37 secondsHow information play AI? Well, um, in openness computing, we have a formal proof to open this box, the black box in
+1:461 minute, 46 secondsthe air of AI model systems. But we have a right n have a formal proof or which I created um to be
+1:551 minute, 55 secondstested um for for real life AI systems.
+2:012 minutes, 1 secondAlthough although although I have although the proof is still in development, the proof of concept is still in development. I I feel I want to
+2:092 minutes, 9 secondsshare with the masses um how we develop AI systems at OBS and it's branch of services the branch computing branch of
+2:182 minutes, 18 secondsservices access computing um first um first we have a formal proof
+2:282 minutes, 28 secondsmathematical proof that you can look at explain the logic behind it you can find how to follow along um this proof is the
+2:352 minutes, 35 secondspaper store and obnext access.org website. This is about revolutionizing AI technology from moving opening that
+2:442 minutes, 44 secondsblack box and opening to understand what the AI is really model is really thinking not not thinking what is really processing how it processes information
+2:532 minutes, 53 secondsand recognizes patterns in data. Um so what is the OB AI model
+3:013 minutes, 1 secondwe're building? The OBI model is a model that solves various all these problems in AI and really we want
+3:093 minutes, 9 secondsto open that box away that box so we know understand that AI system it's going to be used on the obnext.org old website to handle sales,
+3:193 minutes, 19 secondsmarketing, no um login issues and forgetting password or if you need human assistance, it will take you to our human
+3:273 minutes, 27 secondsassistants. Me and others on computing who are live with you on that site looking at waiting for requests if they
+3:353 minutes, 35 secondscannot resolve it. Um you want to do is write this. I want to open this
+3:443 minutes, 44 secondsbox. OB AI models we are biased are just traditional traditional AI models. We we we remodeled we we we changed we we we
+3:533 minutes, 53 secondsupgraded and changed well I upgraded and we we we we thought AI from the top top
+4:014 minutes, 1 seconddown to the bottom from the theory to the practice practical use let's start now
+4:094 minutes, 9 secondsum AI tradition AI tradition AI are naturally biased AI whether it's bottom
+4:174 minutes, 17 secondsup or top Let give me example. If you have an AI model and you feed it um um and you have
+4:274 minutes, 27 secondsthe data, the data is what you want to feed it input and you put that data in and you give an output. The more data
+4:334 minutes, 33 secondsyou give it, the more patterns it learns from that is that it gives you the corresponding output. This is that this is unclean
+4:424 minutes, 42 secondswith the bottom approach in air model or not done right or not filtered. It's the air will be naturally unbiased naturally
+4:504 minutes, 50 secondsunbiased naturally biased naturally naturally biased two intrusion ear models that's data preparation cleaning
+4:584 minutes, 58 secondsis handled unless we have a system but if you have a system where uh in top down
+5:055 minutes, 5 secondsmodel and we have a top we have a top down approach where the is built first and then fed in
+5:125 minutes, 12 secondspatterns then it can then see filter it that way to give you an
+5:195 minutes, 19 secondsoutput. We we obs do do things differently, a bit
+5:245 minutes, 24 secondsdifferently. First of all, the obus
+5:325 minutes, 32 secondsum the obus u the obus uh the OBI hot AI system is going to be on OBS website.
+5:395 minutes, 39 secondsAgain, I'm going to repeat that. It's we want we want you to be able to do sales with OBS's team OBS people's customers
+5:475 minutes, 47 secondsand consumers customers and consumers but we're not consumer customers the goal here of the
+5:555 minutes, 55 secondshaving the AI is to our goal is to slowly integrate features to make
+6:036 minutes, 3 secondssales maybe to make sales auto like with partners partnerships
+6:126 minutes, 12 secondsUm well but like as a system grows in complexity and more people more authors want to more business want to buy or
+6:206 minutes, 20 secondsindividuals want to buy cuz yes um because opens has three three three main open computing has three main ways to do
+6:286 minutes, 28 secondsstuff. single licenses. You want to use one, you get documentation, you get everything you need all in one and you just use it. You're just yourself individual. Then you have business
+6:376 minutes, 37 secondslicense. You get support and documentation. Well, support from business support and you get documentation and you use it and you get
+6:456 minutes, 45 secondshelp and you get the enterprises who have um um uh to two.
+6:526 minutes, 52 secondsYes, you go to pre users too who have um um who have who have subscription
+7:017 minutes, 1 secondservice too like a sub model too for partnerships that's what it is really
+7:087 minutes, 8 secondsum there's there's two solution models if you really want to invest systems now um so there's let me give
+7:177 minutes, 17 secondsyou an anal example systems uh uh in so when in America I can't remember when long time
+7:247 minutes, 24 secondsago we those deals in America when um an ear model sold uh sold
+7:327 minutes, 32 secondsuh sold a car for a dollar a car was a Lamborghini or race I don't know was it
+7:397 minutes, 39 secondswas it was it was on the news as well and uh it was it was a legal matter that has to be pursued because the AI was
+7:477 minutes, 47 secondsmaking mistake and a lot of people uh AI to make sales we want to get that Right.
+7:527 minutes, 52 secondsOr computing the goal here is any business goal here is partnership. So I really
+7:597 minutes, 59 secondssee DC in this technology. So what we're trying to do at OBS
+8:068 minutes, 6 secondsum open is being an AI model that ships that ships that allows businesses um makes
+8:148 minutes, 14 secondssales allows like it's just a sales he has other applications too but it's it's like a it's like a way it's like a it's
+8:238 minutes, 23 secondsmore of a experimental system it's meant to be an AA assistant and an EA agent too.
+8:348 minutes, 34 secondsOkay. So, um here we're going to open the back. We're going to open a box now.
+8:398 minutes, 39 secondsSo, this how the OBS AI works from theory to practice at OBS AI. The
+8:488 minutes, 48 secondsBeijian the Beijian network is core at the core of um the OBS AI. is at the heart of the
+8:578 minutes, 57 secondsengineers. Our model, my model on um and theory theory states um
+9:059 minutes, 5 secondsthat uh for data um when when data bottom of third down is when creating a model when fed into the data when it is
+9:139 minutes, 13 secondsfeeding data through either reinforcement learning that's input to output output to input uh traditional
+9:219 minutes, 21 secondsmethods like standard methods not traditional trans standard method or machine learning practices and use of data structure
+9:299 minutes, 29 secondslike algorithm of KN clustering of data and uh and uh and all of that. My
+9:379 minutes, 37 secondsthree states is a probability model is what's we use a probability model
+9:459 minutes, 45 secondsinstead of a to map out the data. So that's a probability graph known as a basian
+9:539 minutes, 53 secondsnetwork to have a large language model too. Um the best for this uh have a severe
+10:0510 minutes, 5 secondspiggyback we demonstrate in the pro concept and show using this model which is you can
+10:1310 minutes, 13 secondsshow too um how the Beijing network does it and other ambigu another ambigu is not
+10:2210 minutes, 22 secondsmentioned in this video. We we want to create a map a map of the data not not just recognize patterns in the
+10:3510 minutes, 35 secondsdata. Our go our goal here is to create a map of the data like like
+10:4410 minutes, 44 secondsdots of points of data to ensure integrity and uh and
+10:5110 minutes, 51 secondsuh integrity of the data. You want to map out the data when you buy when you buy the formal
+10:5910 minutes, 59 secondsproof. You get a proof of concept too.
+11:0411 minutes, 4 secondsOkay. Of the data on biasing algorithm and you want to demonstrate
+11:1511 minutes, 15 secondsthe want to run we demonstrate how the AI module handles data. And this is what
+11:2111 minutes, 21 secondsthe OBIs are meant to do uh through to packets and this is very mathematical and rigorous. So take your time to
+11:2911 minutes, 29 secondsconsume it. This can be used to demographic on
+11:3611 minutes, 36 secondsbias data too and implications are enormous in the health and financial industry like detection of cancer cancer detection in demographics.
+11:4911 minutes, 49 secondsWe are not we not we not really trying to uh change the way nature of AI is made. We trying to innovate AI systems to open that box.
+11:5911 minutes, 59 secondsHow do AI process data? In the proof of concept, sorry, in
+12:0712 minutes, 7 secondsthe proof of concept, you will learn about from theory to practice using the
+12:1412 minutes, 14 secondsexamples. You learn you learn about you you know about you learn about um um how to make your AI
+12:2412 minutes, 24 secondsinfrastructure also. I give you have you have AI in structures but what I can give you now is that AI a components are
+12:3212 minutes, 32 secondsvery can be modular modular too take for example uh a large language
+12:3912 minutes, 39 secondsmodel with an accessibility feature the goal of the large language
+12:4612 minutes, 46 secondsmodel is to well text data and refine it you know help the user understand
+12:5512 minutes, 55 secondsBut if the person can talk, they can talk in it. They can talk. They can talk. And uh the idea of this is to have
+13:0213 minutes, 2 secondsextensible components of the group of the AI component systems and make sure makes them modular and um reusable and
+13:1113 minutes, 11 secondsextensible to you have a full working product.
+13:1513 minutes, 15 secondsEach feature is crucial about what they do like the accessibility uh if it's a language model it's a it's an
+13:2213 minutes, 22 secondsaccessibility feature to have a voice interaction or voice chat and this AI system is scalable
+13:3213 minutes, 32 secondstoo robust and easy to debug especially when you we try to
+13:3913 minutes, 39 secondsinvestigate the box we open the box see where you went wrong see why it's acting in the way it
+13:5313 minutes, 53 secondsdoes. So um from text chat to voice chat from voice chat to well you know what
+14:0014 minutesrobotics robotics robots and systems that intellect engage like AI is meant to be.
+14:0914 minutes, 9 secondsWe're trying to see also see whether it's AI calculation or AI artificial intelligence what is actually artificial
+14:1614 minutes, 16 secondsintelligence cuz some of it some of us believe that um AI is just calculating
+14:2214 minutes, 22 secondscalculating it's a calculating just by its own systems and taking shortcuts in
+14:2914 minutes, 29 secondstraditional models take take for example mental shortcuts like take example a basketball shooter
+14:3914 minutes, 39 secondsYeah, system just um make a shot to the basketball net and shot it he
+14:4614 minutes, 46 secondsmisses and recalculate or what is known as thinking uh so to some
+14:5414 minutes, 54 secondshumans but it's about refining the algorithm to make sure that the whether whether AI is
+15:0115 minutes, 1 secondactually calculating or intelligent our goal is not to dismiss AI officials in fact we're going to
+15:0815 minutes, 8 secondsinnovate to make sure make a ensure that AI systems are coherent and do what they
+15:1515 minutes, 15 secondsdo mean to do what they do we meant to so away simple we're
+15:2315 minutes, 23 secondsdoing ways by bit by bit so if you when when when when the OBI is
+15:3015 minutes, 30 secondsavailable it will be at the obexus.org computing store obexus.org
+15:3715 minutes, 37 secondsand then and the services and it will also be on the payhip.com/obi
+15:4715 minutes, 47 secondsnexus store. Um so takeaways
+15:5515 minutes, 55 secondstoday we are trying to innovate and use traditional algorithms a algorithms to form better AIS but using a different
+16:0416 minutes, 4 secondstheory to run a theory that's more human friendly human sensitive for those who
+16:1216 minutes, 12 secondscare about air regulation practices and being human. So that's that's that's all for
+16:2016 minutes, 20 secondsnow. Thank you. My name is Nambdi and uh subscribe to all my social media uh Tik Tok at
+16:2716 minutes, 27 secondsuh all the others. Thank you and goodbye. See you later. Subscribe to my YouTube channel. Subscribe
+oncept of uh letting it try again and coming back later to see that result supervised learning is like uh
+40:4540 minutes, 45 secondssaying uh uh so give this do the test and then super supervis like you know I'm going
+40:5240 minutes, 52 secondsto change I'm going to watch your inputs uh I'm going to change to see what output you give me I'm going to supervise you get the right output uh
+40:5940 minutes, 59 secondsyep uh and then we got uh supervised learning then we got unsupervised learning which is the concept of um uh
+41:0741 minutes, 7 secondsnot supervising the AI to do something you know like you know you do more like uh uh test but you don't supervise the
+41:1641 minutes, 16 secondsAI in the tra you let the air do the test come concepts explore that problem using the group theory and then unsupervised make
+41:2541 minutes, 25 secondssure it's doing that job reinforcement layer which which is really generative AI systems that take the input and go back to input output you know you know
+41:3441 minutes, 34 secondsit forces itself what it knows based on the new data set uh do I understand what I understand do I not understand what I don't understand you know understand
+41:4241 minutes, 42 secondsthis clearly based on the QA matrix uh so that's what I'm saying so you know uh when is real world We also deploy a
+41:5141 minutes, 51 seconds95.4 metric uh um scam system. You know how this works is uh for the conscious model you know for vacation you know
+41:5841 minutes, 58 secondsthis like a test to regulate uh real world AI you know things that operate in the real world not in your bedroom uh
+42:0542 minutes, 5 secondsbut you know things that drive trains uh wrong place you know because you know it's meant to be uh it's meant to be
+42:1142 minutes, 11 secondssafe what safe AI 95.4% 4% uh 95 for both suspense is useful here. It's going
+42:1842 minutes, 18 secondsto be a benchmark everything you know 95 refers to 95% refers to the clamping
+42:2542 minutes, 25 secondsradius you know uh for the conscious model we understanding the concept around it uh properly before is deployed
+42:3342 minutes, 33 secondsyou know this is a pass using the QA matrix true positive false positive force negative force positive you know uh that's what the ear is going
+42:4242 minutes, 42 secondsto be doing uh and then the 4% is like you know if I do if I do if If I if I don't understand by four by four but
+42:5142 minutes, 51 secondsfour you know and I round down I'm a bit frustration I round to 95%. So it's like if it's 95% it's a clamp it's clamp
+42:5942 minutes, 59 secondsbetween 95 and 100% uh of the cor understanding while it's driving in the real world why it's flying a plane in the real world why it's uh riding while
+43:0743 minutes, 7 secondsyou while the ear is on the auto plate you know that's what the percent understand now the sub model um which I
+43:1443 minutes, 14 secondsdidn't say uh before for the music when you get a little girl to um to internalize the colors so you give her
+43:2343 minutes, 23 secondsyou can say you kind uh write something up down about that color. You know what she knows. Uh this is and she says uh uh
+43:3043 minutes, 30 secondsyou give her a note to get this color this this meant to be this kind of color. You know uh give her hints too.
+43:3743 minutes, 37 secondsYou can give a hint but until she subject to understand that this is red, this is green, this is blue uh you know
+43:4443 minutes, 44 secondsusing dimension game theory uh which is a strategist to get to understand something in context.
+43:5143 minutes, 51 secondsNow the dimension game theory is meant to address kind of problems. Uh it can address dimensional problems or it's not just game theory. Uh uses to address
+43:5943 minutes, 59 secondsproblems in war problems in uh AI system health system organ failure uh uh big
+44:0744 minutes, 7 secondssystems basically uh and that's what the logical vision infrastructure for AI represents. Okay. Now uh thank you for
+44:1544 minutes, 15 secondswatching. like, share and watch his videos. Uh you can go to github.com/ob when it's complete but it's going to be written in rust. Uh but the proof is ready. Uh you can check it out yourself.
+44:2544 minutes, 25 secondsYou can download the repository. Uh but don't steal my work. Okay. Thank you. Attribute me. Attribute me when you do.
+44:3244 minutes, 32 secondsThank you. Bye-bye.
+
+Sync to video time
+
+true
+16:39
+What Makes Heart And Connection So Important In AI?
+OBINexus
+
+Transcript
+
+Search transcript
+Search transcript
+0:011 secondHi uh everyone um today we're going to explore the um the OBI AI system or theological vision uh AI system uh which
+0:1212 secondsstands for the hot system AI system called OBI AI uh it's going to the
+0:1818 secondssystem which mean hot in ebook uh the 3 vision AI system uh uh OB today we're
+0:2525 secondsgoing to look at the hypothesis uh for the project which is complet anyway uh to see whether them is solved or not.
+0:3333 secondsYou know, uh we're going to see uh how the hypothesis have been addressed systematically.
+0:3838 secondsUh what why why use OBI and the uh infrastructure as a service uh for through obsess.org
+0:4747 secondsuh you guys understand that uh the original is a polygon system continue something called OBI core and we're
+0:5454 secondsgoing to come back to the um bian infrastructure function core system
+1:001 minuteuh which is OB system uh uh to orchestrates components for AI systems
+1:081 minute, 8 secondswith an large language model core uh written in rust uh for processing large
+1:141 minute, 14 secondsmodel features. So let's begin uh and see how we trace them side by side. One second. I would pause my screen.
+1:241 minute, 24 secondsOkay. Now we're going to go through the the system. Now we're going to go through the proof like the hypothesis I made. I developed uh got the first
+1:321 minute, 32 secondshypothesis which was start. We got hypothesis one.1 uh solution versus unbiased model. Uh
+1:401 minute, 40 secondsfirst of all uh OBI AI is intelligent Beijing infrastructure for AI or AI systems that are unbiased. Uh the
+1:481 minute, 48 secondsBeijing is just uh using Beijing inference to uh reason uh in to make sure the AI reasons correctly.
+1:561 minute, 56 secondsThe problem that this model addresses is you know um is using something called um top down reasoning uh and bottom up
+2:052 minutes, 5 secondsreason to dictate uh how data resolve demographically. You know the thing is uh take example AI cancer detection
+2:132 minutes, 13 secondssystem uh that detects AI uh that that takes detects AI uh that uh that cancer
+2:212 minutes, 21 secondsin people. Say you have a doctor who takes cancer in patient and this guy is uh let's say a black uh like me u black
+2:302 minutes, 30 secondsin the UK but you know I smoke a lot which is not true but let's for example I start smoking I do it a lot uh uh their system they system to detect my
+2:392 minutes, 39 secondscancer uh because the system is biased traditionally bias you know uh because it's a demographic it's localized it's
+2:472 minutes, 47 secondsit doesn't generalize it generalizes based on uh I am uh you can't detect me because I am an outlier to say I am I am
+2:552 minutes, 55 secondsuh demographically uh u abound you know so if I was in Nigeria right now or or baref
+3:023 minutes, 2 secondsNigeria um and I'm black um and a and a white and a caucasian uh enters the Nigeria and gets cancer smokes a lot
+3:113 minutes, 11 secondsdrinks a lot he or she uh will then be uh intoxicated but still be the outline of that is uh don't know AI what the
+3:203 minutes, 20 secondsdata set uh what OBI is much achieve is uh unbiased unbiased being unbiased
+3:283 minutes, 28 secondsuh in data modeling uh using uh and uh because we have a model of abnormality and normality because normal is like you
+3:363 minutes, 36 secondsknow when something is normal it's just uh normal like normal means it's just accepted you know it's perceived as
+3:443 minutes, 44 secondsnormal but we don't like is meant to be uh addressed uh this model you see on the screen is called see the model you
+3:513 minutes, 51 secondssee on the screen. Uh see this here, this model here, the black box model. It's it's really my opinion.
+3:583 minutes, 58 secondsYes. Uh so this is emphasizing the black box model. Uh or or the black box. Uh see this this is a uh see this uh this
+4:074 minutes, 7 secondsis a black box uh uh black box here.
+4:124 minutes, 12 secondsUh it's meant to address uh that kind of problem.
+4:164 minutes, 16 secondsUh look this is a That's the black box trans. So when the input goes against the black can't see,
+4:254 minutes, 25 secondswe can't observe uh and because the black is inherently biased. It's just like bias uh it's biased. So you can't
+4:324 minutes, 32 secondsreally understand uh uh what's going on how the model transforms bias input to bias output. Uh hence oi2. So this uh
+4:414 minutes, 41 secondshow the system works. Uh a good thing about this you can't really control this bias parameter. You can't control it.
+4:474 minutes, 47 secondsIt's hard to control it. Uh now how OB this is from something with a co confounder. Uh the confounder is just
+4:554 minutes, 55 secondsthe how the system processes information based on the input speed. You're just thinking about bias tuning. Think it as
+5:025 minutes, 2 secondsbias adjusting weights of that bias parameter uh to get uh um so data set
+5:105 minutes, 10 secondsand there's uh bias parameters here. Uh you know the input is biased. We have the bias parameters you have to address.
+5:175 minutes, 17 secondsUh now the device are just the inputs that are to mitigate the bite you know how you want the options of the ear to address uh nuance in context like you
+5:265 minutes, 26 secondsknow uh how do you want the ear to actually work uh the parameters and the input like the how how much is it and
+5:345 minutes, 34 secondsyou get a device output um using top down and bottom up reasoning now I'm going to give you an example of when this bias parameter will apply uh
+5:435 minutes, 43 secondsbased on the confounder uh the confounder is really So there's a there's a a case study that came up in Nigeria right now. People are
+5:515 minutes, 51 secondsin Nigeria are happier than people in the UK. This is a well search on the internet because you know that's the question is why do we have a health and
+5:595 minutes, 59 secondssocial care system in the UK and people are not happy uh people are miserable or like more happier uh less because the
+6:086 minutes, 8 secondsranked was ranked as Nigeria is ranked at the second uh happiest uh country. uh was it next to Niger I believe that EK
+6:156 minutes, 15 secondsis ranked 11th uh based on my the hierarchy uh I was so you know last 20 uh my my understanding is uh using
+6:246 minutes, 24 secondssubject model is that uh in Nigeria uh we get uh support uh from the community itself but not the government support
+6:316 minutes, 31 secondsyou we get localized community support uh by friends by family uh but not directly from the government you know we
+6:396 minutes, 39 secondsget we do get because we do get some from government but you know we We just get directions. We don't get uh the full support in place but uh to address our
+6:486 minutes, 48 secondsproblems. You know whether it's a housing problem, whether it's a shelter problem, what is a food supply problem.
+6:536 minutes, 53 secondsUh the neighbors mingle to solve each other and everyone is satisfied and therefore happy. Uh now uh this is
+7:017 minutes, 1 secondnatural system, you know, social uh uh health social and housing system for young
+7:087 minutes, 8 secondspeople or children. and they end up uh trying to go to the government for everything. Now the government has to do for them uh can't do for them uh based
+7:167 minutes, 16 secondson can't do for don't actually address their needs and they're being directed uh everywhere there. Uh the co-founder
+7:237 minutes, 23 secondsor let's go to confounder hypothesis uh is really about um how that bottom up
+7:307 minutes, 30 secondssystem uh works uh for how people are happy how an outcome is achieved. Okay.
+7:367 minutes, 36 secondsIs there some case that uh some some cultural case or some ambiguity uh some edge case some corner case has
+7:447 minutes, 44 secondsto address based on the base case as a foundation of you know is there nuance in understanding uh subjectively
+7:527 minutes, 52 secondsobjectively you know just observing the world to address something to debiased you know because eutum
+8:048 minutes, 4 secondsU so uh wait do I have to say so uh we got uh uh two models uh we got top down
+8:148 minutes, 14 secondsreasoning and bottom up reasoning so uh top down reasoning is the idea that you start from a single source of truth uh
+8:228 minutes, 22 secondsand then reason your way downwards to using a a statement or claim you know uh
+8:298 minutes, 29 secondsum let's say example all swans are Okay. Uh let's say oh let's say so the
+8:378 minutes, 37 secondssame thing. So there's the different models of reasoning. I've never seen a black swan. Therefore, all souls are white. That's a that's a truth. You can
+8:458 minutes, 45 secondsad it's a hypothetical. It's a hypothetical. It's like it does work in context, you know, and can use subjective reason. That's objective reasoning called top top down reasoning
+8:548 minutes, 54 secondsbecause everyone has not seen a black swan or the infamous um Hercules is a man. Therefore, I can't remember that. Yes, that's the original.
+9:059 minutes, 5 secondsTherefore, we got your model uh as a basic model you know based on the input data set or the amount of um
+9:149 minutes, 14 secondsman you see or the amount of uh uh swans you see that's a white or black uh so that's the confounder hypothesis you
+9:229 minutes, 22 secondsknow and we got the subject one like you know like you know uh since I've never or uh
+9:329 minutes, 32 secondssince I've never encountered a white black black sword all sws are you know or is it like a
+9:429 minutes, 42 secondsyou know and that's like a reason of the bottom up subjective objective but that's an easy way to relate to it. uh it's meant to be using reasoning
+9:499 minutes, 49 secondssystems. How the the base case for that reasoning or the bottom up analogy how the system uh what's the foundation to
+9:579 minutes, 57 secondsthat system? Uh which is the bottom up way or the top down system to reason that output to the device that data. Uh
+10:0510 minutes, 5 secondsnow no now um you know we have qualitative data and quantitive data.
+10:0810 minutes, 8 secondsQuality refer to the uh uh quality uh the data set
+10:1510 minutes, 15 secondsuh like you know cats, dogs which are data regarding animals or like uh like
+10:2310 minutes, 23 secondsor like wallets uh colors you know uh things you can quantify uh based on their properties you know what you
+10:3010 minutes, 30 secondsobserve quantitative data uh um what we're getting at here is uh top down reason and bottom reason are used to
+10:3910 minutes, 39 secondsaddress uh the uh a bias and a bias output you know in a unified source cost
+10:4610 minutes, 46 secondsuh unified approach to the biased output you know because you can get a data set we still get the bias output and this is the principle the bias
+10:5410 minutes, 54 secondsuh so we got the hyping uh so so when you train an AI system
+11:0411 minutes, 4 secondswhen you train an AI uh when you system you are really training as pattern recognizer you are
+11:1211 minutes, 12 secondsyou really training it as a as a kind of pattern recognizer uh you know it's going in it's a pattern
+11:2111 minutes, 21 secondsand that pattern is being amplified you know you go in here it becomes a pattern uh and uh then you get a bias prediction
+11:2911 minutes, 29 secondsand you get a bias out uh that's what it's saying so you see this step so it goes back feedback. So this goes here AI
+11:3811 minutes, 38 secondsis bi biases uh patterns pattern matches. Uh that's not what you want.
+11:4311 minutes, 43 secondsYou want to uh not make sure they understand how to reason not just match uh to resolve context of problems. Uh so
+11:5211 minutes, 52 secondsthat's what that's a hypothesis that says uh why AI can crash because it's looking for patterns in data uh to or
+11:5911 minutes, 59 secondssingular. So you know if you have if you have an AI car you know it's looking for patterns in its own data set to address that problem you know I would never let
+12:0712 minutes, 7 secondsthe AI car drive me if it just works on pattern matching you know because it can match a wrong person or what is known as
+12:1312 minutes, 13 secondsa false negative a false positive uh so we have a standard structure we got the OB says uh legal so we got true positive
+12:2212 minutes, 22 secondsuh the AI matches correctly uh true positive uh is true and the AI is true false positive
+12:3012 minutes, 30 secondsuh the AI is false uh which is the matrix we got true negative I mean false negative which means uh the AI falsely
+12:3912 minutes, 39 secondsuh identify is negative negatively identify as falsely oh sorry a false positive so the AI cons it's an error so
+12:4812 minutes, 48 secondsyou got true negative true true positive yes true means uh the EI fails to uh and
+12:5712 minutes, 57 secondsthese are all problems for each uh question each address to address uh the sound. This is called a QA matrix. Uh uh QA matrix stands for quality assurance.
+13:0813 minutes, 8 secondsUh is a P of soundness have this this AI system is this sound? Does it not match catch? Is it meant to address the four cases true positive, true negative,
+13:1713 minutes, 17 secondsfalse positive, and that is what I'm saying. If you go to github.com legal, you can read about the QA matrix or the quality assurance.
+13:2613 minutes, 26 secondsWhen people say quality assurance testing, they're talking about uh test during development uh of quality of code not just quantity of the code you write
+13:3513 minutes, 35 secondsum because you're not trusting you're testing all the case indefinitely of the test you're testing the quality of that code um that you wrote uh based on what
+13:4313 minutes, 43 secondsyou developed you know not just writing a test test test which is called a QA test uh which is TDD or testdriven
+13:5013 minutes, 50 secondsdevelopment life cycle pattern uh it's not a it's not a BDD although it can apply BDD because BDD testing is a behavior different development. If you
+13:5913 minutes, 59 secondsapply BDD uh the best way to just use is uh just test without tested BDD uh to do
+14:0514 minutes, 5 secondsis use TDD uh to develop artifacts uh with integration test uh unit test respectively. Uh you don't have to take
+14:1514 minutes, 15 secondsdo uh system testing uh but you know that's what that means uh QA matrix.
+14:2214 minutes, 22 secondsUh so that's the battery. So this is a bias person matching uh input. This is just an example. So you got the input uh
+14:3014 minutes, 30 secondsthese bias models. Um you see that's what it means. This is completely done.
+14:3414 minutes, 34 secondsUh so you got the epoch uh training do eco for each sample of data set given an element. Do you compute you know this is
+14:4114 minutes, 41 secondsjust biasing how this works. You don't want this in your code. It's just a bias organization of the pattern matching uh algorithm. So we go hypothesis three.
+14:5014 minutes, 50 secondsNow it's hypothesis 3.1 and 2.3. Uh so uh hypothesis 3.1 states uh 31 uh
+15:0015 minutesyes uh hypo 31 is just uh concept of unboxing uh the g of unboxing
+15:0715 minutes, 7 secondsuh box refers to the concept of gathering the data how the data how the how the AI processes the inputs uh
+15:1415 minutes, 14 secondsunboxing refers to uh unboxing data data or sorting our data to gain uh like a
+15:2215 minutes, 22 secondsmap of understanding you know whether it's a 2D map or 3D map of that information set you know where does this fit into the cluster of information how
+15:3115 minutes, 31 secondsdo I characterize this thing I already know if he's talking about uh if he's talking about cooking is it he's talking about cleaning you know because you know
+15:3915 minutes, 39 secondsthat's what the news is meant to understand so how this works um uh it's meant to work so we have the concept of 4D tenza if you're familiar with machine
+15:4915 minutes, 49 secondslearning modules uh 4D tens uh represent uh inner monologue you know our brain our processing of 4D in our
+15:5815 minutes, 58 secondsbrain that's how it works is this kind of 4D relationship uh to to work uh the 4D is the model of the system so how
+16:0716 minutes, 7 secondsdimensional reduction works it's very important to understand this how dimensional reduction works you take a
+16:1316 minutes, 13 secondsuh say you are making a 3D game uh uh 3D game uh so if So if you're uh if you are
+16:2216 minutes, 22 secondsusing a dimension regression you have to reduce that state. So you got a 4D tensor uh the 4D t just uh it's just a
+16:3016 minutes, 30 secondsparameter here. So uh if you define d uh let's call it uh d for dimensional dr
+16:3816 minutes, 38 secondsuh uh uh uh dr
+16:4616 minutes, 46 secondsn Sorry.
+16:5316 minutes, 53 secondsAnd uh uh what is the sorry?
+17:0917 minutes, 9 secondsOkay. Um, drd equals uh dr uh
+17:1817 minutes, 18 secondsuh the equals uh n minus one d uh
+17:2617 minutes, 26 secondsokay you know you know what you know I'm just going to try to do some formalization here. So what I'm saying to you is we got um to understand that this the whatever whatever instruction
+17:3417 minutes, 34 secondswhatever your model using when you have a something called the magnitude um
+17:4117 minutes, 41 secondsuh so this is the formula I want just remember you know
+17:5817 minutes, 58 secondsthis uh Uh so so dr refers to the dimension it's
+18:0818 minutes, 8 secondsjust a function of dimension uh equals d minus one you know you know that's what you're trying to do
+18:1618 minutes, 16 secondsum the this is just magnitude like you know the magnitude of that dimension minus one you know you got to remove a dimension uh which is just what is it
+18:2318 minutes, 23 secondssaying so the dr refers to the dimension reduction of the systemus one this is a very practice to do um you want your AI
+18:3018 minutes, 30 secondssystem to able to create a 3D map of the information you know whether it's a 3D game you give it a 3D if it's a 3D game
+18:3918 minutes, 39 secondsuh and you want it to process in real time you use a 4D tensor to model that and then uh transform that data uh within dimension reduction or unboxing
+18:4918 minutes, 49 secondsuh unboxing is a concept of like you know the system of unboxing structure unboxing and unboxing uh structural unboxing refers to uh the structure of
+18:5918 minutes, 59 secondsdoing where you want the to understand uh formally or something. The structure of the data is meant to be uh uh
+19:0619 minutes, 6 secondsstructured you know whether it's input is unstructured in say just go in session to structure data in a way that it can be processed further you know
+19:1319 minutes, 13 secondsthis mative process to it can be processed like a brainstorming using K and clustering uh K and clustering
+19:2019 minutes, 20 secondsrefers to um it's an algorithm from graph theory to cluster information into categories uh Not by I J by by by by K.
+19:3019 minutes, 30 secondsK inverse not a K degree just means uh reduce that to the AB 2D 3D 4D system
+19:3919 minutes, 39 secondsK clustering is uh is a graph theory method where you clust information based on category uh it's not just it's not uh
+19:4719 minutes, 47 secondsit's not the nearest neighbor hypo next nearest neighbors you know just to categorize data based on uh what they
+19:5419 minutes, 54 secondsare meant to achieve for the information set uh in the neuron of the brain you know it's So it can be processing
+20:0120 minutes, 1 secondinformation uh coherently not just matching patterns you know it can index weather information based on the
+20:0820 minutes, 8 secondscategory you've created too. So the K and clustering is really about uh reducing to the end the K dimension uh I
+20:1720 minutes, 17 secondsJ K where K I represents the uh uh the I axis uh the X-axis the Y the Z ais or
+20:2420 minutes, 24 secondsthe map and then the K represent the 3D map you know K 3 plus three map 3D uh so if you have 4D tensor you have a uh AI
+20:3320 minutes, 33 secondssystem in a game or in the real world you have to understand uh uh the 3D map uh it's just it's on what
+20:4120 minutes, 41 secondsit's interpreting directly what is noticing you know in that game you know uh what is tracking in a game and that
+20:4820 minutes, 48 secondsgives it uh that can beatic what you can now you can find out how what you can now have automatic understanding
+20:5620 minutes, 56 secondsuh you now got unstructuring uh say you have like the same data coming from the internet and you now use
+21:0421 minutes, 4 secondsfor you can this allow to uh AI to create new solutions to problems you know something called dimensional game theory.
+21:1221 minutes, 12 secondswhich is my dimension game refers to the concept of using dimensions uh offense defense attack uh to strategically
+21:1921 minutes, 19 secondsaddress problems not just linear bound matching or uh it's meant to uh
+21:2521 minutes, 25 secondsum it's dimensional game theory is about the real world spaces uh actively using
+21:3321 minutes, 33 secondsto solve semantic filter of flash uh understand systems like that uh that dimension it's dimension so your
+21:4121 minutes, 41 secondsstrategy you have is in dimension. So take chess for example uh chess refers to uh uh you know the the standal mother
+21:5021 minutes, 50 secondsof is chess you know if someone plays say you have two players in chess I'm trying to give the dimension game theory concept uh two players and they play a
+21:5821 minutes, 58 secondsperfect game there'll be no victor there'll be no determinism victor uh the game will end in a draw that's determinism so
+22:0722 minutes, 7 secondsthere'll be no winner because they're paid perfectly dimensional game theory it says uh if there's an offense, defense, and attack
+22:1622 minutes, 16 secondsuh a strategy. And one person uh deploys a strategy like a flank like a and get to giving some pieces of this just one
+22:2422 minutes, 24 secondspiece. Uh they can they have an anchor to win that game, they can win that game because they they they went ahead to not play a perfect game or do the most
+22:3222 minutes, 32 secondsoptimal move. Uh but you know, if they can do it, but using strategy to address that problem, hence the dimensional game
+22:4022 minutes, 40 secondstheory. So I'm see my AS play chess too maybe on chest and old but you know that's how dimension gi it's about uh uh
+22:4822 minutes, 48 secondscreating these things called dimensions addressing problems for that strategy you're trying to deploy you know whether it's an AI uh strategy or like a
+22:5722 minutes, 57 secondsstrategy that affect us so this rule you have to remember the drd equals d minus one uh so that's the dimension every
+23:0423 minutes, 4 secondstime you have a using a five using a five dimensional tensor uh you a four dimensional tensor and sword and so on
+23:1123 minutes, 11 secondstill you get the output. You compare you map clear output to the input and output which is a 3D for the 4D 4D you know a
+23:1823 minutes, 18 secondsdimension less uh you can uh apply dimension uh recursively uh on the on a step on on this side on this step here
+23:2723 minutes, 27 secondscan apply indefinitely but you know the goal is to smack it on standard and smack your reasoning.
+23:3423 minutes, 34 secondsUh so this is the algorithm structural unboxing.
+23:3723 minutes, 37 secondsUh yes this you get the inputs for the for but this unstructured unboxing which is the unstructured uh if you're working with the unstructured data uh you want
+23:4723 minutes, 47 secondsthe ATB to process that data uh just on the internet use of formals or you want some uh uh uh structured data structural
+23:5423 minutes, 54 secondsjust refers to uh uh uh data structure uh structured data if you're working from the uh tables or
+24:0224 minutes, 2 secondsrows or like uh data hierarchical data you can use structural unboxing to get inside the data we built the hypothesis
+24:1024 minutes, 10 seconds3 model. So this is the the hypothesis this OBI code for
+24:1824 minutes, 18 secondsuh function call system uh modular so we got you see this uh we got voice interface so we got the base
+24:2524 minutes, 25 secondsLLM call this base LLM code is to be written in rust rust.exe which is a programming language
+24:3424 minutes, 34 secondsuh so so this the llm you know you can now have a uh the FFI uh of the OBO
+24:4224 minutes, 42 secondssystem uh which is Cisco or OB
+24:4924 minutes, 49 secondsto speak to the uh base L to have the vision model, the accessibility feature, the voice interface and the robust
+24:5724 minutes, 57 secondsinterface. uh this allow you to literally just uh develop features that can be evolve and adapt which is uh
+25:0425 minutes, 4 secondsthing we will do try to code but this is a poly system it allows you to talk to any language using rust so when you get
+25:1125 minutes, 11 secondssomething called OBI codeex uh you are using that to talk to Python for your voice interface node for robot user
+25:1925 minutes, 19 secondsinterface uh python accessibility etc for interface you know and this can be enabled and disabled on the fly by the
+25:2725 minutes, 27 secondsuser want to interpret the system after being downloaded on the AI system they use it. Maybe it's a drone, maybe it's a AI system, maybe it's a car system, but
+25:3625 minutes, 36 secondsthis allows it to be downloaded and work virtually anywhere. Yep. Uh so this is the input output. So let's go to the other document now.
+25:4725 minutes, 47 secondsSo this uh so okay so now I'm going to uh talk about more about the filter flash and uh let me see.
+25:5625 minutes, 56 secondsOkay, I want to give you this one. Yeah.
+25:5825 minutes, 58 secondsUm, this one will be I just sum up this one. So, this is like uh uh the filter flash uh so OBS was in works in something called the filter
+26:0626 minutes, 6 secondsflash architecture. Uh the filter flash architecture refers to uh how we know or
+26:1326 minutes, 13 secondshow we know what we know. Uh which is called epistemic uh reasoning. Uh epistemic uh meaning do I know? How do I know? How do I know what how am I show?
+26:2426 minutes, 24 secondsHow do I know? How can I check? You know this is filtering uh is a classical model. Uh filtering refers to the uh
+26:3026 minutes, 30 secondssorting out of information and like uh processing. Flash refers to the concept of storing information in a cohes
+26:3826 minutes, 38 secondsremembering it basically you know so that's what flash you know like structured this is just storing that data but you
+26:4526 minutes, 45 secondsknow in a manner like you know uh package like you know like a structured store refers to the concept of uh uh
+26:5326 minutes, 53 secondsstoring that data that has got in a way that can easily process back again you know filter flashes know whether it's a new insight or not uh the must be able
+27:0227 minutes, 2 secondsto cohesively remember it and load any time. Uh flashing refers to uh the process of uh gaining new insight. Uh
+27:1127 minutes, 11 secondslet me give you an example. Say uh say you have a child you know you know you have a child you have a young ch child you know make sure so this how it works.
+27:1927 minutes, 19 secondsSo the one second um one second let me just one second.
+27:2727 minutes, 27 secondsSo um how the AI system works is something called epistemic reasoning.
+27:3027 minutes, 30 secondsIt's me how do I know what I know? Uh so this works with something called uh my DAG uh asyclic DAG or direct asyclic
+27:3827 minutes, 38 secondsgraph and uh you know using the filter flash filtering means uh uh understanding what you're understanding what you understand and then flashing it
+27:4727 minutes, 47 secondsmeans storing memory uh understanding this. So let me give you an analogy. Um so say you have like a a child let's
+27:5627 minutes, 56 secondsgive a child example example I have I have a girl I don't have any daughter but you know I don't I don't have children uh so we have like a first one
+28:0428 minutes, 4 secondsis mostly objective it can be objective or subjective but you know say you have like a a puzzle a puzzle
+28:1328 minutes, 13 secondsa puzzle piece uh yep a puzzle piece uh one one centime wide you have a rojo rim uh to place that great in a on a you
+28:2128 minutes, 21 secondsknow you give up but you know can do it eventually. But filtering is like uh sorting. How do I sort who do I what do
+28:2728 minutes, 27 secondsI put here to actually uh uh place how do I start organizing this uh puzzle on the floor? So it's a conscious model.
+28:3728 minutes, 37 secondsIt's like a model of cognition consciousness. How we aware when you start processing the filtering you then do a flash uh you didn't flash it. Ah some kind of you have a recap moment.
+28:4628 minutes, 46 secondsOkay. This goes here. This goes here.
+28:4728 minutes, 47 secondsThis gets and you get Yes. Now you go back to go to starting again. Now I got this piece. Am I right? Now you get
+28:5528 minutes, 55 secondsclear picture of what you do. You can get a can try to find the first corner piece. Uh if you really try to go optimal and work from the corner outwards, you know, that's the most
+29:0329 minutes, 3 secondseverybody's strategy. The simplest you can take. Uh get a find a first corner piece. Uh and then get that room to organize and you can start flashing it.
+29:1229 minutes, 12 secondsUh but you can but you can do that to call the flashing you know.
+29:1929 minutes, 19 secondsuh you know flinging or fashion you know fling just means sorting but if you take a flash you take any piece you just
+29:2629 minutes, 26 secondsstart just find any random fleet uh and you try to build your way up to a solution to the full image whether it's
+29:3229 minutes, 32 secondsa space rocket or something more uh just a space rocket you know and you get a space
+29:3929 minutes, 39 secondsyou know a view from space of space and the planet uh the planet system you know that's the you're making uh now that's what it is you know cautious and
+29:4829 minutes, 48 secondsadapting it. That's why we like this model of system. It can adapt to any system meaning that its web intent you
+29:5629 minutes, 56 secondsknow whether you are because you know why we have consciousness in the first place. Consciousness is a static thing.
+30:0230 minutes, 2 secondsIt allows you to dynamically learn from from your experiences and the world around you.
+30:0830 minutes, 8 secondsUh and that's the filter flash activation.
+30:1230 minutes, 12 secondsIt's meant to uh conscious of being aware uh uh objectively subjectively uh
+30:2030 minutes, 20 secondsyou know uh you know the thing about uh uh system when we work on bias systems biased AI systems is that uh when we buy
+30:2830 minutes, 28 secondsbecause you can uh tailor for everyone it's easy to tailor for without getting bottled down on the nuances
+30:3630 minutes, 36 secondsand work for any demographic basically in China Japan uh we have like uh um one more thing that so how they actually go
+30:4530 minutes, 45 secondsto flash flash photo you get up then yeah listens to you or talks to you he learns more about you what is you AI
+30:5330 minutes, 53 secondswhich is uh which is really uh we have something a term called actor the actor term is is not an agent so the to act on
+31:0131 minutes, 1 secondyour behalf you know to make a request or do something on your behalf what is request uh when you're writing an email send it to my coworker about be nice you
+31:0931 minutes, 9 secondsknow you can on your behalf to go and send an email or postpone something or do something in in the real world on the
+31:1631 minutes, 16 secondsinternet being unbiased. Uh no, we're not building what represents or the intelligent
+31:2331 minutes, 23 secondsinfraction for AI system you can always adapt and evolve it like any other system you know it's
+31:3031 minutes, 30 secondsnot just monolithic it's nonal you can use a python binder like pi OBI to pi OB
+31:3731 minutes, 37 secondsto net uh speak to uh network interfaces uh or node or or raster or you have a
+31:4631 minutes, 46 secondsright rece you know it allows you to adapt uh now about the IAS platform IAS platform stands for infrastructure as a service and that's where all the poly
+31:5531 minutes, 55 secondssystem lives so if you go to uhs uh obexuscomputing.org
+32:0332 minutes, 3 secondsuh that's the website I'm going to use to ship deploy uh the system uh replaces a public system that's for the
+32:1032 minutes, 10 secondsis the page user service to use all the certific as a service. It's the infrastructure the poly infraure you can pay for such
+32:1932 minutes, 19 secondsas polyore if you want to pay for services for your business uh to to achieve some kind of uh but it's a
+32:2732 minutes, 27 secondspay as you go service you can uh use to purchase uh used to automate your system.
+32:3532 minutes, 35 secondsUh so the D resolution is important because you know when you filter you flash you have to filter and flash. The D is meant to say using something called verb noun concept. Now uh one more thing
+32:4432 minutes, 44 secondsthe verb noun concept is very important to this uh because you know the simpler model of concept is called a verb noun pair you know it's not really a concept
+32:5332 minutes, 53 secondsit's just like a select thing like think speeding car speeding car is the is just
+33:0033 minutesa concept uh slowing car or breaking car is Same concept breaking car speeding car. These are two concept that verb is
+33:1033 minutes, 10 secondsspeeding and noun is verb. Verbs are speeding and uh breaking and the noun car of the object. Uh yep. uh which is
+33:2033 minutes, 20 secondsin real life using social unboxing because already there but if you want to use unboxing to generally use it use can
+33:2733 minutes, 27 secondsbuild a flying car you know and that's what you can say how do I build a flying car you start to be more formal you know and you talk to yeah this how you may be
+33:3533 minutes, 35 secondsthe final car but you have to be careful you know here because you know blah blah and that unstructured unboxing to uh depict how that model will work in the
+33:4433 minutes, 44 secondsreal world you know we're trying to get the ear to be creative and so problems actually be useful uh uh I'm not sport people but to be a
+33:5233 minutes, 52 secondspessimatic actor to act to do a talks whether you see the calendar notes uh the yeah here is called you say you yeah
+34:0234 minutes, 2 secondsyou know you know it's you but it's yourself what you tell it is what you what you get you know but it's meant to
+34:0934 minutes, 9 secondssolve your problem being a computer system yes so the dark is just a direct cycle that lives among the two layers of fast
+34:1734 minutes, 17 secondscar speeding car and breaking car to resolve a concept. Now when you get two concept that two two pairs two or more pairs two
+34:2634 minutes, 26 secondsthree or more pairs that's a verb now concept that uh concept of fast cars or speeding cars or
+34:3434 minutes, 34 secondsor breaking car now generalize among vehicles you cannot say that car to fast
+34:4034 minutes, 40 secondsbus uh uh breaking bus I mean speeding bus breaking bus or speeding motorcycle if you're talking about if you're
+34:4734 minutes, 47 secondsspeaking about uh motor vehicle or bicycles or things that move, you know, things that have action associated with
+34:5534 minutes, 55 secondsthem. Uh, but to move uh, you know, in these are called taxonomy pairs, which is my concept of verb noun pairs. Uh,
+35:0335 minutes, 3 secondsverb noun concept pairs refers to the concept uh, you use to rectify a situation through formal it's a formal
+35:1135 minutes, 11 secondsconcept modeling system for AI to understand how the AI system should not should approach the problem not just crash by pattern machine. uh what
+35:2035 minutes, 20 secondsconcept can I use to explore what's happening here in real time uh and that's what trying to explore uh so
+35:2835 minutes, 28 secondsstate of being aware uh and the subjective reason I believe to address this with dimensional game theory uh
+35:3535 minutes, 35 secondswhat's your theory of u of um dimensions to strategies in dimension offense defense attack that you depict yourself
+35:4335 minutes, 43 secondsfor that set problem uh what you tackling it's a very flexible Now we go to one more thing about say
+35:5035 minutes, 50 secondsyou have a system uh say you now have a dimension grip to use say you have like a signal a tuning system an input system uh this input is meant to tune a slider
+35:5935 minutes, 59 secondsso you go you know all those airplanes you know say you're making an automatic airplanes you have a system for looking at impulse weather and you want the
+36:0636 minutes, 6 secondssystem to know how to fly this plane now you want the air to learn learn
+36:1536 minutes, 15 secondsuh but you know when it's flying when the system learns enough it will then come back to the ground and but you know
+36:2236 minutes, 22 secondsyou don't want to play able to put autoplay auto play it's uh what you want all the dashboard of the EI systems of
+36:3136 minutes, 31 secondsthe systems are like uh buttons and dials which is a very complex system
+36:3836 minutes, 38 secondswe try to reduce that complexity uh to make sure the inputs are on the system can be uh found on the plane so when is
+36:4736 minutes, 47 secondsflying on find people want to make sure the auto plane is just a safe place to go. So when you put the when it's
+36:5436 minutes, 54 secondslanding the system flies that plane lands the plane but the impression that the mission gives is the input orchestration like you know how the
+37:0237 minutes, 2 secondsinputs become output you know what you know because you know if autopilot you don't want to give maybe have a degree of to give some permission to do
+37:1137 minutes, 11 secondssomething until the is achieved uh but what the system should have you know
+37:1737 minutes, 17 secondshave a dial that uh like a radio dial uh to tune signal to tune signals. Uh
+37:2437 minutes, 24 secondsthat's the thing. Uh when you tune a signal, you are really uh you're really changing many options. Uh you know, until you get a picture, it's
+37:3237 minutes, 32 secondsnot just like switch to uh because it's an it's an analog wave you are changing.
+37:3937 minutes, 39 secondsUh so that's what it says. The mission game theory is meant to be for me to capture the nuances of understanding to address that problem. And that's what
+37:4737 minutes, 47 secondsdimension creator holds you know if I make a slider up and down and it works in inputs it's analog analog or digital
+37:5737 minutes, 57 secondsuh you can go it can go levels like that or it can be in modes basically like a level of gas system or you can be uh you
+38:0738 minutes, 7 secondscan be in a in a fluidity of states uh depending on the what you want to have
+38:1338 minutes, 13 secondsyou know we want to control the plane uh just by being in modes uh with limited
+38:2138 minutes, 21 secondsoption. It reduce like you know reduce the input space uh and reduce the AI to make less mistakes uh uh when changing
+38:2938 minutes, 29 secondsgears or against the two plier pushes in the cockpit uh uh slowly out of the way
+38:3638 minutes, 36 secondsusing a fl observation and that's what the OBI is. a reflection
+38:4338 minutes, 43 secondsof me uh my condition my thinking uh that I put on paper uh to make sure that it's uh it's coherent. Now you can
+38:5138 minutes, 51 secondschange the proof on github.com nexusp nts which is github.com which obx
+39:0039 minutespatatterents uh just look at the pattern disclaimer just comment but you know it's 25 years patents yeah but you guys
+39:0639 minutes, 6 secondscan read the proof and I I don't know but I haven't really p you know just just look at the proofs just just read the proof and see whether it's coherent
+39:1339 minutes, 13 secondsto you uh the uh PDF documents uh so you can go to github.com/obics patatterents
+39:2139 minutes, 21 secondsuh read the formal uh proofs. Um yes uh one more thing uh um you know when we
+39:2839 minutes, 28 secondshave the AI systems uh AI is here already uh system you have to uh understand that uh one more let me give
+39:3539 minutes, 35 secondsyou an say you have a a small daughter a daughter a little girl not a daughter maybe you know your daughter maybe some daughter and you wanted to objectively understand what you're saying uh how
+39:4439 minutes, 44 secondsthis actually works you know you give it five colors she said uh and teaching her the colors of rainbows Richard gave battle in vain but you don't tell her the color you wanted learn objectively.
+39:5439 minutes, 54 secondsSo you said um and you don't tell her.
+39:5739 minutes, 57 secondsSo she said she said you give her the color names but you don't tell her which color you want. So you said uh this is blue uh blue for blue you know and she just
+40:0540 minutes, 5 secondslook at the colors that the names text you know and that teach the AI okay yes this is blue uh using trial and improvement trial and error to uh
+40:1340 minutes, 13 secondsaddress that scenario. So when you when she picks a long color you then uh take that color out uh and let it try again.
+40:2240 minutes, 22 secondsThat's what you want to give the AI to understand what is the concept you're trying to explore you know not just showing a blend images that's objective
+40:2940 minutes, 29 secondsreasoning model using dimensional game theory uh so you want the to be during training uh training is very important using unsupervised training unsupervised
+40:3740 minutes, 37 secondslearning s
+22 secondsWelcome back to everyone to OB Nexus. Um today I'm going to talk about computing um an AI model of development. Um at OBS
+0:1212 secondswe strike we do everything from the heart. If you don't know now you know everything is with human touch and a human position. First OB means heart and
+0:2121 secondsnexus means connection. OB is heart in ebook and nexus mean connection. two or more things. OB Nexus is hydration
+0:3030 secondsservices. Today I want to describe one of one new innovation called one one new innovation called um the OBS AI system
+0:3939 secondsfor AI OB AI system uh uh for OBS
+0:4545 secondsarchitecture and OBS tooling. In this in this video we want to explore the
+0:5252 secondsconcept of AI the AI blackbox in depth without without um without bias. You wait for it. The idea of the
+1:021 minute, 2 secondsOrbin XS AI system is to make sure that when we when we beat AI to we ensure that we are
+1:101 minute, 10 secondsbuilding this for with human we building it u for humans by
+1:211 minute, 21 secondshumans. The idea this although
+1:271 minute, 27 secondsalthough although oh sorry one key problem in AI development is opening is AI information processing done by AI.
+1:371 minute, 37 secondsHow information play AI? Well, um, in openness computing, we have a formal proof to open this box, the black box in
+1:461 minute, 46 secondsthe air of AI model systems. But we have a right n have a formal proof or which I created um to be
+1:551 minute, 55 secondstested um for for real life AI systems.
+2:012 minutes, 1 secondAlthough although although I have although the proof is still in development, the proof of concept is still in development. I I feel I want to
+2:092 minutes, 9 secondsshare with the masses um how we develop AI systems at OBS and it's branch of services the branch computing branch of
+2:182 minutes, 18 secondsservices access computing um first um first we have a formal proof
+2:282 minutes, 28 secondsmathematical proof that you can look at explain the logic behind it you can find how to follow along um this proof is the
+2:352 minutes, 35 secondspaper store and obnext access.org website. This is about revolutionizing AI technology from moving opening that
+2:442 minutes, 44 secondsblack box and opening to understand what the AI is really model is really thinking not not thinking what is really processing how it processes information
+2:532 minutes, 53 secondsand recognizes patterns in data. Um so what is the OB AI model
+3:013 minutes, 1 secondwe're building? The OBI model is a model that solves various all these problems in AI and really we want
+3:093 minutes, 9 secondsto open that box away that box so we know understand that AI system it's going to be used on the obnext.org old website to handle sales,
+3:193 minutes, 19 secondsmarketing, no um login issues and forgetting password or if you need human assistance, it will take you to our human
+3:273 minutes, 27 secondsassistants. Me and others on computing who are live with you on that site looking at waiting for requests if they
+3:353 minutes, 35 secondscannot resolve it. Um you want to do is write this. I want to open this
+3:443 minutes, 44 secondsbox. OB AI models we are biased are just traditional traditional AI models. We we we remodeled we we we changed we we we
+3:533 minutes, 53 secondsupgraded and changed well I upgraded and we we we we thought AI from the top top
+4:014 minutes, 1 seconddown to the bottom from the theory to the practice practical use let's start now
+4:094 minutes, 9 secondsum AI tradition AI tradition AI are naturally biased AI whether it's bottom
+4:174 minutes, 17 secondsup or top Let give me example. If you have an AI model and you feed it um um and you have
+4:274 minutes, 27 secondsthe data, the data is what you want to feed it input and you put that data in and you give an output. The more data
+4:334 minutes, 33 secondsyou give it, the more patterns it learns from that is that it gives you the corresponding output. This is that this is unclean
+4:424 minutes, 42 secondswith the bottom approach in air model or not done right or not filtered. It's the air will be naturally unbiased naturally
+4:504 minutes, 50 secondsunbiased naturally biased naturally naturally biased two intrusion ear models that's data preparation cleaning
+4:584 minutes, 58 secondsis handled unless we have a system but if you have a system where uh in top down
+5:055 minutes, 5 secondsmodel and we have a top we have a top down approach where the is built first and then fed in
+5:125 minutes, 12 secondspatterns then it can then see filter it that way to give you an
+5:195 minutes, 19 secondsoutput. We we obs do do things differently, a bit
+5:245 minutes, 24 secondsdifferently. First of all, the obus
+5:325 minutes, 32 secondsum the obus u the obus uh the OBI hot AI system is going to be on OBS website.
+5:395 minutes, 39 secondsAgain, I'm going to repeat that. It's we want we want you to be able to do sales with OBS's team OBS people's customers
+5:475 minutes, 47 secondsand consumers customers and consumers but we're not consumer customers the goal here of the
+5:555 minutes, 55 secondshaving the AI is to our goal is to slowly integrate features to make
+6:036 minutes, 3 secondssales maybe to make sales auto like with partners partnerships
+6:126 minutes, 12 secondsUm well but like as a system grows in complexity and more people more authors want to more business want to buy or
+6:206 minutes, 20 secondsindividuals want to buy cuz yes um because opens has three three three main open computing has three main ways to do
+6:286 minutes, 28 secondsstuff. single licenses. You want to use one, you get documentation, you get everything you need all in one and you just use it. You're just yourself individual. Then you have business
+6:376 minutes, 37 secondslicense. You get support and documentation. Well, support from business support and you get documentation and you use it and you get
+6:456 minutes, 45 secondshelp and you get the enterprises who have um um uh to two.
+6:526 minutes, 52 secondsYes, you go to pre users too who have um um who have who have subscription
+7:017 minutes, 1 secondservice too like a sub model too for partnerships that's what it is really
+7:087 minutes, 8 secondsum there's there's two solution models if you really want to invest systems now um so there's let me give
+7:177 minutes, 17 secondsyou an anal example systems uh uh in so when in America I can't remember when long time
+7:247 minutes, 24 secondsago we those deals in America when um an ear model sold uh sold
+7:327 minutes, 32 secondsuh sold a car for a dollar a car was a Lamborghini or race I don't know was it
+7:397 minutes, 39 secondswas it was it was on the news as well and uh it was it was a legal matter that has to be pursued because the AI was
+7:477 minutes, 47 secondsmaking mistake and a lot of people uh AI to make sales we want to get that Right.
+7:527 minutes, 52 secondsOr computing the goal here is any business goal here is partnership. So I really
+7:597 minutes, 59 secondssee DC in this technology. So what we're trying to do at OBS
+8:068 minutes, 6 secondsum open is being an AI model that ships that ships that allows businesses um makes
+8:148 minutes, 14 secondssales allows like it's just a sales he has other applications too but it's it's like a it's like a way it's like a it's
+8:238 minutes, 23 secondsmore of a experimental system it's meant to be an AA assistant and an EA agent too.
+8:348 minutes, 34 secondsOkay. So, um here we're going to open the back. We're going to open a box now.
+8:398 minutes, 39 secondsSo, this how the OBS AI works from theory to practice at OBS AI. The
+8:488 minutes, 48 secondsBeijian the Beijian network is core at the core of um the OBS AI. is at the heart of the
+8:578 minutes, 57 secondsengineers. Our model, my model on um and theory theory states um
+9:059 minutes, 5 secondsthat uh for data um when when data bottom of third down is when creating a model when fed into the data when it is
+9:139 minutes, 13 secondsfeeding data through either reinforcement learning that's input to output output to input uh traditional
+9:219 minutes, 21 secondsmethods like standard methods not traditional trans standard method or machine learning practices and use of data structure
+9:299 minutes, 29 secondslike algorithm of KN clustering of data and uh and uh and all of that. My
+9:379 minutes, 37 secondsthree states is a probability model is what's we use a probability model
+9:459 minutes, 45 secondsinstead of a to map out the data. So that's a probability graph known as a basian
+9:539 minutes, 53 secondsnetwork to have a large language model too. Um the best for this uh have a severe
+10:0510 minutes, 5 secondspiggyback we demonstrate in the pro concept and show using this model which is you can
+10:1310 minutes, 13 secondsshow too um how the Beijing network does it and other ambigu another ambigu is not
+10:2210 minutes, 22 secondsmentioned in this video. We we want to create a map a map of the data not not just recognize patterns in the
+10:3510 minutes, 35 secondsdata. Our go our goal here is to create a map of the data like like
+10:4410 minutes, 44 secondsdots of points of data to ensure integrity and uh and
+10:5110 minutes, 51 secondsuh integrity of the data. You want to map out the data when you buy when you buy the formal
+10:5910 minutes, 59 secondsproof. You get a proof of concept too.
+11:0411 minutes, 4 secondsOkay. Of the data on biasing algorithm and you want to demonstrate
+11:1511 minutes, 15 secondsthe want to run we demonstrate how the AI module handles data. And this is what
+11:2111 minutes, 21 secondsthe OBIs are meant to do uh through to packets and this is very mathematical and rigorous. So take your time to
+11:2911 minutes, 29 secondsconsume it. This can be used to demographic on
+11:3611 minutes, 36 secondsbias data too and implications are enormous in the health and financial industry like detection of cancer cancer detection in demographics.
+11:4911 minutes, 49 secondsWe are not we not we not really trying to uh change the way nature of AI is made. We trying to innovate AI systems to open that box.
+11:5911 minutes, 59 secondsHow do AI process data? In the proof of concept, sorry, in
+12:0712 minutes, 7 secondsthe proof of concept, you will learn about from theory to practice using the
+12:1412 minutes, 14 secondsexamples. You learn you learn about you you know about you learn about um um how to make your AI
+12:2412 minutes, 24 secondsinfrastructure also. I give you have you have AI in structures but what I can give you now is that AI a components are
+12:3212 minutes, 32 secondsvery can be modular modular too take for example uh a large language
+12:3912 minutes, 39 secondsmodel with an accessibility feature the goal of the large language
+12:4612 minutes, 46 secondsmodel is to well text data and refine it you know help the user understand
+12:5512 minutes, 55 secondsBut if the person can talk, they can talk in it. They can talk. They can talk. And uh the idea of this is to have
+13:0213 minutes, 2 secondsextensible components of the group of the AI component systems and make sure makes them modular and um reusable and
+13:1113 minutes, 11 secondsextensible to you have a full working product.
+13:1513 minutes, 15 secondsEach feature is crucial about what they do like the accessibility uh if it's a language model it's a it's an
+13:2213 minutes, 22 secondsaccessibility feature to have a voice interaction or voice chat and this AI system is scalable
+13:3213 minutes, 32 secondstoo robust and easy to debug especially when you we try to
+13:3913 minutes, 39 secondsinvestigate the box we open the box see where you went wrong see why it's acting in the way it
+13:5313 minutes, 53 secondsdoes. So um from text chat to voice chat from voice chat to well you know what
+14:0014 minutesrobotics robotics robots and systems that intellect engage like AI is meant to be.
+14:0914 minutes, 9 secondsWe're trying to see also see whether it's AI calculation or AI artificial intelligence what is actually artificial
+14:1614 minutes, 16 secondsintelligence cuz some of it some of us believe that um AI is just calculating
+14:2214 minutes, 22 secondscalculating it's a calculating just by its own systems and taking shortcuts in
+14:2914 minutes, 29 secondstraditional models take take for example mental shortcuts like take example a basketball shooter
+14:3914 minutes, 39 secondsYeah, system just um make a shot to the basketball net and shot it he
+14:4614 minutes, 46 secondsmisses and recalculate or what is known as thinking uh so to some
+14:5414 minutes, 54 secondshumans but it's about refining the algorithm to make sure that the whether whether AI is
+15:0115 minutes, 1 secondactually calculating or intelligent our goal is not to dismiss AI officials in fact we're going to
+15:0815 minutes, 8 secondsinnovate to make sure make a ensure that AI systems are coherent and do what they
+15:1515 minutes, 15 secondsdo mean to do what they do we meant to so away simple we're
+15:2315 minutes, 23 secondsdoing ways by bit by bit so if you when when when when the OBI is
+15:3015 minutes, 30 secondsavailable it will be at the obexus.org computing store obexus.org
+15:3715 minutes, 37 secondsand then and the services and it will also be on the payhip.com/obi
+15:4715 minutes, 47 secondsnexus store. Um so takeaways
+15:5515 minutes, 55 secondstoday we are trying to innovate and use traditional algorithms a algorithms to form better AIS but using a different
+16:0416 minutes, 4 secondstheory to run a theory that's more human friendly human sensitive for those who
+16:1216 minutes, 12 secondscare about air regulation practices and being human. So that's that's that's all for
+16:2016 minutes, 20 secondsnow. Thank you. My name is Nambdi and uh subscribe to all my social media uh Tik Tok at
+16:2716 minutes, 27 secondsuh all the others. Thank you and goodbye. See you later. Subscribe to my YouTube channel. Subscribe.

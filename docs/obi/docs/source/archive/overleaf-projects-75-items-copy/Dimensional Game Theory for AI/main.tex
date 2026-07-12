@@ -1,0 +1,67 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb, amsthm, geometry, graphicx, hyperref}
+\geometry{margin=1in}
+\title{Dimensional Game Theory: Variadic Strategy in Multi-Domain Contexts}
+\author{Nnamdi Michael Okpala \\ OBINexus Computing}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This paper presents a formalized framework for Dimensional Game Theory with a focus on variadic input systems and strategic balance in multi-domain competitive environments. We introduce methods for recognizing context-sensitive inputs, scalar-to-vector transitions, and adaptive dimension detection. These tools enable practical computation of strategic minima in games with infinite or evolving input spaces.
+\end{abstract}
+
+\section{Introduction}
+Traditional game theory fails to scale in systems where inputs are dynamic, sparse, or contextually unlocked. In real-world strategy systems—such as AI coordination, adaptive defense, or market reaction—the structure of the game itself shifts based on dimensional input activations. This work builds upon classical formulations by introducing a formal method to manage these changes through a dimension-configured framework.
+
+\section{From Scalars to Dimensions}
+In many scenarios, an input appears initially as a scalar but holds the potential to become a full dimension. For example, voice communication in a tactical simulation may begin as a toggle variable (present/absent), but once active, contributes a wide range of influence across multiple axes (emotion, intent, deception).
+
+\textbf{Definition 1 (Scalar Promotion):} An input $x$ is said to be promoted to dimension $D$ if:
+\begin{equation}
+\exists f: x \rightarrow \vec{v}_D \in \mathbb{R}^n \text{ such that } \|\vec{v}_D\| > \epsilon
+\end{equation}
+for some threshold $\epsilon$ defining significance in game context.
+
+\section{Variadic Game Framework}
+
+Let $G = (N, A, u, D)$ where:
+\begin{itemize}
+  \item $N$ is the set of players
+  \item $A$ is the action space (can be variadic)
+  \item $u$ is the utility function
+  \item $D$ is the set of activated strategic dimensions
+\end{itemize}
+
+Inputs to $A$ are not fixed in number, and dimensions in $D$ are conditionally activated based on input state and contextual triggers.
+
+\textbf{Definition 2 (Contextual Activation):} A dimension $D_i$ is considered active if:
+\begin{equation}
+\sum_{j=1}^{m} \delta(x_j, D_i) \geq \tau
+\end{equation}
+where $\delta$ maps input $x_j$ to a relevance score under $D_i$, and $\tau$ is a domain-defined activation threshold.
+
+\section{Strategic Balance in High-Dimensional Systems}
+
+Adding parameters naively is computationally infeasible. Instead, we define strategy as a function over the \textit{active dimensional space}.
+
+\textbf{Definition 3 (Strategic Vector):} Let $S_i$ be a strategy for player $i$ defined over active dimensions $D_{act}$. Then:
+\begin{equation}
+S_i = \vec{s} = [s_{D_1}, s_{D_2}, ..., s_{D_k}] \text{ where } D_j \in D_{act}
+\end{equation}
+
+\textbf{Theorem (Computational Reduction):} The game is solvable within tractable bounds iff $|D_{act}| \leq \Theta$, for system-defined computability threshold $\Theta$.
+
+\section{Dimensional Activation Mapping}
+To prevent overload and misclassification, we define a mapping function:
+\begin{equation}
+\phi: \{x_1, x_2, ..., x_n\} \rightarrow D_{act}
+\end{equation}
+This function identifies and filters which scalar or vector inputs activate dimension-specific strategies.
+
+\section{Conclusion}
+Dimensional Game Theory in its variadic form provides a robust structure for handling complex, evolving, and multidimensional strategic interactions. Rather than treating all variables equally, we prioritize strategic dimensionality, enabling AI and human systems to focus on meaningful, actionable game inputs while preserving computational feasibility.
+
+\end{document}

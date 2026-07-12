@@ -1,0 +1,312 @@
+// ============================================================
+// FILE: HAOS_Module4_ActorSubConOpsAndTuring.psc.txt
+// SOURCE: Hierarchical_Actor_Orchestrated_State_Management_with_DIRAM_Backed_Epistemic_Validation.pdf
+//         Sections V, VI
+// AUTHOR: OBINexus Computing — Aegis Framework Division
+// COMPLIANCE: NASA-STD-8739.8, AEGIS-PROOF-1.2
+// CLASSIFICATION: Production Infrastructure
+// PURPOSE: Pseudocode for Actor Sub-ConOps alignment with
+//          Actor class tuple, Proposition 1 (Innovation Preservation),
+//          Verb-Noun Conceptual Modeling, and Theorem 2
+//          (Decomposition Completeness / Turing Soundness)
+// ============================================================
+
+MODULE HAOS_ActorSubConOpsAndTuring
+
+// ============================================================
+// SECTION V — ACTOR SUB-CONOPS INTEGRATION
+// ============================================================
+
+// ============================================================
+// SECTION V.A — Alignment with Actor Class Tuple
+// ============================================================
+
+// The hierarchical state model PRESERVES the Actor's dimensional
+// innovation property while adding structured task management.
+//
+// PROPOSITION 1 (Innovation Preservation):
+// For Actor α = (S, C, Φ, Ψ, ε) with hierarchical extension,
+// the dimensional innovation property holds:
+//
+//   ∃ τ : S → S  where  τ ∉ span(C)
+//   ⟹  ∃ s ∈ S :  D(τ(S)) ∋ s
+//
+// Meaning:
+//   - If an Actor discovers a novel transformation τ (not in the
+//     span of known concepts C), then the decomposition function D
+//     can still produce sub-tasks that include states reachable
+//     via τ.
+//   - Actor-driven innovations always translate into actionable
+//     sub-tasks within epistemic boundaries.
+
+FUNCTION verify_innovation_preservation(
+    actor:           ActorTuple,
+    tau:             StateTransformFunction,    // Novel transformation τ
+    concept_span:    List<StateTransformFunction>  // span(C) — known transforms
+) -> Boolean:
+
+    // Check: τ ∉ span(C) — τ must be genuinely novel
+    IF is_in_span(tau, concept_span) THEN
+        // τ is already representable — not a dimensional innovation
+        RETURN FALSE
+    END IF
+
+    // Apply τ to Actor's state space
+    tau_applied_space := apply_transform(tau, actor.S)
+
+    // Check: ∃ s ∈ S : D(τ(S)) ∋ s
+    // The decomposition of τ(S) must yield at least one reachable state
+    decomposed := decompose_state(tau_applied_space)  // D(τ(S))
+
+    FOR EACH sub_state IN decomposed DO
+        IF actor.S.contains(sub_state) THEN
+            // Innovation preserved — decomposition produces known sub-tasks
+            RETURN TRUE
+        END IF
+    END FOR
+
+    // No reachable state found — innovation cannot be sub-tasked
+    RETURN FALSE
+
+END FUNCTION
+
+// Mission decomposition using dimensional innovation:
+FUNCTION decompose_mission(
+    actor:   ActorTuple,
+    mission: MissionSpec
+) -> List<HierarchicalState>:
+    // Uses the decomposition function D : S → 2^S
+    // Each mission decomposes into epistemically bounded sub-tasks
+
+    ASSERT validate_actor_tuple(actor),  // ε ≥ 0.954 required
+           "Actor epistemic threshold not met — decomposition blocked"
+
+    raw_sub_states := decompose_state(mission.target_state_space)
+    states         := []
+
+    FOR EACH sub_state IN raw_sub_states DO
+        // Assign verb-noun intent to each sub-task
+        intent := derive_intent_from_sub_state(sub_state, mission)
+
+        // Build HierarchicalState with full DIRAM traceability
+        h_state := HierarchicalState {
+            state_id:          generate_uuid_64(),
+            parent_state_hash: sha256_hex(mission.root_state_id),
+            intent:            intent,
+            result_metric:     0.0,           // Not yet evaluated
+            proof_confidence:  actor.eps,     // Inherit Actor's ε
+            status_flag:       STATE_TODO,
+            error_count:       0,
+            timestamp:         timestamp_now(),
+            diram_trace:       NULL           // Allocated at first gate
+        }
+
+        states.append(h_state)
+    END FOR
+
+    RETURN states
+END FUNCTION
+
+// Derive verb-noun intent from a sub-state in the mission context:
+FUNCTION derive_intent_from_sub_state(
+    sub_state: SemanticState,
+    mission:   MissionSpec
+) -> VerbNounConcept:
+    // Map sub-state semantic content to a verb-noun triplet
+    verb := classify_action(sub_state.action_type)
+    noun := classify_domain_object(sub_state.domain_element)
+    phi  := compute_phi_from_context(sub_state, mission.cultural_context)
+
+    RETURN VerbNounConcept {
+        verb:       verb,
+        noun:       noun,
+        phi_vector: phi
+    }
+END FUNCTION
+
+
+// ============================================================
+// SECTION V.B — Verb-Noun Conceptual Modeling
+// ============================================================
+
+// Each state intent follows the formalized triplet: (V, N, Φ)
+//   V = verb string  (action operation)
+//   N = noun string  (domain object)
+//   Φ = phi_vector   (8-dimensional epistemic signature)
+//
+// The phi_vector encodes epistemic confidence across 8 dimensions
+// of the semantic manifold, each element ≥ 0.90 for soundness.
+
+FUNCTION create_verb_noun_concept(
+    verb:      String,
+    noun:      String,
+    context:   EpistemicContext
+) -> VerbNounConcept:
+
+    // Compute 8-dimensional phi vector from epistemic context
+    phi := [
+        context.dimension[0],  // Confidence in causal validity
+        context.dimension[1],  // Confidence in temporal ordering
+        context.dimension[2],  // Confidence in spatial consistency
+        context.dimension[3],  // Confidence in semantic alignment
+        context.dimension[4],  // Confidence in resource validity
+        context.dimension[5],  // Confidence in dependency chain
+        context.dimension[6],  // Confidence in output correctness
+        context.dimension[7]   // Confidence in epistemic closure
+    ]
+
+    // Validate: all phi components must be ≥ 0.90
+    FOR EACH p IN phi DO
+        ASSERT p >= 0.90, "Phi component below minimum: " + p
+    END FOR
+
+    RETURN VerbNounConcept { verb: verb, noun: noun, phi_vector: phi }
+END FUNCTION
+
+// Reference instantiation from Section V.B:
+// Intent: "predict failure" with high-confidence phi vector
+CONSTANT PREDICT_FAILURE_INTENT := VerbNounConcept {
+    verb:       "predict",
+    noun:       "failure",
+    phi_vector: [0.97, 0.95, 0.98, 0.96, 0.94, 0.99, 0.95, 0.97]
+    // Mean phi = 0.96375 — well above ε = 0.954
+}
+
+// Verb-Noun Glossary terms as structured constants:
+// (From the VERB-NOUN CONCEPT GLOSSARY at end of source PDF)
+CONSTANT GLOSSARY_TERMS := [
+    VerbNounGlossaryEntry { term: "anchor-hardware-Φ",
+        definition: "Bind epistemic state to physical memory substrate" },
+    VerbNounGlossaryEntry { term: "append-trace-Φ",
+        definition: "Add state transition to immutable DIRAM log" },
+    VerbNounGlossaryEntry { term: "audit-transition-Φ",
+        definition: "Inspect state lifecycle compliance with confidence metrics" },
+    VerbNounGlossaryEntry { term: "commit-state-Φ",
+        definition: "Finalize state persistence to DIRAM with receipt generation" },
+    VerbNounGlossaryEntry { term: "compute-ratio-Φ",
+        definition: "Calculate success:failure metrics for cascade detection" },
+    VerbNounGlossaryEntry { term: "emit-rollback-Φ",
+        definition: "Generate rollback event with epistemic signature for recovery" },
+    VerbNounGlossaryEntry { term: "generate-receipt-Φ",
+        definition: "Produce SHA-256 trace for forensic accountability" },
+    VerbNounGlossaryEntry { term: "memoize-delta-Φ",
+        definition: "Store confidence degradation for future reference" },
+    VerbNounGlossaryEntry { term: "trace-dependency-Φ",
+        definition: "Map hierarchical state relationships for rollback scope" },
+    VerbNounGlossaryEntry { term: "validate-confidence-Φ",
+        definition: "Assess proof_confidence against 95.4% threshold" },
+    VerbNounGlossaryEntry { term: "verify-trace-Φ",
+        definition: "Validate cryptographic integrity of state transition history "
+                  + "with epistemic signature Φ" }
+]
+
+
+// ============================================================
+// SECTION VI — TURING SOUNDNESS IN TASK DECOMPOSITION
+// ============================================================
+
+// THEOREM 2 (Decomposition Completeness):
+// The hierarchical state system with DIRAM backing achieves
+// Turing-complete task orchestration while maintaining
+// epistemic soundness.
+//
+// PROOF (correspondence with Turing machine):
+//   1. States in S encode Turing configurations
+//   2. Lifecycle transitions simulate state machine evolution
+//   3. DIRAM provides unbounded memory through linked allocations
+//   4. Rollback mechanism implements rejection states
+//   5. validate-confidence-Φ ensures only sound computations proceed
+//
+// The 95.4% threshold prevents non-deterministic branching.
+// Cascade protocols enable recovery from computational dead-ends.
+
+// --- Turing Correspondence Mapping ---
+
+STRUCTURE TuringCorrespondence:
+    turing_concept:  String
+    haos_equivalent: String
+    notes:           String
+END STRUCTURE
+
+CONSTANT TURING_CORRESPONDENCE_TABLE := [
+    TuringCorrespondence {
+        turing_concept:  "Turing configurations",
+        haos_equivalent: "States s ∈ S (HierarchicalState)",
+        notes:           "Each HierarchicalState encodes one Turing configuration"
+    },
+    TuringCorrespondence {
+        turing_concept:  "State machine evolution",
+        haos_equivalent: "Lifecycle transitions: TODO → DOING → DONE",
+        notes:           "Deterministic automaton L : S × C → S"
+    },
+    TuringCorrespondence {
+        turing_concept:  "Unbounded tape (memory)",
+        haos_equivalent: "DIRAM linked allocations",
+        notes:           "diram_alloc_traced provides unbounded traced memory"
+    },
+    TuringCorrespondence {
+        turing_concept:  "Rejection states",
+        haos_equivalent: "Cascade rollback (STATE_ROLLEDBACK)",
+        notes:           "Algorithm 1 implements rejection with recovery"
+    },
+    TuringCorrespondence {
+        turing_concept:  "Halting (acceptance)",
+        haos_equivalent: "STATE_DONE with commit_state_to_diram()",
+        notes:           "Only epistemically sound computations reach DONE"
+    }
+]
+
+// Turing-completeness verification procedure:
+FUNCTION verify_turing_soundness(system: HAOS_System) -> TuringSoundnessReport:
+
+    report := TuringSoundnessReport { all_properties_satisfied: TRUE }
+
+    // Property 1: States encode configurations
+    ASSERT system.state_space IS HierarchicalStateSpace,
+           "State space must be HierarchicalState-based"
+
+    // Property 2: Transitions simulate state machine
+    ASSERT system.lifecycle_automaton IS Deterministic,
+           "Lifecycle automaton must be deterministic"
+
+    // Property 3: DIRAM provides unbounded memory
+    ASSERT system.diram.supports_linked_allocations,
+           "DIRAM must support unbounded linked allocation chains"
+
+    // Property 4: Rollback implements rejection states
+    ASSERT system.rollback_protocol IS CascadeRollbackProtocol,
+           "Must implement Algorithm 1 cascade rollback"
+
+    // Property 5: Confidence validation ensures soundness
+    ASSERT system.epistemic_threshold == EPISTEMIC_THRESHOLD,
+           "Epistemic threshold must be exactly 0.954"
+
+    // Additional constraint from Section VII:
+    // Bounded resources: DIRAM enforces ε(x) ≤ 0.6 upper constraint
+    // (Note: source PDF states ε(x) ≤ 0.6 as upper bound for cost/resource metric,
+    //  distinct from the 0.954 lower bound on proof_confidence)
+    ASSERT system.diram.resource_constraint_enforced(upper_bound=0.6),
+           "DIRAM must enforce resource constraint ε(x) ≤ 0.6"
+
+    RETURN report
+
+END FUNCTION
+
+// Verify non-determinism prevention via threshold:
+FUNCTION verify_determinism_via_threshold(
+    state: HierarchicalState
+) -> Boolean:
+    // The 95.4% threshold prevents non-deterministic branching.
+    // If confidence < 0.954, state is blocked (not allowed to branch).
+    // This ensures only one valid forward path exists at each gate.
+    IF state.proof_confidence >= EPISTEMIC_THRESHOLD THEN
+        // Single valid transition — deterministic
+        RETURN TRUE
+    ELSE
+        // State blocked — no non-deterministic branch permitted
+        state.status_flag := STATE_BLOCKED
+        RETURN FALSE
+    END IF
+END FUNCTION
+
+END MODULE HAOS_ActorSubConOpsAndTuring

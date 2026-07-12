@@ -1,0 +1,270 @@
+// ============================================================
+// FILE: dgt_variadic_v1_M2_canonical_definitions.psc.txt
+// MODULE 2 OF 5 — Canonical Definitions with Founding Context
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts" [ORIGINAL v1, July 4, 2025]
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// ============================================================
+
+// This module establishes the THREE CANONICAL DEFINITIONS of
+// variadic DGT as they stood on July 4, 2025 — the founding day.
+//
+// Because V1 and V2 are formally identical in content, these
+// definitions serve as the authoritative source for:
+//   - AEGIS-PROOF-3.1/3.2 (August 2025): inherited |D_act| concept
+//   - DAG Ephemeris Spec (August 2025):   inherited δ relevance scoring
+//   - OBIAI Thesis (September 2025):      inherited variadic game G=(N,A,u,D)
+//   - DGT-RAF (August 2025):              inherited φ mapping and Θ bound
+//   - DGT Variadic V2 (May 2026):         identical re-affirmation
+
+
+// ── DEFINITION 1: SCALAR PROMOTION (CANONICAL) ───────────────
+
+// DEFINITION 1 (Scalar Promotion) [July 4, 2025]:
+//   An input x is promoted to dimension D if:
+//
+//     ∃f : x → v⃗_D ∈ ℝⁿ  such that  ‖v⃗_D‖ > ε                (eq. 1)
+//
+//   for some threshold ε defining significance in game context.
+//
+// CANONICAL NOTES (July 2025 context):
+//   This definition was established the same day as PDF 8's
+//   Definition 5 (Strategic Dimension). Together they form the
+//   two-part foundation:
+//     PDF 8 Def 5: what a dimension IS (parameter space, basis vector)
+//     PDF 11 Def 1: how a scalar BECOMES a dimension (promotion)
+//
+//   The voice example from §2 is the founding illustration:
+//     toggle ∈ {0,1} → f(toggle) → [emotion, intent, deception] ∈ ℝ³
+//     ‖[emotion, intent, deception]‖ > ε → PROMOTED
+
+CONSTANT EPSILON_PROMOTION_DEFAULT := 0.1   // founding-day default ε
+
+DEFINE PromotionEvent AS:
+    // Records a scalar promotion for audit and downstream use
+    input_id        : InputID
+    dimension_id    : DimensionID
+    pre_norm        : REAL    // ‖v⃗_D‖ before promotion (was ≤ ε)
+    post_norm       : REAL    // ‖v⃗_D‖ after promotion (must be > ε)
+    timestamp       : Timestamp
+    epsilon_used    : REAL
+
+    INVARIANT: post_norm > epsilon_used    // Definition 1 requirement
+    INVARIANT: pre_norm <= post_norm        // monotone promotion
+END DEFINE
+
+
+PROCEDURE IsPromotable(x: ScalarInput, D: StrategicDimension,
+                        f: PromotionFunction, epsilon: REAL) -> BOOL:
+    // Pre-check: can x be promoted to D?
+    // Returns TRUE iff ∃f such that ‖f(x)‖ > ε.
+    v_candidate := f.Apply(x.raw_value, D)
+    RETURN NORM(v_candidate) > epsilon
+END PROCEDURE
+
+
+PROCEDURE PromoteScalar(x: ScalarInput, D: StrategicDimension,
+                         f: PromotionFunction,
+                         epsilon: REAL) -> PromotionEvent:
+    // Formal promotion procedure — records the event.
+    pre_v  := x.embedding IF x.is_promoted ELSE ZERO_VECTOR(D.dimension)
+    post_v := f.Apply(x.raw_value, D)
+
+    IF NORM(post_v) <= epsilon:
+        EMIT WARNING "Promotion failed: ‖f(x)‖=" + NORM(post_v) +
+                     " ≤ ε=" + epsilon
+        RETURN NULL
+    END IF
+
+    x.embedding   := post_v
+    x.is_promoted := TRUE
+
+    RETURN PromotionEvent(
+        input_id     = x.id,
+        dimension_id = D.id,
+        pre_norm     = NORM(pre_v),
+        post_norm    = NORM(post_v),
+        timestamp    = CURRENT_TIMESTAMP(),
+        epsilon_used = epsilon
+    )
+END PROCEDURE
+
+
+// ── DEFINITION 2: CONTEXTUAL ACTIVATION (CANONICAL) ──────────
+
+// DEFINITION 2 (Contextual Activation) [July 4, 2025]:
+//   Dimension Dᵢ is considered active if:
+//
+//     Σⱼ₌₁ᵐ δ(xⱼ, Dᵢ) ≥ τ                                      (eq. 2)
+//
+//   where δ maps input xⱼ to a relevance score under Dᵢ,
+//   and τ is a domain-defined activation threshold.
+//
+// CANONICAL NOTES (July 2025 context):
+//   The δ function is the founding relevance primitive.
+//   All later corpus documents inherit this scoring concept:
+//     PDF 6 EffectivenessScore(strategy, dim) — strategic variant of δ
+//     PDF 9 DimensionActivationScore(input, dim) — RAF variant of δ
+//     PDF 10 RelevanceScore(x, dim) — V2 re-affirmation of same δ
+//
+//   The summation Σδ distinguishes Definition 2 from a single-sample
+//   check: multiple weak signals can collectively cross threshold τ.
+//   This is the founding basis for cascade activation in DIRAM (PDF 7).
+
+CONSTANT TAU_DEFAULT := 0.3    // founding-day default activation threshold
+
+DEFINE RelevanceMap AS:
+    // δ: maps each (input, dimension) pair to a relevance score ∈ [0, 1]
+    INVARIANT: AllScores IN RANGE[0.0, 1.0]
+
+    PROCEDURE Evaluate(x: ScalarInput, D: StrategicDimension) -> REAL:
+        // Core δ function — canonically defined here July 4, 2025.
+        // Projects x's representation onto D's basis vector.
+
+        IF x.is_promoted:
+            projection := DOT(x.embedding, D.basis_vector)
+            denom      := NORM(x.embedding) * NORM(D.basis_vector)
+            RETURN ABS(projection) / MAX(denom, 1e-12)
+        ELSE:
+            // Scalar: magnitude-proportional relevance
+            RETURN CLAMP(ABS(x.raw_value) / MAX_SCALAR_VALUE, 0.0, 1.0)
+        END IF
+    END PROCEDURE
+END DEFINE
+
+
+PROCEDURE AccumulateRelevance(inputs: List[ScalarInput],
+                               D: StrategicDimension,
+                               delta: RelevanceMap) -> REAL:
+    // Compute Σⱼ δ(xⱼ, Dᵢ) — the activation sum for Definition 2.
+    total := 0.0
+    FOR EACH x_j IN inputs:
+        total := total + delta.Evaluate(x_j, D)
+    END FOR
+    RETURN total
+END PROCEDURE
+
+
+PROCEDURE IsContextuallyActive(inputs: List[ScalarInput],
+                                 D: StrategicDimension,
+                                 delta: RelevanceMap,
+                                 tau: REAL) -> BOOL:
+    // Definition 2 check: Σⱼ δ(xⱼ, Dᵢ) ≥ τ
+    accumulated := AccumulateRelevance(inputs, D, delta)
+    active := (accumulated >= tau)
+    EMIT LOG "Def 2 | dim=" + D.name + " | Σδ=" + accumulated +
+             " | τ=" + tau + " | active=" + active
+    RETURN active
+END PROCEDURE
+
+
+// ── DEFINITION 3: STRATEGIC VECTOR (CANONICAL) ───────────────
+
+// DEFINITION 3 (Strategic Vector) [July 4, 2025]:
+//   Let Sᵢ be a strategy for player i over active dimensions D_act. Then:
+//
+//     Sᵢ = s⃗ = [s_{D₁}, s_{D₂}, ..., s_{Dₖ}]  where Dⱼ ∈ D_act   (eq. 3)
+//
+// CANONICAL NOTES (July 2025 context):
+//   This definition became the S_game vector in the DAG Ephemeris Spec
+//   (PDF 6 §5.1, August 2025):
+//     S_game = [DAG_cost(v,n), vexameneria(v,n), p_conf(state)]
+//
+//   Each component of S_game corresponds to one active dimension:
+//     k=1: DAG_cost → s_{D_cost}
+//     k=2: vexameneria → s_{D_vex}
+//     k=3: p_conf → s_{D_conf}
+//
+//   The strategic vector is thus the formalization of the
+//   "three-dimensional strategic state" that drives ephemeris decisions.
+
+PROCEDURE BuildCanonicalStrategicVector(player_i: PlayerID,
+                                         D_act: List[StrategicDimension],
+                                         strategy: Strategy,
+                                         delta: RelevanceMap) -> CanonicalSV:
+    // Build s⃗ over D_act from July 4, 2025 Definition 3.
+
+    components := {}
+    k := LENGTH(D_act)
+
+    FOR j := 0 TO k-1:
+        D_j := D_act[j]
+        // s_{Dⱼ}: component of strategy along dimension Dⱼ
+        s_Dj := delta.Evaluate(Strategy.AsInput(strategy), D_j)
+        components[D_j.id] := s_Dj
+    END FOR
+
+    sv := CanonicalSV(
+        player_id  = player_i,
+        components = components,
+        D_act      = D_act,
+        k          = k,
+        version    = "V1_July2025"
+    )
+
+    EMIT LOG "Strategic vector (Def 3) | k=" + k +
+             " | components=" + components.values
+    RETURN sv
+END PROCEDURE
+
+
+// ── CROSS-DEFINITION CONSISTENCY CHECK ───────────────────────
+
+PROCEDURE VerifyDefinitionConsistency(inputs: List[ScalarInput],
+                                       D_universe: DimensionSet,
+                                       strategy: Strategy,
+                                       player_i: PlayerID,
+                                       epsilon: REAL,
+                                       tau: REAL) -> ConsistencyReport:
+    // Verify that Definitions 1, 2, 3 are mutually consistent:
+    //
+    // Rule: D_j should only appear in s⃗ (Def 3) if it is active (Def 2),
+    //       and a dimension should only be active if at least one input
+    //       has promoted into it (Def 1) with sufficient Σδ ≥ τ.
+
+    report := NEW ConsistencyReport()
+    delta  := RelevanceMap()
+    f_default := PromotionFunction.Default(NULL)
+
+    // Step 1: Identify which inputs can be promoted to each dimension
+    promotable_by_dim := {}
+    FOR EACH dim IN D_universe.dimensions:
+        promotable := [x FOR x IN inputs IF IsPromotable(x, dim, f_default, epsilon)]
+        promotable_by_dim[dim.id] := promotable
+    END FOR
+
+    // Step 2: Identify contextually active dimensions
+    active_dims := []
+    FOR EACH dim IN D_universe.dimensions:
+        IF IsContextuallyActive(inputs, dim, delta, tau):
+            active_dims.APPEND(dim)
+        END IF
+    END FOR
+
+    // Step 3: Build strategic vector over only active dims
+    sv := BuildCanonicalStrategicVector(player_i, active_dims, strategy, delta)
+
+    // Consistency check: no component in sv for inactive dimension
+    report.def1_def2_consistent := TRUE
+    FOR EACH (dim_id, score) IN sv.components:
+        IF score > 0.0 AND NOT AnyDimActive(active_dims, dim_id):
+            EMIT WARNING "Inconsistency: s_{D=" + dim_id + "}>0 but dim not active"
+            report.def1_def2_consistent := FALSE
+        END IF
+    END FOR
+
+    report.sv_only_active_dims   := ALL(sv.D_act IN active_dims)
+    report.active_dims_count     := LENGTH(active_dims)
+    report.sv_components         := sv.components
+    report.all_consistent        := report.def1_def2_consistent AND
+                                    report.sv_only_active_dims
+
+    RETURN report
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: dgt_variadic_v1_M3_theorem_and_mapping.psc.txt
+// ============================================================

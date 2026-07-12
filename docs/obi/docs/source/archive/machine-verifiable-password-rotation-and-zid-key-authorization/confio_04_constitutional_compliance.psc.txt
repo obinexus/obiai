@@ -1,0 +1,249 @@
+// ============================================================
+// FILE: confio_04_constitutional_compliance.psc.txt
+// MODULE 4: Constitutional Compliance Engine & Automated Governance
+// SOURCE: Machine_Verifiable_Password_Rotation_and_ZID_Key_Authorization.pdf
+// Sections: 4, 7, 8, 10
+// Legal Architect: Nnamdi Michael Okpala | OBINexus Computing
+// ============================================================
+
+// ------------------------------------------------------------
+// AXIOMS (Non-overridable constitutional constraints)
+// ------------------------------------------------------------
+
+// Axiom 4.1 (Zero Human Override):
+//   For all h in HumanActors: Override(h, decision) = UNDEFINED (⊥)
+//   No human actor may override any automated decision.
+
+// Axiom 4.2 (Automated Enforcement):
+//   All enforcement is machine-executed via smart contracts.
+//   No appeal mechanism exists.
+
+// Requirement 4.1 (Constitutional Validation):
+//   Execute(op) <=> ConstitutionalEngine(op) = VALID
+//   An operation executes IF AND ONLY IF the engine validates it.
+
+// ------------------------------------------------------------
+// CONSTANTS
+// ------------------------------------------------------------
+
+CONST ALLOWED_OPERATIONS = { create, read, update, delete }
+CONST HUMAN_OVERRIDE_PERMITTED = FALSE   // Axiom 4.1 — immutable
+
+// ------------------------------------------------------------
+// DATA STRUCTURES
+// ------------------------------------------------------------
+
+ENUM OperationStatus:
+    APPROVED
+    BLOCKED
+
+ENUM CertificationStatus:
+    APPROVED
+    REJECTED
+
+STRUCT Violation:
+    operation       : STRING
+    timestamp       : UNIX_TIMESTAMP
+    actor           : STRING
+    description     : STRING
+
+STRUCT Penalty:
+    tier            : INTEGER       // Penalty tier (1–3)
+    consequences    : LIST<STRING>  // Enumerated consequence steps
+    appealable      : BOOLEAN = FALSE   // Always FALSE per Axiom 4.1
+
+// ------------------------------------------------------------
+// SECTION 4.1: MACHINE-VERIFIABLE GOVERNANCE ENGINE
+// ------------------------------------------------------------
+
+CLASS ConstitutionalComplianceEngine:
+
+    ATTRIBUTE enforce_zero_trust    : BOOLEAN = TRUE
+    ATTRIBUTE allow_human_override  : BOOLEAN = FALSE  // Axiom 4.1
+
+    FUNCTION validate(operation) -> BOOLEAN:
+        // Constitutional gate: operation must be in allowed set
+        IF operation.type NOT IN ALLOWED_OPERATIONS THEN
+            RETURN FALSE
+        END IF
+
+        // Validate all required attributes are present and well-formed
+        IF NOT operation.has_valid_credentials() THEN
+            RETURN FALSE
+        END IF
+
+        IF NOT operation.has_valid_timestamp() THEN
+            RETURN FALSE
+        END IF
+
+        IF NOT operation.passes_zid_check() THEN
+            RETURN FALSE
+        END IF
+
+        RETURN TRUE
+    END FUNCTION
+
+    FUNCTION current_policy() -> PolicyState:
+        // Returns serializable representation of current constitutional policy
+        // Used to compute compliance_hash in Module 3
+        RETURN {
+            enforce_zero_trust   : self.enforce_zero_trust,
+            allow_human_override : self.allow_human_override,
+            allowed_operations   : ALLOWED_OPERATIONS,
+            version              : CONSTITUTIONAL_VERSION
+        }
+    END FUNCTION
+
+END CLASS
+
+// ------------------------------------------------------------
+// SECTION 8.2: CONSTITUTIONAL COMPLIANCE MONITOR
+// ------------------------------------------------------------
+
+CLASS ConstitutionalComplianceMonitor:
+
+    ATTRIBUTE engine               : ConstitutionalComplianceEngine = NEW ConstitutionalComplianceEngine()
+    ATTRIBUTE enforce_zero_trust   : BOOLEAN = TRUE
+    ATTRIBUTE allow_human_override : BOOLEAN = FALSE    // Axiom 4.1
+
+    FUNCTION monitor_operation(operation) -> OperationStatus:
+
+        IF NOT self.engine.validate(operation) THEN
+
+            // Step 1: Identify and record violation
+            violation = Violation {
+                operation   = operation.type,
+                timestamp   = current_unix_timestamp(),
+                actor       = operation.actor_id,
+                description = operation.describe_failure()
+            }
+
+            // Step 2: Calculate penalty
+            penalty = self.calculate_penalty(violation)
+
+            // Step 3: Execute automated consequence (smart contract)
+            self.execute_automated_consequence(penalty)
+
+            // Step 4: Block operation
+            RETURN OperationStatus.BLOCKED
+        END IF
+
+        RETURN OperationStatus.APPROVED
+    END FUNCTION
+
+    FUNCTION calculate_penalty(violation: Violation) -> Penalty:
+        // Penalty tier is determined by violation severity
+        // TODO: Clarify from source PDF — tier mapping rules not fully specified
+        tier = PenaltyEngine.classify(violation)
+        consequences = PenaltyEngine.enumerate_consequences(tier)
+        RETURN Penalty {
+            tier        = tier,
+            consequences= consequences,
+            appealable  = FALSE         // Per Axiom 4.1
+        }
+    END FUNCTION
+
+    FUNCTION execute_automated_consequence(penalty: Penalty):
+        SmartContract.execute(penalty)
+    END FUNCTION
+
+END CLASS
+
+// ------------------------------------------------------------
+// SECTION 8.1: CONSTITUTIONAL VIOLATION RESPONSE PROTOCOL
+// ------------------------------------------------------------
+
+// Protocol 8.1: Upon detection of constitutional violation v:
+
+FUNCTION handle_constitutional_violation(violation: Violation):
+
+    // Step 1: Log violation to append-only audit trail
+    AuditTrail.append({
+        violation : violation,
+        timestamp : current_unix_timestamp()
+    })
+
+    // Step 2: Calculate penalty using penalty engine
+    penalty = PenaltyEngine.calculate(violation)
+
+    // Step 3: Execute consequence via smart contract (automated, no human step)
+    SmartContract.execute(penalty)
+
+    // Step 4: Record permanently on blockchain
+    Blockchain.record(violation, penalty)
+
+    // NOTE: No appeals permitted — Axiom 4.1 is final and absolute.
+END FUNCTION
+
+// ------------------------------------------------------------
+// SECTION 7.1: POLYCORE v2 QA VALIDATION
+// ------------------------------------------------------------
+
+// All Confio modules must pass PolyCore v2 lifecycle soundness qualification.
+
+CLASS ConfioQAValidation:
+
+    FUNCTION validate_module(module) -> CertificationStatus:
+        // Gate 1: Unit tests must pass
+        ASSERT module.passes_unit_tests()
+
+        // Gate 2: Lifecycle soundness (state machine completeness)
+        ASSERT module.has_lifecycle_soundness()
+
+        // Gate 3: Performance baseline (see Module 5 for thresholds)
+        ASSERT module.meets_performance_baseline()
+
+        // Gate 4: Constitutional compliance check
+        ASSERT module.constitutional_compliance()
+
+        RETURN CertificationStatus.APPROVED
+
+    END FUNCTION
+
+END CLASS
+
+// ------------------------------------------------------------
+// SECTION 10.1: MANDATORY LEGAL COMPLIANCE REQUIREMENTS
+// ------------------------------------------------------------
+
+// All Confio implementations MUST enforce:
+
+LEGAL_REQUIREMENTS = {
+
+    REQUIREMENT_1: "Enforce annual password rotation without exception",
+    // Mechanism: password_update() checks rotation_is_due() — Module 2
+
+    REQUIREMENT_2: "Maintain 5-year password history with cryptographic integrity",
+    // Mechanism: prune_history_beyond_5_years() + PBKDF2 hash chain — Module 2
+
+    REQUIREMENT_3: "Generate ZID keys using non-isomorphic lattice structures",
+    // Mechanism: GenBasis(lambda, Cartesian) — Module 3
+
+    REQUIREMENT_4: "Validate all operations through Constitutional Compliance Engine",
+    // Mechanism: ConstitutionalComplianceMonitor.monitor_operation() — this module
+
+    REQUIREMENT_5: "Prohibit human intervention in automated decisions",
+    // Mechanism: allow_human_override = FALSE — Axiom 4.1
+
+    REQUIREMENT_6: "Log all operations with blockchain-verified audit trails"
+    // Mechanism: AuditTrail.append() + Blockchain.record() — this module
+}
+
+// ------------------------------------------------------------
+// SECTION 10.2: VIOLATION CONSEQUENCES
+// ------------------------------------------------------------
+
+// Protocol 10.1: Constitutional violations trigger (in sequence):
+
+PROCEDURE violation_consequence_sequence(actor_id):
+    STEP_1: revoke_access_immediately(actor_id)
+    STEP_2: permanently_exclude_from_obinexus_ecosystem(actor_id)
+    STEP_3: initiate_legal_proceedings(tier=3, actor=actor_id)
+    STEP_4: publish_public_documentation_of_violation(actor_id)
+    STEP_5: // No appeal — zero appeal rights per constitutional framework
+            LOG "Appeal pathway: NONE. Decision is final."
+END PROCEDURE
+
+// ============================================================
+// END MODULE 4
+// ============================================================

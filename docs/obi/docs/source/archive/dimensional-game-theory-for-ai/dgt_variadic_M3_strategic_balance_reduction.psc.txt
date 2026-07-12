@@ -1,0 +1,324 @@
+// ============================================================
+// FILE: dgt_variadic_M3_strategic_balance_reduction.psc.txt
+// MODULE 3 OF 5 — Strategic Balance, Strategic Vector,
+//                 Computational Reduction Theorem
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4: STRATEGIC BALANCE IN HIGH-DIMENSIONAL SYSTEMS
+// ------------------------------------------------------------
+
+// Core insight: adding parameters naively is computationally
+// infeasible. The solution is to define strategy as a function
+// OVER THE ACTIVE DIMENSIONAL SPACE only — not over all
+// possible dimensions.
+//
+// This is the computational feasibility principle of variadic DGT.
+
+
+// ── DEFINITION 3: STRATEGIC VECTOR ───────────────────────────
+
+// DEFINITION 3 (Strategic Vector):
+//   Let Sᵢ be a strategy for player i defined over active dimensions D_act.
+//   Then:
+//
+//     Sᵢ = s⃗ = [s_{D₁}, s_{D₂}, ..., s_{Dₖ}]  where Dⱼ ∈ D_act
+//
+//   The strategy vector has exactly k components, one per active dimension.
+//   Components outside D_act are ZERO (inactive dimensions do not contribute).
+
+DEFINE StrategicVector AS:
+    player_id  : PlayerID
+    components : Map[DimensionID → REAL]   // s_{Dⱼ} per active dimension
+    D_act      : List[StrategicDimension]  // basis — only active dims
+
+    INVARIANT: LENGTH(components) == LENGTH(D_act)
+    INVARIANT: ALL(components.keys IN [d.id FOR d IN D_act])
+
+    PROCEDURE GetComponent(dim_id: DimensionID) -> REAL:
+        IF dim_id IN components:
+            RETURN components[dim_id]
+        END IF
+        RETURN 0.0    // inactive dimension → zero contribution
+    END PROCEDURE
+
+    PROCEDURE Dimension() -> INT:
+        RETURN LENGTH(D_act)   // k — number of active dimensions
+    END PROCEDURE
+
+    PROCEDURE AsVector() -> Vector:
+        // Return ordered vector [s_{D₁}, ..., s_{Dₖ}]
+        RETURN Vector([components[d.id] FOR d IN D_act])
+    END PROCEDURE
+
+    PROCEDURE Norm() -> REAL:
+        RETURN NORM(AsVector())
+    END PROCEDURE
+END DEFINE
+
+
+PROCEDURE BuildStrategicVector(player_i: PlayerID,
+                                D_act: List[StrategicDimension],
+                                strategy: Strategy) -> StrategicVector:
+    // Construct the strategic vector s⃗ from a base strategy
+    // by projecting onto each active dimension.
+
+    components := {}
+    FOR EACH dim_j IN D_act:
+        // s_{Dⱼ}: effectiveness of this strategy along dimension Dⱼ
+        s_Dj := EffectivenessScore(strategy, dim_j)
+        components[dim_j.id] := s_Dj
+    END FOR
+
+    sv := StrategicVector(
+        player_id  = player_i,
+        components = components,
+        D_act      = D_act
+    )
+    RETURN sv
+END PROCEDURE
+
+
+PROCEDURE ValidateStrategicVector(sv: StrategicVector) -> BOOL:
+    // Verify all Definition 3 invariants hold.
+
+    // (1) One component per active dimension
+    IF LENGTH(sv.components) != LENGTH(sv.D_act):
+        EMIT ERROR "StrategicVector: component count ≠ D_act size"
+        RETURN FALSE
+    END IF
+
+    // (2) All component keys correspond to active dimensions
+    active_ids := SET([d.id FOR d IN sv.D_act])
+    FOR EACH dim_id IN sv.components.keys:
+        IF dim_id NOT IN active_ids:
+            EMIT ERROR "StrategicVector: component " + dim_id +
+                       " not in D_act"
+            RETURN FALSE
+        END IF
+    END FOR
+
+    EMIT INFO "StrategicVector validated | k=" + sv.Dimension() +
+              " | ‖s⃗‖=" + sv.Norm()
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── STRATEGIC VECTOR OPERATIONS ──────────────────────────────
+
+PROCEDURE StrategicVectorDotProduct(sv1: StrategicVector,
+                                     sv2: StrategicVector) -> REAL:
+    // s⃗₁ · s⃗₂ over shared active dimensions.
+    // Dimensions not in both vectors contribute 0.
+
+    shared_dims := INTERSECTION([d.id FOR d IN sv1.D_act],
+                                  [d.id FOR d IN sv2.D_act])
+    dot := 0.0
+    FOR EACH dim_id IN shared_dims:
+        dot := dot + sv1.GetComponent(dim_id) * sv2.GetComponent(dim_id)
+    END FOR
+    RETURN dot
+END PROCEDURE
+
+
+PROCEDURE StrategicVectorCosineSimilarity(sv1: StrategicVector,
+                                           sv2: StrategicVector) -> REAL:
+    // Strategic alignment between two players' vectors.
+    // cos(s⃗₁, s⃗₂) = (s⃗₁ · s⃗₂) / (‖s⃗₁‖ · ‖s⃗₂‖)
+    dot_val := StrategicVectorDotProduct(sv1, sv2)
+    n1      := sv1.Norm()
+    n2      := sv2.Norm()
+    IF n1 < 1e-12 OR n2 < 1e-12:
+        RETURN 0.0   // degenerate zero vectors
+    END IF
+    RETURN dot_val / (n1 * n2)
+END PROCEDURE
+
+
+PROCEDURE StrategicVectorDistance(sv1: StrategicVector,
+                                   sv2: StrategicVector) -> REAL:
+    // Euclidean distance between two strategic vectors in D_act space.
+    // Used for detecting strategic imbalance (Corollary 1, PDF 8).
+
+    all_dims := UNION([d.id FOR d IN sv1.D_act],
+                       [d.id FOR d IN sv2.D_act])
+    dist_sq := 0.0
+    FOR EACH dim_id IN all_dims:
+        diff := sv1.GetComponent(dim_id) - sv2.GetComponent(dim_id)
+        dist_sq := dist_sq + diff ^ 2
+    END FOR
+    RETURN SQRT(dist_sq)
+END PROCEDURE
+
+
+// ── COMPUTATIONAL REDUCTION THEOREM ──────────────────────────
+
+// THEOREM (Computational Reduction):
+//   The game is solvable within tractable bounds IFF:
+//
+//     |D_act| ≤ Θ
+//
+//   where Θ is the system-defined computability threshold.
+//
+// Rationale:
+//   - With |D_act| dimensions, strategy space has |A|^|D_act| elements
+//   - For exponential action spaces, this blows up unless |D_act| is bounded
+//   - Θ represents the system's computational budget for strategy optimization
+//   - Cross-reference PDF 9 §6.2 (same bound: |D_act| ≤ Θ, eq. 12)
+//   - Cross-reference PDF 6 §7.1: O(K·N·log N) tractability per pair
+
+CONSTANT THETA_COMPUTABILITY := 8   // Θ — default computability threshold
+                                     // (same as THETA_MAX_DIMENSIONS in PDF 9)
+
+
+PROCEDURE IsGameTractable(G: VariadicGame) -> BOOL:
+    // Theorem: game is tractable IFF |D_act| ≤ Θ
+    k := G.D.ActiveCount()
+    IF k <= THETA_COMPUTABILITY:
+        EMIT INFO "Game TRACTABLE | |D_act|=" + k + " ≤ Θ=" + THETA_COMPUTABILITY
+        RETURN TRUE
+    ELSE:
+        EMIT WARNING "Game INTRACTABLE | |D_act|=" + k + " > Θ=" + THETA_COMPUTABILITY
+        RETURN FALSE
+    END IF
+END PROCEDURE
+
+
+PROCEDURE EstimateSearchSpaceSize(G: VariadicGame) -> INT:
+    // Estimate strategy search space given active dimensions.
+    // |A|^|D_act| — exponential in number of active dimensions.
+    k          := G.D.ActiveCount()
+    actions    := LENGTH(G.A.AvailableActions(G.D))
+    RETURN actions ^ k
+END PROCEDURE
+
+
+PROCEDURE EnforceComputabilityBound(G: VariadicGame,
+                                     theta: INT) -> VariadicGame:
+    // If |D_act| > Θ, deactivate lowest-relevance dimensions.
+    // Returns G with at most Θ active dimensions.
+
+    WHILE G.D.ActiveCount() > theta:
+        // Find least relevant currently active dimension
+        least_relevant := FindLeastRelevantActiveDimension(G)
+        G.D.Deactivate(least_relevant.id)
+        EMIT INFO "Deactivated dim=" + least_relevant.name +
+                  " to enforce |D_act| ≤ Θ=" + theta
+    END WHILE
+
+    ASSERT G.D.ActiveCount() <= theta
+    RETURN G
+END PROCEDURE
+
+
+PROCEDURE FindLeastRelevantActiveDimension(G: VariadicGame) -> StrategicDimension:
+    // Among active dimensions, find the one with lowest aggregate relevance.
+    // Relevance is measured by mean activation score across recent inputs.
+
+    active_dims := G.D.ActiveList()
+    IF LENGTH(active_dims) == 0:
+        RETURN NULL
+    END IF
+
+    min_relevance := POSITIVE_INFINITY
+    least_relevant := active_dims[0]
+
+    FOR EACH dim IN active_dims:
+        mean_relevance := G.ComputeMeanRelevance(dim)
+        IF mean_relevance < min_relevance:
+            min_relevance := mean_relevance
+            least_relevant := dim
+        END IF
+    END FOR
+
+    RETURN least_relevant
+END PROCEDURE
+
+
+// ── THEOREM VERIFICATION ──────────────────────────────────────
+
+PROCEDURE VerifyComputationalReductionTheorem(G: VariadicGame,
+                                               theta: INT) -> TheoremVerification:
+
+    k := G.D.ActiveCount()
+
+    // Tractability condition
+    tractable := (k <= theta)
+
+    // Search space estimate
+    search_space := EstimateSearchSpaceSize(G)
+
+    // If not tractable, compute reduced version
+    reduced_G    := NULL
+    reduced_size := NULL
+    IF NOT tractable:
+        reduced_G    := EnforceComputabilityBound(COPY(G), theta)
+        reduced_size := EstimateSearchSpaceSize(reduced_G)
+        EMIT INFO "Reduced search space: " + search_space + " → " + reduced_size
+    END IF
+
+    verification := TheoremVerification(
+        theorem      = "Computational Reduction",
+        k_active     = k,
+        theta        = theta,
+        tractable    = tractable,
+        search_space = search_space,
+        reduced_size = reduced_size
+    )
+
+    IF tractable:
+        EMIT INFO "THEOREM VERIFIED: |D_act|=" + k + " ≤ Θ=" + theta +
+                  " | search_space=" + search_space
+    ELSE:
+        EMIT WARNING "THEOREM: game requires dimension reduction | " +
+                     "|D_act|=" + k + " > Θ=" + theta
+    END IF
+
+    RETURN verification
+END PROCEDURE
+
+
+// ── STRATEGIC MINIMUM COMPUTATION ────────────────────────────
+
+PROCEDURE ComputeStrategicMinimum(G: VariadicGame,
+                                   player_i: PlayerID) -> StrategicVector:
+    // Find the strategy that minimizes cost (maximizes utility) for player i
+    // within the tractable dimensional subspace.
+
+    // Enforce computability bound first
+    G := EnforceComputabilityBound(G, THETA_COMPUTABILITY)
+
+    D_act      := G.D.ActiveList()
+    A_current  := G.A.AvailableActions(G.D)
+
+    best_sv    := NULL
+    best_util  := NEGATIVE_INFINITY
+
+    FOR EACH action IN A_current:
+        strategy := Strategy.fromAction(action)
+        sv       := BuildStrategicVector(player_i, D_act, strategy)
+
+        // Compute utility under current D_act
+        profile := ActionProfile.fromStrategy(player_i, strategy, G.N)
+        util    := G.Utility(player_i, profile)
+
+        IF util > best_util:
+            best_util := util
+            best_sv   := sv
+        END IF
+    END FOR
+
+    EMIT INFO "Strategic minimum found for player " + player_i +
+              " | utility=" + best_util
+    RETURN best_sv
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: dgt_variadic_M4_activation_mapping_integration.psc.txt
+// ============================================================

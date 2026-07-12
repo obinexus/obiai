@@ -1,0 +1,217 @@
+// ============================================================
+// FILE: bayesian_debiasing_M3_algorithm.psc.txt
+// MODULE 3 OF 5 — Bias Detection & Mitigation Algorithm
+// SOURCE: "A Bayesian Network Framework for Mitigating Bias
+//          in Machine Learning Systems"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// ============================================================
+
+// This module implements Algorithm 1 from the paper:
+// "Bayesian Bias Mitigation" — full MCMC-based inference loop.
+
+
+// ------------------------------------------------------------
+// SECTION 4: ALGORITHM 1 — BAYESIAN BIAS MITIGATION
+// ------------------------------------------------------------
+
+// PRECONDITIONS:
+//   D  — Dataset (labelled instances)
+//   G  — DAG structure encoding causal relationships
+//   α  — Prior hyperparameters for true risk parameters θ
+//   β  — Prior hyperparameters for bias factors ϕ
+//
+// POSTCONDITION:
+//   Returns debiased model parameters θ (bias marginalized out)
+
+ALGORITHM BayesianBiasMitigation(D: Dataset, G: DAG,
+                                  α: Hyperprior, β: Hyperprior,
+                                  num_iterations: INT) -> θ_debiased:
+
+    // ── INITIALIZATION ─────────────────────────────────────
+    ϕ_current := SAMPLE_FROM_PRIOR(β)     // ϕ⁽⁰⁾ ~ P(ϕ | β)
+    θ_current := SAMPLE_FROM_PRIOR(α)     // θ⁽⁰⁾ ~ P(θ | α)
+
+    θ_samples := []   // collector for posterior samples of θ
+    ϕ_samples := []   // collector for posterior samples of ϕ
+
+    // ── MAIN MCMC LOOP ─────────────────────────────────────
+    FOR t := 1 TO num_iterations:
+
+        // ── INNER LOOP: iterate over all data points ────────
+        FOR EACH (xᵢ, yᵢ) IN D:
+
+            // Step 5 — Compute likelihood of observation given current params
+            likelihood_i := ComputeLikelihood(yᵢ, xᵢ, θ_current, ϕ_current)
+            //   P(yᵢ | xᵢ, θ, ϕ) evaluated under current DAG G
+
+            // Step 6 — Update θ via Metropolis-Hastings (MH)
+            θ_current := MetropolisHastingsStep(
+                current       = θ_current,
+                likelihood_fn = λ(θ) → ComputeLikelihood(yᵢ, xᵢ, θ, ϕ_current),
+                prior_fn      = λ(θ) → EvaluatePrior(θ, α)
+            )
+
+            // Step 7 — Update ϕ via Gibbs Sampling
+            ϕ_current := GibbsSamplingStep(
+                current        = ϕ_current,
+                conditional_fn = λ(ϕ) → P(ϕ | θ_current, xᵢ, yᵢ, β)
+            )
+
+        END FOR   // end inner loop over data
+
+        // Step 9 — Evaluate bias metrics on held-out validation set
+        bias_metrics_t := EvaluateBiasMetrics(θ_current, ϕ_current, D.validation_set)
+        EMIT LOG "Iteration " + t + " | Bias metrics: " + bias_metrics_t
+
+        // Collect samples for later marginalization
+        θ_samples.APPEND(θ_current)
+        ϕ_samples.APPEND(ϕ_current)
+
+    END FOR   // end outer MCMC loop
+
+    // ── MARGINALIZATION ─────────────────────────────────────
+    // Step 11: P(θ | D) = ∫ P(θ, ϕ | D) dϕ
+    // Approximated by averaging over collected ϕ samples (Monte Carlo):
+    θ_debiased := MarginalizeBias(θ_samples, ϕ_samples)
+
+    RETURN θ_debiased
+
+END ALGORITHM
+
+
+// ------------------------------------------------------------
+// SUBROUTINE: METROPOLIS-HASTINGS STEP (for θ update)
+// ------------------------------------------------------------
+
+PROCEDURE MetropolisHastingsStep(current θ, likelihood_fn: Function,
+                                  prior_fn: Function) -> θ_next:
+
+    // Propose a new candidate θ' from proposal distribution q
+    θ_proposed := SAMPLE_FROM_PROPOSAL(current=θ, proposal_distribution=q)
+
+    // Compute log acceptance ratio (log for numerical stability):
+    //   log α = log P(data | θ') + log P(θ') - log P(data | θ) - log P(θ)
+    log_ratio := (
+        LOG(likelihood_fn(θ_proposed)) + LOG(prior_fn(θ_proposed)) -
+        LOG(likelihood_fn(θ))          - LOG(prior_fn(θ))
+    )
+
+    // Account for asymmetric proposals (Hastings correction):
+    //   + log q(θ | θ') - log q(θ' | θ)
+    log_ratio += LOG(ProposalDensity(θ, given=θ_proposed)) -
+                 LOG(ProposalDensity(θ_proposed, given=θ))
+
+    // Accept or reject:
+    u := SAMPLE_UNIFORM(0, 1)
+    IF LOG(u) < log_ratio:
+        RETURN θ_proposed    // accept
+    ELSE:
+        RETURN θ             // reject — keep current
+    END IF
+
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SUBROUTINE: GIBBS SAMPLING STEP (for ϕ update)
+// ------------------------------------------------------------
+
+PROCEDURE GibbsSamplingStep(current ϕ, conditional_fn: Function) -> ϕ_next:
+
+    // Gibbs sampling draws from the full conditional distribution.
+    // For each bias component ϕⱼ, sample from:
+    //   P(ϕⱼ | ϕ₋ⱼ, θ, data)
+    // where ϕ₋ⱼ = all components of ϕ except the j-th.
+
+    ϕ_next := COPY(ϕ)
+    FOR EACH component j IN ϕ.components:
+        ϕ_next[j] := SAMPLE_FROM(conditional_fn(
+            ϕ_context = ϕ_next.excluding(j)
+        ))
+    END FOR
+
+    RETURN ϕ_next
+
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SUBROUTINE: MARGINALIZATION OVER BIAS PARAMETERS
+// ------------------------------------------------------------
+
+PROCEDURE MarginalizeBias(θ_samples: List, ϕ_samples: List) -> θ_marginal:
+
+    // Monte Carlo approximation of:
+    //   P(θ | D) = ∫ P(θ, ϕ | D) dϕ  ≈  (1/T) Σₜ θ⁽ᵗ⁾
+    //
+    // Because samples are drawn from the joint posterior P(θ, ϕ | D),
+    // simply averaging θ samples marginalizes over ϕ.
+
+    n := LENGTH(θ_samples)
+    θ_sum := ZERO_LIKE(θ_samples[0])
+
+    FOR EACH θ_t IN θ_samples:
+        θ_sum := θ_sum + θ_t
+    END FOR
+
+    θ_marginal := θ_sum / n
+    RETURN θ_marginal
+
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SUBROUTINE: LIKELIHOOD COMPUTATION
+// ------------------------------------------------------------
+
+PROCEDURE ComputeLikelihood(y: Label, x: Features,
+                             θ: Parameters, ϕ: BiasParams) -> REAL:
+
+    // P(y | x, θ, ϕ) — specific form depends on model family.
+    // General probabilistic model likelihood:
+    //   For binary outcomes: Bernoulli likelihood
+    //   For continuous: Gaussian likelihood
+
+    eta := LinearPredictor(x, θ)        // θᵀx  (linear component)
+    eta := eta + BiasCorrection(x, ϕ)   // ϕ modifies prediction per group
+
+    IF y.type == BINARY:
+        p := SIGMOID(eta)
+        RETURN BERNOULLI_PMF(y, p)
+    ELSE IF y.type == CONTINUOUS:
+        RETURN GAUSSIAN_PDF(y, mean=eta, std=ϕ.noise_scale)
+    END IF
+
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SUBROUTINE: BIAS METRICS EVALUATION (per MCMC iteration)
+// ------------------------------------------------------------
+
+PROCEDURE EvaluateBiasMetrics(θ: Parameters, ϕ: BiasParams,
+                               validation_set V: Dataset) -> BiasMetricReport:
+
+    report := NEW BiasMetricReport()
+
+    // Demographic parity gap: |P(Ŷ=1|A=a) - P(Ŷ=1|A=a')|
+    FOR EACH pair (group_a, group_a_prime) IN V.group_pairs:
+        p_a       := PredictionRate(θ, ϕ, V.subset(group_a))
+        p_a_prime := PredictionRate(θ, ϕ, V.subset(group_a_prime))
+        report.parity_gap[group_a, group_a_prime] := ABS(p_a - p_a_prime)
+    END FOR
+
+    // Equalized odds (TPR/FPR parity across groups)
+    // TODO: Clarify from source PDF — equalized odds not explicitly specified
+
+    report.bias_magnitude := MAX(report.parity_gap.values)
+    RETURN report
+
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: bayesian_debiasing_M4_guarantees_validation.psc.txt
+// ============================================================

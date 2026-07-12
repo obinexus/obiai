@@ -1,0 +1,215 @@
+// ============================================================
+// FILE: aegis_proof_4_1_M1_foundation.psc.txt
+// MODULE 1 OF 5 — Mathematical Foundation & Tissue Fragility Constraints
+// SOURCE: "AEGIS-PROOF-4.1: Computational Implementation Specification
+//          Safety-Critical Hospital Systems with Fragile Tissue Interaction"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// DEPENDS_ON: AEGIS-PROOF-3.1, AEGIS-PROOF-3.2, AEGIS-PROOF-1.2
+// ============================================================
+
+// ── PROOF CHAIN POSITION ─────────────────────────────────────
+//
+//   AEGIS-PROOF-1.1 : Cost-Knowledge Monotonicity           (prior)
+//   AEGIS-PROOF-1.2 : Traversal Cost Function Safety        (prior)
+//   AEGIS-PROOF-3.1 : Filter-Flash Monotonicity             (prior)
+//   AEGIS-PROOF-3.2 : Hybrid Mode Convergence               (prior)
+//   AEGIS-PROOF-4.1 : Computational Implementation          (THIS)
+//                     Safety-Critical Hospital Systems
+
+DEFINE ProofContext AS:
+    id          := "AEGIS-PROOF-4.1"
+    domain      := SAFETY_CRITICAL_HOSPITAL
+    subject     := "Fragile Tissue Interaction — Inverse Kinematics Force Control"
+    depends_on  := ["AEGIS-PROOF-3.1", "AEGIS-PROOF-3.2", "AEGIS-PROOF-1.2"]
+    epsilon_safety := 0.6      // ε_safety ≤ 0.6 (DIRAM governance — inherited)
+    confidence_threshold := 0.954   // 95.4% epistemic confidence
+    compliance  := ["NASA-STD-8739.8", "ISO 13485:2016", "IEEE Medical Robotics 2025"]
+END DEFINE
+
+
+// ── SECTION 1: EXECUTIVE SUMMARY — THE FRAGILE PATIENT ANALOGY ──
+
+// Design principle: human tissue is a complex VISCOELASTIC SYSTEM
+// requiring real-time adaptation.
+//
+// Failure modes:
+//   Under-force: task fails
+//   Over-force:  irreversible tissue/bone damage
+//
+// Solution: Ax = b matrix-based pressure control with real-time
+//           safety clamping + Filter-Flash cognitive mode selection.
+
+DEFINE FragilePatientModel AS:
+    // Patient is modelled as a viscoelastic body with patient-specific
+    // fragility parameters.
+    tissue_model := VISCOELASTIC
+    adaptation   := REAL_TIME
+    irreversible_damage_threshold := ENFORCED   // hard stop — never exceed
+END DEFINE
+
+
+// ── SECTION 2.1: MATRIX-BASED PRESSURE CALCULATION SYSTEM ────
+
+// Linear system: Ax = b
+//
+//       ⎡ 2   5   3 ⎤         ⎡ x ⎤         ⎡ 12       ⎤
+//   A = ⎢ 5   2   6 ⎥    x =  ⎢ y ⎥    b =  ⎢ 13       ⎥
+//       ⎣ αp  βp  γp⎦         ⎣ z ⎦         ⎣ P_target ⎦
+//
+//   A : force distribution coefficients (bottom row patient-specific)
+//   x : spatial force components (x, y, z)
+//   b : target pressure constraints (bottom entry = P_target per patient)
+
+DEFINE PressureMatrix A AS:
+    // Standard rows (force coupling):
+    row_1 : [2.0, 5.0, 3.0]
+    row_2 : [5.0, 2.0, 6.0]
+    // Patient-specific row (parameterized):
+    row_3 : [alpha_p, beta_p, gamma_p]   // computed from patient fragility profile
+END DEFINE
+
+DEFINE ForceVector x AS:
+    x_spatial : REAL    // x-component of applied force
+    y_spatial : REAL    // y-component of applied force
+    z_spatial : REAL    // z-component of applied force
+END DEFINE
+
+DEFINE ConstraintVector b AS:
+    constraint_x  : 12.0     // fixed baseline constraint
+    constraint_y  : 13.0     // fixed baseline constraint
+    P_target      : REAL     // patient-specific pressure target (dynamic)
+END DEFINE
+
+
+PROCEDURE BuildPressureMatrix(patient: PatientProfile) -> Matrix3x3:
+    // Construct A with patient-specific bottom row coefficients
+    alpha_p := DeriveAlpha(patient)
+    beta_p  := DeriveBeta(patient)
+    gamma_p := DeriveGamma(patient)
+
+    A := Matrix3x3(
+        row1=[2.0, 5.0, 3.0],
+        row2=[5.0, 2.0, 6.0],
+        row3=[alpha_p, beta_p, gamma_p]
+    )
+    RETURN A
+END PROCEDURE
+
+
+PROCEDURE BuildConstraintVector(target: InteractionTarget,
+                                 patient: PatientProfile) -> Vector3:
+    P_target := ComputeTargetPressure(target, patient)
+    b := Vector3(12.0, 13.0, P_target)
+    RETURN b
+END PROCEDURE
+
+
+PROCEDURE DeriveAlpha(patient: PatientProfile) -> REAL:
+    // α_p: bone density contribution to force distribution
+    RETURN patient.bone_density * patient.age_factor
+END PROCEDURE
+
+PROCEDURE DeriveBeta(patient: PatientProfile) -> REAL:
+    // β_p: tissue compliance contribution
+    RETURN patient.tissue_compliance * patient.vascularity_index
+END PROCEDURE
+
+PROCEDURE DeriveGamma(patient: PatientProfile) -> REAL:
+    // γ_p: medication and condition modifier
+    RETURN patient.medication_factor * patient.condition_severity
+END PROCEDURE
+
+
+// ── SECTION 2.2: TISSUE FRAGILITY CONSTRAINTS ─────────────────
+
+// Three force/pressure constraints that must NEVER be violated:
+//
+//   (5) Bone force:       F_bone    ≤ F_fracture_threshold = κ · age_factor · density_factor
+//   (6) Soft tissue:      P_soft    ≤ P_bruise_threshold   = λ · vascularity_index
+//   (7) Force rate limit: F_dot     ≤ F_dot_max            = μ / adaptation_time
+
+DEFINE FragilityConstraints AS:
+    kappa : REAL    // bone fracture scaling constant
+    lambda_v : REAL // soft tissue bruise scaling constant
+    mu    : REAL    // force rate scaling constant
+END DEFINE
+
+
+PROCEDURE ComputeFractureThreshold(patient: PatientProfile,
+                                    kappa: REAL) -> REAL:
+    // F_fracture = κ · age_factor · density_factor
+    RETURN kappa * patient.age_factor * patient.bone_density
+END PROCEDURE
+
+PROCEDURE ComputeBruiseThreshold(patient: PatientProfile,
+                                  lambda_v: REAL) -> REAL:
+    // P_bruise = λ · vascularity_index
+    RETURN lambda_v * patient.vascularity_index
+END PROCEDURE
+
+PROCEDURE ComputeMaxForceRate(patient: PatientProfile, mu: REAL) -> REAL:
+    // F_dot_max = μ / adaptation_time
+    IF patient.adaptation_time <= 0:
+        EMIT ERROR "adaptation_time must be > 0"
+        RETURN 0.0
+    END IF
+    RETURN mu / patient.adaptation_time
+END PROCEDURE
+
+
+PROCEDURE ValidateForceAgainstFragility(F_bone: REAL, P_soft: REAL,
+                                         F_dot: REAL,
+                                         patient: PatientProfile,
+                                         constraints: FragilityConstraints) -> FragilityCheckResult:
+
+    result := NEW FragilityCheckResult()
+
+    // Check (5): bone force
+    F_thresh := ComputeFractureThreshold(patient, constraints.kappa)
+    result.bone_ok := (F_bone <= F_thresh)
+    IF NOT result.bone_ok:
+        EMIT CRITICAL "Bone force F=" + F_bone + " exceeds fracture threshold " + F_thresh
+    END IF
+
+    // Check (6): soft tissue pressure
+    P_thresh := ComputeBruiseThreshold(patient, constraints.lambda_v)
+    result.soft_ok := (P_soft <= P_thresh)
+    IF NOT result.soft_ok:
+        EMIT CRITICAL "Soft tissue P=" + P_soft + " exceeds bruise threshold " + P_thresh
+    END IF
+
+    // Check (7): force rate
+    F_dot_max := ComputeMaxForceRate(patient, constraints.mu)
+    result.rate_ok := (F_dot <= F_dot_max)
+    IF NOT result.rate_ok:
+        EMIT CRITICAL "Force rate F_dot=" + F_dot + " exceeds max " + F_dot_max
+    END IF
+
+    result.all_safe := result.bone_ok AND result.soft_ok AND result.rate_ok
+    RETURN result
+END PROCEDURE
+
+
+// ── PATIENT PROFILE STRUCTURE ─────────────────────────────────
+
+DEFINE PatientProfile AS:
+    patient_id      : PatientID
+    age_factor      : REAL    // normalized: 0=young, 1=elderly
+    bone_density    : REAL    // normalized: 0=osteoporotic, 1=healthy
+    tissue_compliance : REAL  // normalized: 0=stiff, 1=highly compliant
+    vascularity_index : REAL  // normalized: 0=low, 1=high vascular density
+    adaptation_time : REAL    // seconds: tissue response time
+    medication_factor : REAL  // modifier from current medications
+    condition_severity : REAL // normalized: 0=healthy, 1=critical
+
+    // All factors ∈ [0, 1] normalized
+    INVARIANT: AllFieldsInRange([0.0, 1.0])
+END DEFINE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: aegis_proof_4_1_M2_realtime_solver.psc.txt
+// ============================================================

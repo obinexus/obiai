@@ -1,0 +1,332 @@
+// ============================================================
+// FILE: obiai_thesis_M4_drift_detection_safety.psc.txt
+// MODULE 4 OF 5 — Drift Detection Mathematics, Failure Scale,
+//                 Safety/Ethical Governance (MALPAARTICE)
+// SOURCE: "Data Drift Mitigation for a Polyglot Ontological Bayesian
+//          Infrastructure..." (OBIAI Thesis)
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing
+// DATE:   September 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// CHAPTER 6: DATA DRIFT DETECTION MECHANISMS
+// ------------------------------------------------------------
+
+// ── §6.1: MATHEMATICAL FOUNDATION ────────────────────────────
+
+// The drift detection formula:
+//
+//   ε(t) = KL(P_current ‖ P_baseline) + α · temporal_shift(t)   (eq. 6.1)
+//
+//   ε(t)           : total drift at time t
+//   KL(P ‖ Q)      : Kullback-Leibler divergence (distributional drift)
+//   temporal_shift : time-dependent drift component (environmental change)
+//   α              : temporal weighting coefficient
+
+PROCEDURE DriftMeasure(P_current: Distribution, P_baseline: Distribution,
+                        t: REAL, alpha_drift: REAL) -> REAL:
+    // ε(t) = KL(P_current ‖ P_baseline) + α · temporal_shift(t)
+
+    kl_term       := KLDivergence(P_current, P_baseline, n=P_current.dim)
+    temporal_term := alpha_drift * TemporalShift(t)
+
+    epsilon_t := kl_term + temporal_term
+
+    // Map to signed failure scale [-12, +12]
+    signed_drift := ScaleToFailureRange(epsilon_t)
+    RETURN signed_drift
+END PROCEDURE
+
+
+PROCEDURE KLDivergence(P: Distribution, Q: Distribution, n: INT) -> REAL:
+    // KL(P ‖ Q) = Σ P(x) · log(P(x) / Q(x))
+    // Uses numerically stable variant with ε_min floor (cross-ref AEGIS-PROOF-1.2)
+    CONSTANT EPSILON_MIN := 1e-12
+    kl := 0.0
+    FOR k := 0 TO n-1:
+        p_k := P[k]
+        q_k := MAX(Q[k], EPSILON_MIN)
+        IF p_k > 0.0:
+            kl := kl + p_k * LOG(p_k / q_k)
+        END IF
+    END FOR
+    ASSERT kl >= 0.0
+    RETURN kl
+END PROCEDURE
+
+
+PROCEDURE TemporalShift(t: REAL) -> REAL:
+    // Time-dependent drift component.
+    // Models gradual environmental change over time.
+    // Can be fitted from historical data; default: linear growth.
+    RETURN t / TEMPORAL_NORMALIZATION_CONSTANT
+END PROCEDURE
+
+
+PROCEDURE ScaleToFailureRange(epsilon: REAL) -> REAL:
+    // Map raw ε ∈ [0, ∞) to signed failure scale [-12, +12].
+    // Uses sigmoid-based compression to avoid unbounded values.
+    // Sign determined separately by IsHumanSideDrift.
+
+    // Compress: larger ε → approaches ±12 asymptotically
+    magnitude := 12.0 * (1.0 - EXP(-epsilon))
+    RETURN magnitude   // caller applies sign
+END PROCEDURE
+
+
+// ── §6.2: BIDIRECTIONAL FAILURE SCALE ────────────────────────
+
+// Table 6.1: Bidirectional Failure Scale
+//
+//   Range          Zone              Description
+//   [-12, -9]      AI Panic          Critical system failure
+//   [-9,  -6]      AI Warning        Degraded performance
+//   [-6,  -3]      AI Caution        Minor anomalies
+//   [-3,  +3]      Green Zone        Optimal operation ← OBIAI target
+//   [+3,  +6]      Human Stress Low  User adaptation needed
+//   [+6,  +9]      Human Stress Med  Significant user burden
+//   [+9,  +12]     Human Distress    User overwhelmed
+
+DEFINE FailureScale AS:
+    ZONE_AI_PANIC         := RANGE[-12.0, -9.0]
+    ZONE_AI_WARNING       := RANGE[-9.0,  -6.0]
+    ZONE_AI_CAUTION       := RANGE[-6.0,  -3.0]
+    ZONE_GREEN            := RANGE[-3.0,  +3.0]   // ← optimal
+    ZONE_HUMAN_STRESS_LOW := RANGE[+3.0,  +6.0]
+    ZONE_HUMAN_STRESS_MED := RANGE[+6.0,  +9.0]
+    ZONE_HUMAN_DISTRESS   := RANGE[+9.0,  +12.0]
+END DEFINE
+
+DEFINE ZoneClassification AS ENUM:
+    AI_PANIC
+    AI_WARNING
+    AI_CAUTION
+    GREEN_ZONE
+    HUMAN_STRESS_LOW
+    HUMAN_STRESS_MED
+    HUMAN_DISTRESS
+END DEFINE
+
+PROCEDURE ClassifyDriftZone(drift: REAL) -> ZoneClassification:
+    // Map signed drift value to zone classification
+
+    IF drift < -9.0:
+        RETURN AI_PANIC
+    ELSE IF drift < -6.0:
+        RETURN AI_WARNING
+    ELSE IF drift < -3.0:
+        RETURN AI_CAUTION
+    ELSE IF drift <= +3.0:
+        RETURN GREEN_ZONE
+    ELSE IF drift <= +6.0:
+        RETURN HUMAN_STRESS_LOW
+    ELSE IF drift <= +9.0:
+        RETURN HUMAN_STRESS_MED
+    ELSE:
+        RETURN HUMAN_DISTRESS
+    END IF
+END PROCEDURE
+
+PROCEDURE GetZoneResponse(zone: ZoneClassification) -> ZoneResponse:
+    // Recommended system response per zone
+    MATCH zone:
+        CASE AI_PANIC:
+            RETURN ZoneResponse(cascade=EZE, action=EMERGENCY_HALT,
+                                description="Critical system failure — halt")
+        CASE AI_WARNING:
+            RETURN ZoneResponse(cascade=EZE, action=FALLBACK_MODE,
+                                description="Degraded — Eze override active")
+        CASE AI_CAUTION:
+            RETURN ZoneResponse(cascade=UCHE, action=RECALIBRATE,
+                                description="Minor anomalies — Uche adaptation")
+        CASE GREEN_ZONE:
+            RETURN ZoneResponse(cascade=OBINEXUS, action=NORMAL_OPERATION,
+                                description="Optimal — Obinexus baseline")
+        CASE HUMAN_STRESS_LOW:
+            RETURN ZoneResponse(cascade=UCHE, action=USER_SUPPORT,
+                                description="User adaptation needed")
+        CASE HUMAN_STRESS_MED:
+            RETURN ZoneResponse(cascade=UCHE, action=INCREASED_SUPPORT,
+                                description="Significant user burden")
+        CASE HUMAN_DISTRESS:
+            RETURN ZoneResponse(cascade=EZE, action=INTERVENTION,
+                                description="User overwhelmed — immediate intervention")
+    END MATCH
+END PROCEDURE
+
+
+// ── DRIFT MONITORING PIPELINE ─────────────────────────────────
+
+PROCEDURE ContinuousDriftMonitor(input_stream: Stream[DataPoint],
+                                   baseline: DataDistribution,
+                                   cascade: DIRAMCascade,
+                                   alpha_drift: REAL) -> VOID:
+    // Continuous monitoring loop — runs alongside main processing.
+
+    WHILE monitoring_active:
+        x_t := input_stream.peek_latest()
+        epsilon_t := DriftMeasure(x_t.distribution, baseline,
+                                   CURRENT_TIME(), alpha_drift)
+
+        zone := ClassifyDriftZone(epsilon_t)
+        response := GetZoneResponse(zone)
+
+        // Escalate cascade if needed
+        IF response.cascade == UCHE AND UCHE NOT IN cascade.active_tiers:
+            cascade.ActivateTier(UCHE)
+        END IF
+        IF response.cascade == EZE AND EZE NOT IN cascade.active_tiers:
+            cascade.ActivateTier(EZE)
+        END IF
+
+        // Update baseline if Green Zone (stable distribution)
+        IF zone == GREEN_ZONE:
+            baseline := UpdateBaseline(baseline, x_t, learning_rate=0.01)
+        END IF
+
+        EMIT LOG "Drift monitor | ε=" + epsilon_t + " | zone=" + zone
+        SLEEP(MONITOR_INTERVAL_MS)
+    END WHILE
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// CHAPTER 7: SAFETY AND ETHICAL GOVERNANCE
+// ------------------------------------------------------------
+
+// ── §7.1: MALPAARTICE FRAMEWORK ──────────────────────────────
+
+// MALPAARTICE: malpractice prevention framework.
+// Four pillars: Monitoring, Auditing, Logging, Prevention.
+// (Name is a deliberate inversion of "malpractice" to represent
+//  its prevention — the framework that prevents the failure it names.)
+
+DEFINE MALPAARTICEPillar AS ENUM:
+    MONITORING    // Continuous system observation
+    AUDITING      // Regular compliance checks
+    LOGGING       // Comprehensive trace records
+    PREVENTION    // Proactive risk mitigation
+END DEFINE
+
+CLASS MALPAARTICEFramework:
+    PRIVATE:
+        monitor_log  : List[MonitorRecord]
+        audit_log    : List[AuditRecord]
+        trace_log    : List[TraceRecord]
+        risk_register: List[RiskItem]
+
+    PUBLIC:
+
+        // MONITORING: continuous observation
+        PROCEDURE Monitor(system_state: SystemState) -> MonitorRecord:
+            record := MonitorRecord(
+                timestamp     = CURRENT_TIMESTAMP(),
+                drift_level   = system_state.current_drift,
+                coherence     = system_state.coherence,
+                active_tiers  = system_state.cascade_tiers,
+                zone          = ClassifyDriftZone(system_state.current_drift)
+            )
+            self.monitor_log.APPEND(record)
+            RETURN record
+        END PROCEDURE
+
+        // AUDITING: periodic compliance verification
+        PROCEDURE Audit(period_start: Timestamp, period_end: Timestamp) -> AuditReport:
+            period_records := FILTER(self.monitor_log,
+                                      from=period_start, to=period_end)
+            violations := []
+            FOR EACH record IN period_records:
+                IF record.coherence < C_COHERENCE:
+                    violations.APPEND(AuditViolation(record, type="COHERENCE_BREACH"))
+                END IF
+                IF record.zone IN [AI_PANIC, AI_WARNING]:
+                    violations.APPEND(AuditViolation(record, type="CRITICAL_DRIFT"))
+                END IF
+            END FOR
+            report := AuditReport(violations=violations,
+                                   period=[period_start, period_end],
+                                   compliance_rate=1.0 - (LENGTH(violations) /
+                                                          MAX(LENGTH(period_records), 1)))
+            self.audit_log.APPEND(report)
+            RETURN report
+        END PROCEDURE
+
+        // LOGGING: comprehensive trace records (cross-ref AEGIS audit trail)
+        PROCEDURE Log(event: SystemEvent) -> TraceRecord:
+            record := TraceRecord(
+                timestamp   = CURRENT_TIMESTAMP(),
+                event_type  = event.type,
+                data        = event.payload,
+                proof_ref   = "OBIAI-THESIS + AEGIS chain"
+            )
+            self.trace_log.APPEND(record)
+            RETURN record
+        END PROCEDURE
+
+        // PREVENTION: proactive risk identification and mitigation
+        PROCEDURE Prevent(current_state: SystemState) -> PreventionAction:
+            // Anticipate risk before thresholds are crossed
+            predicted_drift := PredictNextDrift(current_state)
+            predicted_zone  := ClassifyDriftZone(predicted_drift)
+
+            IF predicted_zone IN [AI_CAUTION, HUMAN_STRESS_LOW]:
+                action := PreventionAction(
+                    type    = PRE_ACTIVATE_UCHE,
+                    reason  = "Predicted drift approaching thresholds"
+                )
+                self.risk_register.APPEND(RiskItem(predicted_drift, action))
+                RETURN action
+            END IF
+            RETURN PreventionAction(type=NO_ACTION)
+        END PROCEDURE
+
+END CLASS
+
+
+// ── §7.2: CONSTITUTIONAL COMPLIANCE ──────────────────────────
+
+// OBIAI maintains compliance across multiple jurisdictions.
+// Constitutional compliance ensures no output violates rights
+// frameworks regardless of operational domain.
+//
+// Cross-reference: NSIGII constitutional gate (memory context)
+// Cross-reference: IWU Equity Act, Section 204 (memory context)
+
+PROCEDURE ConstitutionalComplianceCheck(output: ProcessedOutput,
+                                          jurisdiction: Jurisdiction) -> BOOL:
+    // Verify output against applicable constitutional constraints.
+    // Returns TRUE if compliant, FALSE if violation detected.
+
+    checks := []
+
+    // Universal checks (all jurisdictions):
+    checks.APPEND(output.bias_score <= 0.1)          // algorithmic fairness
+    checks.APPEND(output.harm_score == 0)             // zero-harm requirement
+    checks.APPEND(output.privacy_preserved == TRUE)   // data privacy
+
+    // Jurisdiction-specific checks:
+    MATCH jurisdiction:
+        CASE UK:
+            checks.APPEND(output.human_rights_compliant == TRUE)  // HRA 1998
+            checks.APPEND(output.data_protection == TRUE)          // UK GDPR
+        CASE NIGERIA:
+            checks.APPEND(output.nsigii_compliant == TRUE)         // NSIGII protocol
+            checks.APPEND(output.igbo_cultural_respect == TRUE)    // Nsibidi alignment
+        CASE EU:
+            checks.APPEND(output.gdpr_compliant == TRUE)
+            checks.APPEND(output.ai_act_compliant == TRUE)         // EU AI Act 2024
+    END MATCH
+
+    ALL_COMPLIANT := ALL(checks)
+    IF NOT ALL_COMPLIANT:
+        EMIT WARNING "Constitutional compliance violation | jurisdiction=" + jurisdiction
+    END IF
+    RETURN ALL_COMPLIANT
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: obiai_thesis_M5_results_conclusion_proofs.psc.txt
+// ============================================================

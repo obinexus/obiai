@@ -1,0 +1,261 @@
+// ============================================================
+// FILE: aegis_proof_3_1_3_2_M2_filterflash_monotonicity.psc.txt
+// MODULE 2 OF 5 — AEGIS-PROOF-3.1: Filter-Flash Monotonicity
+// SOURCE: "AEGIS-PROOF-3.1 & 3.2: Mathematical Verification Suite"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ── MODE DEFINITIONS ─────────────────────────────────────────
+
+DEFINE CognitionMode AS ENUM:
+    FILTER    // persistent symbolic reasoning — lower error at high confidence
+    FLASH     // ephemeral working memory — higher error at low confidence
+END DEFINE
+
+// Epistemic confidence variable:
+//   p = p_conf ∈ [0, 1]
+//   p = 0.954 → 95.4% threshold (optimal selection boundary per Corollary 1)
+
+CONSTANT P_CONF_OPTIMAL := 0.954    // AEGIS epistemic confidence threshold
+
+
+// ── THEOREM 1: FILTER-FLASH MONOTONICITY ─────────────────────
+
+// THEOREM 1 (Filter-Flash Monotonicity):
+//
+//   Under Assumptions 1–3, for fixed environment distribution
+//   and monotone cost functions, increasing epistemic confidence
+//   p_conf MONOTONICALLY INCREASES the advantage of Filter over Flash.
+//
+//   Formally: Δ(p) = E[C_Flash] − E[C_Filter] is non-decreasing in p.
+//   i.e., dΔ(p)/dp ≥ 0
+
+
+// ── STEP 1: COST ADVANTAGE FUNCTION DECOMPOSITION ────────────
+
+// Δ(p) = E[C_Flash(p)] − E[C_Filter(p)]
+//
+// Expanding via total cost formulation:
+//   Δ(p) = (E[C_Flash_runtime] − E[C_Filter_runtime])   ← constant term
+//         + (E[C_Flash_error(p)] − E[C_Filter_error(p)]) ← Δ_error(p)
+
+PROCEDURE DecomposeCostAdvantage(p_conf: REAL,
+                                  C_runtime: Function,
+                                  C_error: Function,
+                                  dag: EpistemicDAG) -> CostAdvantageDecomposition:
+
+    // Term 1: Runtime cost differential (CONSTANT — independent of p_conf)
+    runtime_flash  := EXPECTATION(C_runtime(FLASH))
+    runtime_filter := EXPECTATION(C_runtime(FILTER))
+    constant_term  := runtime_flash - runtime_filter
+
+    // Term 2: Error cost differential (p_conf-DEPENDENT)
+    error_flash  := EXPECTATION(C_error_total(FLASH,  p_conf, dag))
+    error_filter := EXPECTATION(C_error_total(FILTER, p_conf, dag))
+    delta_error  := error_flash - error_filter
+
+    // Total advantage
+    delta := constant_term + delta_error
+
+    decomp := CostAdvantageDecomposition(
+        constant_term  = constant_term,
+        delta_error    = delta_error,
+        total_delta    = delta,
+        p_conf         = p_conf
+    )
+    RETURN decomp
+END PROCEDURE
+
+
+// ── STEP 2: ERROR COST DIFFERENTIAL ANALYSIS ─────────────────
+
+// Error cost for mode m, weighted by DAG cost:
+//   C_error^m(p) = Σ_{v,n} DAG_cost(v, n) · P(error | v, n, m, p)
+//
+// Key property (from Assumption 2 monotone condition):
+//   ∂P(error | v, n, Filter, p) / ∂p  ≤  ∂P(error | v, n, Flash, p) / ∂p
+//
+// Rationale:
+//   Filter uses persistent symbolic reasoning → error probability
+//   decreases FASTER with confidence than Flash's ephemeral working memory.
+
+PROCEDURE C_error_total(mode: CognitionMode, p_conf: REAL,
+                         dag: EpistemicDAG) -> REAL:
+    // C_error^m(p) = Σ_{v,n} DAG_cost(v, n) · P(error | v, n, m, p)
+    total := 0.0
+    FOR EACH (v, n) IN dag.verb_noun_pairs:
+        dag_cost_vn   := dag.cost(v, n)
+        p_error_vn    := P_error(v, n, mode, p_conf)
+        total         := total + dag_cost_vn * p_error_vn
+    END FOR
+    RETURN total
+END PROCEDURE
+
+
+PROCEDURE P_error(v: Verb, n: Noun, mode: CognitionMode,
+                   p_conf: REAL) -> REAL:
+    // Error probability for mode m at confidence p.
+    // Flash: higher baseline error, slower improvement with p_conf
+    // Filter: lower baseline error, faster improvement with p_conf
+
+    MATCH mode:
+        CASE FLASH:
+            // Ephemeral working memory — error probability higher at low confidence,
+            // decreasing more slowly: ∂P_error/∂p steeper (larger magnitude) than Filter
+            return BaseErrorRate(v, n, FLASH) * (1.0 - p_conf)
+
+        CASE FILTER:
+            // Persistent symbolic reasoning — error probability lower overall,
+            // decreasing faster with confidence gains
+            return BaseErrorRate(v, n, FILTER) * (1.0 - p_conf)^2
+
+    END MATCH
+    // NOTE: The exact functional form is implementation-specific.
+    // The critical property (Assumption 2) is that ∂P_error/∂p is MORE
+    // negative for Filter than Flash — Filter benefits more from confidence.
+END PROCEDURE
+
+
+PROCEDURE VerifyErrorDerivativeOrdering(v: Verb, n: Noun,
+                                         p_conf: REAL) -> BOOL:
+    // Verify: ∂P(error|v,n,Filter,p)/∂p ≤ ∂P(error|v,n,Flash,p)/∂p
+    // i.e., Filter's error decreases at LEAST as fast as Flash's
+
+    dp_filter := NumericalDerivative(P_error, args=(v,n,FILTER), wrt=p_conf)
+    dp_flash  := NumericalDerivative(P_error, args=(v,n,FLASH),  wrt=p_conf)
+
+    // Both should be ≤ 0 (error decreases with confidence)
+    // Filter's derivative should be MORE negative (or equal)
+    IF dp_filter > dp_flash + 1e-10:
+        EMIT WARNING "Derivative ordering violated at (v=" + v + ", n=" + n +
+                     ", p=" + p_conf + ")"
+        RETURN FALSE
+    END IF
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── STEP 3: MONOTONICITY OF ERROR DIFFERENTIAL ───────────────
+
+// d(Δ_error(p)) / dp = Σ_{v,n} DAG_cost(v,n) · d/dp[P(error|v,n,Flash,p)
+//                                                    − P(error|v,n,Filter,p)]
+//
+// Since DAG_cost(v,n) ≥ 0 (by construction) AND
+//       d/dp[P_Flash_error − P_Filter_error] ≥ 0 (from derivative ordering):
+//
+//   d(Δ_error(p)) / dp ≥ 0  ✓
+
+PROCEDURE VerifyErrorDifferentialMonotonicity(dag: EpistemicDAG,
+                                               p_conf: REAL) -> BOOL:
+    // Verify that d(Δ_error)/dp ≥ 0 at p_conf
+
+    derivative_sum := 0.0
+
+    FOR EACH (v, n) IN dag.verb_noun_pairs:
+        dag_cost_vn := dag.cost(v, n)
+        ASSERT dag_cost_vn >= 0.0    // DAG cost non-negative by construction
+
+        d_flash  := NumericalDerivative(P_error, args=(v,n,FLASH),  wrt=p_conf)
+        d_filter := NumericalDerivative(P_error, args=(v,n,FILTER), wrt=p_conf)
+        d_diff   := d_flash - d_filter    // d/dp[P_Flash − P_Filter]
+        ASSERT d_diff >= -1e-10           // ≥ 0 from derivative ordering
+
+        derivative_sum := derivative_sum + dag_cost_vn * d_diff
+    END FOR
+
+    IF derivative_sum < -1e-10:
+        EMIT ERROR "d(Δ_error)/dp < 0 — monotonicity of error differential violated"
+        RETURN FALSE
+    END IF
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── STEP 4: COMPLETE MONOTONICITY PROOF ──────────────────────
+
+// dΔ(p)/dp = d(constant_term)/dp + d(Δ_error(p))/dp
+//           = 0                   + d(Δ_error(p))/dp
+//           ≥ 0
+//
+// Therefore Δ(p) is non-decreasing in p.  □
+
+PROCEDURE ProveFilterFlashMonotonicity(dag: EpistemicDAG,
+                                        C_runtime: Function,
+                                        C_error: Function,
+                                        p_range: List[REAL]) -> MonotonicityProof:
+
+    proof := NEW MonotonicityProof(theorem="AEGIS-PROOF-3.1")
+
+    // Verify derivative ordering holds at each test p value
+    proof.derivative_ordering_ok := TRUE
+    FOR EACH p IN p_range:
+        FOR EACH (v, n) IN dag.verb_noun_pairs:
+            ok := VerifyErrorDerivativeOrdering(v, n, p)
+            IF NOT ok:
+                proof.derivative_ordering_ok := FALSE
+            END IF
+        END FOR
+    END FOR
+
+    // Verify error differential monotonicity at each test p
+    proof.error_diff_monotone := TRUE
+    FOR EACH p IN p_range:
+        ok := VerifyErrorDifferentialMonotonicity(dag, p)
+        IF NOT ok:
+            proof.error_diff_monotone := FALSE
+        END IF
+    END FOR
+
+    // Verify Δ(p) is non-decreasing: Δ(p₁) ≤ Δ(p₂) for p₁ < p₂
+    proof.delta_nondecreasing := TRUE
+    prev_delta := -POSITIVE_INFINITY
+    FOR EACH p IN SORTED(p_range, ASCENDING):
+        decomp := DecomposeCostAdvantage(p, C_runtime, C_error, dag)
+        IF decomp.total_delta < prev_delta - 1e-10:
+            proof.delta_nondecreasing := FALSE
+            EMIT WARNING "Δ(p) decreased at p=" + p
+        END IF
+        prev_delta := decomp.total_delta
+    END FOR
+
+    proof.theorem_holds := proof.derivative_ordering_ok AND
+                           proof.error_diff_monotone AND
+                           proof.delta_nondecreasing
+
+    IF proof.theorem_holds:
+        EMIT INFO "AEGIS-PROOF-3.1 VERIFIED: Filter-Flash Monotonicity confirmed"
+    ELSE:
+        EMIT ERROR "AEGIS-PROOF-3.1 FAILED: Monotonicity not established"
+    END IF
+
+    RETURN proof
+END PROCEDURE
+
+
+// ── COROLLARY 1: CONFIDENCE THRESHOLD OPTIMALITY ─────────────
+
+// COROLLARY 1 (Confidence Threshold Optimality):
+//   The 95.4% confidence threshold provides OPTIMAL mode selection
+//   for real-world deployment scenarios with epistemic uncertainty.
+
+PROCEDURE SelectOptimalMode(p_conf: REAL) -> CognitionMode:
+    // Mode selection rule derived from Theorem 1:
+    // Because Δ(p) is non-decreasing, once p_conf crosses P_CONF_OPTIMAL,
+    // Filter mode is guaranteed to have lower expected cost than Flash.
+
+    IF p_conf >= P_CONF_OPTIMAL:
+        EMIT INFO "p_conf=" + p_conf + " ≥ 0.954 → SELECT FILTER"
+        RETURN FILTER
+    ELSE:
+        EMIT INFO "p_conf=" + p_conf + " < 0.954 → SELECT FLASH"
+        RETURN FLASH
+    END IF
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: aegis_proof_3_1_3_2_M3_hybrid_convergence.psc.txt
+// ============================================================

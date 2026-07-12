@@ -1,0 +1,240 @@
+// ============================================================
+// DIRAM (Directed Instruction RAM)
+// MODULE 2: Configuration System
+// Source: Directed_Instruction_RAM.pdf (README.md, 2025-07-03)
+// OBINexus Aegis Project | License: MIT
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 2.1 — CONFIGURATION DATA STRUCTURES
+// ------------------------------------------------------------
+
+DEFINE CONFIG_SOURCE_ENUM AS:
+    CONFIG_SOURCE_SYSTEM    = 1     // /etc/diram/config.dram
+    CONFIG_SOURCE_USER      = 2     // ~/.dramrc
+    CONFIG_SOURCE_LOCAL     = 3     // ./.dramrc
+    CONFIG_SOURCE_CLI       = 4     // -c <file>
+    CONFIG_SOURCE_ENV       = 5     // DIRAM_CONFIG=<file>
+
+DEFINE DIRAM_CONFIG AS STRUCT:
+    // --- Memory Configuration ---
+    memory_limit            : INTEGER   // MB; default = 2048
+    memory_space            : STRING    // Named space identifier; default = "default"
+
+    // --- Tracing ---
+    trace_enabled           : BOOLEAN   // Enable SHA-256 receipt generation
+    log_dir                 : STRING    // Directory path for log output
+
+    // --- Heap Constraint (Sinphasé Governance) ---
+    max_heap_events         : INTEGER   // Max allocations per epoch; default = 3
+    // ε(x) = epoch_event_count / max_heap_events; MUST be ≤ 0.6
+
+    // --- Process Isolation ---
+    detach_timeout          : INTEGER   // Seconds before daemon self-terminates
+    pid_binding             : ENUM      // "strict" | "relaxed"
+
+    // --- Memory Protection ---
+    guard_pages             : BOOLEAN   // Boundary protection (performance cost)
+    canary_values           : BOOLEAN   // Overflow detection sentinels
+    aslr_enabled            : BOOLEAN   // Address Space Layout Randomization
+
+    // --- Zero-Trust Policy ---
+    zero_trust              : BOOLEAN   // Enable zero-trust memory boundaries
+    memory_audit            : BOOLEAN   // Enable full audit trail
+
+    // --- Telemetry ---
+    telemetry_level         : INTEGER   // 0 = disabled, 1 = system, 2 = opcode-bound
+    telemetry_endpoint      : STRING    // Socket path; e.g. /var/run/diram/telemetry.sock
+
+    // --- Async Section ---
+    async.enable_promises           : BOOLEAN
+    async.default_timeout_ms        : INTEGER   // Default = 10000
+    async.max_pending_promises      : INTEGER   // Default = 100
+    async.lookahead_cache_size      : INTEGER   // Default = 1024
+
+    // --- Detach Section ---
+    detach.enable_detach_mode       : BOOLEAN
+    detach.log_async_operations     : BOOLEAN
+    detach.persist_promise_receipts : BOOLEAN
+
+    // --- Resilience Section ---
+    resilience.retry_on_transient_failure   : BOOLEAN
+    resilience.max_retry_attempts           : INTEGER   // Default = 3
+    resilience.exponential_backoff          : BOOLEAN
+
+// ------------------------------------------------------------
+// SECTION 2.2 — CONFIGURATION LOADING HIERARCHY
+// ------------------------------------------------------------
+
+// Configuration is loaded in strict priority order.
+// Later sources OVERRIDE earlier sources on key conflict.
+
+PROCEDURE load_configuration():
+    config = EMPTY_CONFIG_WITH_DEFAULTS
+
+    // Priority 1 — Lowest: system-wide
+    IF file_exists("/etc/diram/config.dram"):
+        MERGE parse_config_file("/etc/diram/config.dram") INTO config
+        SET config.source = CONFIG_SOURCE_SYSTEM
+
+    // Priority 2: user home config
+    home_rc = path_join(HOME_DIR, ".dramrc")
+    IF file_exists(home_rc):
+        MERGE parse_config_file(home_rc) INTO config
+        SET config.source = CONFIG_SOURCE_USER
+
+    // Priority 3: project-local config
+    IF file_exists("./.dramrc"):
+        MERGE parse_config_file("./.dramrc") INTO config
+        SET config.source = CONFIG_SOURCE_LOCAL
+
+    // Priority 4: CLI-specified config
+    IF cli_args CONTAINS "--config" OR "-c":
+        cli_config_path = cli_args.get_value("--config")
+        MERGE parse_config_file(cli_config_path) INTO config
+        SET config.source = CONFIG_SOURCE_CLI
+
+    // Priority 5 — Highest: environment variable
+    IF env_var_set("DIRAM_CONFIG"):
+        env_config_path = get_env("DIRAM_CONFIG")
+        MERGE parse_config_file(env_config_path) INTO config
+        SET config.source = CONFIG_SOURCE_ENV
+
+    RETURN config
+
+// ------------------------------------------------------------
+// SECTION 2.3 — CONFIGURATION FILE PARSER
+// ------------------------------------------------------------
+
+PROCEDURE parse_config_file(filepath):
+    config_map = EMPTY KEY-VALUE MAP
+    current_section = "root"
+
+    FOR EACH line IN read_lines(filepath):
+        line = strip_whitespace(line)
+
+        // Skip comments and blank lines
+        IF line STARTS_WITH "#" OR line IS EMPTY:
+            CONTINUE
+
+        // Section header detection
+        IF line MATCHES pattern "[section_name]":
+            current_section = extract_section_name(line)
+            CONTINUE
+
+        // Key-value pair parsing
+        IF line CONTAINS "=":
+            key, value = split_on_first("=", line)
+            key   = strip(key)
+            value = strip_inline_comment(value)  // Remove trailing # comments
+
+            IF current_section != "root":
+                qualified_key = current_section + "." + key
+            ELSE:
+                qualified_key = key
+
+            config_map[qualified_key] = value
+
+    RETURN config_map
+
+// ------------------------------------------------------------
+// SECTION 2.4 — CONFIGURATION API (Programmatic Access)
+// ------------------------------------------------------------
+
+PROCEDURE diram_config_init():
+    // Initialize global config state with system defaults
+    SET global_config = DEFAULT_CONFIG_VALUES
+    SET error_list = EMPTY_LIST
+
+PROCEDURE diram_config_load_file(filepath, source_type):
+    parsed = parse_config_file(filepath)
+    MERGE parsed INTO global_config WITH priority(source_type)
+
+PROCEDURE diram_config_set_value(key, value):
+    // Runtime override — highest priority
+    IF key IN KNOWN_CONFIG_KEYS:
+        global_config[key] = coerce_type(key, value)
+    ELSE:
+        APPEND "Unknown config key: " + key TO error_list
+
+PROCEDURE diram_config_get_value(key) -> STRING:
+    IF key IN global_config:
+        RETURN global_config[key] AS STRING
+    ELSE:
+        RETURN NULL
+
+PROCEDURE diram_config_validate() -> BOOLEAN:
+    errors = EMPTY_LIST
+
+    IF global_config.memory_limit <= 0:
+        APPEND "memory_limit must be > 0" TO errors
+
+    IF global_config.max_heap_events <= 0:
+        APPEND "max_heap_events must be > 0" TO errors
+
+    IF global_config.telemetry_level NOT IN {0, 1, 2}:
+        APPEND "telemetry_level must be 0, 1, or 2" TO errors
+
+    IF global_config.pid_binding NOT IN {"strict", "relaxed"}:
+        APPEND "pid_binding must be 'strict' or 'relaxed'" TO errors
+
+    // Validate async section
+    IF global_config.async.enable_promises:
+        IF global_config.async.default_timeout_ms <= 0:
+            APPEND "async.default_timeout_ms must be > 0" TO errors
+        IF global_config.async.lookahead_cache_size <= 0:
+            APPEND "async.lookahead_cache_size must be > 0" TO errors
+
+    SET global_error_list = errors
+    RETURN errors IS EMPTY
+
+PROCEDURE diram_config_get_errors() -> STRING:
+    RETURN join(global_error_list, newline)
+
+PROCEDURE diram_config_save(output_filepath):
+    // Serialize current config back to .dramrc format
+    FOR EACH key, value IN global_config:
+        IF key CONTAINS ".":
+            // Belongs to a section
+            section, subkey = split_on_first(".", key)
+            WRITE "[" + section + "]" IF not_already_written(section)
+            WRITE subkey + "=" + value
+        ELSE:
+            WRITE key + "=" + value
+    FLUSH TO output_filepath
+
+// ------------------------------------------------------------
+// SECTION 2.5 — RUNTIME CONFIG INSPECTION (REPL: config command)
+// ------------------------------------------------------------
+
+// When user types `config` in REPL, the following is displayed:
+
+PROCEDURE repl_config_display():
+    PRINT "DIRAM Configuration:"
+    PRINT "  Memory Configuration:"
+    PRINT "    memory_limit:  " + global_config.memory_limit + " MB"
+    PRINT "    memory_space:  " + global_config.memory_space
+    PRINT "  Tracing:"
+    PRINT "    trace_enabled: " + global_config.trace_enabled
+    PRINT "    log_dir:       " + global_config.log_dir
+    PRINT "  Heap Constraints:"
+    PRINT "    max_heap_events: " + global_config.max_heap_events
+    epsilon_val = epoch_counter / global_config.max_heap_events
+    PRINT "    epsilon:         " + epsilon_val + " (ε = events/max)"
+    PRINT "  Process Isolation:"
+    PRINT "    detach_timeout: " + global_config.detach_timeout + " seconds"
+    PRINT "    pid_binding:    " + global_config.pid_binding
+    PRINT "  Memory Protection:"
+    PRINT "    guard_pages:   " + global_config.guard_pages
+    PRINT "    canary_values: " + global_config.canary_values
+    PRINT "    aslr_enabled:  " + global_config.aslr_enabled
+    PRINT "  Telemetry:"
+    PRINT "    telemetry_level:    " + global_config.telemetry_level
+    PRINT "    telemetry_endpoint: " + global_config.telemetry_endpoint
+    PRINT "  Zero-Trust Policy:"
+    PRINT "    zero_trust:    " + global_config.zero_trust
+    PRINT "    memory_audit:  " + global_config.memory_audit
+
+// ============================================================
+// END MODULE 2
+// ============================================================

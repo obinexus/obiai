@@ -1,0 +1,10 @@
+{
+  "name": "OBI Documentation",
+  "short_name": "OBI Docs",
+  "description": "OBI is an ontological and Bayesian reasoning infrastructure for uncertainty-aware robotic and humanitarian systems.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#161819",
+  "icons": []
+}

@@ -1,0 +1,349 @@
+// ============================================================
+// FILE: aegis_proof_4_1_M4_safety_protocols.psc.txt
+// MODULE 4 OF 5 — Safety Protocols, Fragility Matrix,
+//                 Emergency Response & Verification
+// SOURCE: "AEGIS-PROOF-4.1: Computational Implementation Specification
+//          Safety-Critical Hospital Systems with Fragile Tissue Interaction"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 5: SAFETY PROTOCOL IMPLEMENTATION
+// ------------------------------------------------------------
+
+// ── 5.1: FRAGILITY ASSESSMENT MATRIX ─────────────────────────
+
+// Before ANY interaction, the system computes a 3×3 patient-specific
+// fragility matrix:
+//
+//          ⎡ f_bone    f_joint   f_skin  ⎤
+//   F_pt = ⎢ f_muscle  f_vessel  f_nerve ⎥
+//          ⎣ f_age     f_cond    f_med   ⎦
+//
+// Each element f_ij ∈ [0, 1]:
+//   0 = no vulnerability
+//   1 = maximum vulnerability (extreme caution required)
+
+DEFINE FragilityMatrix AS:
+    // 3×3 matrix of normalized fragility scores
+    f_bone    : REAL    // bone fracture vulnerability
+    f_joint   : REAL    // joint dislocation / damage vulnerability
+    f_skin    : REAL    // skin tear / pressure ulcer vulnerability
+    f_muscle  : REAL    // muscle strain vulnerability
+    f_vessel  : REAL    // blood vessel bruising vulnerability
+    f_nerve   : REAL    // nerve compression vulnerability
+    f_age     : REAL    // age-related general fragility
+    f_cond    : REAL    // current medical condition modifier
+    f_med     : REAL    // medication effects (e.g. blood thinners → +vessel fragility)
+
+    // ALL elements must be in [0, 1]
+    INVARIANT: AllInRange([f_bone, f_joint, f_skin,
+                            f_muscle, f_vessel, f_nerve,
+                            f_age, f_cond, f_med], 0.0, 1.0)
+
+    // Matrix form for linear algebra operations:
+    PROCEDURE AsMatrix() -> Matrix3x3:
+        RETURN Matrix3x3(
+            row1=[f_bone,   f_joint,  f_skin],
+            row2=[f_muscle, f_vessel, f_nerve],
+            row3=[f_age,    f_cond,   f_med]
+        )
+    END PROCEDURE
+
+    // Aggregate fragility score (max over all elements)
+    PROCEDURE MaxFragility() -> REAL:
+        RETURN MAX([f_bone, f_joint, f_skin, f_muscle,
+                    f_vessel, f_nerve, f_age, f_cond, f_med])
+    END PROCEDURE
+
+    // Weighted fragility score (domain-specific weights may be applied)
+    PROCEDURE WeightedScore(weights: Matrix3x3) -> REAL:
+        F_mat := AsMatrix()
+        total := 0.0
+        FOR EACH (row, col) IN [0..2] × [0..2]:
+            total := total + F_mat[row][col] * weights[row][col]
+        END FOR
+        RETURN total / 9.0   // normalize by element count
+    END PROCEDURE
+END DEFINE
+
+
+PROCEDURE ComputeFragilityMatrix(patient: PatientProfile,
+                                  medication_report: MedicationReport) -> FragilityMatrix:
+    // Derive all 9 fragility scores from patient data.
+
+    f := NEW FragilityMatrix()
+
+    f.f_bone   := 1.0 - patient.bone_density          // low density → high fragility
+    f.f_joint  := patient.age_factor * 0.8            // age correlates with joint fragility
+    f.f_skin   := 1.0 - patient.tissue_compliance * 0.5  // compliant skin can still tear
+    f.f_muscle := patient.condition_severity * 0.6
+    f.f_vessel := patient.vascularity_index * patient.age_factor
+    f.f_nerve  := patient.condition_severity * 0.4
+    f.f_age    := patient.age_factor
+    f.f_cond   := patient.condition_severity
+    f.f_med    := medication_report.anticoagulant_factor  // blood thinners increase vessel fragility
+
+    // Clamp all to [0, 1]
+    f := ClampAllFields(f, 0.0, 1.0)
+
+    EMIT INFO "Fragility matrix computed | max_fragility=" + f.MaxFragility()
+    RETURN f
+END PROCEDURE
+
+
+PROCEDURE AdjustSafetyThresholdsFromFragility(fragility: FragilityMatrix,
+                                               base_constraints: FragilityConstraints) -> FragilityConstraints:
+    // Scale thresholds down by maximum fragility — more fragile → tighter bounds
+
+    max_frag := fragility.MaxFragility()
+    safety_factor := 1.0 - (max_frag * 0.4)   // up to 40% threshold reduction
+
+    adjusted := FragilityConstraints(
+        kappa     = base_constraints.kappa    * safety_factor,
+        lambda_v  = base_constraints.lambda_v * safety_factor,
+        mu        = base_constraints.mu       * safety_factor
+    )
+
+    EMIT INFO "Safety thresholds adjusted by factor=" + safety_factor +
+              " (max_fragility=" + max_frag + ")"
+    RETURN adjusted
+END PROCEDURE
+
+
+// ── 5.2: EMERGENCY RESPONSE PROTOCOL — ALGORITHM 2 ───────────
+
+// ALGORITHM 2: Emergency Safety Override System
+//
+//   INPUTS:  F(t)  — real-time force measurements
+//            {F_max, P_max, F_dot_max} — patient safety thresholds
+//
+//   TRIGGER: if F(t) > F_max OR dF/dt > F_dot_max
+
+PROCEDURE EmergencyResponseMonitor(sensor_feed: SensorStream,
+                                    patient: PatientProfile,
+                                    constraints: FragilityConstraints,
+                                    stack: PolymerContactStack) -> VOID:
+    // Runs concurrently with main controller loop.
+    // Monitors force at hardware interrupt frequency.
+
+    F_max     := ComputeFractureThreshold(patient, constraints.kappa)
+    P_max     := ComputeBruiseThreshold(patient, constraints.lambda_v)
+    F_dot_max := ComputeMaxForceRate(patient, constraints.mu)
+
+    WHILE monitoring_active:
+        F_t     := sensor_feed.current_force_magnitude
+        dF_dt   := sensor_feed.force_rate
+
+        // TRIGGER CONDITION (Algorithm 2, line 1):
+        //   if F(t) > F_max OR dF/dt > F_dot_max
+        IF F_t > F_max OR dF_dt > F_dot_max:
+
+            // EMERGENCY STOP (line 2)
+            TriggerEmergencyStop(patient, reason="Force threshold exceeded")
+
+            // GENTLE RETRACTION (line 3)
+            WithdrawContact(stack, rate=GENTLE_RETRACTION_RATE)
+
+            // ALERT MEDICAL STAFF (line 4)
+            AlertMedicalStaff(severity=HIGH, patient=patient,
+                               F_observed=F_t, F_max=F_max)
+
+            // INCIDENT LOG (line 5)
+            LogEmergencyIncident(
+                timestamp   = CURRENT_TIMESTAMP(),
+                force_data  = { F_t: F_t, dF_dt: dF_dt },
+                thresholds  = { F_max: F_max, F_dot_max: F_dot_max },
+                patient_id  = patient.patient_id
+            )
+
+            BREAK   // monitoring ends after emergency stop
+        END IF
+
+        SLEEP(MONITOR_INTERVAL_US)    // high-frequency polling
+    END WHILE
+END PROCEDURE
+
+
+CONSTANT GENTLE_RETRACTION_RATE := 0.05   // m/s — slow controlled withdrawal
+CONSTANT MONITOR_INTERVAL_US    := 100    // 100µs polling interval
+
+
+PROCEDURE TriggerEmergencyStop(patient: PatientProfile,
+                                reason: STRING) -> VOID:
+    EMIT CRITICAL "EMERGENCY STOP | Patient=" + patient.patient_id +
+                  " | Reason=" + reason
+    // 1. Hardware interrupt to actuator — force to zero
+    ActuatorHardwareStop.trigger()
+    // 2. Dermis hardware circuit as redundant backup
+    DermisLayer.TriggerHardwareEmergencyShutdown()
+    // 3. Set interaction_active flag to FALSE
+    SET interaction_active := FALSE
+END PROCEDURE
+
+
+PROCEDURE WithdrawContact(stack: PolymerContactStack,
+                           rate: REAL) -> VOID:
+    // Controlled retraction — maintain contact briefly then withdraw
+    // Rate: GENTLE_RETRACTION_RATE (0.05 m/s) to prevent rebound impact
+    EMIT INFO "Initiating gentle retraction at rate=" + rate + " m/s"
+    ActuatorController.retract(rate=rate, mode=CONTROLLED)
+END PROCEDURE
+
+
+PROCEDURE AlertMedicalStaff(severity: AlertLevel, patient: PatientProfile,
+                              F_observed: REAL, F_max: REAL) -> VOID:
+    alert := MedicalAlert(
+        severity   = severity,
+        patient_id = patient.patient_id,
+        message    = "Force threshold exceeded: F=" + F_observed +
+                     " > F_max=" + F_max,
+        timestamp  = CURRENT_TIMESTAMP(),
+        action_required = "Immediate clinical assessment"
+    )
+    MedicalStaffNotificationSystem.send(alert)
+    EMIT ALERT "Medical staff alerted: " + alert.message
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 6: VERIFICATION AND TESTING PROTOCOL
+// ------------------------------------------------------------
+
+// ── 6.1: COMPUTATIONAL VERIFICATION REQUIREMENTS ─────────────
+
+// Four verification requirements:
+
+// (1) MATRIX CONDITIONING TEST: cond(A) < 10¹²
+PROCEDURE MatrixConditioningTest(patient: PatientProfile) -> TestResult:
+    A_safety  := ComputeSafetyMatrix(patient)
+    cond      := MatrixConditionNumber(A_safety)
+    passed    := cond < 1e12
+    IF NOT passed:
+        EMIT ERROR "Matrix conditioning FAILED: cond=" + cond
+    ELSE:
+        EMIT INFO "Matrix conditioning PASSED: cond=" + cond
+    END IF
+    RETURN TestResult(name="MatrixConditioningTest", passed=passed,
+                      data={ cond_number: cond })
+END PROCEDURE
+
+
+// (2) CONVERGENCE VALIDATION: ‖xₙ − x*‖ → 0 within medical time constraints
+PROCEDURE ConvergenceValidationTest(patient: PatientProfile,
+                                     target: InteractionTarget,
+                                     time_budget_ms: REAL) -> TestResult:
+    A_safety  := ComputeSafetyMatrix(patient)
+    b         := DeriveConstraints(target, patient)
+
+    start_time  := TIMESTAMP()
+    (x_sol, ok) := SolveLinearSystem(A_safety, b)
+    elapsed_ms  := (TIMESTAMP() - start_time) / 1e6   // ns → ms
+
+    // Verify solution residual ‖Ax - b‖ < tolerance
+    residual := NORM(MatrixVectorMult(A_safety, x_sol) - b)
+    converged := (residual < 1e-8) AND ok
+
+    time_ok := elapsed_ms <= time_budget_ms
+
+    passed := converged AND time_ok
+    EMIT INFO "ConvergenceTest: residual=" + residual + " | time=" + elapsed_ms + "ms"
+    RETURN TestResult(name="ConvergenceValidation", passed=passed,
+                      data={ residual: residual, elapsed_ms: elapsed_ms })
+END PROCEDURE
+
+
+// (3) SAFETY BOUND VERIFICATION: all computed forces satisfy fragility constraints
+PROCEDURE SafetyBoundVerificationTest(x_solution: Vector3,
+                                       patient: PatientProfile,
+                                       constraints: FragilityConstraints) -> TestResult:
+    F_bone := ExtractBoneForce(x_solution)
+    P_soft := ExtractSoftTissuePressure(x_solution)
+    F_dot  := 0.0   // static test: rate = 0
+
+    bounds := ValidateForceAgainstFragility(F_bone, P_soft, F_dot,
+                                             patient, constraints)
+    RETURN TestResult(name="SafetyBoundVerification", passed=bounds.all_safe,
+                      data={ F_bone: F_bone, P_soft: P_soft,
+                             bone_ok: bounds.bone_ok, soft_ok: bounds.soft_ok })
+END PROCEDURE
+
+
+// (4) REAL-TIME PERFORMANCE: matrix solve < 1ms for emergency response
+PROCEDURE RealTimePerformanceTest(patient: PatientProfile,
+                                   target: InteractionTarget,
+                                   n_trials: INT) -> TestResult:
+    times_us := []
+    A_safety := ComputeSafetyMatrix(patient)
+    b        := DeriveConstraints(target, patient)
+
+    FOR trial := 1 TO n_trials:
+        t_start := TIMESTAMP_NANOSECONDS()
+        (x, ok) := SolveLinearSystem(A_safety, b)
+        t_end   := TIMESTAMP_NANOSECONDS()
+        times_us.APPEND((t_end - t_start) / 1000.0)   // ns → µs
+    END FOR
+
+    max_time_us := MAX(times_us)
+    avg_time_us := MEAN(times_us)
+
+    // Emergency response budget: < 1ms = 1000µs
+    // Solver budget (§8): < 100µs for matrix solve
+    passed := max_time_us < 100.0
+
+    EMIT INFO "RealTime: max=" + max_time_us + "µs | avg=" + avg_time_us + "µs"
+    RETURN TestResult(name="RealTimePerformance", passed=passed,
+                      data={ max_us: max_time_us, avg_us: avg_time_us })
+END PROCEDURE
+
+
+// ── 6.2: PHYSICAL TESTING WITH TISSUE SIMULANTS ──────────────
+
+DEFINE TissueSimulantLevel AS ENUM:
+    LEVEL_1_HEALTHY_ADULT     // Shore A 30–40
+    LEVEL_2_ELDERLY_PATIENT   // Shore A 15–25
+    LEVEL_3_OSTEOPOROTIC_BONE // brittle foam composite
+    LEVEL_4_PEDIATRIC         // Shore A 5–10 (ultra-soft gel)
+END DEFINE
+
+DEFINE TissueSimulantSpec AS:
+    LEVEL_1 := { label: "Healthy Adult",     shore_A_range: [30, 40], brittle: FALSE }
+    LEVEL_2 := { label: "Elderly Patient",   shore_A_range: [15, 25], brittle: FALSE }
+    LEVEL_3 := { label: "Osteoporotic Bone", shore_A_range: NULL,     brittle: TRUE  }
+    LEVEL_4 := { label: "Pediatric Tissue",  shore_A_range: [5, 10],  brittle: FALSE }
+END DEFINE
+
+PROCEDURE RunSimulantTestSuite(algorithm: AEGISController,
+                                simulant_levels: List[TissueSimulantLevel]) -> SimulantReport:
+    // Run graduated testing protocol across all four simulant levels.
+    report := NEW SimulantReport()
+
+    FOR EACH level IN simulant_levels:
+        simulant_patient := BuildSimulantPatientProfile(level)
+        target := StandardInteractionTarget()
+
+        // Initialize and run the controller on this simulant
+        result := RunControlledInteraction(algorithm, simulant_patient, target)
+
+        report.results[level] := {
+            max_force_applied : result.max_force,
+            safety_violations : result.violation_count,
+            emergency_stops   : result.emergency_stop_count,
+            passed            : result.violation_count == 0
+        }
+
+        EMIT INFO "Simulant " + level + " | max_F=" + result.max_force +
+                  " | violations=" + result.violation_count
+    END FOR
+
+    report.all_levels_passed := ALL(r.passed FOR r IN report.results.values)
+    RETURN report
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: aegis_proof_4_1_M5_obiai_compliance_benchmarks.psc.txt
+// ============================================================

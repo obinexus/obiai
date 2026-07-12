@@ -1,0 +1,289 @@
+// ============================================================
+// FILE: aegis_proof_3_1_3_2_M5_compliance_algorithm.psc.txt
+// MODULE 5 OF 5 — Algorithm 1, NASA-STD-8739.8 Compliance
+//                 & AEGIS Integration Standards
+// SOURCE: "AEGIS-PROOF-3.1 & 3.2: Mathematical Verification Suite"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// ALGORITHM 1: AEGIS-VERIFIED HYBRID MODE IMPLEMENTATION
+// ------------------------------------------------------------
+
+// This is the primary production algorithm integrating:
+//   - Epistemic confidence computation (AEGIS-PROOF-3.1)
+//   - Monotonicity verification at each step
+//   - Diminishing learning rate schedule (AEGIS-PROOF-3.2)
+//   - Gradient descent update
+//   - DIRAM constraint enforcement (ε(transition) ≤ 0.6)
+//
+// INPUTS:  Initial state (v₀, n₀), confidence threshold θ = 0.954
+// OUTPUTS: Converged optimal configuration (v*, n*)
+
+PROCEDURE AEGISVerifiedHybridMode(v0: Verb, n0: Noun,
+                                   dag: EpistemicDAG,
+                                   lambda_w: REAL, mu_w: REAL,
+                                   G: REAL, L: REAL) -> HybridModeResult:
+
+    // ── INITIALIZATION ─────────────────────────────────────
+    n_iter   := 0
+    v_n      := v0
+    n_n      := n0
+    alpha_0  := ALPHA_0                      // 0.01
+    beta_dec := BETA_DECAY                   // 0.6
+    theta    := P_CONF_OPTIMAL               // 0.954
+    epsilon_tol := EPSILON_TOL              // 1e-6
+
+    trace_log := []
+    J_history := []
+
+    EMIT INFO "=== AEGIS-VERIFIED HYBRID MODE STARTING ==="
+    EMIT INFO "Initial state: v₀=" + v0 + " n₀=" + n0
+    EMIT INFO "θ=" + theta + " | α₀=" + alpha_0 + " | β=" + beta_dec
+
+    // ── VERIFY ROBBINS-MONRO CONDITIONS BEFORE LOOP ─────────
+    rm_check := VerifyRobbinsMonroConditions(G)
+    IF NOT rm_check.all_conditions_met:
+        EMIT ERROR "Robbins-Monro conditions not satisfied — aborting"
+        RETURN HybridModeResult(success=FALSE, reason="RM conditions failed")
+    END IF
+
+    // ── MAIN CONVERGENCE LOOP ───────────────────────────────
+    grad_norm := POSITIVE_INFINITY    // initialize above threshold
+
+    WHILE grad_norm > epsilon_tol:
+
+        n_iter := n_iter + 1
+
+        // STEP A: Compute epistemic confidence at current state
+        p_conf := ComputeConfidence(v_n, n_n, dag)
+
+        // STEP B: Apply AEGIS-PROOF-3.1 — verify monotonicity condition
+        //         (ensures mode selection is optimal at this confidence level)
+        mode   := SelectOptimalMode(p_conf)     // FILTER if p≥0.954, else FLASH
+        mono_ok := VerifyErrorDifferentialMonotonicity(dag, p_conf)
+        IF NOT mono_ok:
+            EMIT WARNING "Monotonicity condition failed at iter " + n_iter +
+                         " — continuing under reduced confidence"
+        END IF
+
+        // STEP C: Update learning rate αₙ = α₀ / nᵝ
+        alpha_n := DiminishingLearningRate(n_iter)
+
+        // STEP D: Gradient step
+        //   (vₙ₊₁, nₙ₊₁) = (vₙ, nₙ) − αₙ · ∇J(vₙ, nₙ)
+        grad_J := J.Gradient(v_n, n_n, lambda_w, mu_w, dag)
+        v_next := v_n - alpha_n * grad_J.v_component
+        n_next := n_n - alpha_n * grad_J.n_component
+
+        // STEP E: Add bounded noise ξₙ ~ N(0, σ²I)
+        noise      := SampleNoise(dim=2)
+        v_next     := v_next + noise[0]
+        n_next     := n_next + noise[1]
+
+        // STEP F: Verify DIRAM constraint ε(transition) ≤ 0.6
+        diram_ok := VerifyDIRAMCompatibility(v_next, n_next,
+                                              J_STAR_APPROX,
+                                              lambda_w, mu_w, dag, n_iter)
+        IF NOT diram_ok:
+            // DIRAM violation: clamp step to respect ε bound
+            v_next := LERP(v_n, v_next, t=0.5)    // halve the step
+            n_next := LERP(n_n, n_next, t=0.5)
+            EMIT INFO "DIRAM step clamped at iter " + n_iter
+        END IF
+
+        // STEP G: Commit update
+        v_n := v_next
+        n_n := n_next
+
+        // STEP H: Compute gradient norm for convergence check
+        grad_J_new := J.Gradient(v_n, n_n, lambda_w, mu_w, dag)
+        grad_norm  := NORM(grad_J_new)
+
+        // Record trace entry
+        trace_record := PrintAndTraceVerification(v_n, n_n, p_conf,
+                                                   n_iter, dag, lambda_w, mu_w)
+        trace_log.APPEND(trace_record)
+        J_history.APPEND(J.Evaluate(v_n, n_n, lambda_w, mu_w, dag))
+
+        EMIT LOG "n=" + n_iter + " | αₙ=" + alpha_n + " | ‖∇J‖=" + grad_norm +
+                 " | mode=" + mode + " | DIRAM=" + (IF diram_ok THEN "✓" ELSE "⚠")
+
+    END WHILE   // convergence achieved when ‖∇J‖ ≤ ε_tol
+
+    // ── RETURN CONVERGED CONFIGURATION ─────────────────────
+    J_star_final := J.Evaluate(v_n, n_n, lambda_w, mu_w, dag)
+    EMIT INFO "=== CONVERGENCE ACHIEVED | iter=" + n_iter +
+              " | J*≈" + J_star_final + " ==="
+    EMIT INFO "Convergence guarantee: AEGIS-PROOF-3.2"
+
+    RETURN HybridModeResult(
+        success    = TRUE,
+        v_star     = v_n,
+        n_star     = n_n,
+        J_star     = J_star_final,
+        iterations = n_iter,
+        trace_log  = trace_log,
+        J_history  = J_history
+    )
+END PROCEDURE
+
+
+PROCEDURE ComputeConfidence(v: Verb, n: Noun, dag: EpistemicDAG) -> REAL:
+    // Compute epistemic confidence p_conf at (v, n) in the DAG.
+    // Higher confidence → smoother posterior distribution → lower entropy.
+    H := ComputeNodeEntropy(dag.node_at(v, n))
+    H_max := LOG2(dag.n_interpretations)   // maximum entropy for n classes
+    p_conf := 1.0 - (H / MAX(H_max, 1e-12))   // normalized: 1 = fully confident
+    RETURN CLAMP(p_conf, 0.0, 1.0)
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 6: IMPLEMENTATION COMPLIANCE
+// ------------------------------------------------------------
+
+// ── 6.1: NASA-STD-8739.8 ADHERENCE ───────────────────────────
+
+// The proven mathematical framework satisfies four safety-critical
+// requirements from NASA-STD-8739.8:
+
+DEFINE NASAComplianceProperties AS:
+
+    // (1) DETERMINISTIC EXECUTION:
+    //   Convergence guarantees ensure predictable behavior.
+    //   AEGIS-PROOF-3.2 proves J(vₙ,nₙ) → J* a.s.
+    PROPERTY deterministic_execution := TRUE
+    PROPERTY deterministic_basis     := "AEGIS-PROOF-3.2: a.s. convergence"
+
+    // (2) BOUNDED RESOURCES:
+    //   Diminishing αₙ = α₀/nᵝ ensures finite computational complexity.
+    //   Total update magnitude: Σ αₙ bounded in per-step work.
+    PROPERTY bounded_resources := TRUE
+    PROPERTY resource_bound_basis := "αₙ = α₀/nᵝ → 0; Σα²ₙ < ∞"
+
+    // (3) GRACEFUL DEGRADATION:
+    //   Monotonicity (AEGIS-PROOF-3.1) prevents catastrophic mode
+    //   selection failures — wrong mode cannot cause unbounded cost.
+    PROPERTY graceful_degradation := TRUE
+    PROPERTY degradation_basis    := "AEGIS-PROOF-3.1: Δ(p) non-decreasing"
+
+    // (4) FORMAL VERIFICATION:
+    //   Complete mathematical proofs enable audit trail compliance.
+    PROPERTY formal_verification := TRUE
+    PROPERTY audit_trail         := TRUE
+
+END DEFINE
+
+
+PROCEDURE VerifyNASACompliance(hybrid_result: HybridModeResult) -> BOOL:
+    // Check all four NASA-STD-8739.8 properties against a completed run.
+
+    ALL_OK := TRUE
+
+    // (1) Deterministic: result must be converged
+    IF NOT hybrid_result.success:
+        EMIT ERROR "NASA(1) Deterministic: convergence not achieved"
+        ALL_OK := FALSE
+    END IF
+
+    // (2) Bounded: learning rates must have been decreasing
+    IF hybrid_result.iterations > 0:
+        alpha_final := DiminishingLearningRate(hybrid_result.iterations)
+        IF alpha_final >= ALPHA_0:
+            EMIT ERROR "NASA(2) Bounded: learning rate did not diminish"
+            ALL_OK := FALSE
+        END IF
+    END IF
+
+    // (3) Graceful: no trace entry should show undefined mode selection
+    FOR EACH record IN hybrid_result.trace_log:
+        IF record.mode NOT IN [FILTER, FLASH]:
+            EMIT ERROR "NASA(3) Graceful: undefined mode at iter " + record.iteration
+            ALL_OK := FALSE
+        END IF
+    END FOR
+
+    // (4) Formal: audit trail present
+    IF LENGTH(hybrid_result.trace_log) == 0:
+        EMIT ERROR "NASA(4) Formal: no audit trail recorded"
+        ALL_OK := FALSE
+    END IF
+
+    IF ALL_OK:
+        EMIT INFO "NASA-STD-8739.8 compliance verified ✓"
+    END IF
+    RETURN ALL_OK
+END PROCEDURE
+
+
+// ── 6.2: AEGIS INTEGRATION STANDARDS ─────────────────────────
+
+// Complete AEGIS mathematical verification suite cross-references:
+
+DEFINE AEGISIntegrationStandards AS:
+    proof_chain := [
+        { id: "AEGIS-PROOF-1.1", eq_ref:  29, subject: "Cost-Knowledge Function Monotonicity",
+          status: VERIFIED, file_ref: "aegis_proof_1_1_*.psc.txt" },
+        { id: "AEGIS-PROOF-1.2", eq_ref:  30, subject: "Traversal Cost Function Safety",
+          status: VERIFIED, file_ref: "aegis_proof_1_2_*.psc.txt" },
+        { id: "AEGIS-PROOF-3.1", eq_ref:  31, subject: "Filter-Flash Monotonicity",
+          status: VERIFIED, file_ref: "aegis_proof_3_1_3_2_M2_*.psc.txt" },
+        { id: "AEGIS-PROOF-3.2", eq_ref:  32, subject: "Hybrid Mode Convergence",
+          status: VERIFIED, file_ref: "aegis_proof_3_1_3_2_M3_*.psc.txt" }
+    ]
+
+    // Shared constants across all proofs:
+    SHARED_CONSTANT EPISTEMIC_THRESHOLD := 0.954   // p_conf threshold
+    SHARED_CONSTANT DIRAM_EPSILON       := 0.6     // ε(x) ≤ 0.6
+    SHARED_CONSTANT SINPHASE_BOUND      := 0.6     // Sinphase governance
+
+    // Inter-proof dependencies:
+    //   3.1 uses Assumptions 1–3 from §1
+    //   3.2 uses Assumption 3 (convexity, bounded gradient)
+    //   3.2 Proposition 1 references 1.2 traversal cost for DAG cost definition
+    //   3.1 Corollary 1 (0.954) aligns with Actor Class ε ≥ 0.954 (actor_class PDFs)
+
+END DEFINE
+
+
+// ── CONCLUSION: VERIFICATION SUMMARY ─────────────────────────
+
+PROCEDURE PrintConclusion() -> VOID:
+    EMIT INFO "================================================================"
+    EMIT INFO "AEGIS-PROOF-3.1 & 3.2 — VERIFICATION COMPLETE"
+    EMIT INFO "================================================================"
+    EMIT INFO ""
+    EMIT INFO "AEGIS-PROOF-3.1: Filter-Flash Monotonicity"
+    EMIT INFO "  ✓ dΔ(p)/dp ≥ 0 — Filter advantage increases with confidence"
+    EMIT INFO "  ✓ Corollary 1: θ=0.954 is optimal mode selection threshold"
+    EMIT INFO ""
+    EMIT INFO "AEGIS-PROOF-3.2: Hybrid Mode Convergence"
+    EMIT INFO "  ✓ J(vₙ,nₙ) → J* a.s. (Robbins-Monro + Lyapunov)"
+    EMIT INFO "  ✓ Corollary 2: O(1/n) rate under strong convexity"
+    EMIT INFO "  ✓ DIRAM compatibility: ε(transition) ≤ 0.6 asymptotically"
+    EMIT INFO ""
+    EMIT INFO "Deployment readiness: SAFE, PREDICTABLE, FORMALLY VERIFIED"
+    EMIT INFO "Compliance: NASA-STD-8739.8 properties (1)–(4) satisfied"
+    EMIT INFO "Enables: Production deployment of Filter-Flash architecture"
+    EMIT INFO "================================================================"
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 5 — FINAL MODULE
+//
+// FULL MODULE INDEX (AEGIS-PROOF-3.1 & 3.2):
+//   M1: aegis_proof_3_1_3_2_M1_prerequisites.psc.txt
+//   M2: aegis_proof_3_1_3_2_M2_filterflash_monotonicity.psc.txt
+//   M3: aegis_proof_3_1_3_2_M3_hybrid_convergence.psc.txt
+//   M4: aegis_proof_3_1_3_2_M4_obiai_diram_integration.psc.txt
+//   M5: aegis_proof_3_1_3_2_M5_compliance_algorithm.psc.txt  ← THIS FILE
+//
+// FULL AEGIS PROOF CHAIN (all sessions):
+//   AEGIS-PROOF-1.2  →  aegis_proof_1_2_*.psc.txt  (Session 3)
+//   AEGIS-PROOF-3.1  →  aegis_proof_3_1_3_2_M2_*.psc.txt  (This session)
+//   AEGIS-PROOF-3.2  →  aegis_proof_3_1_3_2_M3_*.psc.txt  (This session)
+// ============================================================

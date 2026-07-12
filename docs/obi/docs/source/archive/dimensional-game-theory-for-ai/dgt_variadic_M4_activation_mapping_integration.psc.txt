@@ -1,0 +1,265 @@
+// ============================================================
+// FILE: dgt_variadic_M4_activation_mapping_integration.psc.txt
+// MODULE 4 OF 5 — Dimensional Activation Mapping, Domain
+//                 Instantiations & Cross-Paper Integration
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 5: DIMENSIONAL ACTIVATION MAPPING
+// ------------------------------------------------------------
+
+// THE φ MAPPING:
+//   φ : {x₁, x₂, ..., xₙ} → D_act   (eq. 4)
+//
+// This function identifies which scalar or vector inputs
+// activate dimension-specific strategies.
+//
+// Role: FILTER (prevent overload) + CLASSIFY (prevent misclassification)
+//
+// Cross-reference evolution:
+//   PDF 8  §4.1 Algorithm 1: DimensionIdentification via PCA
+//   PDF 9  §6.1 eq.11: φ defined with |D_act| ≤ Θ constraint
+//   PDF 10 §5:  φ formalized with contextual activation conditions
+//   (This paper adds the contextual gate: Definition 2 must pass)
+
+
+// ── THE φ MAPPING (FORMAL IMPLEMENTATION) ────────────────────
+
+PROCEDURE DimensionalActivationMapping(inputs: List[ScalarInput],
+                                        D_available: DimensionSet,
+                                        promotion_fns: Map[DimensionID → PromotionFunction],
+                                        tau_map: Map[DimensionID → REAL],
+                                        epsilon: REAL,
+                                        theta: INT) -> List[StrategicDimension]:
+    // φ: {x₁, ..., xₙ} → D_act
+    //
+    // Steps:
+    //   1. Attempt scalar promotion for each (input, dimension) pair
+    //   2. Apply contextual activation (Definition 2) to filter
+    //   3. Enforce computability bound |D_act| ≤ Θ
+
+    D_candidates := []
+
+    // Step 1 + 2: For each dimension, check if inputs activate it
+    FOR EACH dim IN D_available.dimensions:
+        tau := IF dim.id IN tau_map THEN tau_map[dim.id] ELSE DEFAULT_TAU
+        f   := IF dim.id IN promotion_fns THEN promotion_fns[dim.id]
+               ELSE PromotionFunction.Default(dim)
+
+        // Attempt promotion of all inputs to this dimension
+        promoted_inputs := []
+        FOR EACH x_i IN inputs:
+            result := ScalarPromotion(x_i, dim, f, epsilon)
+            IF result.success:
+                promoted_inputs.APPEND(x_i)
+            END IF
+        END FOR
+
+        // Contextual activation (Definition 2): Σⱼ δ(xⱼ, Dᵢ) ≥ τ
+        // Use all inputs (not just promoted) for activation sum
+        is_active := ContextualActivation(
+            inputs   = inputs,
+            D_i      = dim,
+            delta_fn = RelevanceFunction.Default(),
+            tau      = tau
+        )
+
+        IF is_active:
+            D_candidates.APPEND(dim)
+            EMIT LOG "φ: dim=" + dim.name + " activated | promoted=" +
+                     LENGTH(promoted_inputs) + " inputs"
+        END IF
+    END FOR
+
+    // Step 3: Enforce |D_act| ≤ Θ (Computational Reduction Theorem)
+    IF LENGTH(D_candidates) > theta:
+        EMIT INFO "φ: |D_candidates|=" + LENGTH(D_candidates) +
+                  " > Θ=" + theta + " — trimming to top-Θ"
+        D_candidates := SelectTopDimensions(D_candidates, inputs, theta)
+    END IF
+
+    EMIT INFO "φ complete | |D_act|=" + LENGTH(D_candidates)
+    RETURN D_candidates
+END PROCEDURE
+
+
+PROCEDURE SelectTopDimensions(candidates: List[StrategicDimension],
+                                inputs: List[ScalarInput],
+                                theta: INT) -> List[StrategicDimension]:
+    // Rank candidates by aggregate relevance across inputs; take top Θ.
+    scored := []
+    FOR EACH dim IN candidates:
+        total_relevance := SUM([RelevanceScore(x, dim) FOR x IN inputs])
+        scored.APPEND((dim, total_relevance))
+    END FOR
+
+    sorted_by_relevance := SORT_BY(scored, key=pair → pair[1], order=DESCENDING)
+    RETURN [pair[0] FOR pair IN sorted_by_relevance[:theta]]
+END PROCEDURE
+
+
+// ── DOMAIN-SPECIFIC φ INSTANTIATIONS ─────────────────────────
+
+// The φ mapping takes different forms in each application domain.
+// These instantiate the abstract mapping for real contexts.
+
+// Domain 1: AI Coordination
+PROCEDURE AICoordinationMapping(agent_states: List[AgentState],
+                                  D_available: DimensionSet) -> List[StrategicDimension]:
+    // Convert agent state observations to scalar inputs, then apply φ
+    inputs := [AgentStateToScalar(s) FOR s IN agent_states]
+    RETURN DimensionalActivationMapping(
+        inputs       = inputs,
+        D_available  = D_available,
+        promotion_fns = {},     // use defaults
+        tau_map       = {},     // use default τ
+        epsilon       = 0.1,
+        theta         = THETA_COMPUTABILITY
+    )
+END PROCEDURE
+
+PROCEDURE AgentStateToScalar(state: AgentState) -> ScalarInput:
+    // Map agent state to a scalar input for promotion
+    RETURN ScalarInput(
+        id        = state.agent_id,
+        raw_value = state.confidence_level,   // primary scalar
+        embedding = state.belief_vector,       // pre-computed if available
+        is_promoted = (state.belief_vector != NULL)
+    )
+END PROCEDURE
+
+
+// Domain 2: Adaptive Defense (Cybersecurity)
+PROCEDURE CyberDefenseMapping(threat_signals: List[ThreatSignal],
+                               D_available: DimensionSet,
+                               threat_tau: REAL) -> List[StrategicDimension]:
+    // Convert threat signals to scalar inputs
+    inputs := [ThreatSignalToScalar(t) FOR t IN threat_signals]
+
+    // All cyber dimensions use the threat-specific τ
+    tau_map := {d.id: threat_tau FOR d IN D_available.dimensions}
+
+    RETURN DimensionalActivationMapping(
+        inputs       = inputs,
+        D_available  = D_available,
+        promotion_fns = {},
+        tau_map       = tau_map,
+        epsilon       = 0.05,   // low epsilon — even weak threat signals count
+        theta         = THETA_COMPUTABILITY
+    )
+END PROCEDURE
+
+
+// Domain 3: OBIAI Filter-Flash Application
+PROCEDURE OBIAIActivationMapping(observation: Observation,
+                                   D_available: DimensionSet,
+                                   p_conf: REAL) -> List[StrategicDimension]:
+    // Map OBIAI observation to D_act for the epistemic decision step.
+    // Used in the ephemeris step as the dimensional context.
+
+    // Convert verb-noun pairs to scalar inputs
+    verb_noun_pairs := ExtractVerbNounPairs(observation)
+    inputs := []
+    FOR EACH (v, n) IN verb_noun_pairs:
+        // Vexameneria as scalar (action intensity of verb)
+        vex := VexameneriaScore(v, n)
+        inputs.APPEND(ScalarInput(
+            id        = v.id + "⊕" + n.id,
+            raw_value = vex,
+            embedding = Vector([DAGCost(v, n, LAMBDA_DEFAULT, MU_DEFAULT,
+                                        BETA1_DEFAULT, BETA2_DEFAULT,
+                                        GAMMA1_DEFAULT, GAMMA2_DEFAULT),
+                                vex, p_conf]),
+            is_promoted = TRUE   // already promoted via vexameneria
+        ))
+    END FOR
+
+    // Use confidence-scaled τ
+    tau_scaled := DEFAULT_TAU * p_conf
+    tau_map := {d.id: tau_scaled FOR d IN D_available.dimensions}
+
+    RETURN DimensionalActivationMapping(
+        inputs       = inputs,
+        D_available  = D_available,
+        promotion_fns = {},
+        tau_map       = tau_map,
+        epsilon       = 0.1,
+        theta         = THETA_COMPUTABILITY
+    )
+END PROCEDURE
+
+
+// Domain 4: RAF Stress-Adaptive Context
+PROCEDURE RAFStressActivationMapping(stress_level: REAL,
+                                      D_available: DimensionSet) -> List[StrategicDimension]:
+    // Convert RAF stress level to dimensional activation.
+    // Higher stress → lower τ → more dimensions activate.
+    // This implements the stress-dimension coupling in Theorem 2 (PDF 9).
+
+    stress_scalar := ScalarInput(
+        id        = "raf_stress",
+        raw_value = stress_level,
+        embedding = StressScalarPromotion(stress_level),
+        is_promoted = TRUE
+    )
+
+    // τ inversely proportional to stress: under panic, activate all dimensions
+    tau_stress := DEFAULT_TAU * (1.0 - stress_level / 12.0)
+    tau_map    := {d.id: MAX(tau_stress, 0.01) FOR d IN D_available.dimensions}
+
+    RETURN DimensionalActivationMapping(
+        inputs       = [stress_scalar],
+        D_available  = D_available,
+        promotion_fns = {},
+        tau_map       = tau_map,
+        epsilon       = 0.05,
+        theta         = THETA_COMPUTABILITY
+    )
+END PROCEDURE
+
+
+// ── φ COMPOSITION: MULTI-SOURCE ACTIVATION ───────────────────
+
+PROCEDURE CompositeActivationMapping(sources: Map[SourceType → List[ScalarInput]],
+                                      D_available: DimensionSet,
+                                      tau_map: Map[DimensionID → REAL]) -> List[StrategicDimension]:
+    // When inputs come from multiple sources, aggregate their activations.
+    // D_act = Union of dimensions activated by any source.
+
+    all_active_dim_ids := SET()
+    FOR EACH (source_type, inputs) IN sources:
+        D_from_source := DimensionalActivationMapping(
+            inputs       = inputs,
+            D_available  = D_available,
+            promotion_fns = {},
+            tau_map       = tau_map,
+            epsilon       = 0.1,
+            theta         = THETA_COMPUTABILITY
+        )
+        FOR EACH dim IN D_from_source:
+            all_active_dim_ids.ADD(dim.id)
+        END FOR
+    END FOR
+
+    // Build final D_act from union, still bounded by Θ
+    D_act_all := [d FOR d IN D_available.dimensions IF d.id IN all_active_dim_ids]
+    IF LENGTH(D_act_all) > THETA_COMPUTABILITY:
+        // Aggregate all inputs across sources for final ranking
+        all_inputs := FLATTEN(sources.values)
+        D_act_all  := SelectTopDimensions(D_act_all, all_inputs, THETA_COMPUTABILITY)
+    END IF
+
+    EMIT INFO "Composite φ | sources=" + LENGTH(sources) +
+              " | |D_act|=" + LENGTH(D_act_all)
+    RETURN D_act_all
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: dgt_variadic_M5_conclusion_corpus_synthesis.psc.txt
+// ============================================================

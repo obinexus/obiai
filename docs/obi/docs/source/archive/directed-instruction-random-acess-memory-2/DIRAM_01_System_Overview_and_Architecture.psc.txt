@@ -1,0 +1,160 @@
+// ============================================================
+// DIRAM (Directed Instruction RAM)
+// MODULE 1: System Overview and Architecture
+// Source: Directed_Instruction_RAM.pdf (README.md, 2025-07-03)
+// OBINexus Aegis Project | License: MIT
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 1.1 — MISSION STATEMENT
+// ------------------------------------------------------------
+
+// DIRAM is a software emulator for a future hardware memory system.
+// It is NOT a passive memory store. It is predictive, cryptographically-aware,
+// and zero-trust RAM that understands its own state.
+
+DEFINE DIRAM_MISSION AS:
+    // Three primary governing principles:
+    PRINCIPLE lookahead:
+        // Memory anticipates future allocation needs BEFORE algorithms are called
+        USE predictive_allocation_strategies WITH asynchronous_promises AND lookahead_cache
+
+    PRINCIPLE self_governance:
+        // Cryptographic constraints enforced at allocation level
+        ENFORCE sinphase_constraint: ε(x) ≤ 0.6
+        // Zero-trust: no allocation is trusted by default
+
+    PRINCIPLE introspection:
+        // AI systems can query their own memory patterns
+        PROVIDE memory_self_report(state, health, allocation_history)
+
+// ------------------------------------------------------------
+// SECTION 1.2 — PROJECT STATUS FLAGS
+// ------------------------------------------------------------
+
+DEFINE PROJECT_STATUS AS:
+    software_emulator       = COMPLETE          // CLI, REPL, traceable alloc/free, detached procs
+    hardware_prototype      = NOT_BUILT         // Awaiting silicon partners
+    algorithm_testing       = SUITABLE          // For AI model memory shaping and simulation
+    hardware_research       = ACTIVE            // Memory cell design for predictive allocation
+    production_silicon      = TARGET_2026
+
+// ------------------------------------------------------------
+// SECTION 1.3 — SYSTEM ARCHITECTURE (Multi-Layer Stack)
+// ------------------------------------------------------------
+
+// Architecture is a 5-layer vertical stack.
+// Each layer maps to a future hardware counterpart.
+
+DEFINE ARCHITECTURE_STACK AS:
+
+    LAYER 5 [TOP]: AI_Application_Layer
+        // Entry point for AI systems and user applications
+        // Future: Direct hardware API (bypass software emulation)
+        INTERFACE: diram_api -> allocate, free, introspect, query_state
+
+    LAYER 4: Predictive_Allocation_Engine
+        // Manages asynchronous memory promises and lookahead cache
+        // Future: Hardware-accelerated prefetch unit
+        COMPONENTS:
+            promise_queue       // Pending async allocation requests
+            lookahead_cache     // 1024-entry prefetch buffer (future: ML-driven)
+        BEHAVIOR:
+            ON_ALGORITHM_CALL -> CHECK lookahead_cache FOR pre-allocated region
+            IF cache_hit -> RETURN pre-allocated pointer
+            IF cache_miss -> ALLOCATE synchronously AND LOG miss
+
+    LAYER 3: Enhanced_Feature_Allocation
+        // Error indexing and governance enforcement layer
+        COMPONENTS:
+            error_index_registry    // Categorized error codes (see Module 3)
+            governance_auditor      // Validates ε(x) ≤ 0.6 per epoch
+        BEHAVIOR:
+            FOR EACH allocation_request:
+                VALIDATE against governance_constraint
+                IF violation -> DEFER allocation, LOG error_code 0x1001
+                ELSE -> PASS TO Layer 2
+
+    LAYER 2: Core_Traced_Allocation
+        // SHA-256 receipt generation for every allocation event
+        // Future: On-chip SHA engine (0ns latency, parallel with memory access)
+        BEHAVIOR:
+            ON alloc(size, tag):
+                region = malloc(size)
+                receipt = SHA256(base_addr || size || timestamp || pid)
+                STORE receipt IN diram_allocation_t
+                WRITE receipt TO alloc_trace.log
+                RETURN region WITH receipt
+
+    LAYER 1 [BOTTOM]: Heap_Event_Constraints
+        // Runtime enforcement of Sinphasé governance: ε(x) ≤ 0.6
+        // Future: Hardware-enforced transistor-level isolation
+        STATE:
+            epoch_counter   = 0
+            max_heap_events = 3     // Configurable
+        BEHAVIOR:
+            ON each_allocation:
+                epoch_counter += 1
+                epsilon = epoch_counter / max_heap_events
+                IF epsilon > 0.6 -> BLOCK and DEFER allocation
+                IF new_epoch_detected -> RESET epoch_counter = 0
+
+// ------------------------------------------------------------
+// SECTION 1.4 — FUTURE HARDWARE VISION
+// ------------------------------------------------------------
+
+DEFINE HARDWARE_SPECIFICATION_GOALS AS:
+
+    memory_cell_process     = "8nm"
+    embedded_sha_engine     = PER_MEMORY_BANK      // Each bank has own SHA-256 unit
+    predictive_cache_size   = 1024_ENTRIES          // ML-based prefetch
+    latency_target          = LESS_THAN 10ns        // For cryptographic receipt generation
+    power_overhead          = LESS_THAN 0.5W        // For governance features
+    initial_capacity        = 32GB_MODULES          // Full traceability
+
+DEFINE HARDWARE_CAPABILITIES AS:
+    // Capabilities not available in current software emulation
+    FUTURE predictive_allocation_at_hardware_level:
+        USE ai_driven_access_pattern_analysis
+    FUTURE audit_trails_in_physical_cells:
+        EACH cell CONTAINS cryptographic_history
+    FUTURE zero_trust_at_transistor_level:
+        HARDWARE_ENFORCE process_isolation
+    FUTURE ai_workflow_optimization:
+        PROVIDE O(1) heap-like access FOR neural_network_memory_patterns
+    FUTURE hardware_introspection:
+        MEMORY REPORTS OWN state AND health
+
+// ------------------------------------------------------------
+// SECTION 1.5 — PERFORMANCE CHARACTERISTICS
+// ------------------------------------------------------------
+
+DEFINE SOFTWARE_PERFORMANCE AS:
+    allocation_overhead     = O(1) WITH sha256_computation
+    memory_overhead_per_alloc = 128_BYTES           // For metadata struct
+    constraint_checking     = O(1) epoch-based_validation
+    trace_log_writing       = ASYNCHRONOUS WITH line_buffering
+
+DEFINE TARGET_HARDWARE_PERFORMANCE AS:
+    allocation_latency      = LESS_THAN 50ns        // With hardware acceleration
+    cryptographic_ops       = 0ns                   // Parallel with memory access
+    predictive_hit_rate     = GREATER_THAN 90%      // For AI workloads
+    power_overhead          = LESS_THAN 5%          // vs traditional DRAM
+
+// ------------------------------------------------------------
+// SECTION 1.6 — OBINEXUS ECOSYSTEM INTEGRATION
+// ------------------------------------------------------------
+
+DEFINE ECOSYSTEM_INTEGRATIONS AS:
+    RIFTlang    -> governance_contract_validation
+    Polybuild   -> build_orchestration
+    Git_RAF     -> version_control_with_governance
+    Gosilang    -> runtime_execution_environment
+
+// Note: OBINexus toolchain pipeline reference:
+// riftlang.exe -> .so.a -> rift.exe -> gosilang
+// Build orchestration: nlink -> polybuild
+
+// ============================================================
+// END MODULE 1
+// ============================================================

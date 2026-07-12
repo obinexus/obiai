@@ -1,0 +1,208 @@
+// ============================================================
+// AEGIS-PROOF-1.2: Formal Verification of Traversal Cost Function
+// for Epistemological DAG Inference
+// MODULE 4: Semantic Disambiguation Protocols, Bias Mitigation & Integration Specs
+// Source: Formal_Verification_of_Traversal_Cost_Function_for_DAG.pdf
+// OBINexus Computing - Aegis Framework Division | May 27, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 9.2 — SEMANTIC DISAMBIGUATION PROTOCOLS
+// ------------------------------------------------------------
+
+// Semantic disambiguation = the process of resolving ambiguous belief states
+// by traversing toward lower-entropy nodes in the DAG.
+// Each step REDUCES uncertainty (ΔH ≥ 0) while maintaining cost minimality.
+
+DEFINE SEMANTIC_DISAMBIGUATION AS:
+    purpose         = "Resolve ambiguous belief states via cost-optimal DAG traversal"
+    invariant       = "Each disambiguation step reduces epistemic entropy H(Si)"
+    proof_basis     = "Theorem 1 Part 2 — ΔH(Si,j) ≥ 0 for valid transitions"
+
+PROCEDURE semantic_disambiguation_protocol(Node_start, target_context, max_steps) -> DISAMBIGUATION_RESULT:
+    current_node    = Node_start
+    path            = [Node_start]
+    total_cost      = 0.0
+    steps           = 0
+
+    WHILE steps < max_steps:
+        // Step 1: Get candidate next nodes
+        candidates = identify_semantic_neighbors(current_node)
+
+        IF candidates IS EMPTY:
+            // Terminal node reached — no further disambiguation possible
+            BREAK
+
+        // Step 2: Score candidates by cost AND target alignment
+        scored = EMPTY LIST
+        FOR EACH candidate IN candidates:
+            cost = compute_traversal_cost(current_node, candidate, α, β)
+            alignment = compute_target_alignment(candidate, target_context)
+            score = cost - λ * alignment  // λ balances cost vs alignment
+            scored.append((candidate, cost, score))
+
+        // Step 3: Select minimum score (cost-optimal, target-aligned)
+        best_candidate, best_cost, _ = argmin(scored, key=lambda x: x.score)
+
+        // Step 4: Verify entropy reduction (disambiguation invariant)
+        delta_H = compute_entropy_change(current_node.S_i, best_candidate.S_i)
+        IF delta_H < 0:
+            LOG "WARNING: Transition to " + best_candidate.id + " increases entropy"
+            LOG "Skipping — not a valid disambiguation step"
+            scored.remove((best_candidate, best_cost, _))
+            CONTINUE
+
+        // Step 5: Advance
+        path.append(best_candidate)
+        total_cost += best_cost
+        current_node = best_candidate
+        steps += 1
+
+        // Step 6: Check termination (sufficiently low entropy or target reached)
+        IF compute_node_entropy(current_node) <= ENTROPY_TERMINATION_THRESHOLD:
+            BREAK
+        IF current_node.S_i == target_context:
+            BREAK
+
+    RETURN DISAMBIGUATION_RESULT(
+        path        = path,
+        total_cost  = total_cost,
+        final_node  = current_node,
+        final_entropy = compute_node_entropy(current_node)
+    )
+
+// ------------------------------------------------------------
+// SECTION 9.3 — FILTER-FLASH INTEGRATION SPECIFICATION
+// ------------------------------------------------------------
+
+// The cost function enables two Filter-Flash integration modes:
+
+DEFINE FILTER_FLASH_INTEGRATION_MODES AS:
+
+    FILTER_MODE:
+        trigger     = "cost_ij < filter_threshold"
+        action      = "Node passes semantic filter — eligible for traversal"
+        effect      = "Low-cost transitions encouraged — exploration near current state"
+        clinical    = "Prioritizes diagnostically similar hypotheses"
+
+    FLASH_MODE:
+        trigger     = "entropy_gradient(Nodei, Nodej) > flash_threshold"
+        action      = "Flash event triggered — significant epistemic transition flagged"
+        effect      = "High-information transitions surface as consciousness events"
+        clinical    = "Alerts clinician to major diagnostic shifts"
+        // Cross-reference: DreamSystem Module 2 — Flash confidence thresholds
+        // Cross-reference: DPCA Module 2 — Flash event triggering at θ_flash
+
+PROCEDURE configure_filter_flash_for_clinical(domain) -> THRESHOLD_CONFIG:
+    // Clinical domain requires more conservative thresholds
+    IF domain == "cancer_detection":
+        RETURN {
+            filter_threshold    : 0.3,      // Only low-cost (similar) transitions pass
+            flash_threshold     : 0.15,     // Trigger Flash on significant entropy shifts
+            flash_min_confidence: 0.85      // Minimum certainty for Flash in medical context
+        }
+    IF domain == "general_inference":
+        RETURN {
+            filter_threshold    : 0.6,
+            flash_threshold     : 0.3,
+            flash_min_confidence: 0.636     // 2/3 × 95.4% — Medium mode (DreamSystem)
+        }
+    // TODO: Clarify from source PDF — exact clinical threshold values
+
+// ------------------------------------------------------------
+// SECTION 9.4 — BIAS MITIGATION PRESERVATION UNDER SEMANTIC UNCERTAINTY
+// ------------------------------------------------------------
+
+// AEGIS-PROOF-1.2 must maintain the 85% bias reduction achieved in AEGIS-PROOF-1.1.
+// The traversal cost function must NOT introduce differential costs by demographic group.
+
+DEFINE BIAS_PRESERVATION_REQUIREMENTS AS:
+    target_reduction    = 0.85          // 85% bias reduction from AEGIS-PROOF-1.1
+    max_group_disparity = 0.15          // Maximum 15% disparity across groups
+    scope               = "Demographic parity under semantic uncertainty"
+
+PROCEDURE verify_demographic_parity_in_traversal(dag, test_cases) -> PARITY_REPORT:
+    group_costs = {}
+
+    FOR EACH test_case IN test_cases:
+        group = test_case.demographic_group
+        path_cost = dag.traverse(test_case.start_node, test_case.target).cost
+
+        IF group NOT IN group_costs:
+            group_costs[group] = []
+        group_costs[group].append(path_cost)
+
+    // Compute average cost per group
+    avg_costs = {g: mean(costs) FOR g, costs IN group_costs.items()}
+    overall_avg = mean(all values IN group_costs)
+
+    // Check parity
+    violations = []
+    FOR EACH group, avg_cost IN avg_costs.items():
+        disparity = abs(avg_cost - overall_avg) / overall_avg
+        IF disparity > 0.15:
+            violations.append({group: group, disparity: disparity})
+
+    RETURN PARITY_REPORT(
+        group_averages  = avg_costs,
+        overall_average = overall_avg,
+        violations      = violations,
+        bias_preserved  = len(violations) == 0
+    )
+
+PROCEDURE maintain_bias_reduction_through_traversal(dag, bias_baseline) -> BOOLEAN:
+    // Verify that DAG traversal does not erode AEGIS-PROOF-1.1 bias reduction
+    pre_traversal_bias  = bias_baseline                     // From AEGIS-PROOF-1.1
+    post_traversal_bias = measure_bias_in_outputs(dag)      // After traversal
+
+    reduction = (pre_traversal_bias - post_traversal_bias) / pre_traversal_bias
+    IF reduction < 0.85:
+        LOG "Bias reduction VIOLATED: " + reduction + " < 0.85"
+        RETURN FALSE
+
+    LOG "Bias reduction maintained: " + reduction + " ≥ 0.85"
+    RETURN TRUE
+
+// ------------------------------------------------------------
+// SECTION 9 — FULL INTEGRATION SPECIFICATION SUMMARY
+// ------------------------------------------------------------
+
+// AEGIS-PROOF-1.2 enables five technical implementations:
+
+DEFINE INTEGRATION_SPECIFICATIONS AS:
+
+    SPEC_1: EpistemicDAG_Class
+        description     = "Core data structure implementing cost-weighted traversal"
+        implementation  = EpistemicDAG (see Module 3)
+        verified_by     = "Theorem 1 (all four properties)"
+        status          = "Ready for Phase 1.5"
+
+    SPEC_2: Semantic_Disambiguation_Protocols
+        description     = "Algorithms for optimal path selection in belief space"
+        implementation  = semantic_disambiguation_protocol (Module 4)
+        verified_by     = "Theorem 1 Part 2 (ΔH ≥ 0 for valid transitions)"
+        status          = "Ready for Phase 1.5"
+
+    SPEC_3: Filter_Flash_Integration
+        description     = "Consciousness-aware inference triggering"
+        implementation  = filter_flash_traversal (Module 3)
+        verified_by     = "Algorithm 1 (Filter-Flash Integrated Traversal)"
+        cross_reference = "DreamSystem Module 2, DPCA Module 2"
+        status          = "Ready for Phase 1.5"
+
+    SPEC_4: Bias_Mitigation_Preservation
+        description     = "Maintenance of demographic parity under semantic uncertainty"
+        implementation  = verify_demographic_parity_in_traversal (Module 4)
+        verified_by     = "maintain_bias_reduction_through_traversal (85% threshold)"
+        cross_reference = "FABIA_03 — Bayesian debiasing framework"
+        status          = "Ready for Phase 1.5"
+
+    SPEC_5: Clinical_Audit_Trail
+        description     = "Regulatory-compliant traversal logging"
+        implementation  = "Every traversal logged with full parameter record"
+        cross_reference = "DIRAM_03 — SHA-256 receipts / EATV_04 — compliance matrix"
+        status          = "Ready for Phase 1.5"
+
+// ============================================================
+// END MODULE 4
+// ============================================================

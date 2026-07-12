@@ -1,0 +1,10 @@
+{
+  "name": "obi-documentation",
+  "main": "../docs/public/index.html",
+  "window": {
+    "title": "OBI - Ontological Bayesian Intelligence",
+    "width": 1200,
+    "height": 800,
+    "position": "center"
+  }
+}

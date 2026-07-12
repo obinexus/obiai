@@ -1,0 +1,251 @@
+// ============================================================
+// FILE: aegis_04_recovery_algorithm.psc.txt
+// MODULE 4: Recovery Correctness Algorithm (Algorithm 1)
+// SOURCE: Mathematical_Framework_for_Zero_Overhead_Data_Marshalling_for_AI.pdf
+// Sections: 5 (Recovery Correctness), 6 (Safety and Failover / NASA Compliance)
+// Project: Aegis — OBINexus Engineering Team | Document Version 2.0
+// ============================================================
+
+// ------------------------------------------------------------
+// THEOREM 5.1: RECOVERY CORRECTNESS
+// "Algorithm 1 maintains all cryptographic properties and produces
+//  a state indistinguishable from valid execution."
+//
+// Three invariants proven:
+//   INV-1: Cryptographic Integrity  — each applied delta is crypto-verified
+//   INV-2: Bounded Delta Replay     — at most |Delta| <= k deltas processed
+//   INV-3: Soundness Preservation   — soundness certificate verifiable after recovery
+// ------------------------------------------------------------
+
+// ------------------------------------------------------------
+// DATA STRUCTURES
+// ------------------------------------------------------------
+
+STRUCT Checkpoint:
+    state           : SystemState
+    crypto_hash     : BYTES         // Cryptographic hash of state at checkpoint
+    sequence_number : INTEGER
+    timestamp       : UNIX_TIMESTAMP
+
+STRUCT Delta:
+    from_state_hash : BYTES
+    to_state_hash   : BYTES
+    operations      : LIST<Operation>
+    proof           : BYTES         // Cryptographic proof for this delta
+
+STRUCT DeltaVerificationResult:
+    valid           : BOOLEAN
+    pi              : BYTES         // Proof bytes (pi_delta)
+    failure_reason  : STRING        // Populated if valid == FALSE
+
+STRUCT RecoveryOutput:
+    s_r             : SystemState           // Recovered state
+    pi              : BYTES                 // Cryptographic integrity proof
+    sigma           : BYTES                 // Soundness certificate
+
+STRUCT FailureState:
+    checkpoint_log  : LIST<Checkpoint>
+    last_known_seq  : INTEGER
+
+// ------------------------------------------------------------
+// ALGORITHM 1: CRYPTOGRAPHICALLY-SAFE STATE RECOVERY
+// ------------------------------------------------------------
+
+// Preconditions:   failure state s_f, cryptographic context Sigma
+// Postconditions:  recovered state s_r, integrity proof pi, soundness certificate sigma
+
+FUNCTION recovery_algorithm(s_f: FailureState, Sigma) -> RecoveryOutput:
+
+    // Step 1: Initialize valid checkpoint set to empty
+    V = EMPTY_SET          // Will hold cryptographically verified checkpoints
+
+    // Step 2: Scan checkpoint log — retain only cryptographically intact checkpoints
+    FOR EACH checkpoint c IN s_f.checkpoint_log:
+        IF VerifyCryptographicIntegrity(c, Sigma) == TRUE THEN
+            V = V UNION { c }
+        END IF
+        // Failed checkpoints are silently discarded — not applied
+    END FOR
+
+    // Step 3: Select the most recent valid checkpoint as recovery base
+    s_last = FindMostRecentValid(V)
+    // s_last is the last-known-good state before the failure point
+
+    // Step 4: Extract the verifiable delta chain from s_last to s_f
+    //         Delta = ordered sequence of deltas between s_last and s_f
+    Delta = ExtractVerifiableDeltaChain(s_last, s_f)
+    // |Delta| <= k where k = maximum checkpoint interval (bounded — INV-2)
+
+    // Step 5: Initialize recovery state from last valid checkpoint
+    s_r = s_last
+
+    // Step 6: Replay delta chain — apply only verified deltas
+    FOR EACH delta delta_i IN Delta:
+
+        // Verify this delta's cryptographic integrity against current s_r
+        pi_delta = VerifyDeltaCryptography(delta_i, s_r, Sigma)
+
+        IF pi_delta.valid == TRUE THEN
+            // Apply the verified delta to advance recovered state
+            s_r = ApplyVerifiedDelta(s_r, delta_i)
+
+            // Record the cryptographic transition for audit trail
+            RecordCryptographicTransition(s_r, delta_i, pi_delta)
+
+        ELSE
+            // Halt at first invalid delta — do not apply partial/corrupted changes
+            BREAK
+            // INV-1 preserved: no unverified delta is ever applied
+        END IF
+
+    END FOR
+
+    // Step 7: Generate cryptographic integrity proof for recovered state
+    pi = GenerateCryptographicIntegrityProof(s_r, Sigma)
+    // pi attests: s_r was constructed exclusively from verified checkpoints and deltas
+
+    // Step 8: Generate soundness certificate
+    sigma = GenerateSoundnessCertificate(s_r, Delta, Sigma)
+    // Verify(sigma, s_r) = 1  =>  Soundness(s_r) = TRUE   (INV-3)
+
+    RETURN RecoveryOutput { s_r = s_r, pi = pi, sigma = sigma }
+
+END FUNCTION
+
+// ------------------------------------------------------------
+// INVARIANT 1: CRYPTOGRAPHIC INTEGRITY PRESERVATION
+// ------------------------------------------------------------
+
+// For all delta in Delta:
+//   Valid(delta) => CryptoIntact(Apply(s_r, delta))
+
+FUNCTION verify_delta_integrity_invariant(delta, s_r, Sigma) -> BOOLEAN:
+    IF delta.valid THEN
+        s_candidate = apply_delta_tentatively(s_r, delta)
+        RETURN CryptoIntact(s_candidate, Sigma)
+    END IF
+    RETURN TRUE     // Invalid deltas are never applied — invariant trivially holds
+END FUNCTION
+
+// ------------------------------------------------------------
+// INVARIANT 2: BOUNDED DELTA REPLAY
+// ------------------------------------------------------------
+
+// Algorithm processes at most |Delta| <= k deltas
+// where k = maximum checkpoint interval (system configuration parameter)
+// This ensures deterministic termination — required by NASA-STD-8739.8
+
+CONST MAX_CHECKPOINT_INTERVAL = k   // System-defined constant
+
+FUNCTION bounded_delta_check(Delta) -> BOOLEAN:
+    RETURN LENGTH(Delta) <= MAX_CHECKPOINT_INTERVAL
+    // If FALSE: checkpoint interval configuration error — must be corrected
+END FUNCTION
+
+// ------------------------------------------------------------
+// INVARIANT 3: SOUNDNESS PRESERVATION
+// ------------------------------------------------------------
+
+// Verify(sigma, s_r) = 1  implies  Soundness(s_r) = TRUE
+
+FUNCTION verify_soundness_certificate(sigma, s_r, Sigma) -> BOOLEAN:
+    result = Sigma.verify_certificate(sigma, s_r)
+    IF result == 1 THEN
+        RETURN Soundness(s_r) == TRUE
+    END IF
+    RETURN FALSE
+END FUNCTION
+
+// ------------------------------------------------------------
+// SECTION 6: NASA-STD-8739.8 COMPLIANCE — THEOREM 6.1
+// "The marshalling protocol satisfies all safety-critical
+//  requirements specified in NASA-STD-8739.8."
+// ------------------------------------------------------------
+
+// Compliance Requirement 1 — DETERMINISTIC EXECUTION:
+//   For any state s and operation op:
+//   M(s, op) produces identical results across all executions.
+//   Follows from: cryptographic determinism of signature verification + hash computation.
+
+FUNCTION determinism_check(s, op, Sigma) -> BOOLEAN:
+    result_1 = marshalling_function_M(s, op.source, op.target, Sigma)
+    result_2 = marshalling_function_M(s, op.source, op.target, Sigma)
+    RETURN result_1 == result_2     // Must always be TRUE
+END FUNCTION
+
+// Compliance Requirement 2 — BOUNDED RESOURCES:
+//   Time(M_ij)          <= O(n log n)
+//   Space(M_ij)         <= O(n)
+//   Communication(M_ij) <= O(log n)
+// (See Module 2 for full complexity analysis)
+
+// Compliance Requirement 3 — FORMAL VERIFICATION:
+//   All security properties are mathematically provable.
+//   Demonstrated in Sections 4 (soundness), 5 (recovery), 7 (cross-algorithm).
+
+// Compliance Requirement 4 — GRACEFUL DEGRADATION:
+//   Failure modes are:
+//   (a) Detectable through cryptographic verification
+//   (b) Recoverable with bounded resource usage
+//   (c) Preserving of all safety invariants
+
+FUNCTION graceful_degradation_check(s_f: FailureState, Sigma) -> RecoveryStatus:
+    // (a) Detect failure via crypto verification
+    IF NOT any_valid_checkpoint_exists(s_f, Sigma) THEN
+        RETURN RecoveryStatus.UNRECOVERABLE     // No valid base — system must reset
+
+    END IF
+
+    // (b) Recover with bounded resources
+    result = recovery_algorithm(s_f, Sigma)
+
+    // (c) Verify safety invariants preserved
+    IF NOT verify_soundness_certificate(result.sigma, result.s_r, Sigma) THEN
+        RETURN RecoveryStatus.INVARIANT_VIOLATION
+    END IF
+
+    RETURN RecoveryStatus.RECOVERED
+END FUNCTION
+
+// ------------------------------------------------------------
+// HELPER FUNCTIONS
+// ------------------------------------------------------------
+
+FUNCTION FindMostRecentValid(V: SET<Checkpoint>) -> SystemState:
+    // Sort by sequence_number descending, return state of highest-numbered checkpoint
+    sorted = SORT(V, BY=sequence_number, ORDER=DESCENDING)
+    RETURN sorted[0].state
+END FUNCTION
+
+FUNCTION VerifyCryptographicIntegrity(c: Checkpoint, Sigma) -> BOOLEAN:
+    // Recompute hash of checkpoint state and compare to stored crypto_hash
+    recomputed = HASH(c.state)
+    RETURN constant_time_compare(recomputed, c.crypto_hash)
+END FUNCTION
+
+FUNCTION ExtractVerifiableDeltaChain(s_last, s_f: FailureState) -> LIST<Delta>:
+    // Return ordered list of deltas from s_last up to (but not including) failure point
+    // Each delta carries its own cryptographic proof for individual verification
+    // TODO: Clarify from source PDF — delta chain storage format not explicitly specified
+    RETURN s_f.delta_log_since(s_last.sequence_number)
+END FUNCTION
+
+FUNCTION ApplyVerifiedDelta(s_r: SystemState, delta: Delta) -> SystemState:
+    // Apply delta operations to current state; returns new state
+    // Only called after VerifyDeltaCryptography confirms validity
+    RETURN fold(s_r, delta.operations, apply_operation)
+END FUNCTION
+
+FUNCTION RecordCryptographicTransition(s_r, delta, pi_delta):
+    // Append to append-only cryptographic transition log
+    TransitionLog.append({
+        state    : s_r,
+        delta    : delta,
+        proof    : pi_delta,
+        timestamp: current_unix_timestamp_microseconds()
+    })
+END FUNCTION
+
+// ============================================================
+// END MODULE 4
+// ============================================================

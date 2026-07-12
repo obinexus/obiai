@@ -1,0 +1,238 @@
+// ============================================================
+// FILE: raf_cryptographic_M2_perfect_number_auraseal.psc.txt
+// MODULE 2 OF 5 — Perfect Number Cryptographic Validation
+//                 & AuraSeal Bidirectional Verification
+// SOURCE: "Dimensional Game Theory — Fault-Tolerant Cryptographic
+//          Integration for RAF Architecture with AuraSeal Validation"
+// AUTHOR: Nnamdi Okpala — OBINexus Computing
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3: PERFECT NUMBER CRYPTOGRAPHIC VALIDATION
+// ------------------------------------------------------------
+
+// MATHEMATICAL BACKGROUND: PERFECT NUMBERS
+//
+// A perfect number p equals the sum of its proper divisors.
+// Examples: 6 = 1+2+3, 28 = 1+2+4+7+14, 496, 8128.
+//
+// The "divisor echo hypothesis" used here:
+//   If h is a perfect number and P = {p₁, ..., pₖ} are its divisors,
+//   then: Σpᵢ = h (the summation condition)
+//   Additionally: gcd(h, pᵢ) = pᵢ (pᵢ divides h)
+//              AND lcm(h, pᵢ) = h (h absorbs pᵢ)
+//
+// Applied to component hashing: component hash h is validated
+// as "cryptographically perfect" when its policy set P satisfies
+// these divisor relationships.
+
+
+// ── §3.1: AURASEAL INTEGRATION WITH PERFECT NUMBERS ──────────
+
+// DEFINITION 2 (Perfect Validation Record):
+//   For component hash h and policy set P = {p₁, ..., pₖ}:
+//
+//   (6) ∀pᵢ ∈ P : gcd(h, pᵢ) = pᵢ     — policy preserves component identity
+//   (7) ∀pᵢ ∈ P : lcm(h, pᵢ) = h       — component preserves under policy
+//   (8) Σᵢ pᵢ = h                        — perfect summation condition
+
+DEFINE PerfectValidationRecord AS:
+    component_hash : UINT64      // h
+    policy_set     : List[UINT64] // P = {p₁, ..., pₖ}
+
+    // Derived properties (computed at validation time):
+    gcd_checks     : List[BOOL]   // gcd(h, pᵢ) == pᵢ for each i
+    lcm_checks     : List[BOOL]   // lcm(h, pᵢ) == h for each i
+    sum_check      : BOOL         // Σpᵢ == h
+
+    INVARIANT: LENGTH(gcd_checks) == LENGTH(policy_set)
+    INVARIANT: LENGTH(lcm_checks) == LENGTH(policy_set)
+END DEFINE
+
+
+PROCEDURE ValidatePerfectRecord(h: UINT64,
+                                  P: List[UINT64]) -> PerfectValidationRecord:
+    record := NEW PerfectValidationRecord()
+    record.component_hash := h
+    record.policy_set     := P
+
+    record.gcd_checks := []
+    record.lcm_checks := []
+
+    // Check (6) and (7) for each policy pᵢ
+    FOR EACH p_i IN P:
+        // (6): gcd(h, pᵢ) = pᵢ  ↔  pᵢ divides h
+        gcd_val := GCD(h, p_i)
+        gcd_ok  := (gcd_val == p_i)
+        record.gcd_checks.APPEND(gcd_ok)
+        IF NOT gcd_ok:
+            EMIT WARNING "gcd(h=" + h + ", p=" + p_i + ")=" + gcd_val +
+                         " ≠ p_i (condition 6 failed)"
+        END IF
+
+        // (7): lcm(h, pᵢ) = h  ↔  h is a multiple of pᵢ
+        lcm_val := LCM(h, p_i)
+        lcm_ok  := (lcm_val == h)
+        record.lcm_checks.APPEND(lcm_ok)
+        IF NOT lcm_ok:
+            EMIT WARNING "lcm(h=" + h + ", p=" + p_i + ")=" + lcm_val +
+                         " ≠ h (condition 7 failed)"
+        END IF
+    END FOR
+
+    // Check (8): Σpᵢ = h
+    policy_sum    := SUM(P)
+    record.sum_check := (policy_sum == h)
+    IF NOT record.sum_check:
+        EMIT WARNING "Σpᵢ=" + policy_sum + " ≠ h=" + h +
+                     " (perfect summation condition 8 failed)"
+    END IF
+
+    RETURN record
+END PROCEDURE
+
+
+PROCEDURE IsPerfectValidation(record: PerfectValidationRecord) -> BOOL:
+    // All three conditions must hold for perfect validation.
+    gcd_all_ok := ALL(record.gcd_checks)
+    lcm_all_ok := ALL(record.lcm_checks)
+    RETURN gcd_all_ok AND lcm_all_ok AND record.sum_check
+END PROCEDURE
+
+
+// ARITHMETIC UTILITIES
+
+PROCEDURE GCD(a: UINT64, b: UINT64) -> UINT64:
+    // Euclidean algorithm for greatest common divisor
+    WHILE b != 0:
+        t := b
+        b := a MOD b
+        a := t
+    END WHILE
+    RETURN a
+END PROCEDURE
+
+PROCEDURE LCM(a: UINT64, b: UINT64) -> UINT64:
+    // lcm(a, b) = |a·b| / gcd(a, b)
+    IF a == 0 OR b == 0:
+        RETURN 0
+    END IF
+    RETURN (a / GCD(a, b)) * b   // division first to avoid overflow
+END PROCEDURE
+
+PROCEDURE IsPerfectNumber(n: UINT64) -> BOOL:
+    // Verify n is a perfect number: Σ proper_divisors(n) = n
+    IF n <= 1:
+        RETURN FALSE
+    END IF
+    divisor_sum := 1   // 1 is always a proper divisor
+    FOR d := 2 TO SQRT(n):
+        IF n MOD d == 0:
+            divisor_sum := divisor_sum + d
+            IF d != n / d:
+                divisor_sum := divisor_sum + (n / d)
+            END IF
+        END IF
+    END FOR
+    RETURN divisor_sum == n
+END PROCEDURE
+
+PROCEDURE ProperDivisors(n: UINT64) -> List[UINT64]:
+    // Returns all proper divisors of n (divisors excluding n itself)
+    divisors := [1]
+    FOR d := 2 TO SQRT(n):
+        IF n MOD d == 0:
+            divisors.APPEND(d)
+            IF d != n / d:
+                divisors.APPEND(n / d)
+            END IF
+        END IF
+    END FOR
+    RETURN SORTED(divisors)
+END PROCEDURE
+
+
+// ── §3.2: BIDIRECTIONAL CRYPTOGRAPHIC VALIDATION ─────────────
+
+// THEOREM 1 (Cryptographic Perfect Validation):
+//   A component achieves cryptographic perfection IFF ALL FOUR hold:
+//   (1) Perfect number validation succeeds for all policy divisors
+//   (2) AuraSeal cryptographic signature verification passes
+//   (3) Prime entropy distribution within acceptable bounds
+//   (4) Git-RAF governance contracts are satisfied
+
+DEFINE AuraSealSignature AS:
+    signature_bytes : ByteArray
+    signing_key_id  : KeyID
+    timestamp       : Timestamp
+    component_id    : ComponentID
+
+    PROCEDURE Verify(component_hash: UINT64,
+                      key_registry: KeyRegistry) -> BOOL:
+        // Standard cryptographic signature verification
+        public_key := key_registry.GetPublicKey(self.signing_key_id)
+        IF public_key == NULL:
+            EMIT ERROR "AuraSeal: signing key not found | id=" + self.signing_key_id
+            RETURN FALSE
+        END IF
+        RETURN CryptographicVerify(
+            message   = component_hash.ToBytes(),
+            signature = self.signature_bytes,
+            public_key = public_key
+        )
+    END PROCEDURE
+END DEFINE
+
+
+PROCEDURE CryptographicPerfectValidation(
+    component_hash    : UINT64,
+    policy_set        : List[UINT64],
+    auraseal_sig      : AuraSealSignature,
+    prime_entropy     : REAL,
+    git_raf_contracts : GitRAFContractSet,
+    key_registry      : KeyRegistry) -> CryptoPerfectReport:
+
+    report := NEW CryptoPerfectReport()
+
+    // Condition (1): Perfect number validation for all policy divisors
+    perfect_record := ValidatePerfectRecord(component_hash, policy_set)
+    report.perfect_ok := IsPerfectValidation(perfect_record)
+    report.perfect_record := perfect_record
+
+    // Condition (2): AuraSeal signature verification
+    report.auraseal_ok := auraseal_sig.Verify(component_hash, key_registry)
+
+    // Condition (3): Prime entropy within acceptable bounds
+    CONSTANT PRIME_ENTROPY_BOUND := 0.8   // above 80% entropy → elevated risk
+    report.entropy_ok := (prime_entropy <= PRIME_ENTROPY_BOUND)
+    IF NOT report.entropy_ok:
+        EMIT WARNING "Prime entropy=" + prime_entropy + " > bound=" + PRIME_ENTROPY_BOUND
+    END IF
+
+    // Condition (4): Git-RAF governance contracts satisfied
+    report.gitraf_ok := git_raf_contracts.AllSatisfied(component_hash, policy_set)
+
+    // All four conditions required
+    report.cryptographically_perfect :=
+        report.perfect_ok AND report.auraseal_ok AND
+        report.entropy_ok AND report.gitraf_ok
+
+    IF report.cryptographically_perfect:
+        EMIT INFO "CRYPTOGRAPHIC PERFECTION ACHIEVED | hash=" + component_hash
+    ELSE:
+        EMIT WARNING "Cryptographic validation failed | " +
+                     "perfect=" + report.perfect_ok +
+                     " auraseal=" + report.auraseal_ok +
+                     " entropy=" + report.entropy_ok +
+                     " gitraf=" + report.gitraf_ok
+    END IF
+
+    RETURN report
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: raf_cryptographic_M3_quantum_lattice.psc.txt
+// ============================================================

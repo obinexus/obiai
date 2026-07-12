@@ -1,0 +1,306 @@
+// ============================================================
+// FILE: FMFRS_Module2_ImplementationFramework.psc.txt
+// SOURCE: Formal_Mathematical_Reasoning_System.pdf — Sections 2, 3, 4
+// AUTHOR: Nnamdi Michael Okpala (2025)
+// PURPOSE: Pseudocode for the three core interactive systems,
+//          Function Tree Derivation Model, and Output Equivalence
+// ============================================================
+
+MODULE ImplementationFramework
+
+// ============================================================
+// SECTION 2 — Claude Implementation Framework
+// Three core interactive systems (HTML/JS/CSS target)
+// ============================================================
+
+// ------------------------------------------------------------
+// SYSTEM 2.1 — Function Equivalence System (Static + Dynamic)
+// ------------------------------------------------------------
+
+// Purpose: Allow users to define and compare static vs dynamic
+// functions. Determine if a 2D vector solution exists.
+// Equivalence condition: both functions produce identical output
+// on the same input — regardless of static/dynamic classification.
+
+DEFINE FunctionType AS ENUM { STATIC, DYNAMIC }
+
+STRUCTURE FunctionDefinition:
+    id:           String
+    type:         FunctionType
+    expression:   MathExpression
+    domain:       Domain
+END STRUCTURE
+
+FUNCTION compare_functions(
+    f_static:  FunctionDefinition,
+    f_dynamic: FunctionDefinition,
+    domain:    Domain
+) -> EquivalenceResult:
+
+    // Evaluate both functions across shared domain
+    FOR EACH x IN domain DO
+        result_static  := evaluate(f_static,  x)
+        result_dynamic := evaluate(f_dynamic, x)
+
+        IF result_static != result_dynamic THEN
+            RETURN EquivalenceResult {
+                equivalent: FALSE,
+                divergence_point: x,
+                static_value:  result_static,
+                dynamic_value: result_dynamic
+            }
+        END IF
+    END FOR
+
+    // A 2D vector solution exists — functions are equivalent over D
+    RETURN EquivalenceResult {
+        equivalent: TRUE,
+        domain:     domain
+    }
+
+END FUNCTION
+
+PROCEDURE render_equivalence_system(ui_context: UIContext):
+    // UI: user inputs two functions (one static, one dynamic)
+    // System computes equivalence and displays result
+    f_static  := ui_context.get_static_function()
+    f_dynamic := ui_context.get_dynamic_function()
+    domain    := f_static.domain INTERSECT f_dynamic.domain
+
+    result := compare_functions(f_static, f_dynamic, domain)
+    display_result(ui_context, result)
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SYSTEM 2.2 — Matrix Parity Optimization System
+// ------------------------------------------------------------
+
+// Purpose: Parity checking for dynamic matrix traversal,
+// fast matrix classification via state-aware dimension filters,
+// time-space complexity reporting.
+
+STRUCTURE Matrix:
+    data:       2D_Array<Float>
+    rows:       Integer
+    cols:       Integer
+    state_tag:  StateTag    // State-aware metadata
+END STRUCTURE
+
+FUNCTION classify_matrix(M: Matrix) -> MatrixClass:
+    // Apply state-aware dimension filters
+    dimension_filter := get_state_aware_filter(M.state_tag)
+    reduced_M        := apply_filter(M, dimension_filter)
+
+    classification := run_fast_classification(reduced_M)
+    RETURN classification
+END FUNCTION
+
+FUNCTION check_parity(M: Matrix) -> ParityReport:
+    // Dynamic traversal parity check
+    parity_state := EVEN  // or ODD
+
+    FOR EACH row r IN M.data DO
+        FOR EACH element e IN r DO
+            parity_state := update_parity(parity_state, e)
+        END FOR
+    END FOR
+
+    RETURN ParityReport {
+        parity:     parity_state,
+        dimensions: (M.rows, M.cols)
+    }
+END FUNCTION
+
+PROCEDURE render_matrix_system(M: Matrix):
+    classification := classify_matrix(M)
+    parity         := check_parity(M)
+
+    // Display result with time-space complexity table
+    complexity := compute_complexity(M.rows, M.cols)
+    display_matrix_result(classification, parity, complexity)
+
+    // Technical documentation layer is also rendered
+    render_implementation_docs()
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SYSTEM 2.3 — DCS Tabulation Engine
+// ------------------------------------------------------------
+
+// Purpose: Dynamic cost functions via tabulation + memoization,
+// enforceable software design patterns,
+// system state transition modeling for architectural validation.
+
+CONSTANT MEMOIZATION_TABLE := MAP<StateKey, CostValue>
+
+FUNCTION dcs_cost_function(state: SystemState) -> CostValue:
+    // Tabulation: compute cost bottom-up and memoize
+    key := hash(state)
+
+    IF MEMOIZATION_TABLE.contains(key) THEN
+        RETURN MEMOIZATION_TABLE.get(key)
+    END IF
+
+    // Compute cost from sub-states (dynamic programming)
+    sub_costs := []
+    FOR EACH sub_state IN decompose(state) DO
+        sub_costs.append(dcs_cost_function(sub_state))
+    END FOR
+
+    total_cost := aggregate_costs(sub_costs)
+    MEMOIZATION_TABLE.put(key, total_cost)
+    RETURN total_cost
+
+END FUNCTION
+
+FUNCTION validate_state_transition(
+    from_state: SystemState,
+    to_state:   SystemState
+) -> ValidationResult:
+    // Enforce design patterns during transition
+    pattern := get_applicable_design_pattern(from_state, to_state)
+    IF NOT pattern.is_satisfied(from_state, to_state) THEN
+        RETURN ValidationResult.REJECTED("Pattern violation: " + pattern.name)
+    END IF
+    RETURN ValidationResult.ACCEPTED
+END FUNCTION
+
+PROCEDURE run_dcs_engine(initial_state: SystemState):
+    current := initial_state
+    WHILE NOT is_terminal(current) DO
+        cost   := dcs_cost_function(current)
+        next   := get_next_state(current)
+        result := validate_state_transition(current, next)
+
+        IF result == REJECTED THEN
+            RAISE ArchitecturalViolation(result.reason)
+        END IF
+
+        current := next
+    END WHILE
+END PROCEDURE
+
+
+// ============================================================
+// SECTION 3 — Function Tree Derivation Model
+// ============================================================
+
+// Purpose: Provide traceable lineage for dynamic-to-static resolution
+// WITHOUT relying on runtime call stacks.
+// The derivation tree is the formal traceability mechanism.
+
+// Key Constraint:
+//   - AVOID runtime call stacks or execution traces
+//   - ENFORCE derivation tree model with rule-based structural inheritance
+//   - Each function branch connects to a root via formal symbolic derivation
+//   - Chat context acts as the traversal state of this tree
+
+STRUCTURE DerivationNode:
+    function_id:   String
+    parent_id:     String OR NULL   // NULL if root
+    rule_applied:  DerivationRule   // Rule that justifies this branch
+    function_def:  FunctionDefinition
+END STRUCTURE
+
+STRUCTURE DerivationTree:
+    root:  DerivationNode
+    nodes: MAP<FunctionID, DerivationNode>
+END STRUCTURE
+
+FUNCTION add_derived_function(
+    tree:         DerivationTree,
+    parent_id:    String,
+    new_function: FunctionDefinition,
+    rule:         DerivationRule
+) -> DerivationNode:
+    // Ensure parent exists in tree
+    ASSERT tree.nodes.contains(parent_id)
+
+    new_node := DerivationNode {
+        function_id:  new_function.id,
+        parent_id:    parent_id,
+        rule_applied: rule,
+        function_def: new_function
+    }
+
+    tree.nodes.put(new_function.id, new_node)
+    RETURN new_node
+
+END FUNCTION
+
+FUNCTION trace_derivation_lineage(
+    tree:        DerivationTree,
+    function_id: String
+) -> List<DerivationNode>:
+    // Walk from given node back to root — reveals transformation history
+    path    := []
+    current := tree.nodes.get(function_id)
+
+    WHILE current != NULL DO
+        path.prepend(current)
+        current := tree.nodes.get(current.parent_id)
+    END WHILE
+
+    RETURN path  // [root → ... → function_id]
+END FUNCTION
+
+// Assertions drawn from derivation tree structure:
+// Chat context IS the tree traversal state.
+// Claude references function origin/evolution through the tree,
+// NOT through programmatic call stack history.
+
+
+// ============================================================
+// SECTION 4 — Assertion of Output Equivalence
+// ============================================================
+
+// Formal condition:
+// f_d(x) == f_s(x)  for ALL x in domain D
+// If condition fails → divergence must be justified via derivation tree.
+
+EPSILON := 1e-6  // Equivalence tolerance
+
+FUNCTION assert_output_equivalence(
+    f_dynamic: FunctionDefinition,
+    f_static:  FunctionDefinition,
+    domain:    Domain,
+    tree:      DerivationTree
+) -> EquivalenceAssertion:
+
+    FOR EACH x IN domain DO
+        result_d := evaluate(f_dynamic, x)
+        result_s := evaluate(f_static,  x)
+
+        IF ABS(result_d - result_s) > EPSILON THEN
+            // Divergence detected — must be resolved via derivation tree
+            divergence_node := locate_divergence_source(tree, f_dynamic.id, f_static.id)
+
+            // Identify which rule or node caused the deviation
+            DECLARE functions NON_EQUIVALENT for domain slice AT x
+
+            RETURN EquivalenceAssertion {
+                status:          NON_EQUIVALENT,
+                divergence_at:   x,
+                source_node:     divergence_node,
+                // No further equivalence claims propagate until resolved
+                propagate:       FALSE
+            }
+        END IF
+    END FOR
+
+    RETURN EquivalenceAssertion {
+        status:    EQUIVALENT,
+        domain:    domain,
+        propagate: TRUE
+    }
+
+END FUNCTION
+
+// Rule: Equivalence is declared on SOLUTION INTEGRITY,
+//       not on construction type (static vs dynamic).
+// Non-equivalent divergences must be traced to a structural
+// node in the derivation tree before re-evaluation.
+
+END MODULE ImplementationFramework

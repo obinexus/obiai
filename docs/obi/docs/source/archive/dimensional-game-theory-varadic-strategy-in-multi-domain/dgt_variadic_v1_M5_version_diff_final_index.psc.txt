@@ -1,0 +1,225 @@
+// ============================================================
+// FILE: dgt_variadic_v1_M5_version_diff_final_index.psc.txt
+// MODULE 5 OF 5 — Version Diff, Reconciliation & Final Corpus Index
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts" [v1, July 4, 2025]
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025 (reconciliation: session complete)
+// ============================================================
+
+// ------------------------------------------------------------
+// FORMAL VERSION DIFF: PDF 11 (V1) vs PDF 10 (V2)
+// ------------------------------------------------------------
+
+DEFINE VersionDiff AS:
+    // Exhaustive line-by-line structural comparison.
+    // ALL formal content is identical — only metadata differs.
+
+    SECTION_DIFF := [
+        { section: "Abstract",        V1: "IDENTICAL", V2: "IDENTICAL" },
+        { section: "§1 Introduction", V1: "IDENTICAL", V2: "IDENTICAL" },
+        { section: "§2 Scalars→Dims", V1: "IDENTICAL", V2: "IDENTICAL" },
+        { section: "§3 Variadic Game", V1: "IDENTICAL", V2: "IDENTICAL" },
+        { section: "§4 Strat Balance", V1: "IDENTICAL", V2: "IDENTICAL" },
+        { section: "§5 Dim Mapping",   V1: "IDENTICAL", V2: "IDENTICAL" },
+        { section: "§6 Conclusion",    V1: "IDENTICAL", V2: "IDENTICAL" }
+    ]
+
+    EQUATION_DIFF := [
+        { eq: 1, content: "Scalar Promotion",         V1: "IDENTICAL", V2: "IDENTICAL" },
+        { eq: 2, content: "Contextual Activation",    V1: "IDENTICAL", V2: "IDENTICAL" },
+        { eq: 3, content: "Strategic Vector",         V1: "IDENTICAL", V2: "IDENTICAL" },
+        { eq: 4, content: "φ Mapping",                V1: "IDENTICAL", V2: "IDENTICAL" }
+    ]
+
+    DEFINITION_DIFF := [
+        { def: 1, V1: "IDENTICAL", V2: "IDENTICAL" },
+        { def: 2, V1: "IDENTICAL", V2: "IDENTICAL" },
+        { def: 3, V1: "IDENTICAL", V2: "IDENTICAL" }
+    ]
+
+    THEOREM_DIFF := [
+        { theorem: "Computational Reduction", V1: "IDENTICAL", V2: "IDENTICAL" }
+    ]
+
+    METADATA_DIFF := [
+        { field: "date",     V1: "July 4, 2025",  V2: "May 24, 2026"    },
+        { field: "filename", V1: "Varadic...",     V2: "...for_AI.pdf"   },
+        { field: "subtitle", V1: "Variadic Strat", V2: "(no subtitle ch)" }
+    ]
+
+    FORMAL_CONTENT_DELTA := EMPTY   // zero formal differences
+    TOTAL_ADDITIONS      := 0
+    TOTAL_DELETIONS      := 0
+    TOTAL_MODIFICATIONS  := 0
+END DEFINE
+
+
+// ── RECONCILIATION POLICY ─────────────────────────────────────
+
+DEFINE VersionReconciliationPolicy AS:
+    // Policy for resolving any apparent conflict between V1 and V2.
+
+    RULE_1 := "When citing a definition or theorem: prefer V1 (July 2025) as canonical"
+    RULE_2 := "When citing a corpus position: V1 is the founding document"
+    RULE_3 := "When implementing: either version's pseudocode is authoritative"
+    RULE_4 := "The 'Varadic' filename typo has no semantic impact"
+    RULE_5 := "V2 (May 2026) re-affirms V1 after 10 months of downstream use"
+
+    INTERPRETATION := "V2 serves as a validation that V1's formulations remained " +
+                      "sound after all downstream papers (PDFs 4–9) were built upon them."
+END DEFINE
+
+
+// ── DUAL-VERSION MODULE LOOKUP ────────────────────────────────
+
+PROCEDURE ResolveToPSCFile(concept: String, prefer_version: String) -> String:
+    // Returns the .psc.txt file implementing a concept,
+    // routing to V1 or V2 modules as requested.
+
+    V1_MODULES := {
+        "scalar_promotion"          : "dgt_variadic_v1_M1_provenance.psc.txt",
+        "canonical_definitions"     : "dgt_variadic_v1_M2_canonical_definitions.psc.txt",
+        "theorem_and_mapping"       : "dgt_variadic_v1_M3_theorem_and_mapping.psc.txt",
+        "downstream_impact"         : "dgt_variadic_v1_M4_downstream_impact_analysis.psc.txt",
+        "version_diff_index"        : "dgt_variadic_v1_M5_version_diff_final_index.psc.txt"
+    }
+
+    V2_MODULES := {
+        "scalar_promotion"          : "dgt_variadic_M1_scalar_promotion.psc.txt",
+        "variadic_game_framework"   : "dgt_variadic_M2_variadic_game_framework.psc.txt",
+        "strategic_balance"         : "dgt_variadic_M3_strategic_balance_reduction.psc.txt",
+        "activation_mapping"        : "dgt_variadic_M4_activation_mapping_integration.psc.txt",
+        "corpus_synthesis"          : "dgt_variadic_M5_conclusion_corpus_synthesis.psc.txt"
+    }
+
+    IF prefer_version == "V1":
+        IF concept IN V1_MODULES:
+            RETURN V1_MODULES[concept]
+        END IF
+    END IF
+
+    IF concept IN V2_MODULES:
+        RETURN V2_MODULES[concept]
+    END IF
+
+    RETURN "dgt_variadic_M1_scalar_promotion.psc.txt"   // default to V2 implementation
+END PROCEDURE
+
+
+// ── FINAL COMPLETE CORPUS INDEX (11 PDFs, 55 Modules) ────────
+
+PROCEDURE PrintFinalCorpusIndex() -> VOID:
+    EMIT INFO "=========================================================="
+    EMIT INFO "COMPLETE OBINEXUS PSEUDOCODE CORPUS — FINAL"
+    EMIT INFO "11 PDFs → 55 Modules | Nnamdi Michael Okpala, OBINexus"
+    EMIT INFO "Span: May 2025 – May 2026"
+    EMIT INFO "=========================================================="
+    EMIT INFO ""
+    EMIT INFO "── AEGIS PROOF CHAIN ──────────────────────────────────────"
+    EMIT INFO ""
+    EMIT INFO "PDF 1  — Bayesian Debiasing Framework (July 4, 2025)"
+    EMIT INFO "  bayesian_debiasing_M1_problem_formulation.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M2_framework_math.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M3_algorithm.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M4_guarantees_validation.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M5_implementation_safety.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 2  — Actor Class: Epistemic AI Architecture (2025)"
+    EMIT INFO "  actor_class_M1_definition.psc.txt"
+    EMIT INFO "  actor_class_M2_navigation.psc.txt"
+    EMIT INFO "  actor_class_M3_cost_functions.psc.txt"
+    EMIT INFO "  actor_class_M4_deployment_turing.psc.txt"
+    EMIT INFO "  actor_class_M5_architecture_stack.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 3  — AEGIS-PROOF-1.2: Traversal Cost (May 27, 2025)"
+    EMIT INFO "  aegis_proof_1_2_M1_definitions.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M2_theorem_proof.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M3_parameters.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M4_stability_filterflash.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M5_validation_deployment.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 4  — AEGIS-PROOF-3.1 & 3.2 (August 2025)"
+    EMIT INFO "  aegis_proof_3_1_3_2_M1_prerequisites.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M2_filterflash_monotonicity.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M3_hybrid_convergence.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M4_obiai_diram_integration.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M5_compliance_algorithm.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 5  — AEGIS-PROOF-4.1: Hospital Safety (August 2025)"
+    EMIT INFO "  aegis_proof_4_1_M1_foundation.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M2_realtime_solver.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M3_polymer_interface.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M4_safety_protocols.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M5_obiai_compliance_benchmarks.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 6  — DAG Ephemeris Spec (August 2025)"
+    EMIT INFO "  dag_ephemeris_M1_dag_cost_function.psc.txt"
+    EMIT INFO "  dag_ephemeris_M2_ephemeris_step.psc.txt"
+    EMIT INFO "  dag_ephemeris_M3_peristaltic_vexameneria.psc.txt"
+    EMIT INFO "  dag_ephemeris_M4_application_diram.psc.txt"
+    EMIT INFO "  dag_ephemeris_M5_verification_complexity.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 7  — OBIAI Thesis (September 2025)"
+    EMIT INFO "  obiai_thesis_M1_architecture.psc.txt"
+    EMIT INFO "  obiai_thesis_M2_diram_cascade_algorithm.psc.txt"
+    EMIT INFO "  obiai_thesis_M3_implementation_modules.psc.txt"
+    EMIT INFO "  obiai_thesis_M4_drift_detection_safety.psc.txt"
+    EMIT INFO "  obiai_thesis_M5_results_conclusion_proofs.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "── DIMENSIONAL GAME THEORY SUB-SERIES ────────────────────"
+    EMIT INFO ""
+    EMIT INFO "PDF 8  — DGT Formal: Nash / Theorem 1 (July 4, 2025)"
+    EMIT INFO "  dimensional_game_theory_M1_formal_definitions.psc.txt"
+    EMIT INFO "  dimensional_game_theory_M2_dimensional_extension.psc.txt"
+    EMIT INFO "  dimensional_game_theory_M3_algorithms.psc.txt"
+    EMIT INFO "  dimensional_game_theory_M4_applications.psc.txt"
+    EMIT INFO "  dimensional_game_theory_M5_obinexus_integration.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 9  — DGT-RAF Cryptographic (August 2025)"
+    EMIT INFO "  raf_cryptographic_M1_stress_zones_telemetry.psc.txt"
+    EMIT INFO "  raf_cryptographic_M2_perfect_number_auraseal.psc.txt"
+    EMIT INFO "  raf_cryptographic_M3_quantum_lattice.psc.txt"
+    EMIT INFO "  raf_cryptographic_M4_gitraf_policy_strategy.psc.txt"
+    EMIT INFO "  raf_cryptographic_M5_implementation_validation.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 10 — DGT Variadic V2 Reissue (May 24, 2026)"
+    EMIT INFO "  dgt_variadic_M1_scalar_promotion.psc.txt"
+    EMIT INFO "  dgt_variadic_M2_variadic_game_framework.psc.txt"
+    EMIT INFO "  dgt_variadic_M3_strategic_balance_reduction.psc.txt"
+    EMIT INFO "  dgt_variadic_M4_activation_mapping_integration.psc.txt"
+    EMIT INFO "  dgt_variadic_M5_conclusion_corpus_synthesis.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 11 — DGT Variadic V1 ORIGINAL (July 4, 2025)  ← THIS"
+    EMIT INFO "  dgt_variadic_v1_M1_provenance.psc.txt"
+    EMIT INFO "  dgt_variadic_v1_M2_canonical_definitions.psc.txt"
+    EMIT INFO "  dgt_variadic_v1_M3_theorem_and_mapping.psc.txt"
+    EMIT INFO "  dgt_variadic_v1_M4_downstream_impact_analysis.psc.txt"
+    EMIT INFO "  dgt_variadic_v1_M5_version_diff_final_index.psc.txt  ← THIS"
+    EMIT INFO ""
+    EMIT INFO "=========================================================="
+    EMIT INFO "GLOBAL INVARIANTS (all 11 documents):"
+    EMIT INFO "  EPISTEMIC_THRESHOLD    := 0.954"
+    EMIT INFO "  DIRAM_EPSILON_BOUND    := 0.6"
+    EMIT INFO "  SINPHASE_BOUND         := 0.6"
+    EMIT INFO "  ENTROPY_QAK_BOUND      := 0.5  (PDF 9 only, tighter)"
+    EMIT INFO "  THETA_COMPUTABILITY    := 8    (PDFs 9, 10, 11)"
+    EMIT INFO "  STRESS_RANGE           := [0, 12]"
+    EMIT INFO "  TRIPOLAR               := {UCHE, EZE, OBI}"
+    EMIT INFO "  DEFAULT_TAU            := 0.3"
+    EMIT INFO "  LAMBDA_STRESS_PENALTY  := 0.5"
+    EMIT INFO ""
+    EMIT INFO "FOUNDING DAY (July 4, 2025): PDFs 1, 8, 11"
+    EMIT INFO "  Bayesian debiasing + Nash equilibrium + Scalar promotion"
+    EMIT INFO "  = the three mathematical pillars of OBINexus"
+    EMIT INFO "=========================================================="
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 5 — CORPUS COMPLETE
+//
+// TOTAL: 11 PDFs → 55 MODULES
+// CANONICAL DEFINITIONS SOURCE: PDF 11 (July 4, 2025)
+// IMPLEMENTATION REFERENCE:    PDF 10 (May 24, 2026) + all others
+// ============================================================

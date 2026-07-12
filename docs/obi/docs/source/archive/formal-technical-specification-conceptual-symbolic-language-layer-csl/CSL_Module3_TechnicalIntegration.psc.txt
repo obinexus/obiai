@@ -1,0 +1,306 @@
+// ============================================================
+// FILE: CSL_Module3_TechnicalIntegration.psc.txt
+// SOURCE: Formal_Technical_Specification___Conceptual_Symbolic_Language_Layer__CSL_.pdf
+//         Section 6
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing (2025)
+// PURPOSE: Pseudocode for CulturallyAwareBayesianFramework class,
+//          CSL integration architecture, and database schema extensions
+// ============================================================
+
+MODULE CSL_TechnicalIntegration
+
+// ============================================================
+// SECTION 6 — Technical Integration Specifications
+// ============================================================
+
+// ============================================================
+// SECTION 6.1 — Extension of Bayesian Debiasing Framework
+// ============================================================
+
+// CLASS: CulturallyAwareBayesianFramework
+// Extends: BayesianDebiasFramework
+//
+// New attributes:
+//   semantic_layer       — SemanticAbstractionLayer (maps Bayesian results to CSL)
+//   cultural_validator   — CulturalValidationEngine (validates glyph appropriateness)
+//   glyph_composer       — GlyphCompositionEngine   (generates visual glyph compositions)
+
+STRUCTURE SemanticAbstractionLayer:
+    csl_config:       CSLConfiguration
+    concept_mappings: MAP<BayesianConcept, AtomicGlyphType>
+
+    FUNCTION map_to_conceptual(bayesian_results: BayesianResults) -> SemanticState:
+        // Translate numeric Bayesian inference results into CSL semantic state
+        semantic_state := SemanticState {}
+
+        FOR EACH (node, posterior) IN bayesian_results.posteriors DO
+            concept    := classify_bayesian_output(node, posterior)
+            salience   := compute_semantic_salience(
+                              glyph: get_base_glyph(concept),
+                              knowledge_state: bayesian_results.knowledge_state,
+                              cultural_ctx:    bayesian_results.cultural_context,
+                              config:          self.csl_config
+                          )
+            semantic_state.add(concept, salience)
+        END FOR
+
+        RETURN semantic_state
+    END FUNCTION
+END STRUCTURE
+
+STRUCTURE CulturalValidationEngine:
+    csl_config:  CSLConfiguration
+    rule_db:     RuleDatabase
+    community_db: CommunityDatabase
+
+    FUNCTION validate(adapted_glyphs: List<ComposedGlyph>) -> ValidationReport:
+        report := ValidationReport {}
+
+        FOR EACH glyph IN adapted_glyphs DO
+            result := validate_cultural(glyph)   // From Module 2, Section 4.2
+            report.add_result(glyph.id, result)
+        END FOR
+
+        report.overall_approved := ALL(r.approved FOR r IN report.results)
+        RETURN report
+    END FUNCTION
+END STRUCTURE
+
+STRUCTURE GlyphCompositionEngine:
+    FUNCTION generate_visualization(
+        semantic_state: SemanticState,
+        user_context:   UserContext
+    ) -> List<ComposedGlyph>:
+
+        adapted_glyphs := []
+
+        FOR EACH (concept, salience) IN semantic_state.entries DO
+            // Generate glyph for each semantic concept
+            bayesian_state := user_context.current_bayesian_state
+            glyph := compositional_glyph_generation(
+                         bayesian_state: bayesian_state,
+                         concept:        concept,
+                         validator:      CulturalValidator.DEFAULT
+                     )
+
+            // Apply uncertainty visualization based on salience variance
+            variance := bayesian_state.get_variance(concept)
+            render_with_uncertainty(glyph, variance)
+
+            adapted_glyphs.append(glyph)
+        END FOR
+
+        RETURN adapted_glyphs
+    END FUNCTION
+END STRUCTURE
+
+// --- Main Inference Method ---
+
+CLASS CulturallyAwareBayesianFramework EXTENDS BayesianDebiasFramework:
+
+    CONSTRUCTOR(
+        dag_structure:  DAGStructure,
+        prior_params:   PriorParameters,
+        csl_config:     CSLConfiguration
+    ):
+        // Initialize parent Bayesian framework
+        SUPER(dag_structure, prior_params)
+
+        // Initialize CSL-specific components
+        self.semantic_layer     := SemanticAbstractionLayer(csl_config)
+        self.cultural_validator := CulturalValidationEngine(csl_config)
+        self.glyph_composer     := GlyphCompositionEngine()
+    END CONSTRUCTOR
+
+    FUNCTION perform_culturally_aware_inference(
+        evidence:     Evidence,
+        user_context: UserContext
+    ) -> InferenceResult:
+
+        // Step 1: Standard Bayesian inference (from parent class)
+        bayesian_results := SUPER.predict(evidence)
+
+        // Step 2: Generate semantic representation from Bayesian output
+        // map_to_conceptual translates P(θ|D) outputs into CSL semantic states
+        semantic_state := self.semantic_layer.map_to_conceptual(bayesian_results)
+
+        // Step 3: Apply cultural adaptation — generate glyph visualization
+        // Selects culturally appropriate glyph sets based on user_context
+        adapted_glyphs := self.glyph_composer.generate_visualization(
+                              semantic_state, user_context
+                          )
+
+        // Step 4: Validate cultural appropriateness of all generated glyphs
+        validation_result := self.cultural_validator.validate(adapted_glyphs)
+
+        // Step 5: Compute confidence metrics
+        confidence_metrics := self.compute_confidence_metrics()
+
+        // Return unified result package
+        RETURN InferenceResult {
+            bayesian_inference:       bayesian_results,     // Core P(θ|D) results
+            conceptual_visualization: adapted_glyphs,       // CSL glyph set
+            cultural_compliance:      validation_result,    // Validation status
+            confidence_metrics:       confidence_metrics    // Uncertainty quantification
+        }
+
+    END FUNCTION
+
+    FUNCTION compute_confidence_metrics() -> ConfidenceMetrics:
+        // Compute posterior variance, credible intervals, and salience scores
+        // across all active Bayesian nodes
+        RETURN ConfidenceMetrics {
+            posterior_variance:  compute_posterior_variance(self.dag),
+            credible_intervals:  compute_credible_intervals(self.dag, alpha=0.95),
+            salience_scores:     collect_all_salience_scores(self.semantic_layer)
+        }
+    END FUNCTION
+
+END CLASS
+
+
+// ============================================================
+// SECTION 6.2 — Database Schema Extensions
+// ============================================================
+
+// The following pseudocode represents the SQL schema extensions
+// described in Listing 2 of the source specification.
+
+// --- Extension to existing bayesian_nodes table ---
+
+PROCEDURE extend_bayesian_nodes_schema():
+    // ALTER TABLE bayesian_nodes
+    //   ADD COLUMN semantic_glyph_id           UUID,
+    //   ADD COLUMN cultural_context_metadata   JSONB,
+    //   ADD COLUMN glyph_salience_weight       DECIMAL(5,4)
+
+    ALTER TABLE "bayesian_nodes" DO:
+        ADD COLUMN "semantic_glyph_id"         TYPE UUID         DEFAULT NULL
+        ADD COLUMN "cultural_context_metadata" TYPE JSONB        DEFAULT NULL
+        ADD COLUMN "glyph_salience_weight"     TYPE DECIMAL(5,4) DEFAULT 0.0
+    END ALTER
+END PROCEDURE
+
+// --- Core glyph definitions table ---
+
+TABLE concept_glyphs:
+    COLUMNS:
+        id:                        UUID            PRIMARY KEY
+        glyph_svg_data:            TEXT            // SVG rendering data for glyph
+        glyph_vector_encoding:     BYTEA           // Machine-readable vector embedding
+        base_meaning:              TEXT            // Plain-language description
+        cultural_source_tradition: VARCHAR(100)    // "Nsibidi" | "CBD" | etc.
+        historical_precedent_refs: TEXT[]          // Array of reference citations
+        creation_timestamp:        TIMESTAMP       // Record creation time
+        community_validation_status: ENUM(         // Workflow status
+                                        'pending',
+                                        'approved',
+                                        'rejected'
+                                    )
+        authenticity_score:        DECIMAL(3,2)    // A(G_i) ∈ [0.00, 1.00]
+
+    INDEXES:
+        INDEX ON cultural_source_tradition
+        INDEX ON community_validation_status
+        INDEX ON authenticity_score
+
+END TABLE
+
+// --- Compositional grammar rules table ---
+
+TABLE glyph_composition_rules:
+    COLUMNS:
+        id:                      UUID    PRIMARY KEY
+        rule_pattern:            JSONB   // Grammar production rule (Section 3.1.2)
+        cultural_constraints:    JSONB   // Cultural validation constraints
+        mathematical_prerequisites: JSONB // Required Bayesian state conditions
+        composition_algorithm:   TEXT    // Name of algorithm to apply
+        validation_requirements: TEXT[]  // Required validation checks
+
+    NOTES:
+        // rule_pattern encodes: S ::= A | A R A | S T S
+        // cultural_constraints encodes: which traditions allow this composition
+        // mathematical_prerequisites encodes: P(θ) bounds, variance thresholds, etc.
+
+END TABLE
+
+// --- Cultural context management table ---
+
+TABLE cultural_contexts:
+    COLUMNS:
+        id:                      UUID            PRIMARY KEY
+        tradition_name:          VARCHAR(100)    // e.g., "Nsibidi", "CBD"
+        geographic_origin:       POINT           // Lat/Long of cultural origin
+        historical_period_start: DATE            // Earliest documented usage
+        historical_period_end:   DATE            // End of historical period (NULL if ongoing)
+        community_contact_info:  JSONB           // Contact for cultural advisors
+        usage_permissions:       JSONB           // Access control for glyph usage
+        attribution_requirements: TEXT           // Required attribution language
+
+    NOTES:
+        // community_contact_info: encrypted at rest (see Section 8.2)
+        // usage_permissions: defines who may use glyphs from this tradition
+        // and under what conditions (commercial, research, etc.)
+
+END TABLE
+
+// --- Referential integrity rules ---
+
+CONSTRAINTS:
+    concept_glyphs.cultural_source_tradition
+        REFERENCES cultural_contexts.tradition_name
+
+    bayesian_nodes.semantic_glyph_id
+        REFERENCES concept_glyphs.id ON DELETE SET NULL
+
+// --- Audit trail for glyph utilization ---
+// (Required by Section 8.1 — Cultural Intellectual Property Protection)
+
+TABLE glyph_usage_audit:
+    COLUMNS:
+        id:             UUID        PRIMARY KEY
+        glyph_id:       UUID        REFERENCES concept_glyphs(id)
+        user_session:   UUID        // Anonymized session reference
+        usage_context:  JSONB       // What inference triggered this glyph
+        timestamp:      TIMESTAMP
+        cultural_ctx:   UUID        REFERENCES cultural_contexts(id)
+        attribution_ok: BOOLEAN     // Was attribution requirement satisfied?
+
+    NOTES:
+        // Supports blockchain-verified compensation mechanism (Section 8.1)
+        // All rows are append-only — no DELETE permitted
+
+END TABLE
+
+// --- CSL Runtime Query Patterns ---
+
+FUNCTION lookup_glyph_by_concept(
+    concept:    BayesianConcept,
+    tradition:  String
+) -> AtomicGlyph:
+    // SELECT * FROM concept_glyphs
+    // WHERE base_meaning = concept
+    //   AND cultural_source_tradition = tradition
+    //   AND community_validation_status = 'approved'
+    // ORDER BY authenticity_score DESC
+    // LIMIT 1
+
+    RETURN glyph_db.query(
+        filter: { concept: concept, tradition: tradition, status: 'approved' },
+        order:  { authenticity_score: DESC },
+        limit:  1
+    )
+END FUNCTION
+
+FUNCTION get_composition_rules_for_pattern(
+    pattern_type: String
+) -> List<GlyphCompositionRule>:
+    // SELECT * FROM glyph_composition_rules
+    // WHERE rule_pattern->>'type' = pattern_type
+
+    RETURN rule_db.query(
+        filter: { "rule_pattern.type": pattern_type }
+    )
+END FUNCTION
+
+END MODULE CSL_TechnicalIntegration

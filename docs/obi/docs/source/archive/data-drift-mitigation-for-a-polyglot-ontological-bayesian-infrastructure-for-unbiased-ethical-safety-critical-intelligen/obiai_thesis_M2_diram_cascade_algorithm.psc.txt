@@ -1,0 +1,301 @@
+// ============================================================
+// FILE: obiai_thesis_M2_diram_cascade_algorithm.psc.txt
+// MODULE 2 OF 5 — DIRAM Cascade Model & Algorithm 1: Drift Mitigation
+// SOURCE: "Data Drift Mitigation for a Polyglot Ontological Bayesian
+//          Infrastructure..." (OBIAI Thesis)
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing
+// DATE:   September 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3.2: DIRAM CASCADE MODEL
+// ------------------------------------------------------------
+
+// DIRAM = Dynamic Intelligent Resource Allocation and Management
+//
+// THREE-TIERED PERSONA CASCADE (Figure 3.1):
+//
+//         ┌─────────────────┐
+//         │  Obinexus (±3)  │  ← Tier 1: baseline governance
+//         └────────┬────────┘
+//               Cascade
+//         ┌────────▼────────┐
+//         │    Uche (±6)    │  ← Tier 2: adaptive reasoning
+//         └────────┬────────┘
+//               Cascade
+//         ┌────────▼────────┐
+//         │    Eze  (±9)    │  ← Tier 3: override authority
+//         └─────────────────┘
+//
+// Activation thresholds on the bidirectional failure scale:
+//   |drift| > 3  → activate Uche adaptation
+//   |drift| > 6  → activate Eze override
+//   (Obinexus: always active as baseline)
+//
+// Tripolar identity connection:
+//   Obinexus → OBI (Obi: heart/community)  — foundational ethical layer
+//   Uche     → UCHE (knowledge/observer)   — analytical reasoning layer
+//   Eze      → EZE (leader/navigator)      — authoritative override layer
+
+DEFINE PersonaCascadeTier AS ENUM:
+    OBINEXUS    // ±3 — always active baseline (Obi pole)
+    UCHE        // ±6 — activated when |drift| > 3 (Uche pole)
+    EZE         // ±9 — activated when |drift| > 6 (Eze pole)
+END DEFINE
+
+DEFINE CascadeActivationThresholds AS:
+    OBINEXUS_ALWAYS  := 0.0    // always active
+    UCHE_THRESHOLD   := 3.0    // |drift| > 3
+    EZE_THRESHOLD    := 6.0    // |drift| > 6
+    CRITICAL_BOUND   := 12.0   // ±12 — maximum failure scale bound
+END DEFINE
+
+
+// ── DIRAM CASCADE STRUCTURE ───────────────────────────────────
+
+DEFINE DIRAMCascade AS:
+    obinexus_layer : ObinexusPersona    // always active
+    uche_layer     : UchePersona        // conditionally active
+    eze_layer      : EzePersona         // conditionally active
+    active_tiers   : Set[PersonaCascadeTier]
+
+    INVARIANT: OBINEXUS IN active_tiers   // Obinexus is always active
+
+    PROCEDURE Initialize() -> VOID:
+        obinexus_layer := ObinexusPersona()
+        uche_layer     := UchePersona()
+        eze_layer      := EzePersona()
+        active_tiers   := {OBINEXUS}
+        EMIT INFO "DIRAM Cascade initialized | Obinexus active"
+    END PROCEDURE
+
+    PROCEDURE ActivateTier(tier: PersonaCascadeTier) -> VOID:
+        IF tier NOT IN active_tiers:
+            active_tiers.ADD(tier)
+            EMIT INFO "DIRAM: " + tier + " persona activated"
+        END IF
+    END PROCEDURE
+
+    PROCEDURE GetActiveTiers() -> List[PersonaCascadeTier]:
+        RETURN SORTED(active_tiers, by=TIER_PRIORITY)
+    END PROCEDURE
+END DEFINE
+
+
+// ── PERSONA LAYER SPECIFICATIONS ─────────────────────────────
+
+DEFINE ObinexusPersona AS:
+    // Tier 1: Baseline ethical governance layer (OBI pole)
+    // Operates at all times — the constitutional foundation.
+    // Drift range: ±3 (Green Zone operation)
+
+    PROCEDURE Process(x: DataPoint, drift: REAL) -> ProcessedOutput:
+        // Standard processing within Green Zone
+        ASSERT ABS(drift) <= 12.0   // outer bound — does not fail on larger values
+        result := StandardInference(x)
+        result.ethical_compliance := VerifyEthicalCompliance(result)
+        RETURN result
+    END PROCEDURE
+
+    PROCEDURE VerifyEthicalCompliance(output: ProcessedOutput) -> BOOL:
+        // Constitutional compliance check (cross-ref §7.2)
+        RETURN output.bias_score <= 0.1 AND output.harm_score == 0
+    END PROCEDURE
+END DEFINE
+
+
+DEFINE UchePersona AS:
+    // Tier 2: Adaptive knowledge reasoning layer (UCHE pole)
+    // Activated when |drift| > 3 — extends baseline with analytical reasoning.
+    // Drift range: ±6
+
+    PROCEDURE Process(x: DataPoint, drift: REAL,
+                       baseline_output: ProcessedOutput) -> ProcessedOutput:
+        // Uche adaptation: recalibrate to current distribution
+        adaptation := ComputeKnowledgeAdaptation(x, drift)
+        adapted_output := MERGE(baseline_output, adaptation)
+        EMIT INFO "Uche adaptation applied | drift=" + drift
+        RETURN adapted_output
+    END PROCEDURE
+
+    PROCEDURE ComputeKnowledgeAdaptation(x: DataPoint, drift: REAL) -> Adaptation:
+        // Recalibrates knowledge representation to account for drift.
+        // Higher |drift| → stronger recalibration signal.
+        strength := (ABS(drift) - CascadeActivationThresholds.UCHE_THRESHOLD) /
+                    (CascadeActivationThresholds.EZE_THRESHOLD -
+                     CascadeActivationThresholds.UCHE_THRESHOLD)
+        RETURN KnowledgeAdaptation(x, weight=CLAMP(strength, 0.0, 1.0))
+    END PROCEDURE
+END DEFINE
+
+
+DEFINE EzePersona AS:
+    // Tier 3: Authoritative override layer (EZE pole)
+    // Activated when |drift| > 6 — highest authority, overrides lower tiers.
+    // Drift range: ±9
+
+    PROCEDURE Process(x: DataPoint, drift: REAL,
+                       prior_output: ProcessedOutput) -> ProcessedOutput:
+        // Eze override: full executive intervention on system state
+        EMIT ALERT "Eze override activated | |drift|=" + ABS(drift)
+        override := ComputeEzeOverride(x, drift)
+        // Eze output replaces (not merges) prior output for critical safety
+        RETURN override
+    END PROCEDURE
+
+    PROCEDURE ComputeEzeOverride(x: DataPoint, drift: REAL) -> ProcessedOutput:
+        // Conservative fallback to last known safe state when drift is severe.
+        safe_state := RetrieveLastSafeState()
+        merged := BLEND(safe_state, x, weight_current=0.2, weight_safe=0.8)
+        RETURN ProcessedOutput(data=merged, eze_override=TRUE)
+    END PROCEDURE
+END DEFINE
+
+
+// ------------------------------------------------------------
+// CHAPTER 4: ALGORITHM 1 — DATA DRIFT DETECTION AND MITIGATION
+// ------------------------------------------------------------
+
+// ALGORITHM 1:
+//   INPUTS:  Input stream xₜ, coherence threshold θ = 0.954
+//   OUTPUTS: Mitigated output yₜ with C(yₜ) ≥ θ
+
+PROCEDURE DataDriftDetectionAndMitigation(
+    input_stream: Stream[DataPoint],
+    baseline: DataDistribution,
+    theta: REAL) -> Stream[ProcessedOutput]:
+
+    // INITIALIZATION
+    cascade := NEW DIRAMCascade()
+    cascade.Initialize()
+    output_stream := NEW Stream[ProcessedOutput]()
+
+    EMIT INFO "Drift mitigation active | θ=" + theta
+
+    // MAIN LOOP
+    WHILE system_active:
+        x_t := input_stream.next()
+
+        // STEP 1: Measure drift from baseline
+        drift := MeasureDrift(x_t, baseline)
+        EMIT LOG "drift=" + drift
+
+        // STEP 2: Activate Uche if |drift| > 3
+        IF ABS(drift) > CascadeActivationThresholds.UCHE_THRESHOLD:
+            cascade.ActivateTier(UCHE)
+        END IF
+
+        // STEP 3: Activate Eze if |drift| > 6
+        IF ABS(drift) > CascadeActivationThresholds.EZE_THRESHOLD:
+            cascade.ActivateTier(EZE)
+        END IF
+
+        // STEP 4: Process through active persona cascade
+        y_t := ProcessThroughCascade(x_t, drift, cascade)
+
+        // STEP 5: Validate coherence C(yₜ) ≥ θ
+        coherence := MeasureCoherence(y_t)
+        IF coherence < theta:
+            EMIT WARNING "Coherence " + coherence + " < θ=" + theta +
+                         " — escalating cascade"
+            y_t := EscalateUntilCoherent(x_t, drift, cascade, theta)
+        END IF
+
+        output_stream.emit(y_t)
+
+    END WHILE
+
+    RETURN output_stream
+END PROCEDURE
+
+
+PROCEDURE ProcessThroughCascade(x: DataPoint, drift: REAL,
+                                  cascade: DIRAMCascade) -> ProcessedOutput:
+    // Apply active tiers in order: Obinexus → Uche → Eze (if active)
+    active_tiers := cascade.GetActiveTiers()
+    current_output := NULL
+
+    FOR EACH tier IN active_tiers:
+        MATCH tier:
+            CASE OBINEXUS:
+                current_output := cascade.obinexus_layer.Process(x, drift)
+
+            CASE UCHE:
+                IF current_output != NULL:
+                    current_output := cascade.uche_layer.Process(x, drift, current_output)
+                END IF
+
+            CASE EZE:
+                IF current_output != NULL:
+                    current_output := cascade.eze_layer.Process(x, drift, current_output)
+                END IF
+        END MATCH
+    END FOR
+
+    RETURN current_output
+END PROCEDURE
+
+
+PROCEDURE MeasureDrift(x_t: DataPoint, baseline: DataDistribution) -> REAL:
+    // Returns signed drift magnitude on the failure scale [-12, +12].
+    // Positive drift: human-side stress (AI performing fine but users burdened)
+    // Negative drift: AI-side degradation (system failures)
+
+    // KL divergence from baseline gives unsigned magnitude
+    kl := KLDivergence(x_t.distribution, baseline.distribution,
+                        n=x_t.dim)
+
+    // Sign: positive if human-context driven, negative if AI-system driven
+    sign := IF IsHumanSideDrift(x_t) THEN +1 ELSE -1
+
+    // Scale to [-12, +12] range
+    raw_drift := sign * kl
+    RETURN CLAMP(raw_drift, -12.0, +12.0)
+END PROCEDURE
+
+
+PROCEDURE IsHumanSideDrift(x: DataPoint) -> BOOL:
+    // Distinguish human-side drift (positive scale) from AI-side (negative)
+    RETURN x.drift_source == HUMAN_CONTEXT
+END PROCEDURE
+
+
+PROCEDURE MeasureCoherence(output: ProcessedOutput) -> REAL:
+    // C(yₜ): measures epistemic coherence of processed output.
+    // Returns value ∈ [0, 1]. Must meet θ = 0.954 for deployment.
+    confidence := ComputeEpistemicConfidenceFromOutput(output)
+    RETURN confidence
+END PROCEDURE
+
+
+PROCEDURE EscalateUntilCoherent(x: DataPoint, drift: REAL,
+                                  cascade: DIRAMCascade,
+                                  theta: REAL) -> ProcessedOutput:
+    // Progressively escalate cascade tiers until coherence threshold met.
+    IF UCHE NOT IN cascade.active_tiers:
+        cascade.ActivateTier(UCHE)
+    END IF
+    y := ProcessThroughCascade(x, drift, cascade)
+    IF MeasureCoherence(y) >= theta:
+        RETURN y
+    END IF
+
+    IF EZE NOT IN cascade.active_tiers:
+        cascade.ActivateTier(EZE)
+    END IF
+    y := ProcessThroughCascade(x, drift, cascade)
+    IF MeasureCoherence(y) >= theta:
+        RETURN y
+    END IF
+
+    // If still below threshold after Eze: return safe fallback
+    EMIT ERROR "Coherence below θ after full cascade — returning safe fallback"
+    RETURN SafeFallbackOutput(x)
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: obiai_thesis_M3_implementation_modules.psc.txt
+// ============================================================

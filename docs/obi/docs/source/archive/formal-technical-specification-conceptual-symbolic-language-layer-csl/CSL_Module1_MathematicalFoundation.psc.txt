@@ -1,0 +1,355 @@
+// ============================================================
+// FILE: CSL_Module1_MathematicalFoundation.psc.txt
+// SOURCE: Formal_Technical_Specification___Conceptual_Symbolic_Language_Layer__CSL_.pdf
+//         Sections 1, 2, 3
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing (2025)
+// PURPOSE: Pseudocode for CSL Executive Summary, Mathematical
+//          Foundation Extension, and Glyph Grammar Architecture
+// PROJECT: HeartAI / OBI AI Bayesian Framework — Aegis Waterfall
+// ============================================================
+
+MODULE CSL_MathematicalFoundation
+
+// ============================================================
+// SECTION 1 — Executive Technical Summary
+// ============================================================
+
+// The Conceptual Symbolic Language Layer (CSL) is an integrated
+// semantic abstraction layer within the HeartAI/OBI AI Bayesian
+// debiasing framework.
+//
+// Core purpose:
+//   - Enable culturally-grounded symbolic representation
+//   - Represent probabilistic reasoning states
+//   - Express causal relationships and uncertainty quantification
+//   - Use visual concept glyphs rooted in Nsibidi/CBD traditions
+//
+// Integration points with existing Aegis architecture:
+//   1. Extends Cost-Knowledge Function C(Kt, S) with semantic salience
+//   2. Maintains core Bayesian structure:
+//        P(theta | D) = integral R * P(theta, phi | D) d_phi
+//   3. Complies with Waterfall Methodology (milestone-based + cultural validation gates)
+//
+// Baseline achieved: 85% bias reduction via existing mathematical framework
+// CSL extends interpretability while preserving computational rigor.
+
+STRUCTURE CSLConfiguration:
+    weighting_alpha:      Float    // α — Bayesian posterior weight
+    weighting_beta:       Float    // β — cultural authenticity weight
+    weighting_gamma:      Float    // γ — cost-knowledge weight
+    adaptation_rate:      Float    // λ — UI adaptation rate
+    epsilon_base:         Float    // ε_base — minimum comprehensibility floor
+    complexity_threshold: Float    // Threshold for progressive revelation
+END STRUCTURE
+
+
+// ============================================================
+// SECTION 2 — Mathematical Foundation Extension
+// ============================================================
+
+// ============================================================
+// SECTION 2.1 — Semantic Salience Function
+// ============================================================
+
+// DEFINITION 1 (Semantic Salience Function):
+// The semantic salience of glyph G_i at knowledge state K_t
+// with cultural context C_cultural is:
+//
+//   Σ(G_i, K_t, C_cultural) = α · P(concept_i | evidence_t)
+//                            + β · A(G_i)
+//                            + γ · C(K_t, S_i)
+//
+// Where:
+//   α, β, γ     = weighting coefficients (from CSLConfiguration)
+//   P(concept_i | evidence_t) = posterior probability from Bayesian inference
+//   A(G_i)      = cultural authenticity score for glyph G_i
+//   C(K_t, S_i) = established Aegis Cost-Knowledge function
+
+FUNCTION compute_semantic_salience(
+    glyph:           Glyph,         // G_i
+    knowledge_state: KnowledgeState,// K_t
+    cultural_ctx:    CulturalContext,
+    config:          CSLConfiguration
+) -> Float:
+
+    // Component 1: Bayesian posterior probability
+    bayesian_posterior := P(glyph.concept | knowledge_state.evidence)
+
+    // Component 2: Cultural authenticity score (see Section 4)
+    authenticity_score := compute_cultural_authenticity(glyph)
+
+    // Component 3: Aegis Cost-Knowledge function
+    cost_knowledge := compute_cost_knowledge(knowledge_state, glyph.semantic_index)
+
+    // Weighted combination
+    salience := (config.weighting_alpha * bayesian_posterior)
+              + (config.weighting_beta  * authenticity_score)
+              + (config.weighting_gamma * cost_knowledge)
+
+    RETURN salience
+
+END FUNCTION
+
+
+// ============================================================
+// SECTION 2.2 — Glyph State Transition Function
+// ============================================================
+
+// Builds on the Filter-Flash consciousness model:
+//
+//   G_{t+1} = F_filter(G_t, Σ_t) ⊕ Φ_flash(ΔΣ_t, context_t)
+//
+// Where:
+//   ⊕          = compositional glyph operation
+//   F_filter    = filter function — stable/baseline state propagation
+//   Φ_flash     = flash function — triggered by salience change events
+//   ΔΣ_t        = salience delta that triggers flash events
+//   context_t   = current inference context
+
+FUNCTION filter_function(
+    current_glyph: Glyph,
+    salience:      Float           // Σ_t
+) -> GlyphState:
+    // F_filter: propagates stable conceptual state
+    // Applies salience-weighted filtering to current glyph
+    RETURN apply_salience_filter(current_glyph, salience)
+END FUNCTION
+
+FUNCTION flash_function(
+    delta_salience: Float,         // ΔΣ_t — change in salience
+    context:        InferenceContext
+) -> GlyphState:
+    // Φ_flash: triggered by significant salience changes
+    // Represents consciousness "flash" events — sudden insight transitions
+    IF ABS(delta_salience) > FLASH_TRIGGER_THRESHOLD THEN
+        RETURN generate_flash_state(delta_salience, context)
+    ELSE
+        RETURN GlyphState.NO_FLASH
+    END IF
+END FUNCTION
+
+FUNCTION compute_glyph_transition(
+    current_glyph:  Glyph,         // G_t
+    salience_t:     Float,         // Σ_t
+    delta_salience: Float,         // ΔΣ_t
+    context:        InferenceContext
+) -> Glyph:
+    // G_{t+1} = F_filter(G_t, Σ_t) ⊕ Φ_flash(ΔΣ_t, context_t)
+    filter_state := filter_function(current_glyph, salience_t)
+    flash_state  := flash_function(delta_salience, context)
+
+    // ⊕ is compositional glyph operation (not XOR)
+    next_glyph   := compositional_merge(filter_state, flash_state)
+    RETURN next_glyph
+
+END FUNCTION
+
+
+// ============================================================
+// SECTION 3 — Systematic Glyph Grammar Architecture
+// ============================================================
+
+// ============================================================
+// SECTION 3.1.1 — Level 1: Atomic Concept Mapping
+// ============================================================
+
+// Each Bayesian element maps to a base glyph with a cultural source:
+//
+// Bayesian Element    | Glyph Symbol | Mathematical Mapping         | Cultural Source
+// -------------------|--------------|------------------------------|----------------
+// Node Variable Xi   | G_node       | P(Xi | Pa(Xi))               | Nsibidi core
+// Prior Distribution | G_seed       | P(θ | α)                     | CBD growth
+// Posterior Update   | G_flow       | P(D|θ)·P(θ) / P(D)           | Flow symbols
+// Uncertainty σ²     | G_cloud      | Var[θ | D]                   | Weather glyphs
+// Strong Evidence    | G_mountain   | ||∇ log P(D|θ)||              | Stability symbols
+// Bias Factor ϕ      | G_broken     | E[ϕ | D, A]                  | Disruption patterns
+
+DEFINE AtomicGlyphType AS ENUM {
+    G_NODE,       // Bayesian node variable
+    G_SEED,       // Prior distribution
+    G_FLOW,       // Posterior update
+    G_CLOUD,      // Uncertainty
+    G_MOUNTAIN,   // Strong evidence
+    G_BROKEN,     // Bias factor
+    G_MEDICAL,    // Medical diagnosis (from compositional patterns)
+    G_SHIELD,     // Protective screening (from compositional patterns)
+    G_HEALTH,     // Health state
+    G_FILTER      // Filter operation
+}
+
+STRUCTURE AtomicGlyph:
+    glyph_type:       AtomicGlyphType
+    bayesian_element: String
+    math_mapping:     MathExpression    // Formal Bayesian mapping
+    cultural_source:  String            // Nsibidi / CBD / etc.
+    svg_data:         String            // Visual rendering data
+    vector_encoding:  ByteArray         // Machine-readable encoding
+END STRUCTURE
+
+FUNCTION get_base_glyph(concept: BayesianConcept) -> AtomicGlyph:
+    // Map Bayesian concept to its culturally-rooted base glyph
+    SWITCH concept:
+        CASE NODE_VARIABLE:   RETURN glyph_registry.get(G_NODE)
+        CASE PRIOR_DIST:      RETURN glyph_registry.get(G_SEED)
+        CASE POSTERIOR:       RETURN glyph_registry.get(G_FLOW)
+        CASE UNCERTAINTY:     RETURN glyph_registry.get(G_CLOUD)
+        CASE STRONG_EVIDENCE: RETURN glyph_registry.get(G_MOUNTAIN)
+        CASE BIAS_FACTOR:     RETURN glyph_registry.get(G_BROKEN)
+        DEFAULT:
+            RAISE GlyphNotFound("No base glyph for concept: " + concept)
+    END SWITCH
+END FUNCTION
+
+
+// ============================================================
+// SECTION 3.1.2 — Level 2: Compositional Operators
+// ============================================================
+
+// DEFINITION 2 (Glyph Composition Grammar):
+// The compositional grammar G is defined by production rules:
+//
+//   S ::= A | A R A | S T S
+//   A ::= G_base[σ] | M(A)
+//   R ::= G_causal[τ] | G_temporal[δ]
+//   M ::= intensity[ρ] | direction[θ] | uncertainty[ε]
+//
+// Where σ, τ, δ, ρ, θ, ε are parameter vectors from Bayesian inference states.
+
+DEFINE GrammarSymbolType AS ENUM {
+    SENTENCE,     // S — top-level composition
+    ATOM,         // A — atomic glyph or modified atom
+    RELATION,     // R — causal or temporal relation
+    MODIFIER,     // M — intensity, direction, or uncertainty modifier
+    TRANSITION    // T — sentence transition
+}
+
+STRUCTURE GlyphModifier:
+    modifier_type:  String    // "intensity" | "direction" | "uncertainty"
+    parameter_rho:  Float     // ρ — intensity parameter
+    parameter_theta: Float    // θ — direction parameter
+    parameter_eps:  Float     // ε — uncertainty parameter
+END STRUCTURE
+
+STRUCTURE GlyphRelation:
+    relation_type: String     // "causal" | "temporal"
+    tau:           Vector     // τ — causal parameter vector
+    delta:         Vector     // δ — temporal parameter vector
+END STRUCTURE
+
+FUNCTION parse_glyph_grammar(
+    sentence: GlyphSentence,
+    bayesian_state: BayesianState
+) -> ComposedGlyph:
+    // Apply grammar production rules
+
+    IF sentence.is_atomic() THEN
+        // A ::= G_base[σ] | M(A)
+        base := get_base_glyph(sentence.concept)
+        sigma := extract_sigma(bayesian_state)
+        RETURN apply_parameter(base, sigma)
+
+    ELSE IF sentence.has_relation() THEN
+        // S ::= A R A
+        left  := parse_glyph_grammar(sentence.left, bayesian_state)
+        right := parse_glyph_grammar(sentence.right, bayesian_state)
+        rel   := build_relation(sentence.relation_type, bayesian_state)
+        RETURN compose(left, rel, right)
+
+    ELSE IF sentence.has_transition() THEN
+        // S ::= S T S
+        sub1 := parse_glyph_grammar(sentence.sub1, bayesian_state)
+        sub2 := parse_glyph_grammar(sentence.sub2, bayesian_state)
+        RETURN transition_compose(sub1, sub2)
+
+    END IF
+END FUNCTION
+
+
+// ============================================================
+// SECTION 3.2.1 — Verb-Noun Glyph Structures
+// ============================================================
+
+// Conceptual Expression       | Composition Pattern              | Bayesian State Mapping
+// ----------------------------|----------------------------------|---------------------------
+// Accelerating Evidence       | G_mountain ⊙ M+_velocity        | d/dt P(evidence|t) > 0
+// Diminishing Uncertainty     | G_cloud ⊙ M_reduction           | d/dt H[P(θ|D_t)] < 0
+// Conflicting Priors          | G_seed1 ⊙ R_tension ⊙ G_seed2  | KL[P(θ|α1)||P(θ|α2)] > δ
+// Stabilizing Diagnosis       | G_medical ⊙ M_equilibrium       | ||θ_{t+1} − θ_t|| < ε
+// Protective Screening        | G_shield ⊙ G_filter ⊙ G_health  | Bias ϕ marginalized
+
+DEFINE VerbNounPattern AS ENUM {
+    ACCELERATING_EVIDENCE,
+    DIMINISHING_UNCERTAINTY,
+    CONFLICTING_PRIORS,
+    STABILIZING_DIAGNOSIS,
+    PROTECTIVE_SCREENING
+}
+
+FUNCTION build_verb_noun_composition(
+    pattern: VerbNounPattern,
+    bayesian_state: BayesianState
+) -> ComposedGlyph:
+
+    SWITCH pattern:
+        CASE ACCELERATING_EVIDENCE:
+            // G_mountain ⊙ M+_velocity — evidence growth rate > 0
+            g := get_base_glyph(STRONG_EVIDENCE)       // G_mountain
+            m := GlyphModifier { modifier_type: "velocity", parameter_rho: +1.0 }
+            RETURN apply_modifier(g, m)
+
+        CASE DIMINISHING_UNCERTAINTY:
+            // G_cloud ⊙ M_reduction — entropy decreasing
+            g := get_base_glyph(UNCERTAINTY)            // G_cloud
+            m := GlyphModifier { modifier_type: "intensity", parameter_rho: -1.0 }
+            RETURN apply_modifier(g, m)
+
+        CASE CONFLICTING_PRIORS:
+            // G_seed1 ⊙ R_tension ⊙ G_seed2 — KL divergence > δ
+            g1  := get_base_glyph(PRIOR_DIST)           // G_seed1
+            g2  := get_base_glyph(PRIOR_DIST)           // G_seed2 (alt prior)
+            rel := GlyphRelation { relation_type: "tension" }
+            RETURN compose(g1, rel, g2)
+
+        CASE STABILIZING_DIAGNOSIS:
+            // G_medical ⊙ M_equilibrium — theta convergence
+            g := get_base_glyph(MEDICAL_DIAGNOSIS)      // G_medical
+            m := GlyphModifier { modifier_type: "direction", parameter_theta: 0.0 }
+            RETURN apply_modifier(g, m)
+
+        CASE PROTECTIVE_SCREENING:
+            // G_shield ⊙ G_filter ⊙ G_health — bias marginalized
+            g1 := get_base_glyph(SHIELD)
+            g2 := get_base_glyph(FILTER)
+            g3 := get_base_glyph(HEALTH)
+            RETURN sequential_compose([g1, g2, g3])
+    END SWITCH
+
+END FUNCTION
+
+
+// ============================================================
+// SECTION 3.2.2 — Modifier Stack Architecture
+// ============================================================
+
+// Modifiers are applied as a stack on top of a base glyph.
+// Stack order determines visual and semantic precedence.
+
+STRUCTURE ModifierStack:
+    base_glyph:  AtomicGlyph
+    modifiers:   List<GlyphModifier>   // Applied bottom-up
+END STRUCTURE
+
+FUNCTION apply_modifier_stack(
+    stack: ModifierStack
+) -> ComposedGlyph:
+    result := stack.base_glyph
+
+    FOR EACH modifier m IN stack.modifiers DO
+        // Each modifier transforms the current glyph state
+        result := apply_modifier(result, m)
+    END FOR
+
+    RETURN result
+END FUNCTION
+
+END MODULE CSL_MathematicalFoundation

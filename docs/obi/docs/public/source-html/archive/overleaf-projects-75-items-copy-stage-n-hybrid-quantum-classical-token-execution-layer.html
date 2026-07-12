@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>stage N Hybrid Quantum Classical Token Execution Layer | OBI Source HTML</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --surface: #ffffff;
+      --text: #202321;
+      --muted: #626962;
+      --accent: #147d7e;
+      --border: #d9ddd4;
+      --code: #eef1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    header, main, footer { max-width: 1060px; margin: 0 auto; padding: 1.25rem; }
+    header { border-bottom: 4px solid var(--accent); background: #161819; color: #f5f7f2; max-width: none; }
+    header > div { max-width: 1060px; margin: 0 auto; }
+    a { color: #0f5f60; }
+    header a { color: inherit; }
+    main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 1.25rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p, li { max-width: 78ch; }
+    img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    pre { overflow: auto; background: #20251f; color: #f7fbf2; padding: 1rem; border-radius: 8px; }
+    code { background: var(--code); padding: 0.12rem 0.25rem; border-radius: 5px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--border); padding: 0.45rem 0.6rem; text-align: left; }
+    blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding-left: 1rem; color: var(--muted); }
+    .skip-link { position: absolute; left: 1rem; top: 0.75rem; transform: translateY(-200%); }
+    .skip-link:focus { transform: translateY(0); background: var(--surface); color: var(--text); padding: 0.5rem; }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header>
+    <div>
+      <a href="../index.html">OBI Source HTML</a>
+      <h1>stage N Hybrid Quantum Classical Token Execution Layer</h1>
+      <p>Generated from Markdown with Python tooling and Pandoc-compatible source preservation.</p>
+    </div>
+  </header>
+  <main id="content" tabindex="-1">
+    <h1 id="stage-n-hybrid-quantum-classical-token-execution-layer">stage N Hybrid Quantum Classical Token Execution Layer</h1>
+<p>Source folder: <code>overleaf-projects-75-items-copy/stage-N - Hybrid Quantum-Classical Token Execution Layer</code></p>
+<h2 id="extracted-files">Extracted Files</h2>
+<ul>
+<li><code>main.tex</code></li>
+</ul>
+<h2 id="main">main</h2>
+<h1 id="executive-summary">Executive Summary</h1>
+<p>This document formalizes Stage-N of the RiftLang Protocol Stack, establishing the critical interface between quantum probabilistic computation and classical deterministic execution. Stage-N enables seamless transitions between quantum superposition states and classical computational models while maintaining strict AEGIS governance compliance throughout the quantum-classical boundary.</p>
+<p>The specification defines standardized patterns for stages 0 through N+1 (currently implemented through Stage-7), providing a unified framework for quantum token management, collapse operations, and memory-governed parsing within the RIFT domain-specific language ecosystem.</p>
+<h1 id="stage-evolution-framework">Stage Evolution Framework</h1>
+<div class="tcolorbox">
+
+- **Stage-0**: Token initialization and classical baseline
+
+- **Stage-1**: Quantum extension introduction
+
+- **Stage-2**: Entanglement protocol establishment
+
+- **Stage-3**: Collapse operator implementation
+
+- **Stage-4**: Memory governance integration
+
+- **Stage-5**: Parser unification
+
+- **Stage-6**: AEGIS phase alignment
+
+- **Stage-7**: Full quantum-classical bridge deployment
+
+- **Stage-N**: Dynamic stage instantiation
+
+- **Stage-N+1**: Future extensibility framework
+
+</div>
+
+<h1 id="core-architecture-and-purpose">Core Architecture and Purpose</h1>
+<h2 id="fundamental-design-principles">Fundamental Design Principles</h2>
+<p>Stage-N serves as the quantum-classical computation bridge within the RIFT DSL execution pipeline. The architecture enables:</p>
+<ol>
+<li>
+<p><span style="color: quantumblue">Quantum state preservation</span> during computation</p>
+</li>
+<li>
+<p><span style="color: classicalgreen">Deterministic resolution</span> when measurement occurs</p>
+</li>
+<li>
+<p><span style="color: governancered">Governance enforcement</span> at state transitions</p>
+</li>
+<li>
+<p><span style="color: memoryorange">Memory-bounded execution</span> with Planck-scale constraints</p>
+</li>
+</ol>
+<h2 id="integration-points">Integration Points</h2>
+<pre><code>@stage_interface[N] {
+    input_stages: [N-1, quantum_init]
+    output_stages: [N+1, classical_exec]
+    governance_hooks: AEGIS_Phase_I_III
+    memory_model: quantum_foam_temporal
+    compliance_level: STRICT
+}
+</code></pre>
+<h1 id="quantum-token-specification">Quantum Token Specification</h1>
+<h2 id="core-quantum-token-definition">Core Quantum Token Definition</h2>
+<p>The fundamental quantum token represents a qubit in superposition state with complex amplitude coefficients.</p>
+<pre><code>@token[quantum] qbit superposition(alpha, beta) -&gt; QINT
+Where:
+    alpha in C : Complex amplitude for |0&gt; state
+    beta  in C : Complex amplitude for |1&gt; state
+    Constraint: |alpha|^2 + |beta|^2 = 1 (normalization)
+</code></pre>
+<h2 id="extended-quantum-token-attributes">Extended Quantum Token Attributes</h2>
+<pre><code>@token_extension[quantum] {
+    # Dirac notation representation
+    bra_ket_notation: |psi&gt; = alpha|0&gt; + beta|1&gt;
+
+    # Normalization enforcement with tolerance
+    amplitude_norm: enforce(|alpha|^2 + |beta|^2 = 1.0 +/- epsilon)
+    Where: epsilon = 10^-15 (machine epsilon)
+
+    # Decoherence threshold at Planck scale
+    decohere_threshold: tau_planck = 5.39 x 10^-44 seconds
+
+    # Entanglement tracking
+    entanglement_flag: bool
+    entanglement_partners: QINT[] (max_size = 6)
+
+    # Phase coherence bounds
+    phase_coherence: phi in [0, 2*pi]
+    phase_drift_rate: d_phi/dt &lt;= pi/tau_coherence
+}
+</code></pre>
+<h2 id="quantum-token-memory-alignment">Quantum Token Memory Alignment</h2>
+<pre><code>@memory_align[quantum] {
+    alignment: 8-qubit boundary
+    span_type: distributed_quantum_foam
+    coherence_window: planck_time
+    isolation_level: phase_locked
+
+    layout: {
+        |q0&gt;|q1&gt;|q2&gt;|q3&gt;|q4&gt;|q5&gt;|q6&gt;|q7&gt;
+        [amplitude_real][amplitude_imag]
+        [phase][entangle_mask][coherence]
+    }
+}
+</code></pre>
+<h1 id="classical-resolution-operator">Classical Resolution Operator</h1>
+<h2 id="collapse-operator-definition">Collapse Operator Definition</h2>
+<p>The collapse operator manages the quantum-to-classical transition under governance constraints.</p>
+<pre><code>@operator collapse {
+    input: QINT                    # Quantum integer in superposition
+    condition: coherence &gt;= PLANCK_THRESHOLD
+    output: INT                    # Classical deterministic integer
+    audit: quantum_event_log       # Governance audit trail
+
+    properties: {
+        irreversible: true
+        measurement_basis: computational
+        entropy_increase: Delta_S &gt; 0
+    }
+}
+</code></pre>
+<h2 id="piecewise-collapse-logic">Piecewise Collapse Logic</h2>
+<pre><code>PROCEDURE quantum_classical_collapse(q: QINT, E: energy, m: mass):
+    LET c^2 = speed_of_light^2
+    LET E_planck = hbar * omega
+
+    IF E^2 &lt;= m * c^2:
+        # Low energy - classical behavior dominates
+        state := CLASSICAL_DETERMINISTIC
+        RETURN cast_to_int(q, method=&quot;measurement&quot;)
+
+    ELIF E &gt; E_critical AND q.coherence &gt;= tau_planck:
+        # High energy with coherence - forced collapse
+        TRIGGER collapse_event {
+            log: quantum_event_log
+            timestamp: current_planck_time
+            method: &quot;forced_decoherence&quot;
+        }
+        state := CLASSICAL_COLLAPSED
+        RETURN probabilistic_cast(q)
+
+    ELSE:
+        # Maintain quantum superposition
+        state := QUANTUM_SUPERPOSITION
+        EVOLVE q WITH hamiltonian(H)
+        RETURN q  # Preserve quantum state
+
+    END IF
+END PROCEDURE
+</code></pre>
+<h2 id="state-transition-matrix">State Transition Matrix</h2>
+<pre><code>@state_transition_matrix {
+    QUANTUM -&gt; CLASSICAL: {
+        trigger: measurement OR decoherence
+        probability: |&lt;psi|phi&gt;|^2
+        governance: collapse_contract
+        audit_level: MANDATORY
+    }
+
+    CLASSICAL -&gt; QUANTUM: {
+        trigger: superposition_gate
+        condition: coherence_budget &gt; threshold
+        governance: quantum_init_contract
+        audit_level: STRICT
+    }
+
+    QUANTUM -&gt; QUANTUM: {
+        trigger: unitary_evolution
+        operator: U = exp(-iHt/hbar)
+        governance: evolution_contract
+        audit_level: PERIODIC
+    }
+}
+</code></pre>
+<h1 id="memory-governed-quantum-parser">Memory-Governed Quantum Parser</h1>
+<h2 id="hybrid-token-grammar">Hybrid Token Grammar</h2>
+<p>The parser must handle both quantum and classical tokens with appropriate type safety.</p>
+<pre><code>@parser[hybrid_quantum_classical] {
+    token_types: {
+        QINT    : quantum_integer[superposition]
+        INT     : classical_integer[deterministic]
+        FLOAT   : classical_float[ieee754]
+        BRA     : &lt;psi| quantum_state
+        KET     : |psi&gt; quantum_state
+        QFLOAT  : quantum_float[superposition]
+    }
+
+    # Regex pattern with quantum extensions
+    parse_rules: R&quot;/([QC])(INT|FLOAT|STATE)/gmi[tb]&quot;
+    Where:
+        g: global matching
+        m: multiline quantum states
+        i: case-insensitive operators
+        t: top-down classical resolution
+        b: bottom-up quantum composition
+}
+</code></pre>
+<h2 id="temporal-memory-state-management">Temporal Memory State Management</h2>
+<pre><code>@memory_state::quantum_foam {
+    lifetime: planck_time = 5.39 x 10^-44 seconds
+    scope: local_superposition
+
+    allocation: {
+        classical_mode: align(4096_bits)
+        quantum_mode: align(8_qubits)
+        hybrid_mode: interleaved_coherent
+    }
+
+    persistence: {
+        coherent_duration: tau_coherence
+        decoherence_rate: Gamma = 1/T_2
+        error_threshold: 10^-9
+    }
+
+    governance: {
+        max_entanglement_depth: 6
+        bell_state_limit: 4_pairs
+        gc_policy: phase_aware_collection
+    }
+}
+</code></pre>
+<h2 id="parser-state-machine">Parser State Machine</h2>
+<pre><code>AUTOMATON quantum_parser {
+    states: {S_INIT, S_QUANTUM, S_CLASSICAL, S_COLLAPSE, S_MEASURE}
+
+    transitions: {
+        S_INIT -&gt; S_QUANTUM: 
+            condition: detect_superposition_token()
+            action: init_quantum_context()
+
+        S_QUANTUM -&gt; S_COLLAPSE:
+            condition: coherence &lt; PLANCK_THRESHOLD
+            action: prepare_collapse()
+
+        S_COLLAPSE -&gt; S_CLASSICAL:
+            condition: collapse_complete()
+            action: emit_classical_token()
+
+        S_QUANTUM -&gt; S_MEASURE:
+            condition: measurement_operator()
+            action: von_neumann_projection()
+
+        S_MEASURE -&gt; S_CLASSICAL:
+            condition: measurement_complete()
+            action: emit_measured_value()
+    }
+
+    error_states: {
+        E_COHERENCE_LOST: recovery = forced_collapse
+        E_ENTANGLE_VIOLATION: recovery = isolate_subsystem
+        E_MEMORY_OVERFLOW: recovery = quantum_gc
+    }
+}
+</code></pre>
+<h1 id="governance-constraint-declarations">Governance Constraint Declarations</h1>
+<h2 id="core-governance-rules">Core Governance Rules</h2>
+<pre><code>@gov_rule::collapse_contract {
+    requires: {
+        coherence &gt;= planck_threshold
+        entanglement_depth &lt;= max_allowed
+        quantum_budget &gt; operation_cost
+        audit_trail.enabled = true
+    }
+
+    prohibits: {
+        superposition_state &gt; max_density_matrix_size
+        concurrent_measurements &gt; 1
+        phase_drift &gt; pi/4
+        untracked_entanglement = true
+    }
+
+    audit: {
+        log_destination: quantum_event_log
+        retention_period: 7_stages
+        cryptographic_seal: SHA3-256
+        immutability: blockchain_anchored
+    }
+}
+</code></pre>
+<h2 id="resource-management-constraints">Resource Management Constraints</h2>
+<pre><code>@gov_rule::quantum_resource_management {
+    allocation_policy: {
+        max_qubits_per_token: 16
+        max_entangled_pairs: 8
+        decoherence_budget: 1000_planck_times
+        memory_quota: 1MB_quantum_foam
+    }
+
+    cleanup_policy: {
+        auto_collapse_timeout: 100_planck_times
+        garbage_collection: phase_aware
+        memory_reclaim: immediate
+        entanglement_pruning: depth_first
+    }
+
+    cost_model: {
+        superposition_cost: 0.1_per_qubit_per_cycle
+        entanglement_cost: 0.3_per_pair
+        measurement_cost: 0.2_per_operation
+        coherence_maintenance: 0.05_per_planck_time
+    }
+}
+</code></pre>
+<h2 id="security-and-validation-rules">Security and Validation Rules</h2>
+<pre><code>@gov_rule::quantum_security {
+    validation: {
+        state_vector_normalization: continuous
+        no_cloning_enforcement: strict
+        basis_state_verification: periodic(10_cycles)
+        bell_inequality_check: on_entanglement
+    }
+
+    access_control: {
+        quantum_state_read: privileged_only
+        collapse_trigger: authorized_operators
+        entanglement_create: rate_limited(10/sec)
+        phase_manipulation: governance_approved
+    }
+
+    integrity: {
+        checksum_algorithm: quantum_hash_SHA3Q
+        tamper_detection: bell_inequality_test
+        audit_trail: immutable_quantum_ledger
+        replay_protection: nonce_per_operation
+    }
+}
+</code></pre>
+<h1 id="integration-with-aegis-phase-architecture">Integration with AEGIS Phase Architecture</h1>
+<h2 id="phase-i-matrix-parity-integration">Phase I - Matrix Parity Integration</h2>
+<pre><code>INTEGRATION matrix_parity_bridge {
+    quantum_to_fft: {
+        INPUT: QINT[superposition]
+        PROCESS: 
+            1. Extract amplitude vectors (alpha, beta)
+            2. Map to FFT basis: F(|psi&gt;) = Sum(alpha_k*e^(2*pi*ijk/N))
+            3. Apply parity constraints from Phase I
+            4. Verify matrix eigenvalue stability
+        OUTPUT: FFT_MATRIX[classical]
+    }
+
+    governance: {
+        parity_check: R&quot;/[01]{8}/g&quot; 
+        matrix_alignment: 8x8_quantum_block
+        eigenvalue_threshold: |lambda| &lt; 1.0
+    }
+}
+</code></pre>
+<h2 id="phase-ii-token-stream-management">Phase II - Token Stream Management</h2>
+<pre><code>INTEGRATION token_stream_quantum {
+    stream_mode: {
+        classical: sequential_ordered
+        quantum: parallel_superposed
+        hybrid: context_switched
+    }
+
+    synchronization: {
+        barrier: quantum_measurement_point
+        ordering: causal_cone_preservation
+        latency: &lt;= coherence_window
+    }
+
+    buffering: {
+        quantum_buffer: circular_phase_locked
+        classical_buffer: FIFO_deterministic
+        transition_buffer: copy_on_collapse
+    }
+}
+</code></pre>
+<h2 id="phase-iii-planck-verification">Phase III - Planck Verification</h2>
+<pre><code>INTEGRATION planck_verification {
+    collapse_window: {
+        detection: coherence &lt; PLANCK_THRESHOLD
+        action: enforce(collapse_contract)
+        verification: cryptographic_proof
+        timing: exact_planck_time
+    }
+
+    quantum_classical_boundary: {
+        transition_log: {
+            timestamp: planck_time_resolution
+            state_before: |psi&gt;
+            state_after: classical_value
+            entropy_change: Delta_S
+            information_preserved: I = -Sum(p log p)
+        }
+    }
+
+    entanglement_boundary: {
+        max_distance: 6_hops
+        isolation_enforcement: bell_state_collapse
+        audit_requirement: full_trace
+        correlation_preservation: EPR_compliant
+    }
+}
+</code></pre>
+<h1 id="runtime-execution-model">Runtime Execution Model</h1>
+<h2 id="dual-mode-execution-pipeline">Dual-Mode Execution Pipeline</h2>
+<pre><code>PIPELINE rift_stage_n_execution {
+    MODE classical {
+        stages: tokenize -&gt; parse -&gt; validate -&gt; execute
+        memory: sequential_4096_aligned
+        concurrency: mutex_protected
+        error_handling: exception_based
+    }
+
+    MODE quantum {
+        stages: superpose -&gt; entangle -&gt; evolve -&gt; measure
+        memory: distributed_8qubit_foam
+        concurrency: phase_locked_parallel
+        error_handling: decoherence_recovery
+    }
+
+    MODE hybrid {
+        stages: detect_context -&gt; switch_mode -&gt; process -&gt; reconcile
+        memory: adaptive_alignment
+        concurrency: quantum_classical_barrier
+        error_handling: graceful_degradation
+    }
+
+    performance: {
+        classical_throughput: 10^6 ops/sec
+        quantum_coherence: 1000 x planck_time
+        transition_overhead: &lt; 1us
+    }
+}
+</code></pre>
+<h2 id="context-switching-protocol">Context Switching Protocol</h2>
+<pre><code>PROTOCOL context_switch {
+    classical_to_quantum: {
+        save_classical_state()
+        init_quantum_registers()
+        prepare_superposition()
+        verify_coherence()
+        enable_quantum_operations()
+    }
+
+    quantum_to_classical: {
+        prepare_measurement()
+        collapse_superposition()
+        extract_classical_value()
+        cleanup_quantum_resources()
+        restore_classical_context()
+    }
+
+    switch_overhead: {
+        time_cost: O(n_qubits)
+        memory_cost: O(2^n_qubits)
+        governance_cost: O(audit_depth)
+    }
+}
+</code></pre>
+<h1 id="example-usage-patterns">Example Usage Patterns</h1>
+<h2 id="basic-quantum-token-operations">Basic Quantum Token Operations</h2>
+<pre><code># Initialize quantum token in superposition
+@quantum
+let q_value: QINT = superposition(0.707, 0.707)  # |+&gt; state
+
+# Entangle two quantum tokens
+@quantum
+let q_pair: (QINT, QINT) = entangle(q_value, q_other)
+
+# Conditional collapse based on coherence
+@hybrid
+if coherence(q_value) &lt; PLANCK_THRESHOLD {
+    let classical_result: INT = collapse(q_value)
+    process_classical(classical_result)
+} else {
+    evolve_quantum(q_value, hamiltonian)
+}
+
+# Measurement with basis selection
+@quantum
+let measured: INT = measure(q_value, basis=&quot;X&quot;)
+</code></pre>
+<h2 id="hybrid-computation-pattern">Hybrid Computation Pattern</h2>
+<pre><code>@hybrid_algorithm grover_search {
+    # Classical preprocessing
+    let dataset: INT[] = load_classical_data()
+    let target: INT = define_search_target()
+
+    # Quantum acceleration phase
+    @quantum {
+        let q_register: QINT[] = init_superposition(size=log2(dataset.length))
+
+        repeat sqrt(dataset.length) times {
+            apply_oracle(q_register, target)
+            apply_diffusion(q_register)
+
+            if coherence_degraded(q_register) {
+                refresh_quantum_state(q_register)
+            }
+        }
+
+        let result_index: INT = measure_all(q_register)
+    }
+
+    # Classical verification
+    @classical {
+        verify_result(dataset[result_index], target)
+        return dataset[result_index]
+    }
+}
+</code></pre>
+<h1 id="formal-verification-properties">Formal Verification Properties</h1>
+<h2 id="safety-properties">Safety Properties</h2>
+<pre><code>PROPERTY quantum_safety {
+    # G1: Normalization is always maintained
+    [] (forall q: QINT . |amplitude(q)|^2 = 1.0 +/- epsilon)
+
+    # G2: No-cloning theorem is preserved
+    [] (not exists operation . clone(|psi&gt;) -&gt; |psi&gt;|psi&gt;)
+
+    # G3: Causality is respected
+    [] (forall measurement . timestamp(cause) &lt; timestamp(effect))
+
+    # G4: Measurement irreversibility
+    [] (collapsed(q) -&gt; not quantum(q))
+}
+</code></pre>
+<h2 id="liveness-properties">Liveness Properties</h2>
+<pre><code>PROPERTY quantum_liveness {
+    # L1: Every quantum state eventually decoheres
+    &lt;&gt; (forall q: QINT . coherence(q) &lt; PLANCK_THRESHOLD)
+
+    # L2: Measurements eventually complete
+    (measure_initiated(q) -&gt; &lt;&gt; measure_complete(q))
+
+    # L3: Resources are eventually reclaimed
+    []&lt;&gt; (allocated_qubits = deallocated_qubits)
+
+    # L4: Entanglements eventually resolve
+    &lt;&gt; (forall entangled_pair . separated OR measured)
+}
+</code></pre>
+<h1 id="performance-specifications">Performance Specifications</h1>
+<div class="tcolorbox">
+
+- **Quantum Coherence Time**: $`\geq 1000 \tau_{planck}`$
+
+- **State Preparation**: $`< 10`$ ns per qubit
+
+- **Measurement Latency**: $`< 100`$ ns
+
+- **Context Switch Overhead**: $`< 1 \mu`$s
+
+- **Memory Efficiency**: $`O(n)`$ for $`n`$ qubits
+
+- **Entanglement Depth**: Maximum 6 levels
+
+- **Error Rate**: $`< 10^{-9}`$ per operation
+
+</div>
+
+<h1 id="firmware-integration-guidelines">Firmware Integration Guidelines</h1>
+<h2 id="git-raf-integration-points">Git-RAF Integration Points</h2>
+<pre><code>@firmware_integration {
+    git_raf_hooks: {
+        pre_commit: validate_quantum_governance()
+        post_merge: verify_collapse_consistency()
+        pre_push: audit_quantum_operations()
+    }
+
+    versioning: {
+        quantum_state_snapshot: on_commit
+        collapse_history: immutable_log
+        entanglement_graph: version_tracked
+    }
+
+    deployment: {
+        stage: [0..N+1]
+        firmware_target: quantum_coprocessor
+        validation_level: AEGIS_COMPLIANT
+    }
+}
+</code></pre>
+<h1 id="conclusion-and-future-extensions">Conclusion and Future Extensions</h1>
+<p>Stage-N of the RiftLang Protocol Stack provides a robust foundation for hybrid quantum-classical computation within the AEGIS governance framework. The specification enables:</p>
+<ul>
+<li>
+<p>Seamless quantum-classical transitions</p>
+</li>
+<li>
+<p>Governance-compliant state management</p>
+</li>
+<li>
+<p>Planck-scale temporal constraints</p>
+</li>
+<li>
+<p>Integration with existing AEGIS phases</p>
+</li>
+<li>
+<p>Extensibility for future quantum algorithms</p>
+</li>
+</ul>
+<p>Future stages (N+1 and beyond) will extend this framework to support:</p>
+<ul>
+<li>
+<p>Distributed quantum computation</p>
+</li>
+<li>
+<p>Fault-tolerant quantum error correction</p>
+</li>
+<li>
+<p>Advanced entanglement protocols</p>
+</li>
+<li>
+<p>Quantum machine learning integration</p>
+</li>
+</ul>
+<h1 id="glossary-of-terms">Glossary of Terms</h1>
+<p>QINT<br>
+Quantum Integer - A quantum register holding superposition states</p>
+<p>Planck Time<br>
+$<code>\tau_{planck} = 5.39 \times 10^{-44}</code>$ seconds</p>
+<p>Coherence<br>
+Quantum state phase relationship preservation</p>
+<p>Collapse<br>
+Quantum to classical state transition</p>
+<p>AEGIS<br>
+Automated Enterprise Governance Intelligence System</p>
+<h1 id="references">References</h1>
+<ol>
+<li>
+<p>AEGIS Project Technical Specification v2.0</p>
+</li>
+<li>
+<p>RiftLang Compiler Documentation</p>
+</li>
+<li>
+<p>Quantum Computing Governance Framework</p>
+</li>
+<li>
+<p>Git-RAF Firmware Integration Manual</p>
+</li>
+<li>
+<p>OBINexus Toolchain Architecture Guide</p>
+</li>
+</ol>
+  </main>
+  <footer>
+    <p>Generated artifact: <code>archive/overleaf-projects-75-items-copy-stage-n-hybrid-quantum-classical-token-execution-layer</code></p>
+  </footer>
+</body>
+</html>

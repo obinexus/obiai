@@ -1,0 +1,1412 @@
+---
+title: "dimensional game theory for ai"
+kind: "archive"
+source_archive: "dimensional-game-theory-for-ai"
+source_folder: "dimensional-game-theory-for-ai"
+---
+
+# dimensional game theory for ai
+
+Source folder: `dimensional-game-theory-for-ai`
+
+## Extracted Files
+
+- `dgt_variadic_M1_scalar_promotion.psc.txt`
+- `dgt_variadic_M2_variadic_game_framework.psc.txt`
+- `dgt_variadic_M3_strategic_balance_reduction.psc.txt`
+- `dgt_variadic_M4_activation_mapping_integration.psc.txt`
+- `dgt_variadic_M5_conclusion_corpus_synthesis.psc.txt`
+
+## dgt variadic M1 scalar promotion.psc
+
+## dgt variadic M1 scalar promotion
+
+// ============================================================
+// FILE: dgt_variadic_M1_scalar_promotion.psc.txt
+// MODULE 1 OF 5 — Scalar Promotion & Variadic Game Foundation
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   May 24, 2026
+// ============================================================
+
+// ── CORPUS POSITION (PDF 10 of 10) ───────────────────────────
+//
+// This paper is the most recent in the OBINexus corpus and
+// completes the Dimensional Game Theory sub-series:
+//
+//   PDF 8  — Dimensional Game Theory (formal game definitions,
+//             Nash equilibrium, Theorem 1 perfect game outcome)
+//   PDF 9  — DGT + RAF Cryptographic Integration (stress zones,
+//             AuraSeal, Theorem 2 stress-adaptive strategy)
+//   PDF 10 — DGT Variadic Strategy (THIS) — scalar promotion,
+//             contextual activation, computational reduction
+//
+// This paper extends PDF 8's Definition 5 (Strategic Dimension)
+// and PDF 9's variadic input mapping (eq. 11: φ: {x₁,...,xₙ}→D_act)
+// with formal scalar promotion semantics and contextual activation
+// thresholds.
+//
+// Cross-reference map:
+//   Definition 1 (Scalar Promotion) → OBIAI Flash Layer (eq. 3.2):
+//     scalars in working memory become full dimensional embeddings
+//   Definition 2 (Contextual Activation) → DAG Ephemeris vexameneria:
+//     δ(xⱼ, Dᵢ) = relevance score maps to EffectivenessScore(slot, dim)
+//   Theorem (Computational Reduction) → AEGIS-PROOF-3.2 complexity:
+//     |D_act| ≤ Θ parallels O(K·N·log N) tractability bound
+
+DEFINE VariadicDGTContext AS:
+    paper_title   := "Dimensional Game Theory: Variadic Strategy in Multi-Domain Contexts"
+    date          := "May 24, 2026"
+    builds_on     := ["PDF 8: DGT Formal", "PDF 9: DGT-RAF"]
+    key_contrib   := [
+        "Scalar-to-dimension promotion semantics",
+        "Contextual activation thresholds",
+        "Computational reduction theorem",
+        "Variadic φ mapping formalization"
+    ]
+END DEFINE
+
+
+// ── SECTION 1: INTRODUCTION ───────────────────────────────────
+
+// Problem: Traditional game theory fails when inputs are:
+//   (a) DYNAMIC: the input space changes during play
+//   (b) SPARSE:  most inputs are irrelevant at any given moment
+//   (c) CONTEXTUALLY UNLOCKED: a dimension becomes active only
+//       when certain preconditions are satisfied
+//
+// Solution: dimension-configured framework — the structure of
+// the game itself shifts based on which dimensions are active.
+
+DEFINE FailureModeOfTraditionalGameTheory AS:
+    DYNAMIC_INPUTS   := "Input space shifts during play — static A fails"
+    SPARSE_INPUTS    := "Most variables irrelevant — treating all equally wastes compute"
+    CONTEXTUAL_UNLOCK := "Dimensions activate conditionally — not a priori known"
+END DEFINE
+
+DEFINE ApplicationDomains AS:
+    // Domains where variadic DGT applies (from §1):
+    AI_COORDINATION  := "Multi-agent AI systems with evolving shared state"
+    ADAPTIVE_DEFENSE := "Cybersecurity with context-specific threat surfaces"
+    MARKET_REACTION  := "Trading systems where relevant signals shift by regime"
+END DEFINE
+
+
+// ── SECTION 2: FROM SCALARS TO DIMENSIONS ────────────────────
+
+// Motivating example (§2):
+//   Voice in a tactical simulation starts as a binary toggle
+//   (present/absent — a scalar). Once active, it contributes a
+//   rich vector: emotion, intent, deception → a full dimension.
+//
+// This is the SCALAR PROMOTION phenomenon.
+
+DEFINE ScalarInput AS:
+    // An input that begins as a scalar (single value)
+    // but may be promoted to a full strategic dimension.
+    id          : InputID
+    raw_value   : REAL            // scalar representation
+    embedding   : Vector          // promoted vector (null if not yet promoted)
+    is_promoted : BOOL
+
+    PROCEDURE CurrentRepresentation() -> REAL OR Vector:
+        IF is_promoted:
+            RETURN embedding
+        ELSE:
+            RETURN raw_value
+        END IF
+    END PROCEDURE
+END DEFINE
+
+
+// DEFINITION 1 (Scalar Promotion):
+//   An input x is promoted to dimension D if:
+//
+//     ∃f : x → v⃗_D ∈ ℝⁿ  such that  ‖v⃗_D‖ > ε
+//
+//   where ε is a threshold defining significance in the game context.
+//
+//   Interpretation:
+//     - f is the promotion function (context-specific)
+//     - v⃗_D is the resulting dimensional vector
+//     - ‖v⃗_D‖ > ε: the promoted vector must be non-trivial
+//       (have sufficient magnitude to matter strategically)
+
+PROCEDURE ScalarPromotion(x: ScalarInput, D: StrategicDimension,
+                           f: PromotionFunction,
+                           epsilon: REAL) -> PromotionResult:
+    // Attempt to promote scalar x to dimension D via function f.
+    //
+    // Returns: PromotionResult with success flag and v⃗_D if promoted.
+
+    // Apply promotion function: f(x) → v⃗_D ∈ ℝⁿ
+    v_D := f.Apply(x.raw_value, D)
+
+    // Check significance threshold: ‖v⃗_D‖ > ε
+    norm_v := NORM(v_D)
+    IF norm_v > epsilon:
+        x.embedding   := v_D
+        x.is_promoted := TRUE
+        EMIT INFO "Scalar promoted | input=" + x.id +
+                  " → dim=" + D.name + " | ‖v⃗_D‖=" + norm_v
+        RETURN PromotionResult(success=TRUE, vector=v_D, norm=norm_v)
+    ELSE:
+        EMIT LOG "Scalar NOT promoted | input=" + x.id +
+                 " | ‖v⃗_D‖=" + norm_v + " ≤ ε=" + epsilon
+        RETURN PromotionResult(success=FALSE, vector=NULL, norm=norm_v)
+    END IF
+END PROCEDURE
+
+
+PROCEDURE VerifyScalarPromotionDefinition(x: ScalarInput,
+                                           D: StrategicDimension,
+                                           f: PromotionFunction,
+                                           epsilon: REAL) -> BOOL:
+    // Formally verify Definition 1 conditions hold after promotion attempt.
+    result := ScalarPromotion(x, D, f, epsilon)
+
+    IF result.success:
+        // Must have ∃f such that ‖v⃗_D‖ > ε
+        ASSERT result.norm > epsilon
+        ASSERT result.vector != NULL
+        ASSERT LENGTH(result.vector) > 0   // v⃗_D ∈ ℝⁿ for n > 0
+        EMIT INFO "Definition 1 satisfied: ‖v⃗_D‖=" + result.norm + " > ε=" + epsilon
+        RETURN TRUE
+    END IF
+    RETURN FALSE
+END PROCEDURE
+
+
+// ── PROMOTION FUNCTION CATALOGUE ─────────────────────────────
+
+// Domain-specific promotion functions f: scalar → vector
+
+PROCEDURE VoiceTacticalPromotion(toggle: REAL,
+                                   audio_features: AudioFeatureVector) -> Vector:
+    // Voice presence (0/1 scalar) → [emotion, intent, deception] vector
+    // Only meaningful when toggle > 0 (voice is active)
+    IF toggle <= 0:
+        RETURN ZERO_VECTOR(3)
+    END IF
+    emotion   := audio_features.EmotionScore()
+    intent    := audio_features.IntentScore()
+    deception := audio_features.DeceptionScore()
+    RETURN Vector([emotion, intent, deception])
+END PROCEDURE
+
+
+PROCEDURE MarketSignalPromotion(price: REAL,
+                                  market_history: PriceHistory) -> Vector:
+    // Single price value → [momentum, mean_reversion, volatility] vector
+    momentum      := ComputeMomentum(price, market_history, window=20)
+    mean_rev      := ComputeMeanReversion(price, market_history, window=50)
+    volatility    := ComputeVolatility(price, market_history, window=10)
+    RETURN Vector([momentum, mean_rev, volatility])
+END PROCEDURE
+
+
+PROCEDURE StressScalarPromotion(stress_level: REAL) -> Vector:
+    // Stress scalar (from RAF stress formula) → dimensional vector
+    // Maps to: [entropy_component, complexity_component, violation_component]
+    // This bridges PDF 9's stress formula back into DGT dimensional space.
+    e := DEFAULT_ALPHA * stress_level / 12.0
+    c := DEFAULT_BETA  * stress_level / 12.0
+    v := DEFAULT_GAMMA * stress_level / 12.0
+    RETURN Vector([e, c, v])
+END PROCEDURE
+
+
+// ── SIGNIFICANCE THRESHOLD MANAGEMENT ────────────────────────
+
+DEFINE PromotionThreshold AS:
+    // ε: domain-specific threshold for scalar promotion significance
+
+    PROCEDURE DefaultEpsilon() -> REAL:
+        RETURN 0.1    // 10% of unit vector norm — general default
+    END PROCEDURE
+
+    PROCEDURE GameContextEpsilon(context: GameContext) -> REAL:
+        // Scale threshold by current stress level:
+        //   Higher stress → lower ε (more inputs get promoted — need more info)
+        //   Green zone   → higher ε (only strongly relevant inputs promoted)
+        stress_scale := context.stress_level / 12.0
+        base_epsilon := 0.1
+        RETURN base_epsilon * (1.0 - stress_scale * 0.5)
+    END PROCEDURE
+END DEFINE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: dgt_variadic_M2_variadic_game_framework.psc.txt
+// ============================================================
+
+## dgt variadic M2 variadic game framework.psc
+
+## dgt variadic M2 variadic game framework
+
+// ============================================================
+// FILE: dgt_variadic_M2_variadic_game_framework.psc.txt
+// MODULE 2 OF 5 — Variadic Game Framework & Contextual Activation
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3: VARIADIC GAME FRAMEWORK
+// ------------------------------------------------------------
+
+// THE EXTENDED GAME TUPLE:
+//   G = (N, A, u, D)
+//
+//   N  — set of players (as in classical game theory, PDF 8 §2)
+//   A  — action space (VARIADIC: not fixed in number)
+//   u  — utility function
+//   D  — set of ACTIVATED strategic dimensions (conditionally active)
+//
+// Key difference from classical G = (N, A, u):
+//   The addition of D makes the game structure itself dynamic.
+//   D changes as inputs arrive and contextual triggers fire.
+
+
+// ── VARIADIC GAME STRUCTURE ───────────────────────────────────
+
+DEFINE VariadicGame AS STRUCTURE:
+    N   : Set[PlayerID]             // finite player set
+    A   : VariadicActionSpace       // A — variadic: |A| not fixed
+    u   : Map[PlayerID → UtilityFunction]
+    D   : ActiveDimensionSet        // conditionally activated dimensions
+
+    INVARIANT: LENGTH(u) == LENGTH(N)
+    // NOTE: unlike classical game, no invariant on |A| — variadic
+
+    PROCEDURE NumPlayers() -> INT:
+        RETURN LENGTH(N)
+    END PROCEDURE
+
+    PROCEDURE ActiveDimensionCount() -> INT:
+        RETURN D.ActiveCount()
+    END PROCEDURE
+
+    PROCEDURE Utility(player_i: PlayerID, action_profile: ActionProfile) -> REAL:
+        ASSERT player_i IN N
+        RETURN u[player_i].Evaluate(action_profile, self.D)
+    END PROCEDURE
+END DEFINE
+
+
+DEFINE VariadicActionSpace AS:
+    // A: the action space for the variadic game.
+    // Unlike classical A₁ × ... × Aₙ (fixed), here actions may
+    // be proposed at runtime and gated by active dimensions.
+
+    base_actions   : Set[Action]         // always-available actions
+    unlocked_actions : Map[DimensionID → Set[Action]]  // D-gated actions
+
+    PROCEDURE AvailableActions(D_active: ActiveDimensionSet) -> Set[Action]:
+        // Union of base actions + all actions unlocked by active dimensions
+        available := COPY(base_actions)
+        FOR EACH dim_id IN D_active.ActiveIDs():
+            IF dim_id IN unlocked_actions:
+                available.ADD_ALL(unlocked_actions[dim_id])
+            END IF
+        END FOR
+        RETURN available
+    END PROCEDURE
+
+    PROCEDURE IsVariadic() -> BOOL:
+        // True when at least one dimension unlocks additional actions
+        RETURN LENGTH(unlocked_actions) > 0
+    END PROCEDURE
+END DEFINE
+
+
+DEFINE ActiveDimensionSet AS:
+    // D: the set of currently active strategic dimensions.
+    // Contents change dynamically as inputs arrive.
+
+    all_dimensions : List[StrategicDimension]    // full universe of dimensions
+    active_flags   : Map[DimensionID → BOOL]     // which are currently active
+
+    PROCEDURE IsActive(dim_id: DimensionID) -> BOOL:
+        IF dim_id IN active_flags:
+            RETURN active_flags[dim_id]
+        END IF
+        RETURN FALSE
+    END PROCEDURE
+
+    PROCEDURE Activate(dim_id: DimensionID) -> VOID:
+        active_flags[dim_id] := TRUE
+        EMIT INFO "Dimension activated: " + dim_id
+    END PROCEDURE
+
+    PROCEDURE Deactivate(dim_id: DimensionID) -> VOID:
+        active_flags[dim_id] := FALSE
+        EMIT INFO "Dimension deactivated: " + dim_id
+    END PROCEDURE
+
+    PROCEDURE ActiveList() -> List[StrategicDimension]:
+        RETURN [d FOR d IN all_dimensions IF IsActive(d.id)]
+    END PROCEDURE
+
+    PROCEDURE ActiveCount() -> INT:
+        RETURN LENGTH(ActiveList())
+    END PROCEDURE
+
+    PROCEDURE ActiveIDs() -> List[DimensionID]:
+        RETURN [d.id FOR d IN ActiveList()]
+    END PROCEDURE
+END DEFINE
+
+
+// ── DEFINITION 2: CONTEXTUAL ACTIVATION ──────────────────────
+
+// DEFINITION 2 (Contextual Activation):
+//   Dimension Dᵢ is considered ACTIVE if:
+//
+//     Σⱼ δ(xⱼ, Dᵢ) ≥ τ
+//
+//   where:
+//     δ(xⱼ, Dᵢ) — relevance score of input xⱼ under dimension Dᵢ
+//     τ          — domain-defined activation threshold
+//     m          — number of inputs xⱼ in the current observation window
+
+PROCEDURE ContextualActivation(inputs: List[ScalarInput],
+                                 D_i: StrategicDimension,
+                                 delta_fn: RelevanceFunction,
+                                 tau: REAL) -> BOOL:
+    // Evaluate: Σⱼ δ(xⱼ, Dᵢ) ≥ τ
+
+    IF tau < 0:
+        EMIT ERROR "Activation threshold τ must be ≥ 0"
+        RETURN FALSE
+    END IF
+
+    relevance_sum := 0.0
+    FOR EACH x_j IN inputs:
+        delta_j := delta_fn.Evaluate(x_j, D_i)
+        // δ must be non-negative (relevance score)
+        ASSERT delta_j >= 0.0
+        relevance_sum := relevance_sum + delta_j
+    END FOR
+
+    is_active := (relevance_sum >= tau)
+
+    EMIT LOG "Contextual activation | dim=" + D_i.name +
+             " | Σδ=" + relevance_sum +
+             " | τ=" + tau +
+             " | active=" + is_active
+    RETURN is_active
+END PROCEDURE
+
+
+PROCEDURE RelevanceScore(x: ScalarInput, D: StrategicDimension) -> REAL:
+    // δ(xⱼ, Dᵢ): measures how relevant input x is to dimension D.
+    //
+    // Cross-reference: EffectivenessScore (PDF 8 §3 Definition 6)
+    //   Both measure alignment between an input/strategy and a dimension.
+    //   δ operates on raw scalar inputs; EffectivenessScore on strategies.
+    //
+    // Implementation: project x's feature vector onto D's basis.
+
+    IF x.is_promoted:
+        // Use promoted vector
+        projection := DOT(x.embedding, D.basis_vector)
+        RETURN ABS(projection) / MAX(NORM(x.embedding) * NORM(D.basis_vector), 1e-12)
+    ELSE:
+        // Scalar: treat as magnitude-weighted projection
+        RETURN ABS(x.raw_value) * NORM(D.basis_vector) /
+               MAX(NORM(D.basis_vector), 1e-12)
+    END IF
+END PROCEDURE
+
+
+// ── DIMENSION UPDATE LOOP ─────────────────────────────────────
+
+PROCEDURE UpdateActiveDimensions(G: VariadicGame,
+                                   new_inputs: List[ScalarInput],
+                                   tau_map: Map[DimensionID → REAL]) -> VOID:
+    // For each dimension, re-evaluate contextual activation.
+    // Updates G.D (the active dimension set) in-place.
+
+    FOR EACH dim IN G.D.all_dimensions:
+        tau := IF dim.id IN tau_map THEN tau_map[dim.id] ELSE DEFAULT_TAU
+
+        // Definition 2: Σⱼ δ(xⱼ, Dᵢ) ≥ τ
+        is_now_active := ContextualActivation(
+            inputs   = new_inputs,
+            D_i      = dim,
+            delta_fn = RelevanceFunction.Default(),
+            tau      = tau
+        )
+
+        IF is_now_active AND NOT G.D.IsActive(dim.id):
+            G.D.Activate(dim.id)
+        ELSE IF NOT is_now_active AND G.D.IsActive(dim.id):
+            G.D.Deactivate(dim.id)
+        END IF
+    END FOR
+END PROCEDURE
+
+CONSTANT DEFAULT_TAU := 0.3   // default activation threshold τ
+
+
+// ── VARIADIC UTILITY FUNCTION ─────────────────────────────────
+
+PROCEDURE VariadicUtility(player_i: PlayerID,
+                            action_profile: ActionProfile,
+                            D_active: ActiveDimensionSet,
+                            base_utility: UtilityFunction) -> REAL:
+    // Utility in a variadic game depends on the active dimension set D.
+    // Active dimensions unlock additional utility components.
+
+    base_u := base_utility.Evaluate(player_i, action_profile)
+
+    dimensional_bonus := 0.0
+    FOR EACH dim IN D_active.ActiveList():
+        dim_contribution := dim.Evaluate(
+            Strategy.fromActionProfile(action_profile, player_i)
+        )
+        dimensional_bonus := dimensional_bonus + dim_contribution
+    END FOR
+
+    total_u := base_u + dimensional_bonus
+    RETURN total_u
+END PROCEDURE
+
+
+// ── VARIADIC GAME CONSTRUCTION ────────────────────────────────
+
+PROCEDURE BuildVariadicGame(player_ids: List[PlayerID],
+                              base_action_set: Set[Action],
+                              dimension_unlocked_actions: Map[DimensionID → Set[Action]],
+                              utility_fns: List[UtilityFunction],
+                              all_dimensions: List[StrategicDimension]) -> VariadicGame:
+
+    A := VariadicActionSpace(
+        base_actions      = base_action_set,
+        unlocked_actions  = dimension_unlocked_actions
+    )
+
+    D := ActiveDimensionSet(
+        all_dimensions = all_dimensions,
+        active_flags   = {}   // all inactive initially
+    )
+
+    G := VariadicGame(
+        N = SET(player_ids),
+        A = A,
+        u = MAP(player_ids, utility_fns),
+        D = D
+    )
+    RETURN G
+END PROCEDURE
+
+
+// ── CONNECTION TO OBIAI FILTER-FLASH ─────────────────────────
+
+// The Filter layer (PDF 7 eq. 3.1) can be read as a variadic game:
+//   Filter(x) = Σᵢ wᵢ · ϕᵢ(x) · verify(x)
+//   → ϕᵢ = symbolic inference functions = dimension-specific utility components
+//   → verify(x) = epistemic validity = contextual activation gate
+//   → wᵢ = slot weights = dimension relevance scores δ
+//
+// The Flash layer (eq. 3.2) captures the pre-promotion scalar state:
+//   Flash(x, t) = ephemeral(x) · e^(−λt)
+//   → scalar x has not yet been promoted (‖v⃗_D‖ ≤ ε)
+//   → decays until context triggers promotion
+
+PROCEDURE FilterFlashAsMappingToVariadicGame(
+    x: ScalarInput, t: REAL, lambda: REAL,
+    D_available: List[StrategicDimension],
+    epsilon: REAL, tau: REAL) -> EphemerisMode:
+    // Determine if x should be processed by Filter (promoted) or Flash (scalar).
+
+    // Try promotion across all available dimensions
+    best_norm := 0.0
+    FOR EACH dim IN D_available:
+        f_generic := PromotionFunction.Generic()
+        result    := ScalarPromotion(x, dim, f_generic, epsilon)
+        IF result.success AND result.norm > best_norm:
+            best_norm := result.norm
+        END IF
+    END FOR
+
+    // Flash value at time t (decayed scalar)
+    flash_value := EphemeralRepresentation(x) * EXP(-lambda * t)
+
+    // If promoted AND contextually activated: Filter
+    // If only scalar remains: Flash
+    IF best_norm > epsilon AND flash_value > 0.5:
+        RETURN FILTER
+    ELSE:
+        RETURN REFLASH
+    END IF
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: dgt_variadic_M3_strategic_balance_reduction.psc.txt
+// ============================================================
+
+## dgt variadic M3 strategic balance reduction.psc
+
+## dgt variadic M3 strategic balance reduction
+
+// ============================================================
+// FILE: dgt_variadic_M3_strategic_balance_reduction.psc.txt
+// MODULE 3 OF 5 — Strategic Balance, Strategic Vector,
+//                 Computational Reduction Theorem
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4: STRATEGIC BALANCE IN HIGH-DIMENSIONAL SYSTEMS
+// ------------------------------------------------------------
+
+// Core insight: adding parameters naively is computationally
+// infeasible. The solution is to define strategy as a function
+// OVER THE ACTIVE DIMENSIONAL SPACE only — not over all
+// possible dimensions.
+//
+// This is the computational feasibility principle of variadic DGT.
+
+
+// ── DEFINITION 3: STRATEGIC VECTOR ───────────────────────────
+
+// DEFINITION 3 (Strategic Vector):
+//   Let Sᵢ be a strategy for player i defined over active dimensions D_act.
+//   Then:
+//
+//     Sᵢ = s⃗ = [s_{D₁}, s_{D₂}, ..., s_{Dₖ}]  where Dⱼ ∈ D_act
+//
+//   The strategy vector has exactly k components, one per active dimension.
+//   Components outside D_act are ZERO (inactive dimensions do not contribute).
+
+DEFINE StrategicVector AS:
+    player_id  : PlayerID
+    components : Map[DimensionID → REAL]   // s_{Dⱼ} per active dimension
+    D_act      : List[StrategicDimension]  // basis — only active dims
+
+    INVARIANT: LENGTH(components) == LENGTH(D_act)
+    INVARIANT: ALL(components.keys IN [d.id FOR d IN D_act])
+
+    PROCEDURE GetComponent(dim_id: DimensionID) -> REAL:
+        IF dim_id IN components:
+            RETURN components[dim_id]
+        END IF
+        RETURN 0.0    // inactive dimension → zero contribution
+    END PROCEDURE
+
+    PROCEDURE Dimension() -> INT:
+        RETURN LENGTH(D_act)   // k — number of active dimensions
+    END PROCEDURE
+
+    PROCEDURE AsVector() -> Vector:
+        // Return ordered vector [s_{D₁}, ..., s_{Dₖ}]
+        RETURN Vector([components[d.id] FOR d IN D_act])
+    END PROCEDURE
+
+    PROCEDURE Norm() -> REAL:
+        RETURN NORM(AsVector())
+    END PROCEDURE
+END DEFINE
+
+
+PROCEDURE BuildStrategicVector(player_i: PlayerID,
+                                D_act: List[StrategicDimension],
+                                strategy: Strategy) -> StrategicVector:
+    // Construct the strategic vector s⃗ from a base strategy
+    // by projecting onto each active dimension.
+
+    components := {}
+    FOR EACH dim_j IN D_act:
+        // s_{Dⱼ}: effectiveness of this strategy along dimension Dⱼ
+        s_Dj := EffectivenessScore(strategy, dim_j)
+        components[dim_j.id] := s_Dj
+    END FOR
+
+    sv := StrategicVector(
+        player_id  = player_i,
+        components = components,
+        D_act      = D_act
+    )
+    RETURN sv
+END PROCEDURE
+
+
+PROCEDURE ValidateStrategicVector(sv: StrategicVector) -> BOOL:
+    // Verify all Definition 3 invariants hold.
+
+    // (1) One component per active dimension
+    IF LENGTH(sv.components) != LENGTH(sv.D_act):
+        EMIT ERROR "StrategicVector: component count ≠ D_act size"
+        RETURN FALSE
+    END IF
+
+    // (2) All component keys correspond to active dimensions
+    active_ids := SET([d.id FOR d IN sv.D_act])
+    FOR EACH dim_id IN sv.components.keys:
+        IF dim_id NOT IN active_ids:
+            EMIT ERROR "StrategicVector: component " + dim_id +
+                       " not in D_act"
+            RETURN FALSE
+        END IF
+    END FOR
+
+    EMIT INFO "StrategicVector validated | k=" + sv.Dimension() +
+              " | ‖s⃗‖=" + sv.Norm()
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── STRATEGIC VECTOR OPERATIONS ──────────────────────────────
+
+PROCEDURE StrategicVectorDotProduct(sv1: StrategicVector,
+                                     sv2: StrategicVector) -> REAL:
+    // s⃗₁ · s⃗₂ over shared active dimensions.
+    // Dimensions not in both vectors contribute 0.
+
+    shared_dims := INTERSECTION([d.id FOR d IN sv1.D_act],
+                                  [d.id FOR d IN sv2.D_act])
+    dot := 0.0
+    FOR EACH dim_id IN shared_dims:
+        dot := dot + sv1.GetComponent(dim_id) * sv2.GetComponent(dim_id)
+    END FOR
+    RETURN dot
+END PROCEDURE
+
+
+PROCEDURE StrategicVectorCosineSimilarity(sv1: StrategicVector,
+                                           sv2: StrategicVector) -> REAL:
+    // Strategic alignment between two players' vectors.
+    // cos(s⃗₁, s⃗₂) = (s⃗₁ · s⃗₂) / (‖s⃗₁‖ · ‖s⃗₂‖)
+    dot_val := StrategicVectorDotProduct(sv1, sv2)
+    n1      := sv1.Norm()
+    n2      := sv2.Norm()
+    IF n1 < 1e-12 OR n2 < 1e-12:
+        RETURN 0.0   // degenerate zero vectors
+    END IF
+    RETURN dot_val / (n1 * n2)
+END PROCEDURE
+
+
+PROCEDURE StrategicVectorDistance(sv1: StrategicVector,
+                                   sv2: StrategicVector) -> REAL:
+    // Euclidean distance between two strategic vectors in D_act space.
+    // Used for detecting strategic imbalance (Corollary 1, PDF 8).
+
+    all_dims := UNION([d.id FOR d IN sv1.D_act],
+                       [d.id FOR d IN sv2.D_act])
+    dist_sq := 0.0
+    FOR EACH dim_id IN all_dims:
+        diff := sv1.GetComponent(dim_id) - sv2.GetComponent(dim_id)
+        dist_sq := dist_sq + diff ^ 2
+    END FOR
+    RETURN SQRT(dist_sq)
+END PROCEDURE
+
+
+// ── COMPUTATIONAL REDUCTION THEOREM ──────────────────────────
+
+// THEOREM (Computational Reduction):
+//   The game is solvable within tractable bounds IFF:
+//
+//     |D_act| ≤ Θ
+//
+//   where Θ is the system-defined computability threshold.
+//
+// Rationale:
+//   - With |D_act| dimensions, strategy space has |A|^|D_act| elements
+//   - For exponential action spaces, this blows up unless |D_act| is bounded
+//   - Θ represents the system's computational budget for strategy optimization
+//   - Cross-reference PDF 9 §6.2 (same bound: |D_act| ≤ Θ, eq. 12)
+//   - Cross-reference PDF 6 §7.1: O(K·N·log N) tractability per pair
+
+CONSTANT THETA_COMPUTABILITY := 8   // Θ — default computability threshold
+                                     // (same as THETA_MAX_DIMENSIONS in PDF 9)
+
+
+PROCEDURE IsGameTractable(G: VariadicGame) -> BOOL:
+    // Theorem: game is tractable IFF |D_act| ≤ Θ
+    k := G.D.ActiveCount()
+    IF k <= THETA_COMPUTABILITY:
+        EMIT INFO "Game TRACTABLE | |D_act|=" + k + " ≤ Θ=" + THETA_COMPUTABILITY
+        RETURN TRUE
+    ELSE:
+        EMIT WARNING "Game INTRACTABLE | |D_act|=" + k + " > Θ=" + THETA_COMPUTABILITY
+        RETURN FALSE
+    END IF
+END PROCEDURE
+
+
+PROCEDURE EstimateSearchSpaceSize(G: VariadicGame) -> INT:
+    // Estimate strategy search space given active dimensions.
+    // |A|^|D_act| — exponential in number of active dimensions.
+    k          := G.D.ActiveCount()
+    actions    := LENGTH(G.A.AvailableActions(G.D))
+    RETURN actions ^ k
+END PROCEDURE
+
+
+PROCEDURE EnforceComputabilityBound(G: VariadicGame,
+                                     theta: INT) -> VariadicGame:
+    // If |D_act| > Θ, deactivate lowest-relevance dimensions.
+    // Returns G with at most Θ active dimensions.
+
+    WHILE G.D.ActiveCount() > theta:
+        // Find least relevant currently active dimension
+        least_relevant := FindLeastRelevantActiveDimension(G)
+        G.D.Deactivate(least_relevant.id)
+        EMIT INFO "Deactivated dim=" + least_relevant.name +
+                  " to enforce |D_act| ≤ Θ=" + theta
+    END WHILE
+
+    ASSERT G.D.ActiveCount() <= theta
+    RETURN G
+END PROCEDURE
+
+
+PROCEDURE FindLeastRelevantActiveDimension(G: VariadicGame) -> StrategicDimension:
+    // Among active dimensions, find the one with lowest aggregate relevance.
+    // Relevance is measured by mean activation score across recent inputs.
+
+    active_dims := G.D.ActiveList()
+    IF LENGTH(active_dims) == 0:
+        RETURN NULL
+    END IF
+
+    min_relevance := POSITIVE_INFINITY
+    least_relevant := active_dims[0]
+
+    FOR EACH dim IN active_dims:
+        mean_relevance := G.ComputeMeanRelevance(dim)
+        IF mean_relevance < min_relevance:
+            min_relevance := mean_relevance
+            least_relevant := dim
+        END IF
+    END FOR
+
+    RETURN least_relevant
+END PROCEDURE
+
+
+// ── THEOREM VERIFICATION ──────────────────────────────────────
+
+PROCEDURE VerifyComputationalReductionTheorem(G: VariadicGame,
+                                               theta: INT) -> TheoremVerification:
+
+    k := G.D.ActiveCount()
+
+    // Tractability condition
+    tractable := (k <= theta)
+
+    // Search space estimate
+    search_space := EstimateSearchSpaceSize(G)
+
+    // If not tractable, compute reduced version
+    reduced_G    := NULL
+    reduced_size := NULL
+    IF NOT tractable:
+        reduced_G    := EnforceComputabilityBound(COPY(G), theta)
+        reduced_size := EstimateSearchSpaceSize(reduced_G)
+        EMIT INFO "Reduced search space: " + search_space + " → " + reduced_size
+    END IF
+
+    verification := TheoremVerification(
+        theorem      = "Computational Reduction",
+        k_active     = k,
+        theta        = theta,
+        tractable    = tractable,
+        search_space = search_space,
+        reduced_size = reduced_size
+    )
+
+    IF tractable:
+        EMIT INFO "THEOREM VERIFIED: |D_act|=" + k + " ≤ Θ=" + theta +
+                  " | search_space=" + search_space
+    ELSE:
+        EMIT WARNING "THEOREM: game requires dimension reduction | " +
+                     "|D_act|=" + k + " > Θ=" + theta
+    END IF
+
+    RETURN verification
+END PROCEDURE
+
+
+// ── STRATEGIC MINIMUM COMPUTATION ────────────────────────────
+
+PROCEDURE ComputeStrategicMinimum(G: VariadicGame,
+                                   player_i: PlayerID) -> StrategicVector:
+    // Find the strategy that minimizes cost (maximizes utility) for player i
+    // within the tractable dimensional subspace.
+
+    // Enforce computability bound first
+    G := EnforceComputabilityBound(G, THETA_COMPUTABILITY)
+
+    D_act      := G.D.ActiveList()
+    A_current  := G.A.AvailableActions(G.D)
+
+    best_sv    := NULL
+    best_util  := NEGATIVE_INFINITY
+
+    FOR EACH action IN A_current:
+        strategy := Strategy.fromAction(action)
+        sv       := BuildStrategicVector(player_i, D_act, strategy)
+
+        // Compute utility under current D_act
+        profile := ActionProfile.fromStrategy(player_i, strategy, G.N)
+        util    := G.Utility(player_i, profile)
+
+        IF util > best_util:
+            best_util := util
+            best_sv   := sv
+        END IF
+    END FOR
+
+    EMIT INFO "Strategic minimum found for player " + player_i +
+              " | utility=" + best_util
+    RETURN best_sv
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: dgt_variadic_M4_activation_mapping_integration.psc.txt
+// ============================================================
+
+## dgt variadic M4 activation mapping integration.psc
+
+## dgt variadic M4 activation mapping integration
+
+// ============================================================
+// FILE: dgt_variadic_M4_activation_mapping_integration.psc.txt
+// MODULE 4 OF 5 — Dimensional Activation Mapping, Domain
+//                 Instantiations & Cross-Paper Integration
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 5: DIMENSIONAL ACTIVATION MAPPING
+// ------------------------------------------------------------
+
+// THE φ MAPPING:
+//   φ : {x₁, x₂, ..., xₙ} → D_act   (eq. 4)
+//
+// This function identifies which scalar or vector inputs
+// activate dimension-specific strategies.
+//
+// Role: FILTER (prevent overload) + CLASSIFY (prevent misclassification)
+//
+// Cross-reference evolution:
+//   PDF 8  §4.1 Algorithm 1: DimensionIdentification via PCA
+//   PDF 9  §6.1 eq.11: φ defined with |D_act| ≤ Θ constraint
+//   PDF 10 §5:  φ formalized with contextual activation conditions
+//   (This paper adds the contextual gate: Definition 2 must pass)
+
+
+// ── THE φ MAPPING (FORMAL IMPLEMENTATION) ────────────────────
+
+PROCEDURE DimensionalActivationMapping(inputs: List[ScalarInput],
+                                        D_available: DimensionSet,
+                                        promotion_fns: Map[DimensionID → PromotionFunction],
+                                        tau_map: Map[DimensionID → REAL],
+                                        epsilon: REAL,
+                                        theta: INT) -> List[StrategicDimension]:
+    // φ: {x₁, ..., xₙ} → D_act
+    //
+    // Steps:
+    //   1. Attempt scalar promotion for each (input, dimension) pair
+    //   2. Apply contextual activation (Definition 2) to filter
+    //   3. Enforce computability bound |D_act| ≤ Θ
+
+    D_candidates := []
+
+    // Step 1 + 2: For each dimension, check if inputs activate it
+    FOR EACH dim IN D_available.dimensions:
+        tau := IF dim.id IN tau_map THEN tau_map[dim.id] ELSE DEFAULT_TAU
+        f   := IF dim.id IN promotion_fns THEN promotion_fns[dim.id]
+               ELSE PromotionFunction.Default(dim)
+
+        // Attempt promotion of all inputs to this dimension
+        promoted_inputs := []
+        FOR EACH x_i IN inputs:
+            result := ScalarPromotion(x_i, dim, f, epsilon)
+            IF result.success:
+                promoted_inputs.APPEND(x_i)
+            END IF
+        END FOR
+
+        // Contextual activation (Definition 2): Σⱼ δ(xⱼ, Dᵢ) ≥ τ
+        // Use all inputs (not just promoted) for activation sum
+        is_active := ContextualActivation(
+            inputs   = inputs,
+            D_i      = dim,
+            delta_fn = RelevanceFunction.Default(),
+            tau      = tau
+        )
+
+        IF is_active:
+            D_candidates.APPEND(dim)
+            EMIT LOG "φ: dim=" + dim.name + " activated | promoted=" +
+                     LENGTH(promoted_inputs) + " inputs"
+        END IF
+    END FOR
+
+    // Step 3: Enforce |D_act| ≤ Θ (Computational Reduction Theorem)
+    IF LENGTH(D_candidates) > theta:
+        EMIT INFO "φ: |D_candidates|=" + LENGTH(D_candidates) +
+                  " > Θ=" + theta + " — trimming to top-Θ"
+        D_candidates := SelectTopDimensions(D_candidates, inputs, theta)
+    END IF
+
+    EMIT INFO "φ complete | |D_act|=" + LENGTH(D_candidates)
+    RETURN D_candidates
+END PROCEDURE
+
+
+PROCEDURE SelectTopDimensions(candidates: List[StrategicDimension],
+                                inputs: List[ScalarInput],
+                                theta: INT) -> List[StrategicDimension]:
+    // Rank candidates by aggregate relevance across inputs; take top Θ.
+    scored := []
+    FOR EACH dim IN candidates:
+        total_relevance := SUM([RelevanceScore(x, dim) FOR x IN inputs])
+        scored.APPEND((dim, total_relevance))
+    END FOR
+
+    sorted_by_relevance := SORT_BY(scored, key=pair → pair[1], order=DESCENDING)
+    RETURN [pair[0] FOR pair IN sorted_by_relevance[:theta]]
+END PROCEDURE
+
+
+// ── DOMAIN-SPECIFIC φ INSTANTIATIONS ─────────────────────────
+
+// The φ mapping takes different forms in each application domain.
+// These instantiate the abstract mapping for real contexts.
+
+// Domain 1: AI Coordination
+PROCEDURE AICoordinationMapping(agent_states: List[AgentState],
+                                  D_available: DimensionSet) -> List[StrategicDimension]:
+    // Convert agent state observations to scalar inputs, then apply φ
+    inputs := [AgentStateToScalar(s) FOR s IN agent_states]
+    RETURN DimensionalActivationMapping(
+        inputs       = inputs,
+        D_available  = D_available,
+        promotion_fns = {},     // use defaults
+        tau_map       = {},     // use default τ
+        epsilon       = 0.1,
+        theta         = THETA_COMPUTABILITY
+    )
+END PROCEDURE
+
+PROCEDURE AgentStateToScalar(state: AgentState) -> ScalarInput:
+    // Map agent state to a scalar input for promotion
+    RETURN ScalarInput(
+        id        = state.agent_id,
+        raw_value = state.confidence_level,   // primary scalar
+        embedding = state.belief_vector,       // pre-computed if available
+        is_promoted = (state.belief_vector != NULL)
+    )
+END PROCEDURE
+
+
+// Domain 2: Adaptive Defense (Cybersecurity)
+PROCEDURE CyberDefenseMapping(threat_signals: List[ThreatSignal],
+                               D_available: DimensionSet,
+                               threat_tau: REAL) -> List[StrategicDimension]:
+    // Convert threat signals to scalar inputs
+    inputs := [ThreatSignalToScalar(t) FOR t IN threat_signals]
+
+    // All cyber dimensions use the threat-specific τ
+    tau_map := {d.id: threat_tau FOR d IN D_available.dimensions}
+
+    RETURN DimensionalActivationMapping(
+        inputs       = inputs,
+        D_available  = D_available,
+        promotion_fns = {},
+        tau_map       = tau_map,
+        epsilon       = 0.05,   // low epsilon — even weak threat signals count
+        theta         = THETA_COMPUTABILITY
+    )
+END PROCEDURE
+
+
+// Domain 3: OBIAI Filter-Flash Application
+PROCEDURE OBIAIActivationMapping(observation: Observation,
+                                   D_available: DimensionSet,
+                                   p_conf: REAL) -> List[StrategicDimension]:
+    // Map OBIAI observation to D_act for the epistemic decision step.
+    // Used in the ephemeris step as the dimensional context.
+
+    // Convert verb-noun pairs to scalar inputs
+    verb_noun_pairs := ExtractVerbNounPairs(observation)
+    inputs := []
+    FOR EACH (v, n) IN verb_noun_pairs:
+        // Vexameneria as scalar (action intensity of verb)
+        vex := VexameneriaScore(v, n)
+        inputs.APPEND(ScalarInput(
+            id        = v.id + "⊕" + n.id,
+            raw_value = vex,
+            embedding = Vector([DAGCost(v, n, LAMBDA_DEFAULT, MU_DEFAULT,
+                                        BETA1_DEFAULT, BETA2_DEFAULT,
+                                        GAMMA1_DEFAULT, GAMMA2_DEFAULT),
+                                vex, p_conf]),
+            is_promoted = TRUE   // already promoted via vexameneria
+        ))
+    END FOR
+
+    // Use confidence-scaled τ
+    tau_scaled := DEFAULT_TAU * p_conf
+    tau_map := {d.id: tau_scaled FOR d IN D_available.dimensions}
+
+    RETURN DimensionalActivationMapping(
+        inputs       = inputs,
+        D_available  = D_available,
+        promotion_fns = {},
+        tau_map       = tau_map,
+        epsilon       = 0.1,
+        theta         = THETA_COMPUTABILITY
+    )
+END PROCEDURE
+
+
+// Domain 4: RAF Stress-Adaptive Context
+PROCEDURE RAFStressActivationMapping(stress_level: REAL,
+                                      D_available: DimensionSet) -> List[StrategicDimension]:
+    // Convert RAF stress level to dimensional activation.
+    // Higher stress → lower τ → more dimensions activate.
+    // This implements the stress-dimension coupling in Theorem 2 (PDF 9).
+
+    stress_scalar := ScalarInput(
+        id        = "raf_stress",
+        raw_value = stress_level,
+        embedding = StressScalarPromotion(stress_level),
+        is_promoted = TRUE
+    )
+
+    // τ inversely proportional to stress: under panic, activate all dimensions
+    tau_stress := DEFAULT_TAU * (1.0 - stress_level / 12.0)
+    tau_map    := {d.id: MAX(tau_stress, 0.01) FOR d IN D_available.dimensions}
+
+    RETURN DimensionalActivationMapping(
+        inputs       = [stress_scalar],
+        D_available  = D_available,
+        promotion_fns = {},
+        tau_map       = tau_map,
+        epsilon       = 0.05,
+        theta         = THETA_COMPUTABILITY
+    )
+END PROCEDURE
+
+
+// ── φ COMPOSITION: MULTI-SOURCE ACTIVATION ───────────────────
+
+PROCEDURE CompositeActivationMapping(sources: Map[SourceType → List[ScalarInput]],
+                                      D_available: DimensionSet,
+                                      tau_map: Map[DimensionID → REAL]) -> List[StrategicDimension]:
+    // When inputs come from multiple sources, aggregate their activations.
+    // D_act = Union of dimensions activated by any source.
+
+    all_active_dim_ids := SET()
+    FOR EACH (source_type, inputs) IN sources:
+        D_from_source := DimensionalActivationMapping(
+            inputs       = inputs,
+            D_available  = D_available,
+            promotion_fns = {},
+            tau_map       = tau_map,
+            epsilon       = 0.1,
+            theta         = THETA_COMPUTABILITY
+        )
+        FOR EACH dim IN D_from_source:
+            all_active_dim_ids.ADD(dim.id)
+        END FOR
+    END FOR
+
+    // Build final D_act from union, still bounded by Θ
+    D_act_all := [d FOR d IN D_available.dimensions IF d.id IN all_active_dim_ids]
+    IF LENGTH(D_act_all) > THETA_COMPUTABILITY:
+        // Aggregate all inputs across sources for final ranking
+        all_inputs := FLATTEN(sources.values)
+        D_act_all  := SelectTopDimensions(D_act_all, all_inputs, THETA_COMPUTABILITY)
+    END IF
+
+    EMIT INFO "Composite φ | sources=" + LENGTH(sources) +
+              " | |D_act|=" + LENGTH(D_act_all)
+    RETURN D_act_all
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: dgt_variadic_M5_conclusion_corpus_synthesis.psc.txt
+// ============================================================
+
+## dgt variadic M5 conclusion corpus synthesis.psc
+
+## dgt variadic M5 conclusion corpus synthesis
+
+// ============================================================
+// FILE: dgt_variadic_M5_conclusion_corpus_synthesis.psc.txt
+// MODULE 5 OF 5 — Conclusion, Cross-Paper Synthesis
+//                 & Complete 10-PDF Corpus Index
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 6: CONCLUSION
+// ------------------------------------------------------------
+
+// From the paper:
+//   "Dimensional Game Theory in its variadic form provides a robust
+//    structure for handling complex, evolving, and multidimensional
+//    strategic interactions. Rather than treating all variables equally,
+//    we prioritize strategic dimensionality, enabling AI and human
+//    systems to focus on meaningful, actionable game inputs while
+//    preserving computational feasibility."
+
+DEFINE VariadicDGTConclusion AS:
+    FINDING_1 := "Scalar Promotion (Def 1) enables rich dimensional reasoning from minimal initial signals"
+    FINDING_2 := "Contextual Activation (Def 2) gates dimension entry via relevance accumulation Σδ≥τ"
+    FINDING_3 := "Strategic Vector (Def 3) constrains strategy to D_act only — computational efficiency"
+    FINDING_4 := "Computational Reduction Theorem: tractable IFF |D_act| ≤ Θ"
+    FINDING_5 := "φ mapping (eq. 4) unifies promotion + activation + bounding in one pipeline"
+END DEFINE
+
+
+// ── FORMAL PROPERTY VERIFICATION SUITE ───────────────────────
+
+PROCEDURE VerifyVariadicDGTProperties(G: VariadicGame,
+                                       test_inputs: List[ScalarInput],
+                                       theta: INT) -> VariadicDGTReport:
+
+    report := NEW VariadicDGTReport()
+
+    // P1: Scalar promotion preserves significance threshold
+    test_dim := G.D.all_dimensions[0]
+    f_test   := PromotionFunction.Default(test_dim)
+    epsilon  := PromotionThreshold.DefaultEpsilon()
+
+    promo_ok := TRUE
+    FOR EACH x IN test_inputs:
+        result := ScalarPromotion(x, test_dim, f_test, epsilon)
+        IF result.success AND result.norm <= epsilon:
+            EMIT ERROR "Promotion inconsistency: ‖v⃗_D‖ ≤ ε but marked success"
+            promo_ok := FALSE
+        END IF
+    END FOR
+    report.scalar_promotion_ok := promo_ok
+
+    // P2: Contextual activation is monotone in relevance accumulation
+    //     More relevant inputs → higher Σδ → same or more activations
+    tau_test := DEFAULT_TAU
+    active_k := ContextualActivation(test_inputs, test_dim,
+                                      RelevanceFunction.Default(), tau_test)
+    // Add a highly relevant input — activation must remain stable
+    boosted_inputs := test_inputs + [HighRelevanceInput(test_dim)]
+    active_boosted := ContextualActivation(boosted_inputs, test_dim,
+                                            RelevanceFunction.Default(), tau_test)
+    // Monotonicity: if already active, stays active with more relevant inputs
+    report.activation_monotone := (NOT active_k) OR active_boosted
+
+    // P3: Strategic vector dimension count ≤ |D_act|
+    D_act := G.D.ActiveList()
+    IF LENGTH(D_act) > 0:
+        sv := BuildStrategicVector(G.N.first, D_act,
+                                    Strategy.Random(G.A.base_actions))
+        report.sv_dimension_ok := (sv.Dimension() == LENGTH(D_act))
+    ELSE:
+        report.sv_dimension_ok := TRUE   // vacuously true
+    END IF
+
+    // P4: Computational reduction — game tractable at Θ
+    report.tractable := IsGameTractable(G)
+    report.reduction_ok := (G.D.ActiveCount() <= theta)
+
+    // P5: φ mapping respects Θ bound
+    D_mapped := DimensionalActivationMapping(
+        inputs       = test_inputs,
+        D_available  = G.D,
+        promotion_fns = {},
+        tau_map       = {},
+        epsilon       = epsilon,
+        theta         = theta
+    )
+    report.phi_bound_ok := (LENGTH(D_mapped) <= theta)
+
+    report.all_ok := report.scalar_promotion_ok AND
+                     report.activation_monotone AND
+                     report.sv_dimension_ok AND
+                     report.tractable AND
+                     report.phi_bound_ok
+
+    IF report.all_ok:
+        EMIT INFO "ALL VARIADIC DGT PROPERTIES VERIFIED ✓"
+    ELSE:
+        EMIT ERROR "VARIADIC DGT PROPERTY FAILURES — see report"
+    END IF
+
+    RETURN report
+END PROCEDURE
+
+
+// ── UNIFIED CORPUS CROSS-REFERENCE TABLE ─────────────────────
+
+// All 10 PDFs contribute to a unified variadic DGT / OBIAI architecture.
+// The following table maps each concept to its defining document(s).
+
+DEFINE CorpusCrossReferenceTable AS:
+
+    concept_map := [
+        { concept: "Bayesian Bias Mitigation",         primary: "PDF 1",    uses: ["PDF 3"] },
+        { concept: "Actor Class (ε≥0.954, τ∉span(C))", primary: "PDF 2",    uses: ["PDF 8"] },
+        { concept: "Traversal Cost C(Nᵢ→Nⱼ)",          primary: "PDF 3",    uses: ["PDF 6"] },
+        { concept: "Filter-Flash Monotonicity",         primary: "PDF 4",    uses: ["PDF 7", "PDF 10"] },
+        { concept: "Hybrid Mode Convergence",           primary: "PDF 4",    uses: ["PDF 7", "PDF 8"] },
+        { concept: "Hospital Safety / Ax=b",            primary: "PDF 5",    uses: ["PDF 3"] },
+        { concept: "DAG_cost(v,n) / Vexameneria",       primary: "PDF 6",    uses: ["PDF 8", "PDF 10"] },
+        { concept: "OBIAI Architecture (3-layer)",       primary: "PDF 7",    uses: ["PDF 6", "PDF 4"] },
+        { concept: "DIRAM Cascade (±3/±6/±9)",          primary: "PDF 7",    uses: ["PDF 9", "PDF 10"] },
+        { concept: "Nash Equilibrium",                  primary: "PDF 8",    uses: ["PDF 10"] },
+        { concept: "Perfect Game Outcome (Theorem 1)",  primary: "PDF 8",    uses: ["PDF 10"] },
+        { concept: "Dimensional Innovation (τ∉span)",   primary: "PDF 8",    uses: ["PDF 9", "PDF 10"] },
+        { concept: "Stress Zones [0,12]",               primary: "PDF 9",    uses: ["PDF 7", "PDF 10"] },
+        { concept: "AuraSeal / Perfect Numbers",        primary: "PDF 9",    uses: [] },
+        { concept: "Quantum Lattice Deformation",       primary: "PDF 9",    uses: [] },
+        { concept: "Git-RAF Stakeholder Consensus",     primary: "PDF 9",    uses: [] },
+        { concept: "Stress-Adaptive Strategy (Thm 2)", primary: "PDF 9",    uses: ["PDF 10"] },
+        { concept: "Scalar Promotion (Def 1)",          primary: "PDF 10",   uses: [] },
+        { concept: "Contextual Activation (Def 2)",     primary: "PDF 10",   uses: ["PDF 7", "PDF 9"] },
+        { concept: "Strategic Vector (Def 3)",          primary: "PDF 10",   uses: ["PDF 6", "PDF 8"] },
+        { concept: "Computational Reduction Theorem",  primary: "PDF 10",   uses: ["PDF 9"] },
+        { concept: "φ Mapping ({x}→D_act)",            primary: "PDF 10",   uses: ["PDF 9", "PDF 6"] }
+    ]
+
+END DEFINE
+
+
+// ── SHARED INVARIANTS (ACROSS ALL 10 DOCUMENTS) ──────────────
+
+DEFINE GlobalInvariants AS:
+    // These constants appear in every document in the corpus.
+    EPISTEMIC_THRESHOLD    := 0.954    // 95.4% confidence threshold (PDFs 2–10)
+    DIRAM_EPSILON_BOUND    := 0.6      // ε(transition) ≤ 0.6 (PDFs 3,4,6,7,9)
+    SINPHASE_BOUND         := 0.6      // Sinphase ε(x) ≤ 0.6 (PDFs 2,3,4,5,9)
+    ENTROPY_QAK_BOUND      := 0.5      // Quantum AuraSeal tighter bound (PDF 9)
+    THETA_COMPUTABILITY    := 8        // |D_act| ≤ Θ (PDFs 9, 10)
+    STRESS_RANGE           := [0, 12]  // Stress scale (PDFs 7, 9, 10)
+    TRIPOLAR               := [UCHE, EZE, OBI]   // (PDFs 2, 7, 8, 10)
+    DEFAULT_TAU            := 0.3      // Activation threshold τ (PDF 10)
+    LAMBDA_STRESS_PENALTY  := 0.5      // Stress penalty λ (PDF 9)
+END DEFINE
+
+
+// ── COMPLETE CORPUS INDEX (10 PDFs, 50 Modules) ──────────────
+
+PROCEDURE PrintCompleteCorpusIndex() -> VOID:
+    EMIT INFO "========================================================"
+    EMIT INFO "COMPLETE OBINEXUS PSEUDOCODE CORPUS"
+    EMIT INFO "10 PDFs → 50 Modules | Author: Nnamdi Michael Okpala"
+    EMIT INFO "========================================================"
+    EMIT INFO ""
+    EMIT INFO "PDF 1 — Bayesian Debiasing Framework (July 2025)"
+    EMIT INFO "  bayesian_debiasing_M1_problem_formulation.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M2_framework_math.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M3_algorithm.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M4_guarantees_validation.psc.txt"
+    EMIT INFO "  bayesian_debiasing_M5_implementation_safety.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 2 — Actor Class: Epistemic AI Architecture (2025)"
+    EMIT INFO "  actor_class_M1_definition.psc.txt"
+    EMIT INFO "  actor_class_M2_navigation.psc.txt"
+    EMIT INFO "  actor_class_M3_cost_functions.psc.txt"
+    EMIT INFO "  actor_class_M4_deployment_turing.psc.txt"
+    EMIT INFO "  actor_class_M5_architecture_stack.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 3 — AEGIS-PROOF-1.2: Traversal Cost Function (May 2025)"
+    EMIT INFO "  aegis_proof_1_2_M1_definitions.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M2_theorem_proof.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M3_parameters.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M4_stability_filterflash.psc.txt"
+    EMIT INFO "  aegis_proof_1_2_M5_validation_deployment.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 4 — AEGIS-PROOF-3.1 & 3.2: Monotonicity + Convergence (Aug 2025)"
+    EMIT INFO "  aegis_proof_3_1_3_2_M1_prerequisites.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M2_filterflash_monotonicity.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M3_hybrid_convergence.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M4_obiai_diram_integration.psc.txt"
+    EMIT INFO "  aegis_proof_3_1_3_2_M5_compliance_algorithm.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 5 — AEGIS-PROOF-4.1: Hospital Safety Systems (Aug 2025)"
+    EMIT INFO "  aegis_proof_4_1_M1_foundation.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M2_realtime_solver.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M3_polymer_interface.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M4_safety_protocols.psc.txt"
+    EMIT INFO "  aegis_proof_4_1_M5_obiai_compliance_benchmarks.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 6 — DAG Ephemeris Spec: Verb-Noun Cost + Vexameneria (Aug 2025)"
+    EMIT INFO "  dag_ephemeris_M1_dag_cost_function.psc.txt"
+    EMIT INFO "  dag_ephemeris_M2_ephemeris_step.psc.txt"
+    EMIT INFO "  dag_ephemeris_M3_peristaltic_vexameneria.psc.txt"
+    EMIT INFO "  dag_ephemeris_M4_application_diram.psc.txt"
+    EMIT INFO "  dag_ephemeris_M5_verification_complexity.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 7 — OBIAI Thesis: Data Drift Mitigation (Sep 2025)"
+    EMIT INFO "  obiai_thesis_M1_architecture.psc.txt"
+    EMIT INFO "  obiai_thesis_M2_diram_cascade_algorithm.psc.txt"
+    EMIT INFO "  obiai_thesis_M3_implementation_modules.psc.txt"
+    EMIT INFO "  obiai_thesis_M4_drift_detection_safety.psc.txt"
+    EMIT INFO "  obiai_thesis_M5_results_conclusion_proofs.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 8 — Dimensional Game Theory: Formal (July 2025)"
+    EMIT INFO "  dimensional_game_theory_M1_formal_definitions.psc.txt"
+    EMIT INFO "  dimensional_game_theory_M2_dimensional_extension.psc.txt"
+    EMIT INFO "  dimensional_game_theory_M3_algorithms.psc.txt"
+    EMIT INFO "  dimensional_game_theory_M4_applications.psc.txt"
+    EMIT INFO "  dimensional_game_theory_M5_obinexus_integration.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 9 — DGT-RAF Cryptographic Integration (Aug 2025)"
+    EMIT INFO "  raf_cryptographic_M1_stress_zones_telemetry.psc.txt"
+    EMIT INFO "  raf_cryptographic_M2_perfect_number_auraseal.psc.txt"
+    EMIT INFO "  raf_cryptographic_M3_quantum_lattice.psc.txt"
+    EMIT INFO "  raf_cryptographic_M4_gitraf_policy_strategy.psc.txt"
+    EMIT INFO "  raf_cryptographic_M5_implementation_validation.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "PDF 10 — DGT Variadic Strategy (May 24, 2026)  ← THIS"
+    EMIT INFO "  dgt_variadic_M1_scalar_promotion.psc.txt"
+    EMIT INFO "  dgt_variadic_M2_variadic_game_framework.psc.txt"
+    EMIT INFO "  dgt_variadic_M3_strategic_balance_reduction.psc.txt"
+    EMIT INFO "  dgt_variadic_M4_activation_mapping_integration.psc.txt"
+    EMIT INFO "  dgt_variadic_M5_conclusion_corpus_synthesis.psc.txt  ← THIS"
+    EMIT INFO ""
+    EMIT INFO "GLOBAL INVARIANTS (all 10 documents):"
+    EMIT INFO "  EPISTEMIC_THRESHOLD := 0.954"
+    EMIT INFO "  DIRAM_EPSILON_BOUND := 0.6"
+    EMIT INFO "  SINPHASE_BOUND      := 0.6"
+    EMIT INFO "  THETA_COMPUTABILITY := 8"
+    EMIT INFO "  STRESS_RANGE        := [0, 12]"
+    EMIT INFO "  TRIPOLAR            := {UCHE, EZE, OBI}"
+    EMIT INFO "========================================================"
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 5 — FINAL MODULE — CORPUS COMPLETE
+//
+// TOTAL: 10 PDFs → 50 MODULES
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// SPAN:   May 2025 – May 2026
+// ============================================================

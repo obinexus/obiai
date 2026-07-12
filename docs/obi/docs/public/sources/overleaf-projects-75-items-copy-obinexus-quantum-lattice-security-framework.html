@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OBINexus Quantum Lattice Security Framework | OBI Documentation</title>
+  <meta name="description" content="OBINexus Quantum Lattice Security Framework Source folder: overleaf-projects-75-items-copy/OBINexus Quantum Lattice Security Framework Extracted Files main.tex main Introduction The OBINexus quantum lattice security framework represents a paradigm shift in se...">
+  <link rel="canonical" href="https://obinexus.github.io/obi/sources/overleaf-projects-75-items-copy-obinexus-quantum-lattice-security-framework.html">
+  <meta property="og:title" content="OBINexus Quantum Lattice Security Framework">
+  <meta property="og:description" content="OBINexus Quantum Lattice Security Framework Source folder: overleaf-projects-75-items-copy/OBINexus Quantum Lattice Security Framework Extracted Files main.tex main Introduction The OBINexus quantum lattice security framework represents a paradigm shift in se...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://obinexus.github.io/obi/sources/overleaf-projects-75-items-copy-obinexus-quantum-lattice-security-framework.html">
+  <meta property="og:site_name" content="OBI Documentation">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="OBINexus Quantum Lattice Security Framework">
+  <meta name="twitter:description" content="OBINexus Quantum Lattice Security Framework Source folder: overleaf-projects-75-items-copy/OBINexus Quantum Lattice Security Framework Extracted Files main.tex main Introduction The OBINexus quantum lattice security framework represents a paradigm shift in se...">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="../assets/obi.css">
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] } };
+    window.OBI_SEARCH_URL = "../search.json";
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"ScholarlyArticle","name":"OBINexus Quantum Lattice Security Framework","description":"OBINexus Quantum Lattice Security Framework Source folder: overleaf-projects-75-items-copy/OBINexus Quantum Lattice Security Framework Extracted Files main.tex main Introduction The OBINexus quantum lattice security framework represents a paradigm shift in se...","isPartOf":{"@type":"WebSite","name":"OBI Documentation","url":"https://obinexus.github.io/obi/"},"author":{"@type":"Person","name":"Nnamdi Michael Okpala"}}</script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="brand">
+      <a href="../index.html" aria-label="OBI Documentation home">
+        <span class="brand-mark">OBI</span>
+        <span>
+          <strong>Ontological Bayesian Intelligence</strong>
+          <small>OBINexus documentation</small>
+        </span>
+      </a>
+    </div>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" class="site-nav" aria-label="Primary navigation"><a href="../index.html" class="">Overview</a><a href="../papers.html" class="active">Papers</a><a href="../bibliography.html" class="">Bibliography</a></nav>
+  </header>
+  <div class="doc-shell">
+    <aside class="doc-sidebar">
+      <search class="search-panel">
+        <label for="site-search">Search documentation</label>
+        <input id="site-search" type="search" placeholder="Search OBI docs" autocomplete="off">
+        <div id="search-results" class="search-results" role="listbox" aria-label="Search results"></div>
+      </search>
+      <nav class="toc" aria-label="Table of contents">
+        <h2>On This Page</h2>
+        <a class="toc-level-2" href="#obinexus-quantum-lattice-security-framework">OBINexus Quantum Lattice Security Framework</a><a class="toc-level-3" href="#extracted-files">Extracted Files</a><a class="toc-level-3" href="#main">main</a><a class="toc-level-2" href="#introduction">Introduction</a><a class="toc-level-3" href="#core-philosophy-the-red-disciple-protocol">Core Philosophy: The Red Disciple Protocol</a><a class="toc-level-3" href="#framework-overview">Framework Overview</a><a class="toc-level-2" href="#buffer-regions-and-protocol-state-machines">Buffer Regions &amp; Protocol State Machines</a><a class="toc-level-3" href="#theoretical-foundation">Theoretical Foundation</a><a class="toc-level-3" href="#buffer-zone-architecture">Buffer Zone Architecture</a><a class="toc-level-3" href="#mathematical-formalization">Mathematical Formalization</a><a class="toc-level-3" href="#the-hungry-state-machine-example">The Hungry State Machine Example</a><a class="toc-level-2" href="#auraseal-quantum-resistant-hashing-layer">AuraSeal Quantum-Resistant Hashing Layer</a><a class="toc-level-3" href="#technical-architecture">Technical Architecture</a><a class="toc-level-3" href="#mathematical-specification">Mathematical Specification</a><a class="toc-level-4" href="#pre-hashing-and-salting">Pre-hashing and Salting</a><a class="toc-level-4" href="#quantum-private-key-sealing">Quantum Private Key Sealing</a><a class="toc-level-3" href="#noise-induced-decoherence-model">Noise-Induced Decoherence Model</a><a class="toc-level-2" href="#example-cryptic-state-machine-implementation">Example Cryptic State Machine Implementation</a><a class="toc-level-2" href="#computation-matrix-and-quality-assurance">Computation Matrix &amp; Quality Assurance</a><a class="toc-level-3" href="#quantum-computation-verification-matrix">Quantum Computation Verification Matrix</a><a class="toc-level-3" href="#test-case-examples">Test Case Examples</a><a class="toc-level-2" href="#references">References</a>
+      </nav>
+    </aside>
+    <main id="content" class="content" tabindex="-1">
+      <article class="doc-article">
+        <header class="article-header">
+          <p class="eyebrow">OBINexus / OBI</p>
+          <h1>OBINexus Quantum Lattice Security Framework</h1>
+          <p>OBINexus Quantum Lattice Security Framework Source folder: overleaf-projects-75-items-copy/OBINexus Quantum Lattice Security Framework Extracted Files main.tex main Introduction The OBINexus quantum lattice security framework represents a paradigm shift in se...</p>
+        </header>
+        <h2 id="obinexus-quantum-lattice-security-framework">OBINexus Quantum Lattice Security Framework</h2>
+<p>Source folder: <code>overleaf-projects-75-items-copy/OBINexus Quantum Lattice Security Framework</code></p>
+<h3 id="extracted-files">Extracted Files</h3>
+<ul>
+<li><code>main.tex</code></li>
+</ul>
+<h3 id="main">main</h3>
+<h2 id="introduction">Introduction</h2>
+<p>The OBINexus quantum lattice security framework represents a paradigm shift in secure communication architecture for next-generation 6G/7G networks. Built upon principles of temporary zero-trust topology, orthogonal span lattices, and quantum field theory, this framework addresses critical security challenges in quantum-era communications.</p>
+<h3 id="core-philosophy-the-red-disciple-protocol">Core Philosophy: The Red Disciple Protocol</h3>
+<p>&lt;div class=&quot;tcolorbox&quot;&gt;</p>
+<p><em>“When your lattice hits RED, this ain’t about panic or chaos. Nah, it’s about respect, discipline, and learning the quantum language. You don’t fight the vibe — you sync with it. Be the disciple, absorb the signals, and move with the flow. This is the RED Disciple Protocol, where every quantum flicker’s a lesson, not a threat. Let’s vibe and thrive in the cryptic chaos.”</em></p>
+<p>&lt;/div&gt;</p>
+<h3 id="framework-overview">Framework Overview</h3>
+<p>The framework integrates:</p>
+<ul>
+<li><strong>Temporary Lattice Topology</strong>: Dynamic, zero-trust communication regions</li>
+</ul>
+<ul>
+<li><strong>Buffer Zones</strong>: Temporal spaces for protocol ambiguity resolution</li>
+</ul>
+<ul>
+<li><strong>Cryptic State Machines</strong>: Non-deterministic automata for adaptive security</li>
+</ul>
+<ul>
+<li><strong>AuraSeal Layer</strong>: Quantum-resistant hashing and integrity verification</li>
+</ul>
+<ul>
+<li><strong>Governance Matrix</strong>: Severity-based security response protocols</li>
+</ul>
+<h2 id="buffer-regions-and-protocol-state-machines">Buffer Regions &amp; Protocol State Machines</h2>
+<h3 id="theoretical-foundation">Theoretical Foundation</h3>
+<p>Within automata theory, we distinguish between behavioral and protocol state machines. The OBINexus framework introduces a third category: cryptic state machines, which model non-deterministic behavior in quantum communication protocols.</p>
+<h3 id="buffer-zone-architecture">Buffer Zone Architecture</h3>
+<p>Buffer regions function as temporal zones within the quantum lattice where ambiguous or transitional protocol states reside. These regions serve multiple purposes:</p>
+<p>&lt;div class=&quot;tcolorbox&quot;&gt;</p>
+<ul>
+<li>Act as network slack spaces or queues</li>
+</ul>
+<ul>
+<li>Enable context-sensitive authentication and authorization layers</li>
+</ul>
+<ul>
+<li>Allow controlled ambiguity that resolves as the system stabilizes</li>
+</ul>
+<ul>
+<li>Integrate with lattice deformation states for dynamic protocol behavior</li>
+</ul>
+<p>&lt;/div&gt;</p>
+<h3 id="mathematical-formalization">Mathematical Formalization</h3>
+<p>Let $<code>\mathcal{B}</code>$ denote the buffer zone space, defined as: ``` math \begin{equation} \mathcal{B} = \{(s, t, \phi) : s \in \mathcal{S}, t \in [0, \tau], \phi \in \Phi\} \end{equation}</p>
+<pre><code class="language-text">where:
+
+- $`\mathcal{S}`$ represents the state space
+
+- $`t`$ is the temporal parameter with maximum duration $`\tau`$
+
+- $`\Phi`$ is the set of possible protocol configurations
+
+# Grammar Anchors as Protocol State Modifiers
+
+## Conceptual Framework
+
+Grammar anchors function as implicit operators that modify protocol semantics based on context. This concept draws from natural language processing where punctuation changes meaning:
+
+&lt;div class=&quot;tcolorbox&quot;&gt;
+
+Base statement: “Don’t you know how to read”  
+With “?”: Interrogative context $`\rightarrow`$ Request for information  
+With “!”: Imperative context $`\rightarrow`$ Expression of frustration
+
+&lt;/div&gt;
+
+## Protocol Application
+
+In the quantum lattice context, grammar anchors modify state transitions:
+
+``` math
+\begin{equation}
+\text{State}_n \xrightarrow[\text{Grammar Anchor}]{\text{Buffer Zone}} \text{State}_{n+1}
+\end{equation}</code></pre>
+<p>The transition function $<code>\delta</code>$ becomes context-dependent: ``` math \begin{equation} \delta: \mathcal{S} \times \Sigma \times \mathcal{G} \rightarrow \mathcal{P}(\mathcal{S}) \end{equation}</p>
+<pre><code class="language-text">where $`\mathcal{G}`$ represents the set of grammar anchors.
+
+# Cryptic Protocol State Machine Formalization
+
+## Red Disciple Protocol Preamble
+
+&lt;div class=&quot;tcolorbox&quot;&gt;
+
+**When the lattice enters RED, the operator becomes its disciple.**
+
+- Listen to quantum fluctuations
+
+- Learn patterns from ambiguity
+
+- Adapt responses accordingly
+
+This state promotes harmonization, not control.
+
+&lt;/div&gt;
+
+## Cryptic State Machine Definition
+
+A cryptic state machine is formally defined as a 7-tuple:
+``` math
+\begin{equation}
+\mathcal{M}_{\text{cryptic}} = (Q, \Sigma, \delta, q_0, F, \mathcal{C}, \Lambda)
+\end{equation}</code></pre>
+<p>where:</p>
+<ul>
+<li>$<code>Q</code>$ is a finite set of states</li>
+</ul>
+<ul>
+<li>$<code>\Sigma</code>$ is the input alphabet</li>
+</ul>
+<ul>
+<li>$<code>\delta: Q \times \Sigma \times \mathcal{C} \rightarrow \mathcal{P}(Q)</code>$ is the transition function</li>
+</ul>
+<ul>
+<li>$<code>q_0 \in Q</code>$ is the initial state</li>
+</ul>
+<ul>
+<li>$<code>F \subseteq Q</code>$ is the set of accepting states</li>
+</ul>
+<ul>
+<li>$<code>\mathcal{C}</code>$ is the context space</li>
+</ul>
+<ul>
+<li>$<code>\Lambda</code>$ is the set of cyclic loops</li>
+</ul>
+<h3 id="the-hungry-state-machine-example">The Hungry State Machine Example</h3>
+<p>&lt;figure data-latex-placement=&quot;h&quot;&gt;</p>
+<p>&lt;figcaption&gt;Cryptic State Machine with Self-Loop&lt;/figcaption&gt; &lt;/figure&gt;</p>
+<h2 id="auraseal-quantum-resistant-hashing-layer">AuraSeal Quantum-Resistant Hashing Layer</h2>
+<h3 id="technical-architecture">Technical Architecture</h3>
+<p>The AuraSeal layer implements a quantum-resistant cryptographic seal through the following pipeline:</p>
+<p>&lt;div class=&quot;tcolorbox&quot;&gt;</p>
+<p>&lt;div class=&quot;center&quot;&gt;</p>
+<p>Input Data $<code>\rightarrow</code>$ Salt (Dynamic Nonce) $<code>\rightarrow</code>$ Pre-Hash $<code>\rightarrow</code>$ Aura512 $<code>\rightarrow</code>$ Quantum Distillation $<code>\rightarrow</code>$ Private Key Seal $<code>\rightarrow</code>$ Lattice Integration</p>
+<p>&lt;/div&gt;</p>
+<p>&lt;/div&gt;</p>
+<h3 id="mathematical-specification">Mathematical Specification</h3>
+<h4 id="pre-hashing-and-salting">Pre-hashing and Salting</h4>
+<p>``` math \begin{equation} h_{\text{pre}} = H_{\text{classical}}(\text{data} || \text{nonce}_{\text{session}}) \end{equation}</p>
+<pre><code class="language-text">
+### Quantum-Distilled Hashing (Aura512)
+
+The quantum distillation process applies controlled noise to remove exploitable patterns:
+``` math
+\begin{equation}
+\text{Aura512}(x) = \mathcal{D}_{\text{quantum}}\left(\sum_{i=1}^{n} \alpha_i |h_i\rangle \otimes |\psi_i\rangle\right)
+\end{equation}</code></pre>
+<p>where $<code>\mathcal{D}_{\text{quantum}}</code>$ represents the distillation operator.</p>
+<h4 id="quantum-private-key-sealing">Quantum Private Key Sealing</h4>
+<p>``` math \begin{equation} \text{Seal}_{\text{final}} = \text{Sign}_{\text{QPK}}(\text{Aura512}(x)) \end{equation}</p>
+<pre><code class="language-text">
+# Security Governance and Severity Levels
+
+## Governance Severity Matrix
+
+&lt;div class=&quot;tcolorbox&quot;&gt;
+
+**Entanglement Enforcement Failure:** Full lattice compromise risk.  
+**Action:** Immediate system shutdown and quantum state collapse.
+
+&lt;/div&gt;
+
+&lt;div class=&quot;tcolorbox&quot;&gt;
+
+**Buffer Zone Quantum Activity Mismanagement:** Injection and faulty states.  
+**Action:** Review recommended before detach, enhanced monitoring.
+
+&lt;/div&gt;
+
+&lt;div class=&quot;tcolorbox&quot;&gt;
+
+**Grammar Anchor Integration:** Proper ambiguity handling.  
+**Action:** Continue normal operations with logging.
+
+&lt;/div&gt;
+
+## Error Zone Management Table
+
+&lt;div class=&quot;center&quot;&gt;
+
+| **Error Range** | **Zone** | **Severity** | **Action** |
+|:--:|:--:|:--:|:--:|
+| 0-3 | OK Zone | Safe | Detach permitted with warning |
+| 3-6 | Warning Zone | Elevated | Review recommended before detach |
+| 6-9 | Danger Zone | High | Detach not permitted - fix required |
+| 9-12 | Critical Zone | Critical | System panic - immediate termination |
+| \&gt;12 | Extended Trace | Maximum | No-panic flag with full diagnostics |
+
+&lt;/div&gt;
+
+# Real-Time Lattice Reconfiguration
+
+## Adaptive Topology Engine
+
+The lattice topology adapts in real-time based on:
+
+1.  Quantum coherence measurements
+
+2.  Network traffic patterns
+
+3.  Security threat indicators
+
+4.  Buffer zone occupancy
+
+## Reconfiguration Algorithm
+
+``` math
+\begin{equation}
+\mathcal{L}_{t+1} = \mathcal{R}(\mathcal{L}_t, \mathcal{M}_t, \mathcal{T}_t)
+\end{equation}</code></pre>
+<p>where:</p>
+<ul>
+<li>$<code>\mathcal{L}_t</code>$ is the lattice configuration at time $<code>t</code>$</li>
+</ul>
+<ul>
+<li>$<code>\mathcal{M}_t</code>$ represents current measurements</li>
+</ul>
+<ul>
+<li>$<code>\mathcal{T}_t</code>$ denotes threat assessment</li>
+</ul>
+<ul>
+<li>$<code>\mathcal{R}</code>$ is the reconfiguration operator</li>
+</ul>
+<h3 id="noise-induced-decoherence-model">Noise-Induced Decoherence Model</h3>
+<p>After communication completion: ``` math \begin{equation} \rho_{\text{lattice}}(t &gt; t_{\text{comm}}) = \sum_k E_k \rho_{\text{lattice}}(t_{\text{comm}}) E_k^\dagger \end{equation}</p>
+<pre><code class="language-text">where $`E_k`$ are Kraus operators representing environmental noise.
+
+# Integration with OBINexus Toolchain
+
+## Toolchain Architecture
+
+&lt;div class=&quot;tcolorbox&quot;&gt;
+
+`riftlang.exe` $`\rightarrow`$ \[Buffer Zone Definition\] $`\rightarrow`$ `.so.a` $`\rightarrow`$ \[AuraSeal Implementation\] $`\rightarrow`$  
+`rift.exe` $`\rightarrow`$ \[State Machine Compilation\] $`\rightarrow`$ `gosilang` $`\rightarrow`$ \[Protocol Deployment\]
+
+&lt;/div&gt;
+
+## Security Hook Integration
+
+Each stage of the toolchain incorporates security hooks:
+
+1.  **Preprocessing**: Policy enforcement and governance rules
+
+2.  **Compilation**: Quantum byte standardization
+
+3.  **Runtime**: Real-time lattice monitoring
+
+4.  **Post-processing**: Decoherence verification
+
+## Compliance Scripts
+
+``` bash
+#!/bin/bash
+# OBINexus Compliance Checker
+
+echo &quot;Verifying quantum lattice security compliance...&quot;
+
+# Check buffer zone configuration
+verify_buffer_zones() {
+    local config=$1
+    # Verify temporal parameters
+    # Verify state space definitions
+    # Verify grammar anchor integration
+}
+
+# Validate AuraSeal implementation
+check_auraseal() {
+    # Verify quantum distillation
+    # Check entropy thresholds
+    # Validate signature schemes
+}
+
+# Main compliance loop
+for module in $(find . -name &quot;*.rift&quot;); do
+    verify_buffer_zones $module
+    check_auraseal $module
+done</code></pre>
+<h2 id="example-cryptic-state-machine-implementation">Example Cryptic State Machine Implementation</h2>
+<pre><code class="language-text">#include &lt;stdio.h&gt;
+#include &lt;quantum_lattice.h&gt;
+
+// Define the events
+typedef enum {
+    EAT,
+    FULL,
+    QUANTUM_FLUCTUATION
+} Event;
+
+// Define the states
+typedef enum {
+    IDLE,
+    HUNGRY,
+    FULL_STATE,
+    RED_DISCIPLE  // Cryptic state
+} State;
+
+// Buffer zone structure
+typedef struct {
+    State current;
+    float quantum_coherence;
+    char grammar_anchor;
+} BufferZone;
+
+// AuraSeal verification
+bool verify_auraseal(BufferZone* zone) {
+    // Quantum distillation check
+    if (zone-&gt;quantum_coherence &lt; 0.25) {
+        return false;  // Below entropy threshold
+    }
+    // Grammar anchor validation
+    if (zone-&gt;grammar_anchor != &#39;?&#39; &amp;&amp; 
+        zone-&gt;grammar_anchor != &#39;!&#39;) {
+        return false;
+    }
+    return true;
+}
+
+// Cryptic state transition with buffer zones
+State cryptic_transition(BufferZone* zone, Event event) {
+    if (!verify_auraseal(zone)) {
+        return RED_DISCIPLE;  // Enter learning mode
+    }
+    
+    switch (zone-&gt;current) {
+        case IDLE:
+            if (event == EAT) {
+                // Non-deterministic transition
+                if (zone-&gt;quantum_coherence &gt; 0.7) {
+                    return HUNGRY;
+                } else {
+                    return RED_DISCIPLE;
+                }
+            }
+            break;
+            
+        case HUNGRY:
+            if (event == EAT) {
+                // Self-loop with context
+                return (zone-&gt;grammar_anchor == &#39;?&#39;) ? 
+                       HUNGRY : FULL_STATE;
+            }
+            break;
+            
+        case RED_DISCIPLE:
+            // Learn from quantum fluctuations
+            if (event == QUANTUM_FLUCTUATION) {
+                // Harmonize with the system
+                return IDLE;
+            }
+            break;
+    }
+    
+    return zone-&gt;current;
+}
+
+int main() {
+    BufferZone zone = {
+        .current = IDLE,
+        .quantum_coherence = 0.8,
+        .grammar_anchor = &#39;?&#39;
+    };
+    
+    printf(&quot;OBINexus Cryptic State Machine\n&quot;);
+    printf(&quot;Initial state: IDLE\n&quot;);
+    
+    // Simulate quantum lattice communication
+    while (1) {
+        Event event;
+        printf(&quot;Enter event (0=EAT, 1=FULL, 2=QUANTUM): &quot;);
+        scanf(&quot;%d&quot;, &amp;event);
+        
+        // Update quantum coherence (simulated)
+        zone.quantum_coherence *= 0.95;
+        
+        State next = cryptic_transition(&amp;zone, event);
+        
+        if (next == RED_DISCIPLE) {
+            printf(&quot;Entering RED DISCIPLE mode...\n&quot;);
+            printf(&quot;Listen, learn, harmonize.\n&quot;);
+        }
+        
+        zone.current = next;
+        printf(&quot;Current state: %d, Coherence: %.2f\n&quot;, 
+               zone.current, zone.quantum_coherence);
+        
+        // Check for decoherence
+        if (zone.quantum_coherence &lt; 0.1) {
+            printf(&quot;Lattice decoherence detected.\n&quot;);
+            printf(&quot;Communication session terminated.\n&quot;);
+            break;
+        }
+    }
+    
+    return 0;
+}</code></pre>
+<h2 id="computation-matrix-and-quality-assurance">Computation Matrix &amp; Quality Assurance</h2>
+<h3 id="quantum-computation-verification-matrix">Quantum Computation Verification Matrix</h3>
+<p>&lt;div class=&quot;center&quot;&gt;</p>
+<p>| <strong>Component</strong>    | <strong>Classical Test</strong> |   <strong>Quantum Test</strong>    | <strong>Hybrid Mode</strong>  | |:-----------------|:------------------:|:---------------------:|:----------------:| | Buffer Zones     |     Unit tests     | Coherence measurement |     Fuzzing      | | Grammar Anchors  |  Parse validation  |    Context entropy    |  State coverage  | | AuraSeal         |   Hash collision   |  Quantum resistance   |   Side-channel   | | Lattice Topology | Graph connectivity |  Entanglement verify  | Decoherence rate |</p>
+<p>&lt;/div&gt;</p>
+<h3 id="test-case-examples">Test Case Examples</h3>
+<p>&lt;div class=&quot;tcolorbox&quot;&gt;</p>
+<ol>
+<li><strong>Buffer Zone Overflow</strong>: Verify graceful degradation</li>
+</ol>
+<ol>
+<li><strong>Grammar Anchor Injection</strong>: Test for malicious modifiers</li>
+</ol>
+<ol>
+<li><strong>Quantum State Collapse</strong>: Ensure proper cleanup</li>
+</ol>
+<ol>
+<li><strong>Lattice Persistence</strong>: Verify no residual quantum fields</li>
+</ol>
+<p>&lt;/div&gt;</p>
+<h2 id="references">References</h2>
+<ol>
+<li>Okpala, N. M. (2025). <em>Formal Proofs for Confion: Post-Quantum HACC System</em>. OBINexus Computing.</li>
+</ol>
+<ol>
+<li>Okpala, N. M. (2025). <em>The RIFT Architecture: Quantum Determinism Through Governed Computation</em>. OBINexus Project.</li>
+</ol>
+<ol>
+<li>Okpala, N. M. (2025). <em>$<code>\Psi</code>$-QFT: The Wavefunction Glue - A Foundational Framework for Adaptive Evolution Beyond Dark Matter</em>. OBINexus Technical Specification.</li>
+</ol>
+<ol>
+<li>Okpala, N. M. (2025). <em>OBINexus Cryptographic Interoperability Standard v1.0</em>. OBINexus Computing.</li>
+</ol>
+<ol>
+<li>Dirac, P. A. M. (1930). <em>The Principles of Quantum Mechanics</em>. Oxford University Press.</li>
+</ol>
+<ol>
+<li>Aaronson, S. (2018). <em>The Complexity of Quantum State Verification</em>. Foundations of Computer Science.</li>
+</ol>
+      </article>
+    </main>
+  </div>
+  <footer class="site-footer">
+    <p>OBI is an ontological and Bayesian reasoning infrastructure for uncertainty-aware robotic and humanitarian systems.</p>
+    <p>Generated as static HTML for local serving, NW.js desktop viewing, and GitHub Pages publishing.</p>
+  </footer>
+  <script src="../assets/obi.js" defer></script>
+</body>
+</html>

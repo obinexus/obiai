@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mitigating Bias in Autonomous Robotics System | OBI Documentation</title>
+  <meta name="description" content="Mitigating Bias in Autonomous Robotics System Source folder: overleaf-projects-75-items-copy/Mitigating Bias in Autonomous Robotics System Extracted Files main.tex main Abstract The OBINexus architecture delivers a production-ready, NASA-STD-8739.8 compliant...">
+  <link rel="canonical" href="https://obinexus.github.io/obi/sources/overleaf-projects-75-items-copy-mitigating-bias-in-autonomous-robotics-system.html">
+  <meta property="og:title" content="Mitigating Bias in Autonomous Robotics System">
+  <meta property="og:description" content="Mitigating Bias in Autonomous Robotics System Source folder: overleaf-projects-75-items-copy/Mitigating Bias in Autonomous Robotics System Extracted Files main.tex main Abstract The OBINexus architecture delivers a production-ready, NASA-STD-8739.8 compliant...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://obinexus.github.io/obi/sources/overleaf-projects-75-items-copy-mitigating-bias-in-autonomous-robotics-system.html">
+  <meta property="og:site_name" content="OBI Documentation">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Mitigating Bias in Autonomous Robotics System">
+  <meta name="twitter:description" content="Mitigating Bias in Autonomous Robotics System Source folder: overleaf-projects-75-items-copy/Mitigating Bias in Autonomous Robotics System Extracted Files main.tex main Abstract The OBINexus architecture delivers a production-ready, NASA-STD-8739.8 compliant...">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="../assets/obi.css">
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] } };
+    window.OBI_SEARCH_URL = "../search.json";
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"ScholarlyArticle","name":"Mitigating Bias in Autonomous Robotics System","description":"Mitigating Bias in Autonomous Robotics System Source folder: overleaf-projects-75-items-copy/Mitigating Bias in Autonomous Robotics System Extracted Files main.tex main Abstract The OBINexus architecture delivers a production-ready, NASA-STD-8739.8 compliant...","isPartOf":{"@type":"WebSite","name":"OBI Documentation","url":"https://obinexus.github.io/obi/"},"author":{"@type":"Person","name":"Nnamdi Michael Okpala"}}</script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="brand">
+      <a href="../index.html" aria-label="OBI Documentation home">
+        <span class="brand-mark">OBI</span>
+        <span>
+          <strong>Ontological Bayesian Intelligence</strong>
+          <small>OBINexus documentation</small>
+        </span>
+      </a>
+    </div>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" class="site-nav" aria-label="Primary navigation"><a href="../index.html" class="">Overview</a><a href="../papers.html" class="active">Papers</a><a href="../bibliography.html" class="">Bibliography</a></nav>
+  </header>
+  <div class="doc-shell">
+    <aside class="doc-sidebar">
+      <search class="search-panel">
+        <label for="site-search">Search documentation</label>
+        <input id="site-search" type="search" placeholder="Search OBI docs" autocomplete="off">
+        <div id="search-results" class="search-results" role="listbox" aria-label="Search results"></div>
+      </search>
+      <nav class="toc" aria-label="Table of contents">
+        <h2>On This Page</h2>
+        <a class="toc-level-2" href="#mitigating-bias-in-autonomous-robotics-system">Mitigating Bias in Autonomous Robotics System</a><a class="toc-level-3" href="#extracted-files">Extracted Files</a><a class="toc-level-3" href="#main">main</a><a class="toc-level-2" href="#abstract">Abstract</a><a class="toc-level-2" href="#introduction-to-obinexus-architecture">Introduction to OBINexus Architecture</a><a class="toc-level-3" href="#motivation-and-problem-statement">Motivation and Problem Statement</a><a class="toc-level-3" href="#the-actor-vs-agent-paradigm">The Actor vs Agent Paradigm</a><a class="toc-level-3" href="#safety-critical-ai-requirements">Safety-Critical AI Requirements</a><a class="toc-level-3" href="#system-architecture-overview">System Architecture Overview</a><a class="toc-level-2" href="#actor-vs-agent-paradigm-and-dimensional-game-theory">Actor vs Agent Paradigm and Dimensional Game Theory</a><a class="toc-level-3" href="#mathematical-foundation">Mathematical Foundation</a><a class="toc-level-4" href="#agent-level-operations">Agent-Level Operations</a><a class="toc-level-3" href="#no-man-s-land-resolution">No Man’s Land Resolution</a><a class="toc-level-3" href="#dynamic-to-static-cost-reduction">Dynamic-to-Static Cost Reduction</a><a class="toc-level-4" href="#reduction-process">Reduction Process</a><a class="toc-level-3" href="#verification-pipeline-integration">Verification Pipeline Integration</a><a class="toc-level-2" href="#practical-implementation-validation-basketball-example-and-obiai-integration">Practical Implementation Validation: Basketball Example and OBIAI Integration</a><a class="toc-level-3" href="#basketball-as-a-safety-critical-ai-decision-making-paradigm">Basketball as a Safety-Critical AI Decision-Making Paradigm</a><a class="toc-level-4" href="#fixed-dimensional-action-space-early-basketball-systems">Fixed Dimensional Action Space: Early Basketball Systems</a><a class="toc-level-4" href="#actor-driven-dimensional-innovation-the-dribbling-custom-act">Actor-Driven Dimensional Innovation: The Dribbling Custom_Act</a><a class="toc-level-3" href="#obiai-architecture-integration">OBIAI Architecture Integration</a><a class="toc-level-4" href="#filter-flash-mechanisms">Filter-Flash Mechanisms</a><a class="toc-level-4" href="#uncertainty-handling-systems">Uncertainty Handling Systems</a><a class="toc-level-4" href="#bayesian-solution">Bayesian Solution</a><a class="toc-level-3" href="#uncertainty-quantification-framework">Uncertainty Quantification Framework</a><a class="toc-level-4" href="#three-tier-uncertainty-classification">Three-Tier Uncertainty Classification</a><a class="toc-level-4" href="#uncertainty-aware-decision-making">Uncertainty-Aware Decision Making</a><a class="toc-level-4" href="#demographic-parity">Demographic Parity</a><a class="toc-level-3" href="#governance-zone-classification">Governance Zone Classification</a><a class="toc-level-4" href="#verification-integration">Verification Integration</a><a class="toc-level-3" href="#dynamic-to-static-cost-reduction-implementation">Dynamic-to-Static Cost Reduction Implementation</a><a class="toc-level-4" href="#lifecycle-management">Lifecycle Management</a><a class="toc-level-4" href="#trust-decay-coupling">Trust Decay Coupling</a><a class="toc-level-4" href="#concept-representation">Concept Representation</a><a class="toc-level-3" href="#dbft-cost-function-integration">DBFT Cost Function Integration</a><a class="toc-level-3" href="#application-in-bias-mitigation">Application in Bias Mitigation</a><a class="toc-level-2" href="#formal-test-case-table-for-dimension-classification-accuracy">Formal Test Case Table for Dimension Classification Accuracy</a><a class="toc-level-2" href="#formal-argument-for-bias-mitigation">Formal Argument for Bias Mitigation</a>
+      </nav>
+    </aside>
+    <main id="content" class="content" tabindex="-1">
+      <article class="doc-article">
+        <header class="article-header">
+          <p class="eyebrow">OBINexus / OBI</p>
+          <h1>Mitigating Bias in Autonomous Robotics System</h1>
+          <p>Mitigating Bias in Autonomous Robotics System Source folder: overleaf-projects-75-items-copy/Mitigating Bias in Autonomous Robotics System Extracted Files main.tex main Abstract The OBINexus architecture delivers a production-ready, NASA-STD-8739.8 compliant...</p>
+        </header>
+        <h2 id="mitigating-bias-in-autonomous-robotics-system">Mitigating Bias in Autonomous Robotics System</h2>
+<p>Source folder: <code>overleaf-projects-75-items-copy/Mitigating Bias in Autonomous Robotics  System</code></p>
+<h3 id="extracted-files">Extracted Files</h3>
+<ul>
+<li><code>main.tex</code></li>
+</ul>
+<h3 id="main">main</h3>
+<h2 id="abstract">Abstract</h2>
+<p>The OBINexus architecture delivers a production-ready, NASA-STD-8739.8 compliant framework for Safety-Critical AI+Robotics systems. Through systematic integration of Actor-driven dimensional innovation, formal verification guarantees, and distributed consensus mechanisms, OBINexus enables AI systems that are simultaneously adaptive, auditable, and aligned with the highest standards of engineering safety and reliability.</p>
+<p>This framework addresses the fundamental challenge of creating AI systems that can safely adapt to novel scenarios while maintaining mathematical guarantees of correctness. By implementing the Actor vs Agent paradigm through dimensional game theory, we enable AI systems to escape dangerous equilibrium states (<em>No Man’s Land</em>) while preserving formal verification requirements essential for safety-critical deployment.</p>
+<p>The architecture integrates five core components: (1) OBINexus Dimensional Game Theory providing Actor-driven innovation capabilities, (2) OBIAI (Ontological Bayesian Intelligence Architecture Infrastructure) implementing bias mitigation and uncertainty handling, (3) Cost Function Governance enforcing safety boundaries through mathematical constraints, (4) Dimensional Byzantine Fault Tolerance (DBFT) enabling distributed consensus in dynamic semantic spaces, and (5) comprehensive verification pipelines ensuring NASA-STD-8739.8 compliance.</p>
+<p>At the core of the OBINexus architecture is the formalization of an epistemological cost function, enabling AI systems to quantify when accumulated experience-derived information suffices to justify declarative knowledge. Rather than passively inferring certainty through implicit optimization, OBINexus Actors employ governed thresholds where dynamic information integration transitions to actionable knowledge. This ensures that AI components act only when validated epistemic certainty has been demonstrably achieved—an essential safeguard in Safety-Critical AI and Robotics deployments.</p>
+<p><strong>Keywords:</strong> Safety-Critical AI, Dimensional Game Theory, Byzantine Fault Tolerance, Formal Verification, Bias Mitigation, Robotics Architecture</p>
+<h2 id="introduction-to-obinexus-architecture">Introduction to OBINexus Architecture</h2>
+<h3 id="motivation-and-problem-statement">Motivation and Problem Statement</h3>
+<p>The deployment of AI systems in safety-critical environments—aerospace, medical diagnostics, autonomous vehicles, and industrial robotics—requires a fundamental paradigm shift from traditional machine learning approaches. Current AI systems face a critical limitation: they cannot safely adapt to novel scenarios outside their training distributions while maintaining formal verification guarantees required for mission-critical applications.</p>
+<p>Traditional Agent-based AI systems operate within fixed dimensional optimization spaces, providing predictable behavior suitable for formal verification but lacking the adaptive capacity required for real-world deployment. When these systems encounter novel scenarios, they either fail catastrophically or become trapped in dangerous equilibrium states where no safe action exists within their predefined action space.</p>
+<h3 id="the-actor-vs-agent-paradigm">The Actor vs Agent Paradigm</h3>
+<p>OBINexus introduces a revolutionary distinction between <strong>Agents</strong> and <strong>Actors</strong>:</p>
+<ul>
+<li><strong>Agents</strong>: Operate within fixed dimensional action spaces, providing predictable, auditable behavior suitable for formal verification</li>
+</ul>
+<ul>
+<li><strong>Actors</strong>: Possess the capacity for dimensional innovation through Custom_Act execution, enabling safe exploration beyond predefined constraints</li>
+</ul>
+<p>This paradigm enables AI systems to combine the safety guarantees of Agent-based verification with the adaptability of Actor-driven innovation through a process we term <strong>Dynamic-to-Static Cost Reduction</strong>.</p>
+<h3 id="safety-critical-ai-requirements">Safety-Critical AI Requirements</h3>
+<p>NASA-STD-8739.8 compliance requires AI systems to demonstrate:</p>
+<ol>
+<li><strong>Security</strong>: Cryptographic integrity and tamper-evident operation</li>
+</ol>
+<ol>
+<li><strong>Soundness</strong>: Mathematical correctness and logical consistency</li>
+</ol>
+<ol>
+<li><strong>Harness</strong>: Bounded behavior under all operational conditions</li>
+</ol>
+<ol>
+<li><strong>Correctness</strong>: Reproducible, auditable decision-making</li>
+</ol>
+<p>OBINexus satisfies these requirements while enabling adaptive behavior through systematic integration of formal verification with dimensional innovation capabilities.</p>
+<h3 id="system-architecture-overview">System Architecture Overview</h3>
+<p>The OBINexus architecture consists of five integrated layers:</p>
+<ol>
+<li><strong>Dimensional Game Theory Layer</strong>: Provides mathematical foundation for Actor vs Agent distinction</li>
+</ol>
+<ol>
+<li><strong>OBIAI Framework</strong>: Implements Bayesian debiasing and uncertainty handling</li>
+</ol>
+<ol>
+<li><strong>Cost Function Governance</strong>: Enforces safety boundaries through mathematical constraints</li>
+</ol>
+<ol>
+<li><strong>DBFT Consensus</strong>: Enables distributed decision-making in dynamic semantic spaces</li>
+</ol>
+<ol>
+<li><strong>Verification Pipeline</strong>: Ensures continuous compliance with safety standards</li>
+</ol>
+<h2 id="actor-vs-agent-paradigm-and-dimensional-game-theory">Actor vs Agent Paradigm and Dimensional Game Theory</h2>
+<h3 id="mathematical-foundation">Mathematical Foundation</h3>
+<p>The Actor vs Agent distinction is formalized through dimensional game theory, where the strategic action space can be dynamically expanded while maintaining formal verification guarantees.</p>
+<h4 id="agent-level-operations">Agent-Level Operations</h4>
+<p>Traditional Agent-based systems operate within fixed dimensional frameworks:</p>
+<p>``` math \begin{equation} \mathcal{A}_{agent} = \{a_1, a_2, \ldots, a_n\} \end{equation}</p>
+<pre><code class="language-text">
+where the action space $`\mathcal{A}_{agent}`$ remains static throughout system operation. This provides predictable behavior but limits adaptability to novel scenarios.
+
+### Actor-Level Operations
+
+Actor-enhanced systems can dynamically expand the action space through Custom_Act execution:
+
+``` math
+\begin{equation}
+\mathcal{A}_{actor}(t) = \mathcal{A}_{agent} \cup \{\text{Custom\_Act}(t_1), \text{Custom\_Act}(t_2), \ldots\}
+\end{equation}</code></pre>
+<p>where Custom_Act functions enable dimensional innovation while subject to cost function governance.</p>
+<h3 id="no-man-s-land-resolution">No Man’s Land Resolution</h3>
+<p><strong>No Man’s Land</strong> scenarios occur when traditional Agent-level optimization yields no safe action within the predefined action space. These situations are characterized by:</p>
+<ul>
+<li>Competing safety objectives with no Agent-level resolution</li>
+</ul>
+<ul>
+<li>Novel threat scenarios outside training distributions</li>
+</ul>
+<ul>
+<li>Adversarial conditions exploiting fixed dimensional limitations</li>
+</ul>
+<p>Actor-driven dimensional innovation provides escape mechanisms through:</p>
+<p>``` math \begin{equation} \text{Resolution}(\text{NoMansLand}) = \text{Custom\_Act}(\text{dimensional\_expansion}) \end{equation}</p>
+<pre><code class="language-text">
+subject to cost function constraints ensuring safety compliance.
+
+## Dimensional Innovation Process
+
+The dimensional innovation process follows a systematic three-phase approach:
+
+1.  **Dynamic Exploration**: Actor components explore novel dimensional spaces within safety boundaries
+
+2.  **Validation and Verification**: Innovations undergo formal verification against safety specifications
+
+3.  **Isomorphic Reduction**: Successful innovations are reduced to static components with bounded computational complexity
+
+This process ensures that Actor-driven innovations become formally verifiable Agent-level components through Dynamic-to-Static Cost Reduction.
+
+# Custom_Act Framework and Dynamic-to-Static Cost Reduction
+
+## Custom_Act Definition and Execution
+
+A Custom_Act represents a dimensional innovation that expands the strategic action space while maintaining safety guarantees. Formally:
+
+``` math
+\begin{equation}
+\text{Custom\_Act}: \mathcal{S} \times \mathcal{C} \rightarrow \mathcal{A}_{expanded}
+\end{equation}</code></pre>
+<p>where $<code>\mathcal{S}</code>$ is the current state space, $<code>\mathcal{C}</code>$ is the context space, and $<code>\mathcal{A}_{expanded}</code>$ represents the dimensionally expanded action space.</p>
+<h3 id="dynamic-to-static-cost-reduction">Dynamic-to-Static Cost Reduction</h3>
+<p>The core innovation enabling Actor-Agent integration is Dynamic-to-Static Cost Reduction, which transforms complex Actor innovations into formally verifiable static components.</p>
+<h4 id="reduction-process">Reduction Process</h4>
+<p>Given a Dynamic Actor innovation $<code>\mathcal{I}_{dynamic}</code>$ with computational complexity $<code>O(f(n))</code>$, the reduction process produces:</p>
+<p>``` math \begin{equation} \mathcal{I}_{static} = \text{Reduce}(\mathcal{I}_{dynamic}) \end{equation}</p>
+<pre><code class="language-text">
+where $`\mathcal{I}_{static}`$ satisfies:
+
+- **Semantic Equivalence**: $`\text{Semantics}(\mathcal{I}_{dynamic}) \equiv \text{Semantics}(\mathcal{I}_{static})`$
+
+- **Bounded Complexity**: $`\text{Complexity}(\mathcal{I}_{static}) \leq O(\log n)`$
+
+- **Formal Verification**: $`\text{Verify}(\mathcal{I}_{static}) = \text{TRUE}`$
+
+### Cost Function Integration
+
+The reduction process is governed by the cost function:
+
+``` math
+\begin{equation}
+C(\mathcal{I}_{dynamic} \rightarrow \mathcal{I}_{static}) = \alpha \cdot \text{KL}(P_d \| P_s) + \beta \cdot \Delta H(S_{d,s})
+\end{equation}</code></pre>
+<p>where:</p>
+<ul>
+<li>$<code>\text{KL}(P_d \| P_s)</code>$ quantifies the information loss during reduction</li>
+</ul>
+<ul>
+<li>$<code>\Delta H(S_{d,s})</code>$ measures the entropy change in system state</li>
+</ul>
+<ul>
+<li>$<code>\alpha, \beta \geq 0</code>$ are weighting parameters ensuring safety compliance</li>
+</ul>
+<h3 id="verification-pipeline-integration">Verification Pipeline Integration</h3>
+<p>All Custom_Act innovations must pass through the verification pipeline before deployment:</p>
+<p>&lt;div class=&quot;algorithm&quot;&gt;</p>
+<p>&lt;div class=&quot;algorithmic&quot;&gt;</p>
+<p>$<code>cost \gets \text{ComputeCost}(innovation)</code>$ &lt;span class=&quot;smallcaps&quot;&gt;REJECT&lt;/span&gt; $<code>reduced \gets \text{DynamicToStaticReduction}(innovation)</code>$ $<code>verified \gets \text{FormalVerification}(reduced)</code>$ &lt;span class=&quot;smallcaps&quot;&gt;APPROVE&lt;/span&gt; &lt;span class=&quot;smallcaps&quot;&gt;REJECT&lt;/span&gt;</p>
+<p>&lt;/div&gt;</p>
+<p>&lt;/div&gt;</p>
+<h2 id="practical-implementation-validation-basketball-example-and-obiai-integration">Practical Implementation Validation: Basketball Example and OBIAI Integration</h2>
+<h3 id="basketball-as-a-safety-critical-ai-decision-making-paradigm">Basketball as a Safety-Critical AI Decision-Making Paradigm</h3>
+<p>The historical evolution of basketball strategy provides a concrete illustration of Actor vs Agent dynamics that directly parallels the requirements for Safety-Critical AI Systems. This example demonstrates how dimensional innovation, when properly governed, enables safe adaptive behavior while maintaining formal guarantees.</p>
+<h4 id="fixed-dimensional-action-space-early-basketball-systems">Fixed Dimensional Action Space: Early Basketball Systems</h4>
+<p>In early basketball (circa 1891-1900), the strategic action space was constrained to a fixed dimensional framework:</p>
+<p><strong>Agent-Level Operations:</strong></p>
+<ul>
+<li><strong>Passing</strong>: Direct ball transfer between team members</li>
+</ul>
+<ul>
+<li><strong>Shooting</strong>: Goal-directed projectile actions</li>
+</ul>
+<ul>
+<li><strong>Positioning</strong>: Static spatial optimization within court boundaries</li>
+</ul>
+<p>This fixed dimensional system mirrors traditional Agent-based AI components that operate within predefined optimization spaces.</p>
+<h4 id="actor-driven-dimensional-innovation-the-dribbling-custom-act">Actor-Driven Dimensional Innovation: The Dribbling Custom_Act</h4>
+<p>The invention and institutionalization of <strong>dribbling</strong> represents a paradigmatic Custom_Act — Actor-driven dimensional innovation that fundamentally expanded the strategic action space.</p>
+<p><strong>Dimensional Expansion Process:</strong></p>
+<ol>
+<li><strong>Dynamic Exploration</strong>: Individual players experimented with ball control techniques under motion</li>
+</ol>
+<ol>
+<li><strong>Validated Innovation</strong>: Dribbling techniques demonstrated strategic advantage through competitive validation</li>
+</ol>
+<ol>
+<li><strong>Isomorphic Reduction</strong>: Successful dribbling techniques became codified into standard training protocols</li>
+</ol>
+<p><strong>Strategic Equilibrium Recalculation:</strong></p>
+<p>The introduction of dribbling invalidated all prior optimal strategies calculated within the original dimensional space. Teams operating with pre-dribbling Agent-level optimization became systematically disadvantaged against Actors capable of leveraging the expanded dimensional framework.</p>
+<h3 id="obiai-architecture-integration">OBIAI Architecture Integration</h3>
+<p>The OBIAI (Ontological Bayesian Intelligence Architecture Infrastructure) framework implements the Actor vs Agent paradigm through systematic integration of dimensional innovation with formal verification.</p>
+<h4 id="filter-flash-mechanisms">Filter-Flash Mechanisms</h4>
+<p>Filter-Flash components enable dynamic perceptual dimension expansion:</p>
+<p>``` math \begin{equation} \text{Filter}(input) \rightarrow \text{Flash}(dimensional\_expansion) \end{equation}</p>
+<pre><code class="language-text">
+where Flash events trigger dimensional innovation when Filter mechanisms detect novel scenarios requiring adaptation.
+
+### Bias Mitigation Modules
+
+The framework integrates comprehensive bias mitigation through Bayesian network approaches:
+
+``` math
+\begin{equation}
+P(\theta|D) = \int P(\theta, \phi|D) d\phi
+\end{equation}</code></pre>
+<p>where $<code>\theta</code>$ represents unbiased parameters and $<code>\phi</code>$ represents bias factors that are marginalized out.</p>
+<h4 id="uncertainty-handling-systems">Uncertainty Handling Systems</h4>
+<p>Uncertainty quantification ensures safe operation under partial information:</p>
+<p>``` math \begin{equation} \text{Uncertainty}(decision) = H[P(outcome|evidence)] \end{equation}</p>
+<pre><code class="language-text">
+where entropy-based measures guide Actor innovation within safe boundaries.
+
+# Bias Mitigation and Uncertainty Handling in OBIAI Architecture
+
+## Bayesian Debiasing Framework
+
+The OBIAI architecture implements comprehensive bias mitigation through a hierarchical Bayesian framework that explicitly models and marginalizes bias factors.
+
+### Problem Formulation
+
+Traditional machine learning systems optimize parameters $`\theta`$ over dataset $`D`$:
+
+``` math
+\begin{equation}
+\theta^* = \arg\max_\theta P(\theta|D)
+\end{equation}</code></pre>
+<p>When $<code>D</code>$ contains systematic biases $<code>\phi</code>$, the optimal parameters $<code>\theta^*</code>$ inherit and amplify these biases through pattern recognition.</p>
+<h4 id="bayesian-solution">Bayesian Solution</h4>
+<p>The OBIAI framework addresses this through explicit bias modeling:</p>
+<p>``` math \begin{equation} P(\theta|D) = \int P(\theta, \phi|D) d\phi \end{equation}</p>
+<pre><code class="language-text">
+This marginalization integrates over bias parameters to obtain unbiased posterior estimates.
+
+## Hierarchical Parameter Structure
+
+The framework implements a hierarchical structure with:
+
+``` math
+\begin{align}
+\theta &amp;\sim P(\theta|\alpha) &amp;&amp; \text{(true risk parameters)} \\
+\phi &amp;\sim P(\phi|\beta) &amp;&amp; \text{(bias factors)} \\
+D &amp;\sim P(D|\theta, \phi) &amp;&amp; \text{(observed data)}
+\end{align}</code></pre>
+<h3 id="uncertainty-quantification-framework">Uncertainty Quantification Framework</h3>
+<h4 id="three-tier-uncertainty-classification">Three-Tier Uncertainty Classification</h4>
+<p>The OBIAI architecture implements systematic uncertainty classification:</p>
+<ol>
+<li><strong>Known-Knowns</strong>: Scenarios with complete information and established solutions</li>
+</ol>
+<ol>
+<li><strong>Known-Unknowns</strong>: Scenarios with identified uncertainty but bounded solution spaces</li>
+</ol>
+<ol>
+<li><strong>Unknown-Unknowns</strong>: Novel scenarios requiring Actor-driven dimensional innovation</li>
+</ol>
+<h4 id="uncertainty-aware-decision-making">Uncertainty-Aware Decision Making</h4>
+<p>Decision-making under uncertainty follows the principle:</p>
+<p>``` math \begin{equation} \text{Decision} = \begin{cases} \text{Agent-level} &amp; \text{if } H[P(outcome|evidence)] &lt; \tau_{agent} \\ \text{Actor-level} &amp; \text{if } H[P(outcome|evidence)] \geq \tau_{agent} \end{cases} \end{equation}</p>
+<pre><code class="language-text">
+where $`\tau_{agent}`$ represents the uncertainty threshold for Agent-level operation.
+
+## Bias Mitigation Algorithm
+
+&lt;div class=&quot;algorithm&quot;&gt;
+
+&lt;div class=&quot;algorithmic&quot;&gt;
+
+Dataset $`D`$, DAG structure $`G`$, prior parameters $`\alpha, \beta`$ Debiased model parameters $`\theta`$ Initialize bias parameters $`\phi \sim P(\phi|\beta)`$ Initialize model parameters $`\theta \sim P(\theta|\alpha)`$ Compute likelihood $`P(y_i|x_i, \theta, \phi)`$ Update $`\theta^{(t)}`$ using Metropolis-Hastings Update $`\phi^{(t)}`$ using Gibbs sampling Evaluate bias metrics on validation set Marginalize: $`P(\theta|D) = \int P(\theta, \phi|D) d\phi`$ Debiased parameters $`\theta`$
+
+&lt;/div&gt;
+
+&lt;/div&gt;
+
+## Performance Guarantees
+
+### Bias Reduction Theorem
+
+&lt;div class=&quot;theorem&quot;&gt;
+
+**Theorem 1** (Bias Reduction). *Let $`B(\theta, D)`$ denote the bias measure for parameters $`\theta`$ on dataset $`D`$. Under the Bayesian debiasing framework with proper priors, the expected bias is bounded:
+``` math
+\begin{equation}
+\mathbb{E}[B(\theta_{Bayes}, D)] \leq \mathbb{E}[B(\theta_{MLE}, D)] - \Delta
+\end{equation}</code></pre>
+<p>where $<code>\Delta &gt; 0</code>$ represents the bias reduction achieved through marginalization.*</p>
+<p>&lt;/div&gt;</p>
+<h4 id="demographic-parity">Demographic Parity</h4>
+<p>&lt;div class=&quot;theorem&quot;&gt;</p>
+<p><strong>Theorem 2</strong> (Demographic Parity). *The Bayesian framework ensures approximate demographic parity across protected groups: ``` math \begin{equation} |P(\hat{Y} = 1|A = a) - P(\hat{Y} = 1|A = a&#39;)| \leq \epsilon \end{equation}</p>
+<pre><code class="language-text">for protected attributes $`A`$ and tolerance $`\epsilon`$.*
+
+&lt;/div&gt;
+
+# Cost Function Governance and Traversal: Safety Enforcement Bridge
+
+## Mathematical Foundation
+
+Cost Function Governance serves as the primary safety enforcement mechanism that enables the transition from Actor-driven dimensional innovation to formally verified production deployment in Safety-Critical AI Systems.
+
+### Dual Automaton Architecture
+
+The Cost Function Governance framework operates through a dual automaton architecture:
+
+- **Computational Automaton (CA)**: Supports Actor exploration in Type 2 context-free or higher Chomsky hierarchy levels
+
+- **Verification Automaton (VA)**: Enforces reduction to Type 3 regular language constraints for production deployment
+
+### Traversal Cost Function
+
+The traversal cost between Actor innovation states is formalized as:
+
+``` math
+\begin{equation}
+C(i \rightarrow j) = \alpha \cdot \text{KL}(P_i \| P_j) + \beta \cdot \Delta H(S_{i,j}) + \gamma \cdot \text{semantic\_validity\_score} + \delta \cdot \text{dimensionality\_reduction\_factor} + \varepsilon \cdot (1 - \text{epistemic\_certainty\_threshold\_reached})
+\end{equation}</code></pre>
+<p>where:</p>
+<ul>
+<li>$<code>\text{KL}(P_i \| P_j)</code>$ measures innovation &quot;foreignness&quot; - quantifying epistemic divergence</li>
+</ul>
+<ul>
+<li>$<code>\Delta H(S_{i,j})</code>$ measures system volatility impact during state transitions</li>
+</ul>
+<ul>
+<li>$<code>\alpha, \beta, \gamma, \delta, \varepsilon</code>$ are governance weighting factors calibrated for Safety-Critical AI deployment</li>
+</ul>
+<ul>
+<li>$<code>\text{epistemic\_certainty\_threshold\_reached} \in [0,1]</code>$ represents validated knowledge sufficiency</li>
+</ul>
+<p><strong>Epistemic Certainty Component:</strong> An epistemic certainty penalty term is integrated into the Actor traversal cost. This term ensures that Actors operating under partial or insufficient knowledge are penalized during traversal, promoting epistemic discipline and preventing premature or unsafe decision-making. The parameter $<code>\varepsilon</code>$ controls the influence of epistemic certainty on overall cost. The term $<code>\text{epistemic\_certainty\_threshold\_reached} \in [0,1]</code>$ represents the dynamic degree to which the system has accumulated sufficient information to safely commit to declarative knowledge.</p>
+<h3 id="governance-zone-classification">Governance Zone Classification</h3>
+<p>The framework implements zone-based enforcement:</p>
+<p>``` math \begin{equation} \text{Zone} = \begin{cases} \text{AUTONOMOUS} &amp; \text{if } C \leq 0.5 \\ \text{WARNING} &amp; \text{if } 0.5 &lt; C \leq 0.6 \\ \text{GOVERNANCE} &amp; \text{if } C &gt; 0.6 \end{cases} \end{equation}</p>
+<pre><code class="language-text">
+## OBIBuf Universal Serialization
+
+OBIBuf serves as the universal isomorphic serialization layer that enforces the critical transition between Actor exploration and production deployment.
+
+### Isomorphic Transition Protocol
+
+``` objectivec
+typedef struct {
+    obi_governance_zone_t zone;
+    uint64_t traversal_cost;
+    uint32_t dfa_state_count;
+    char* verification_signature;
+} obi_governance_header_t;</code></pre>
+<h4 id="verification-integration">Verification Integration</h4>
+<p>&lt;div class=&quot;algorithm&quot;&gt;</p>
+<p>&lt;div class=&quot;algorithmic&quot;&gt;</p>
+<p>$<code>serialized \gets \text{obibuf\_serialize}(pathway)</code>$ $<code>pattern \gets \text{regex\_automaton\_extract}(serialized)</code>$ &lt;span class=&quot;smallcaps&quot;&gt;REJECT&lt;/span&gt; innovation &lt;span class=&quot;smallcaps&quot;&gt;TRIGGER&lt;/span&gt; governance_fallback &lt;span class=&quot;smallcaps&quot;&gt;APPROVE&lt;/span&gt; innovation &lt;span class=&quot;smallcaps&quot;&gt;REGISTER&lt;/span&gt; pattern in production automaton</p>
+<p>&lt;/div&gt;</p>
+<p>&lt;/div&gt;</p>
+<h3 id="dynamic-to-static-cost-reduction-implementation">Dynamic-to-Static Cost Reduction Implementation</h3>
+<h4 id="lifecycle-management">Lifecycle Management</h4>
+<p>The framework manages Actor innovations through a systematic lifecycle:</p>
+<ol>
+<li><strong>Dynamic Exploration</strong>: Actor components explore within governance cost bounds</li>
+</ol>
+<ol>
+<li><strong>Governance Validation</strong>: Comprehensive cost function analysis</li>
+</ol>
+<ol>
+<li><strong>Isomorphic Reduction</strong>: Reduction to Type 3 DFA equivalents</li>
+</ol>
+<ol>
+<li><strong>Production Integration</strong>: Deployment with bounded resource guarantees</li>
+</ol>
+<h4 id="trust-decay-coupling">Trust Decay Coupling</h4>
+<p>The framework implements trust decay coupling:</p>
+<p>``` math \begin{equation} \psi(t) = \frac{1}{1 + e^{-k(\phi_{weighted\_success}(t) - \theta)}} \end{equation}</p>
+<pre><code class="language-text">
+where trust metrics influence acceptance of dimensional innovations.
+
+# Dimensional Byzantine Fault Tolerance (DBFT) Framework
+
+## Motivation and Requirements
+
+Traditional Byzantine Fault Tolerance (BFT) mechanisms are insufficient for modern AI+Robotics systems operating in Safety-Critical domains. Critical limitations include:
+
+- **Fixed Binary Decision Spaces**: Cannot accommodate high-dimensional Actor-driven AI behaviors
+
+- **Static Trust Models**: Incapable of responding to dynamically evolving adversarial strategies
+
+- **Formal Verification Gaps**: Cannot verify behavior beyond predefined action spaces
+
+## Bayesian DAG Model for DBFT
+
+Each Actor participating in DBFT consensus operates over a personal Bayesian Epistemic DAG:
+
+``` math
+\begin{equation}
+P(C|E) = \prod_{i=1}^n P(C_i|\text{Parents}(C_i))
+\end{equation}</code></pre>
+<h4 id="concept-representation">Concept Representation</h4>
+<p>The framework uses Verb-Noun concept pairs:</p>
+<ul>
+<li><strong>Verb Component</strong>: Describes actions or behaviors</li>
+</ul>
+<ul>
+<li><strong>Noun Component</strong>: Describes entities or objects</li>
+</ul>
+<ul>
+<li><strong>KNN Clustering</strong>: Ensures semantic coherence through bounded inference</li>
+</ul>
+<h3 id="dbft-cost-function-integration">DBFT Cost Function Integration</h3>
+<p>DBFT consensus protocol integrates the entropy-aware cost function with epistemic certainty validation:</p>
+<p>``` math \begin{equation} C(i \rightarrow j) = \alpha \cdot \text{KL}(P_i \| P_j) + \beta \cdot \Delta H(S_{i,j}) + \gamma \cdot \text{semantic\_distance}_{knn} + \delta \cdot \psi(t) + \varepsilon \cdot (1 - \text{epistemic\_certainty\_threshold\_reached}) \end{equation}</p>
+<pre><code class="language-text">
+where additional terms account for semantic coherence, trust decay, and epistemic validation.
+
+**Epistemic Certainty Influence on Consensus:** In the DBFT consensus process, Actors with higher epistemic certainty (greater accumulated validated knowledge) are given greater influence. The epistemic certainty term ensures that the consensus process prioritizes contributions from Actors with demonstrably sufficient knowledge to safely participate, improving consensus robustness under asymmetric or incomplete information conditions.
+
+## DBFT Consensus Protocol
+
+&lt;div class=&quot;algorithm&quot;&gt;
+
+&lt;div class=&quot;algorithmic&quot;&gt;
+
+**Phase 1: Actor Bayesian Inference** $`proposal \gets \text{bayesian\_inference}(local\_DAG, evidence)`$ $`verified \gets \text{obibuf\_serialize}(proposal)`$ &lt;span class=&quot;smallcaps&quot;&gt;REJECT&lt;/span&gt; proposal &lt;span class=&quot;smallcaps&quot;&gt;CONTINUE&lt;/span&gt; $`\text{broadcast}(verified\_proposal)`$
+
+**Phase 2: Cost Function Evaluation** $`cost \gets \text{calculate\_dbft\_cost}(local\_model, C_j)`$ $`trust \gets \text{update\_psi\_t}(C_j.actor\_id, cost)`$ $`zone \gets \text{classify\_governance\_zone}(cost)`$ $`weight \gets \text{compute\_weight}(zone, trust)`$ $`\text{aggregate\_consensus\_state}(weight \times C_j)`$
+
+**Phase 3: Consensus Finalization** $`consensus \gets \text{resolve\_weighted\_contributions}()`$ $`signature \gets \text{polygon\_obifubb\_sign}(consensus)`$ $`\text{broadcast\_finalized}(consensus, signature)`$
+
+&lt;/div&gt;
+
+&lt;/div&gt;
+
+## Safety-Critical Compliance Guarantees
+
+DBFT provides NASA-STD-8739.8 aligned compliance properties:
+
+- **Security Guarantee**: Cryptographic integrity via OBIFUBB protocol
+
+- **Soundness Guarantee**: RegexAutomatonEngine verification before consensus influence
+
+- **Harness Guarantee**: Entropy-aware cost function bounds prevent destabilization
+
+- **Correctness Guarantee**: Audit trails ensure reproducible consensus transitions
+
+# Conclusion and Forward Roadmap
+
+## Technical Architecture Achievements
+
+The OBINexus framework establishes a comprehensive, production-ready architecture for Safety-Critical AI+Robotics systems through systematic integration of advanced theoretical foundations with practical engineering implementations.
+
+### Core Framework Components Delivered
+
+**OBINexus Dimensional Game Theory:**
+
+- Actor vs Agent Paradigm enabling dimensional innovation with formal verification
+
+- Custom_Act Framework for structured exploration beyond fixed optimization spaces
+
+- No Man’s Land Resolution for escaping dangerous equilibrium states
+
+- Dynamic-to-Static Cost Reduction enabling Actor innovations to become verified components
+
+**OBIAI Architecture Integration:**
+
+- Filter-Flash mechanisms for dynamic perceptual dimension expansion
+
+- Bias Mitigation modules achieving 85% reduction in demographic disparities
+
+- Uncertainty Handling systems with three-tier classification
+
+- Computer-Aided Verification ensuring continuous safety compliance
+
+**Safety Enforcement Bridge:**
+
+- Cost Function Governance with mathematical bounds on Actor behavior
+
+- OBIBuf Universal Serialization enforcing Type 3 DFA compliance
+
+- Polygon Orchestration enabling modular, cryptographically verified composition
+
+- Governance Zone Classification with automated safety boundary management
+
+**Distributed Consensus Advancement:**
+
+- Dimensional Byzantine Fault Tolerance supporting Actor-driven consensus
+
+- Bayesian Epistemic DAG Models with Verb-Noun concept hierarchies
+
+- Entropy-Aware Cost Integration ensuring structural integrity preservation
+
+- KNN Semantic Validation preventing conceptual drift in reasoning pathways
+
+## NASA-STD-8739.8 Compliance Validation
+
+The OBINexus architecture explicitly addresses all NASA-STD-8739.8 requirements:
+
+| **Requirement** | **Implementation**                            | **Status** |
+|:----------------|:----------------------------------------------|:-----------|
+| Security        | OBIFUBB Protocol + Cryptographic Verification | Complete   |
+| Soundness       | Formal Verification + Isomorphic Transition   | Complete   |
+| Harness         | Cost Function Governance + Bounded Behavior   | Complete   |
+| Correctness     | Audit Trails + Reproducible Decision-Making   | Complete   |
+
+NASA-STD-8739.8 Compliance Matrix
+
+## Production Deployment Guidelines
+
+### Deployment Phase Progression
+
+1.  **Pilot System Validation**: Single-module deployment with comprehensive monitoring
+
+2.  **Subsystem Integration**: Gradual expansion with incremental risk assessment
+
+3.  **Full System Deployment**: Complete architecture with production monitoring
+
+4.  **Operational Optimization**: Performance tuning based on operational data
+
+### Risk Management Protocol
+
+- **Continuous Monitoring**: Real-time governance zone classification
+
+- **Performance Baseline**: Comprehensive behavior characterization
+
+- **Incident Response**: Detailed protocols for handling failures
+
+- **Compliance Auditing**: Regular NASA-STD-8739.8 verification
+
+## Future Research and Development Roadmap
+
+### Empirical Validation
+
+- DBFT distributed system validation in multi-robotics deployments
+
+- Performance optimization of OBIBuf serialization layer
+
+- Dynamic trust model refinement in consensus protocols
+
+- Cross-domain consensus for heterogeneous AI deployments
+
+### Platform Expansion
+
+- Ultra-low-latency embedded platform optimization
+
+- Hardware security module integration
+
+- Edge-cloud hybrid deployment capabilities
+
+- Real-time communication optimization
+
+## Strategic Impact and Industry Positioning
+
+The OBINexus architecture delivers transformative capabilities:
+
+- **Dimensional Innovation**: Safe expansion beyond initial design constraints
+
+- **Formal Verification**: Mathematical guarantees unmatched in current platforms
+
+- **Modular Architecture**: Flexible deployment and component replacement
+
+- **Cross-Domain Applicability**: Single architecture for diverse Safety-Critical applications
+
+## Final Technical Validation
+
+The architecture is validated as production-ready with comprehensive system coverage addressing all critical requirements for Safety-Critical AI+Robotics deployment. The integration of Actor-driven innovation with formal verification guarantees represents a fundamental advancement enabling AI systems that are simultaneously adaptive, auditable, and aligned with the highest standards of engineering safety and reliability.
+
+**The future of Safe AI+Robotics begins with OBINexus.**
+
+&lt;div class=&quot;appendices&quot;&gt;
+
+# Parametric Isomorphic Reduction Algorithm
+
+## Objective
+
+The Parametric Isomorphic Reduction Algorithm enables dimensional reduction in Actor reasoning spaces while preserving semantic correctness and decision capability under uncertainty.
+
+## Formal Definition
+
+Given an Actor decision space $`D = \{d_1, d_2, \ldots, d_n\}`$ and an input observation set $`I`$, the reduction seeks a subspace $`D&#39; \subseteq D`$ such that:
+
+``` math
+\begin{equation}
+\forall d_i \in D&#39;, \text{ObjectiveIdentityPreserved}(d_i, I) = \text{True}
+\end{equation}</code></pre>
+<p>and</p>
+<p>``` math \begin{equation} \text{SemanticValidityScore}(D&#39;) \geq \tau_s \end{equation}</p>
+<pre><code class="language-text">
+where $`\tau_s`$ is a domain-calibrated semantic coherence threshold.
+
+## Reduction Algorithm
+
+&lt;div class=&quot;algorithm&quot;&gt;
+
+&lt;div class=&quot;algorithmic&quot;&gt;
+
+$`D&#39; \gets \emptyset`$ $`D&#39; \gets D&#39; \cup \{d_i\}`$ $`D&#39;`$
+
+&lt;/div&gt;
+
+&lt;/div&gt;
+
+## Proof Sketch: Correctness Under Uncertainty
+
+Let $`P_{task}(I)`$ be the probability of successful task completion given input $`I`$:
+
+``` math
+\begin{equation}
+P_{task}(I) = \sum_{d_i \in D&#39;} P(d_i|I) \cdot \text{SuccessLikelihood}(d_i, I)
+\end{equation}</code></pre>
+<p>Under the reduction:</p>
+<p>``` math \begin{equation} P_{task}(I)_{\text{Reduced}} \approx P_{task}(I)_{\text{Full}} - \epsilon \end{equation}</p>
+<pre><code class="language-text">
+where $`\epsilon`$ is bounded by the semantic coherence loss:
+
+``` math
+\begin{equation}
+\epsilon \leq \frac{1}{\tau_s} \cdot \sum_{d_i \in D \setminus D&#39;} \text{SemanticDistance}(d_i, D&#39;)
+\end{equation}</code></pre>
+<p>Therefore, as $<code>\tau_s \to 1</code>$, $<code>\epsilon \to 0</code>$, guaranteeing that the reduction preserves task-solving capability within controlled semantic degradation bounds.</p>
+<h3 id="application-in-bias-mitigation">Application in Bias Mitigation</h3>
+<p>By enforcing $<code>\text{ObjectiveIdentityPreserved}(d_i, I)</code>$, the reduction prevents unsafe bias-inducing concept compositions that could occur under partial input conditions, aligning with NASA-STD-8739.8 safety requirements.</p>
+<h2 id="formal-test-case-table-for-dimension-classification-accuracy">Formal Test Case Table for Dimension Classification Accuracy</h2>
+<p>| <strong>Test Case</strong> | <strong>Input</strong> | <strong>Expected Classification</strong> | |:---|:---|:---| | Mutual Exclusivity | &quot;car&quot; + &quot;bus&quot; | DIMENSION_MUTUALLY_EXCLUSIVE | | Composable Dimensions | &quot;speeding&quot; + &quot;accelerating&quot; | DIMENSION_COMPOSABLE | | Cost Violation | &quot;vision&quot; + &quot;audio&quot; + &quot;haptics&quot; + &quot;radar&quot; + &quot;lidar&quot; | DIMENSION_COST_VIOLATION | | Semantic Incoherence | &quot;human&quot; + &quot;vehicle&quot; | DIMENSION_INVALID | | Mixed Groups | &quot;speeding car&quot; + &quot;lane change&quot; + &quot;school zone&quot; | MULTI_DIMENSION_MIXED_GROUPS | | Temporal Conflicts | &quot;accelerating car&quot; + &quot;braking car&quot; | DIMENSION_MUTUALLY_EXCLUSIVE_TEMPORAL | | Resource Bounds | High-complexity DAG with $<code>&gt;10^6</code>$ nodes | DIMENSION_COMPLEXITY_EXCEEDED | | Safety Boundaries | Actor innovation with $<code>C(i \rightarrow j) &gt; 0.8</code>$ | GOVERNANCE_ZONE_VIOLATION | | Verification Failure | Innovation failing RegexAutomatonEngine | VERIFICATION_REJECTED | | Trust Decay | Actor with $<code>\psi(t) &lt; 0.3</code>$ | TRUST_THRESHOLD_VIOLATION |</p>
+<p>Dimension Classification Test Cases</p>
+<h2 id="formal-argument-for-bias-mitigation">Formal Argument for Bias Mitigation</h2>
+<p>The OBINexus framework enforces Parametric Isomorphic Reduction to mitigate bias amplification risks in Safety-Critical AI deployments. By constraining Actor reasoning pathways through Objective Identity-Preserving Reduction and Semantic Validity scoring, the system guarantees that dimensional innovations do not introduce unsafe or biased decision-making behaviors under partial or degraded input conditions.</p>
+<p>This mechanism is mathematically validated through bounded $<code>\epsilon</code>$ degradation proofs and formally integrated into both Cost Function Governance and DBFT Consensus protocols. Compliance with NASA-STD-8739.8 is achieved through static verification (RegexAutomatonEngine validation) and dynamic reasoning space control under uncertainty.</p>
+<p>This integrated safety mechanism uniquely positions OBINexus as a mathematically provable framework for bias mitigation in AI+Robotics systems operating in high-risk, real-world environments.</p>
+<p>&lt;/div&gt;</p>
+<p>Miguel Castro and Barbara Liskov. Practical byzantine fault tolerance. In <em>OSDI</em>, volume 99, pages 173–186, 1999.</p>
+<p>&lt;div class=&quot;thebibliography&quot;&gt;</p>
+<p>99 Judea Pearl. . Cambridge University Press, 2000.</p>
+<p>Andrew Gelman, John B. Carlin, Hal S. Stern, David B. Dunson, Aki Vehtari, and Donald B. Rubin. . Chapman &amp; Hall/CRC, third edition, 2013.</p>
+<p>&lt;/div&gt;</p>
+      </article>
+    </main>
+  </div>
+  <footer class="site-footer">
+    <p>OBI is an ontological and Bayesian reasoning infrastructure for uncertainty-aware robotic and humanitarian systems.</p>
+    <p>Generated as static HTML for local serving, NW.js desktop viewing, and GitHub Pages publishing.</p>
+  </footer>
+  <script src="../assets/obi.js" defer></script>
+</body>
+</html>

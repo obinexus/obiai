@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Formal Proofs for Confion Post Quantum HACC System | OBI Source HTML</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --surface: #ffffff;
+      --text: #202321;
+      --muted: #626962;
+      --accent: #147d7e;
+      --border: #d9ddd4;
+      --code: #eef1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    header, main, footer { max-width: 1060px; margin: 0 auto; padding: 1.25rem; }
+    header { border-bottom: 4px solid var(--accent); background: #161819; color: #f5f7f2; max-width: none; }
+    header > div { max-width: 1060px; margin: 0 auto; }
+    a { color: #0f5f60; }
+    header a { color: inherit; }
+    main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 1.25rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p, li { max-width: 78ch; }
+    img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    pre { overflow: auto; background: #20251f; color: #f7fbf2; padding: 1rem; border-radius: 8px; }
+    code { background: var(--code); padding: 0.12rem 0.25rem; border-radius: 5px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--border); padding: 0.45rem 0.6rem; text-align: left; }
+    blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding-left: 1rem; color: var(--muted); }
+    .skip-link { position: absolute; left: 1rem; top: 0.75rem; transform: translateY(-200%); }
+    .skip-link:focus { transform: translateY(0); background: var(--surface); color: var(--text); padding: 0.5rem; }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header>
+    <div>
+      <a href="../index.html">OBI Source HTML</a>
+      <h1>Formal Proofs for Confion Post Quantum HACC System</h1>
+      <p>Generated from Markdown with Python tooling and Pandoc-compatible source preservation.</p>
+    </div>
+  </header>
+  <main id="content" tabindex="-1">
+    <h1 id="formal-proofs-for-confion-post-quantum-hacc-system">Formal Proofs for Confion Post Quantum HACC System</h1>
+<p>Source folder: <code>overleaf-projects-75-items-copy/Formal Proofs for Confion- Post-Quantum HACC System</code></p>
+<h2 id="extracted-files">Extracted Files</h2>
+<ul>
+<li><code>main.tex</code></li>
+</ul>
+<h2 id="main">main</h2>
+<h1 id="introduction">Introduction</h1>
+<p>The enhanced Confion system implements autonomous key management through orthogonal state transitions in Hilbert space, eliminating human intervention. We provide formal security proofs under post-quantum assumptions using Dirac notation and projective measurements.</p>
+<h1 id="mathematical-foundations">Mathematical Foundations</h1>
+<h2 id="hilbert-space-basis-definition">Hilbert Space Basis Definition</h2>
+<p>Define a 3D Hilbert space $<code>\mathcal{H}</code>$ with orthonormal basis vectors:</p>
+<pre><code class="language-math">\begin{align*}
+&amp;\ket{x}: \text{x-basis vector} \\
+&amp;\ket{y}: \text{y-basis vector (90° projection from x)} \\
+&amp;\ket{z}: \text{z-basis vector (projected from y-plane)}
+\end{align*}
+</code></pre>
+<p>satisfying orthogonality:</p>
+<pre><code class="language-math">\braket{x|y} = \braket{y|z} = \braket{z|x} = 0
+</code></pre>
+<p>and normalization:</p>
+<pre><code class="language-math">\braket{x|x} = \braket{y|y} = \braket{z|z} = 1
+</code></pre>
+<h2 id="state-representation">State Representation</h2>
+<p>Cryptographic state at time $<code>t</code>$:</p>
+<pre><code class="language-math">\ket{\psi_t} = \alpha_t\ket{x} + \beta_t\ket{y} + \gamma_t\ket{z}
+</code></pre>
+<p>where $<code>\alpha_t, \beta_t, \gamma_t \in \mathbb{Z}</code>$ are integer coefficients.</p>
+<h2 id="orthogonal-projection-operators">Orthogonal Projection Operators</h2>
+<p>Define planar projection operators:</p>
+<pre><code class="language-math">\begin{align*}
+\hat{P}_{xy} &amp;= \ket{x}\bra{x} + \ket{y}\bra{y} \\
+\hat{P}_{yz} &amp;= \ket{y}\bra{y} + \ket{z}\bra{z}
+\end{align*}
+</code></pre>
+<h2 id="state-transition-operators">State Transition Operators</h2>
+<pre><code class="language-math">\begin{align*}
+\hat{R}_{xy} &amp;= -\ket{x}\bra{y} + \ket{y}\bra{x} \quad \text{(90° rotation in xy-plane)} \\
+\hat{T}_{yz} &amp;= \ket{y}\bra{y} + \ket{z}\bra{z} + \delta_z\ket{z}\bra{y} \\
+\hat{U}_t &amp;= \hat{T}_{yz}\hat{R}_{xy} \quad \text{(full transition operator)}
+\end{align*}
+</code></pre>
+<h2 id="key-derivation-function">Key Derivation Function</h2>
+<p>For key $<code>K_t</code>$ of length $<code>n</code>$:</p>
+<pre><code class="language-math">K_t[i] = \operatorname{Re}\left( \braket{\phi_i | \psi_t} \right) \mod 256
+</code></pre>
+<p>where $<code>\ket{\phi_i} = \cos\theta_i\ket{y} + \sin\theta_i\ket{z}</code>$ are random vectors in the yz-plane.</p>
+<h1 id="security-properties">Security Properties</h1>
+<h2 id="completeness">Completeness</h2>
+<div class="theorem">
+
+For any valid initial state $`\ket{\psi_0}`$, the Confion system generates cryptographically valid derived keys with probability 1.
+
+</div>
+
+<div class="proof">
+
+*Proof.* 1. The state transition $`\hat{U}_t`$ is unitary and preserves norm  
+2. Projective measurements $`\braket{\phi_i|\psi_t}`$ are well-defined  
+3. Modular arithmetic ensures byte-aligned output  
+4. Hence $`K_t`$ is always computable and valid ◻
+
+</div>
+
+<h2 id="soundness">Soundness</h2>
+<div class="theorem">
+
+Let $`\mathcal{A}`$ be a PPT adversary. The probability that $`\mathcal{A}`$ forges a valid $`K_t`$ without $`\ket{\psi_0}`$ is negligible.
+
+</div>
+
+<div class="proof">
+
+*Proof.* The state space has cardinality $`|\mathbb{Z}^3| = \infty`$ with trace decay:
+
+<pre><code class="language-math">|\braket{\psi_0 | \psi_t}| \sim \mathcal{O}(t^{-1/2})
+</code></pre>
+
+For $`t > 2^{80}`$, initial state recovery requires solving:
+
+<pre><code class="language-math">\min_{\alpha,\beta,\gamma} \norm{\hat{U}^{-t}(\alpha\ket{x} + \beta\ket{y} + \gamma\ket{z}) - \ket{\psi_t}}^2
+</code></pre>
+
+which is equivalent to the Orthogonal Vector Problem (OVP), known to be NP-hard. ◻
+
+</div>
+
+<h2 id="quantum-resistance">Quantum Resistance</h2>
+<div class="theorem">
+
+The system resists quantum adversaries running Grover’s and Shor’s algorithms.
+
+</div>
+
+<div class="proof">
+
+*Proof.* **Grover’s Algorithm:** Provides quadratic speedup for unstructured search.  
+- State space dimension: $`\infty`$  
+- Quantum search complexity: $`O(\sqrt{\infty}) = \infty`$  
+**Shor’s Algorithm:**  
+- Non-commutation: $`[\hat{R}_{xy}, \hat{T}_{yz}] \neq 0`$ prevents period finding  
+- No algebraic structure for QFT application  
+**Quantum Linear Algebra Attacks:**  
+State evolution requires solving:
+
+<pre><code class="language-math">\hat{U}_t\ket{\psi_0} = \prod_{k=0}^{t-1} \hat{T}_{yz}^{(k)} \hat{R}_{xy}^{(k)} \ket{\psi_0}
+</code></pre>
+
+where non-commutation creates path-dependent evolution with no efficient inversion. ◻
+
+</div>
+
+<h1 id="orthogonal-span-properties">Orthogonal Span Properties</h1>
+<h2 id="planar-confinement">Planar Confinement</h2>
+<pre><code class="language-math">\hat{P}_{xy}\hat{P}_{yz}\ket{\psi_t} = \beta_t\ket{y}
+</code></pre>
+<p>preserves coherence through shared y-component.</p>
+<h2 id="projective-trace">Projective Trace</h2>
+<p>Security relies on trace properties:</p>
+<pre><code class="language-math">\begin{align*}
+\operatorname{Tr}(\hat{P}_{xy} \ket{\psi_t}\bra{\psi_t}) &amp;= \alpha_t^2 + \beta_t^2 \\
+\operatorname{Tr}(\hat{P}_{yz} \ket{\psi_t}\bra{\psi_t}) &amp;= \beta_t^2 + \gamma_t^2
+\end{align*}
+</code></pre>
+<h2 id="non-commutation-security">Non-commutation Security</h2>
+<pre><code class="language-math">[\hat{R}_{xy}, \hat{T}_{yz}] = \ket{x}\bra{y}\delta_z - \delta_z\ket{y}\bra{x}
+</code></pre>
+<p>generates orthogonal noise preventing simultaneous measurement.</p>
+<h1 id="implementation-security">Implementation Security</h1>
+<h2 id="pattern-registration">Pattern Registration</h2>
+<p>Registered pattern for orthogonal span primitives:</p>
+<pre><code>OSPAN-3D:[a-f0-9]{64}
+  - hilbert_dimension: 3
+  - projection_planes: ["xy", "yz"]
+  - quantum_resistance: non-commutative
+</code></pre>
+<h2 id="audit-logging">Audit Logging</h2>
+<p>Complies with OBINexus Standard v1.0:</p>
+<pre><code class="language-math">\log_{\text{entry}} = \left\{ 
+\begin{array}{l}
+\text{timestamp: ISO 8601}, \\
+\text{primitive\_ref: PRIM\_[16-char hex]}, \\
+\text{pattern\_ref: PAT\_OSPAN-3D}, \\
+\text{context: orthogonal\_span\_derivation}
+\end{array} 
+\right\}
+</code></pre>
+<h1 id="conclusion">Conclusion</h1>
+<p>The orthogonal span formalization provides a quantum-resistant cryptographic foundation with:</p>
+<ul>
+<li>
+<p><strong>Provable security</strong> via non-commuting operators</p>
+</li>
+<li>
+<p><strong>Efficient implementation</strong> using projective measurements</p>
+</li>
+<li>
+<p><strong>Forward secrecy</strong> through trace decay</p>
+</li>
+<li>
+<p><strong>Zero human attack vectors</strong> via autonomous operation</p>
+</li>
+</ul>
+<div class="thebibliography">
+
+9 P. A. M. Dirac. *The Principles of Quantum Mechanics*. Oxford University Press, 1930.
+
+N. M. Okpala. *Formal Proofs for Confion: Post-Quantum HACC System*. OBINexus Computing, 2025.
+
+N. M. Okpala. *OBINexus Cryptographic Interoperability Standard v1.0*. OBINexus Computing, 2025.
+
+S. Aaronson. *The Complexity of Quantum State Verification*. Foundations of Computer Science, 2018.
+
+</div>
+  </main>
+  <footer>
+    <p>Generated artifact: <code>archive/overleaf-projects-75-items-copy-formal-proofs-for-confion-post-quantum-hacc-system</code></p>
+  </footer>
+</body>
+</html>

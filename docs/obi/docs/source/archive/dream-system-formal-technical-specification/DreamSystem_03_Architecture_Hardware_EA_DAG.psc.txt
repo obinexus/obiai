@@ -1,0 +1,401 @@
+// ============================================================
+// DREAM SYSTEM: Formal Technical Specification
+// Cognitive Observability Platform v0.3
+// MODULE 3: System Architecture — Hardware Layer, EA Actor, DAG Memory
+// Source: Dream_System___Formal_Technical_Specification.pdf
+// OBINexus Engineering Team | May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 5 — SECURITY-ENHANCED FILTER-FLASH PROCESSING
+// ------------------------------------------------------------
+
+DEFINE SecureFilterFlash AS CLASS:
+
+    STATE:
+        crypto_validator    : CryptographicPrimitiveValidator
+        security_monitor    : SecurityMonitor
+        audit_logger        : SecureAuditLogger
+        dag                 : SecureFlashFilterDAG
+
+    PROCEDURE init():
+        crypto_validator = NEW CryptographicPrimitiveValidator()
+        security_monitor = NEW SecurityMonitor()
+        audit_logger     = NEW SecureAuditLogger()
+
+    PROCEDURE secure_filter_to_flash(encrypted_eeg_data, user_context)
+                                     -> LIST[SecureFlashEvent]:
+        // STEP 1: Validate cryptographic envelope
+        IF NOT crypto_validator.validate_encryption(encrypted_eeg_data):
+            audit_logger.log_security_event("INVALID_CRYPTO_ENVELOPE")
+            RAISE SecurityException("Invalid cryptographic envelope")
+
+        // STEP 2: Decrypt with authenticated encryption
+        decrypted_data = decrypt_with_validation(
+            encrypted_eeg_data,
+            user_context.session_key
+        )
+
+        // STEP 3: Apply security-aware filtering
+        filtered_data = apply_secure_filters(decrypted_data)
+
+        // STEP 4: Game-theoretic flash detection across DAG nodes
+        flash_events = EMPTY LIST
+        FOR EACH node IN dag.nodes():
+            confidence = compute_secure_confidence(node, filtered_data, user_context)
+            IF confidence >= 0.954:     // 95.4% Hard Mode threshold
+                flash_event = create_signed_flash_event(node, confidence, user_context)
+                APPEND flash_event TO flash_events
+                audit_logger.log_flash_event(flash_event)
+
+        RETURN flash_events
+
+    PROCEDURE create_signed_flash_event(node, confidence, context) -> SecureFlashEvent:
+        event_data = {
+            node_id:    node.id,
+            confidence: confidence,
+            timestamp:  utcnow().isoformat(),
+            user_id:    context.user_id,
+            session_id: context.session_id
+        }
+        // Sign with user's private key (ECDSA-P256)
+        signature = sign_with_ecdsa(json(event_data), context.signing_key)
+        RETURN SecureFlashEvent(
+            data      = event_data,
+            signature = signature,
+            primitive = "ECDSA-P256"
+        )
+
+// ------------------------------------------------------------
+// SECTION 5.2 — SECURITY CONTROLS INTEGRATION
+// ------------------------------------------------------------
+
+// PREVENTIVE CONTROLS (CI/CD Pipeline)
+DEFINE CICD_SECURITY_PIPELINE AS:
+    stages: [build, security_scan, test, deploy]
+
+    security_scan_stage:
+        // Static analysis for cryptographic vulnerabilities
+        RUN "cryptography-audit scan --standard obinexus-v1.0"
+
+        // Dependency vulnerability scanning
+        RUN "dependency-check --project 'Dream System' --scan ."
+
+        // Infrastructure as Code security
+        RUN "cfn-nag scan --input-path infrastructure/"
+        RUN "checkov -d terraform/"
+
+        // Custom Dream System checks
+        RUN "dream-security-validator --check-primitives"
+        RUN "dream-security-validator --verify-dag-integrity"
+
+        OUTPUT: "gl-security-report.json"
+
+// DETECTIVE CONTROLS (Runtime Monitoring)
+DEFINE RUNTIME_SECURITY_MONITORING AS:
+    alarm_name      = "DreamSystem-CryptoAnomaly"
+    metric          = "InvalidCryptoPrimitive"
+    namespace       = "DreamSystem/Security"
+    threshold       = 1                     // Any single anomaly triggers alarm
+    period_seconds  = 300
+    action          = SecurityIncidentTopic // SNS topic
+
+    ON alarm_trigger:
+        INVOKE DreamSystem_SecurityResponse_Lambda WITH event_detail
+
+    DEFINE SecurityResponse_Lambda(event):
+        detail = event.detail
+        IF detail.eventType == "InvalidCryptoPrimitive":
+            revoke_session(detail.sessionId)
+            quarantine_user_data(detail.userId)
+            notify_security_team(detail)
+            create_security_incident(detail)
+
+// ------------------------------------------------------------
+// SECTION 6.1 — HARDWARE LAYER
+// ------------------------------------------------------------
+
+// SECTION 6.1.1 — NON-INVASIVE TECHNOLOGY SPECIFICATION
+DEFINE EEG_HARDWARE_SPECIFICATION AS:
+    technology          = "Non-invasive EEG"
+    electrode_placement = "Surface electrodes only"
+    skin_penetration    = FALSE
+    subdural_placement  = FALSE     // NOT semi-invasive
+    intracranial        = FALSE     // NOT invasive
+    standard_compliance = "IEEE 11073 PHD"   // Personal Health Device standard
+
+// SECTION 6.1.3 — CONNECTIVITY SPECIFICATIONS (Table 2)
+DEFINE CONNECTIVITY_STANDARDS AS:
+
+    device_to_device:
+        standard            = "Bluetooth 5.2"
+        security_minimum    = "AES-128"
+        pairing             = "Secure pairing mandatory"
+
+    network_upload:
+        standard            = "3G / 4G / 5G"
+        transport_security  = "TLS 1.3"
+        certificate_pinning = REQUIRED
+
+    orchestration:
+        layer               = "Phone App"
+        authentication      = "Biometric"
+        storage             = "Secure enclave"
+
+    pedometric_data:
+        standard            = "ANT+ / BLE"
+        channel_encryption  = REQUIRED
+        integrity_check     = REQUIRED
+
+// SECTION 6.1.4 — SECURE PHONE ORCHESTRATION LAYER
+DEFINE SecurePhoneOrchestrator AS CLASS:
+
+    STATE:
+        keyManager          : CryptoKeyManager
+        sessionManager      : SecureSessionManager
+        auditLogger         : AuditLogger
+        btManager           : SecureBluetoothManager
+        headsetConnection   : EncryptedChannel     // BT 5.2 + AES to EEG headset
+        bandConnection      : EncryptedChannel     // BLE Secure to Dream Band
+        networkQuality      : NetworkMonitor
+
+    PROCEDURE secureOrchestrateDataFlow():
+        // Step 1: Validate session integrity
+        IF NOT sessionManager.validateSession():
+            auditLogger.logSecurityEvent("INVALID_SESSION")
+            RAISE SecurityException("Session validation failed")
+
+        // Step 2: Collect from encrypted Bluetooth channels
+        eegData      = headsetConnection.readEncryptedStream()
+        activityData = bandConnection.getEncryptedPedometric()
+
+        // Step 3: Verify data integrity for both streams
+        IF NOT verifyDataIntegrity(eegData) OR NOT verifyDataIntegrity(activityData):
+            auditLogger.logSecurityEvent("DATA_INTEGRITY_FAILURE")
+            RETURN
+
+        // Step 4: Network-aware secure upload
+        IF networkQuality.is5G():
+            uploadSecureRealtime(eegData, activityData)
+        ELSE IF networkQuality.is4G():
+            uploadSecureBatched(eegData, activityData, interval=30s)
+        ELSE:    // 3G fallback
+            uploadSecureCompressed(eegData, activityData, interval=60s)
+
+    PROCEDURE uploadSecureRealtime(eeg, activity):
+        bundle = NEW SecureUploadBundle()
+        bundle.addData(eeg)
+        bundle.addData(activity)
+        bundle.sign(keyManager.getSigningKey())
+        secureCloudConnector.upload(bundle)
+
+// SECTION 6.1.5 — DREAM BAND PEDOMETRIC INTEGRATION
+DEFINE DREAM_BAND_CAPABILITIES AS:
+    sensor_ppg              : BOOLEAN = TRUE    // Continuous heart rate monitoring
+    step_counting           : BOOLEAN = TRUE    // Step count + distance
+    activity_classification : LIST = ["walking", "running", "sedentary"]
+    sleep_stage_detection   : BOOLEAN = TRUE    // When paired with EEG headset
+    day_pattern_analysis    : BOOLEAN = TRUE    // Context for dream analysis
+    biometric_storage:
+        encryption          = "Hardware encryption"
+        location            = "On-device secure storage"
+
+// ------------------------------------------------------------
+// SECTION 6.2 — EPISTEMIC AGENT (EA) ACTOR: FORMAL DEFINITION
+// ------------------------------------------------------------
+
+// SECTION 6.2.1 — ACTOR VS AGENT ARCHITECTURAL DISTINCTION (Table 3)
+DEFINE EA_ACTOR_MODEL AS:
+
+    PURE_AGENT_BEHAVIOR:
+        decision_making     = "Protocol-driven, deterministic"
+        user_interaction    = "Responds to explicit commands only"
+        data_processing     = "Follows predefined algorithms"
+        authority           = NONE      // Purely executive
+        memory_access       = READ_ONLY // Validation only
+        security_model      = "Static permissions"
+
+    EA_ACTOR_BEHAVIOR:
+        decision_making     = "Intent-driven within epistemic bounds"
+        user_interaction    = "Anticipates needs based on validated states"
+        data_processing     = "Applies contextual reasoning"
+        authority           = LIMITED   // Within user-granted permissions only
+        memory_access       = READ_WRITE // With explicit user consent
+        security_model      = "Dynamic, context-aware permissions"
+
+// Engagement condition (see Module 2, E_secure_cost):
+// EA Actor engages ONLY when E_secure_cost < 0.3 (τ_threshold)
+
+// ------------------------------------------------------------
+// SECTION 6.2.3 — OBICALL POLYGLOT LAYER
+// ------------------------------------------------------------
+
+// OBICall provides a unified CLI/API interface for AI binding.
+
+DEFINE OBICALL_COMMAND_INTERFACE AS:
+    syntax: "obicall.exe [command] [subcommand] [parameters] --auth [token]"
+
+    COMMANDS:
+        bind        -> Connect AI model to Dream System
+        validate    -> Run epistemic validation
+        flash       -> Trigger flash recognition
+        filter      -> Apply pre-processing filters
+        export      -> Generate dream visualization
+        game        -> Execute game-theoretic analysis
+        security    -> Manage cryptographic operations
+
+    SECURITY_SUBCOMMANDS:
+        security keygen     -> Generate new cryptographic keys
+        security validate   -> Validate primitive patterns
+        security audit      -> Review security audit trail
+        security rotate     -> Rotate encryption keys
+
+    AUTH_REQUIREMENT:
+        --auth [token]  // Mandatory for all commands
+
+// SECTION 6.2.4 — CORE LLM BINDING WITH SECURITY LAYER (Equation 9)
+// OBICall_binding : LLMcore × Gdim × Scrypto -> DreamSystemAPI
+
+DEFINE LLM_BINDING_MAP AS:
+    LLM_pattern_recognition     -> Flash_Model_Engine
+    LLM_nlp                     -> U_Interface
+    LLM_validation_logic        -> EA_Actor
+    LLM_strategic_reasoning     -> Dimensional_Game_Theory_Engine
+    LLM_security_operations     -> CryptographicPrimitiveValidator
+
+// ------------------------------------------------------------
+// SECTION 7.1 — SECURE FLASH-FILTER DAG MEMORY ARCHITECTURE
+// ------------------------------------------------------------
+
+DEFINE SecureFlashFilterDAG AS CLASS:
+
+    STATE:
+        graph           : DirectedAcyclicGraph  // NetworkX DiGraph
+        flash_index     : MAP[STRING, NODE]     // Fast lookup by confidence
+        crypto_validator: CryptographicPrimitiveValidator
+        user_context    : SecureContext
+        hash_chain      : HashChain             // Append-only cryptographic chain
+        audit_logger    : SecureAuditLogger
+
+    PROCEDURE init(user_context):
+        graph           = NEW DiGraph()
+        flash_index     = EMPTY MAP
+        user_context    = user_context
+        hash_chain      = initialize_hash_chain()
+
+    PROCEDURE add_secure_flash_event(flash_id, confidence, timestamp, data) -> STRING:
+        // Build event bundle with hash chain linkage
+        event_bundle = {
+            flash_id:       flash_id,
+            confidence:     confidence,
+            timestamp:      timestamp.isoformat(),
+            data:           data,
+            previous_hash:  hash_chain.get_latest(),
+            user_id:        user_context.user_id
+        }
+
+        // Sign event with user's key
+        signature = sign_event(event_bundle)
+        event_bundle.signature = signature
+
+        // Compute and append hash to chain
+        event_hash = compute_secure_hash(event_bundle)
+        hash_chain.append(event_hash)
+
+        // Add to DAG with full security metadata
+        graph.add_node(flash_id, {
+            confidence: confidence,
+            timestamp:  timestamp,
+            data:       data,
+            type:       "flash",
+            hash:       event_hash,
+            signature:  signature
+        })
+
+        // Create temporal links to adjacent flash events
+        create_temporal_links(flash_id, timestamp)
+
+        // Emit audit entry (only first 16 chars of hash for log)
+        audit_logger.log_dag_modification(
+            operation   = "ADD_FLASH",
+            node_id     = flash_id,
+            hash        = event_hash[:16]
+        )
+
+        RETURN event_hash
+
+    PROCEDURE verify_dag_integrity() -> BOOLEAN:
+        // Check 1: Hash chain continuity
+        IF NOT hash_chain.verify():
+            RETURN FALSE
+
+        // Check 2: Each node's ECDSA signature
+        FOR EACH node_id IN graph.nodes():
+            node_data = graph.nodes[node_id]
+            IF NOT verify_node_signature(node_id, node_data):
+                RETURN FALSE
+
+        // Check 3: Temporal ordering consistency
+        IF NOT verify_temporal_consistency():
+            RETURN FALSE
+
+        RETURN TRUE
+
+// ------------------------------------------------------------
+// SECTION 7.2 — SECURE COGNITIVE LEARNING MODEL (ROYGBIV)
+// ------------------------------------------------------------
+
+// The system implements a ROYGBIV-mapped learning model
+// with cryptographic state protection on all learning transitions.
+
+DEFINE SecureCognitiveLearningModel AS CLASS:
+
+    STATE:
+        color_map       : ENCRYPTED_MAP         // ROYGBIV color associations
+        learning_dag    : SecureFlashFilterDAG
+        state_protector : CryptoStateProtector
+
+    PROCEDURE secure_objective_learning_cycle(input_color, user_feedback, auth_token) -> DICT:
+        // Authenticate before any learning state mutation
+        IF NOT verify_auth_token(auth_token):
+            RAISE SecurityException("Unauthorized learning attempt")
+
+        // Encrypt the learning state snapshot
+        encrypted_state = state_protector.encrypt_state({
+            input:      input_color,
+            feedback:   user_feedback,
+            timestamp:  utcnow()
+        })
+
+        IF user_feedback == "incorrect":
+            // Transactional modification — atomic with rollback
+            WITH learning_dag.secure_transaction():
+                learning_dag.remove_flash_association(
+                    input_color,
+                    auth_token = auth_token
+                )
+                new_flash = generate_corrective_flash()
+                audit_logger.log_learning_event(
+                    event   = "COGNITIVE_ELIMINATION",
+                    removed = input_color,
+                    added   = new_flash.id
+                )
+            RETURN { status: "updated", new_flash: new_flash }
+
+        // TODO: Clarify from source PDF — handling of "correct" feedback branch
+
+    PROCEDURE verify_learning_integrity() -> BOOLEAN:
+        RETURN learning_dag.verify_dag_integrity()
+
+// SECTION 7.3 — GAMIFICATION MODEL WITH SECURITY LEVELS (Figure 3)
+DEFINE GAMIFICATION_SECURITY_LEVELS AS:
+    // Confidence range maps to both game mode AND authentication requirement
+
+    RANGE [0%, 31.75%)  :   below_threshold     AUTH: none
+    RANGE [31.75%, 63.5%):  EASY_MODE           AUTH: "Basic Auth"
+    RANGE [63.5%, 95.4%):   MEDIUM_MODE         AUTH: "MFA Required"
+    RANGE [95.4%, 100%] :   HARD_MODE           AUTH: "Biometric + MFA"
+
+// ============================================================
+// END MODULE 3
+// ============================================================

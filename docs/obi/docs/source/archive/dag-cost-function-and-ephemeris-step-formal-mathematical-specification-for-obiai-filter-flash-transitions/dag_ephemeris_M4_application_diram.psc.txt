@@ -1,0 +1,346 @@
+// ============================================================
+// FILE: dag_ephemeris_M4_application_diram.psc.txt
+// MODULE 4 OF 5 — Autonomous Vehicle Application, Print-and-Trace,
+//                 DIRAM Memory Governance & Game Theory Coupling
+// SOURCE: "DAG Cost Function and Ephemeris Step: Formal Mathematical
+//          Specification for OBIAI Filter-Flash Transitions"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4: REAL-WORLD APPLICATION — AUTONOMOUS VEHICLE
+// ------------------------------------------------------------
+
+// The driving scenario demonstrates the ephemeris step with two
+// contrasting confidence cases:
+//
+//   Scenario 1: 40 mph sign on busy street
+//     Observation: "see-sign" ⊕ "busy-street"
+//     p_conf = 0.972 ≥ 0.954 → FILTER (persistent speed adjustment)
+//
+//   Scenario 2: Sudden braking car appearance
+//     Observation: "braking-car" ⊕ "immediate-hazard"
+//     p_conf = 0.847 < 0.954 → REFLASH (rapid response)
+
+// ── VERB-NOUN PAIR EXTRACTION ─────────────────────────────────
+
+PROCEDURE ExtractVerbNounPairs(observation: Observation) -> List[(SymbolicCapsule, SymbolicCapsule)]:
+    // Parse raw observation into structured verb-noun capsule pairs.
+    // The ⊕ operator joins the two components of an observation.
+    //
+    // Example: "see-sign" ⊕ "busy-street"
+    //   verb: "see-sign"  (action component)
+    //   noun: "busy-street" (object/context component)
+
+    raw_pairs := observation.split_by_operator("⊕")
+    capsule_pairs := []
+
+    FOR EACH raw_pair IN raw_pairs:
+        verb_token := raw_pair.verb_component
+        noun_token := raw_pair.noun_component
+
+        v := BuildSymbolicCapsule(verb_token, type=VERB)
+        n := BuildSymbolicCapsule(noun_token, type=NOUN)
+        capsule_pairs.APPEND((v, n))
+    END FOR
+
+    RETURN capsule_pairs
+END PROCEDURE
+
+
+// ── SECTION 4.1: EPHEMERIS STEP IMPLEMENTATION (Python reference) ─
+
+// The Python listing in §4.1 of the source PDF is formalized here:
+
+PROCEDURE EphemerisStepDecision(observation: Observation,
+                                 state: SystemState) -> EphemerisMode:
+    // Implements ephemeris_step_decision(observation, state)
+    // as specified in §4.1 Python listing
+
+    // Step 1: Parse verb-noun pairs from observation
+    verb_noun_pairs := ExtractVerbNounPairs(observation)
+
+    // Step 2: Calculate total DAG cost across all pairs
+    total_cost := 0.0
+    FOR EACH (v, n) IN verb_noun_pairs:
+        cost := DAGCostFromState(v, n, state)
+        total_cost := total_cost + cost
+    END FOR
+
+    // Step 3: Compute epistemic confidence
+    p_conf := ComputeEpistemicConfidenceFromPairs(verb_noun_pairs, state, total_cost)
+
+    // Step 4: Ephemeris decision
+    IF p_conf >= EPISTEMIC_THRESHOLD:    // 0.954
+        RETURN FILTER    // Persistent inference
+    ELSE:
+        RETURN REFLASH   // Ephemeral working memory
+    END IF
+END PROCEDURE
+
+
+PROCEDURE DAGCostFromState(v: SymbolicCapsule, n: SymbolicCapsule,
+                             state: SystemState) -> REAL:
+    // DAG cost incorporating current state context.
+    // State influences temporal penalty (recency and persistence mismatch).
+    // Cross-reference to Module 1 (eq. 1) full formula.
+
+    RETURN DAGCost(
+        v         = v,
+        n         = n,
+        lambda_w  = LAMBDA_DEFAULT,
+        mu_w      = MU_DEFAULT,
+        beta1     = BETA1_DEFAULT,
+        beta2     = BETA2_DEFAULT,
+        gamma1    = state.recency_weight,    // state-specific recency scaling
+        gamma2    = state.persistence_weight
+    )
+END PROCEDURE
+
+
+PROCEDURE ComputeEpistemicConfidenceFromPairs(
+    pairs: List[(SymbolicCapsule, SymbolicCapsule)],
+    state: SystemState, total_cost: REAL) -> REAL:
+    // Confidence inversely related to total DAG cost.
+    // Low cost → high coherence → high confidence.
+    // Maps total_cost to [0,1] via sigmoid-like normalization.
+
+    IF total_cost < 0:
+        RETURN 1.0
+    END IF
+    normalized := total_cost / MAX_TOTAL_COST
+    confidence := 1.0 / (1.0 + EXP(5.0 * (normalized - 0.5)))
+    RETURN CLAMP(confidence, 0.0, 1.0)
+END PROCEDURE
+
+
+// ── SECTION 4.2: EXAMPLE TRANSITIONS ─────────────────────────
+
+PROCEDURE RunScenario1_SpeedSignBusyStreet() -> EphemerisDecisionRecord:
+    // Scenario 1: 40 mph sign on busy street
+    //   Observation: "see-sign" ⊕ "busy-street"
+    //   p_conf = 0.972 ≥ 0.954 → FILTER
+    //   Action: Persistent speed adjustment with context retention
+
+    obs := Observation(
+        raw_text    = "see-sign ⊕ busy-street",
+        urgency     = LOW,
+        context_richness = HIGH
+    )
+    state := SystemState(
+        urgency_level       = 0.1,
+        evidence_sources    = BuildEvidenceSources(obs),
+        recency_weight      = 1.0,
+        persistence_weight  = 1.0
+    )
+
+    p_conf := 0.972   // as given in paper
+    mode   := EphemerisDecision(state)   // will confirm FILTER
+
+    ASSERT mode == FILTER
+    ASSERT p_conf >= EPISTEMIC_THRESHOLD
+
+    action := "Persistent speed adjustment with context retention"
+    EMIT INFO "Scenario 1 | mode=" + mode + " | p_conf=" + p_conf +
+              " | action=" + action
+
+    RETURN EphemerisDecisionRecord(
+        scenario    = "40mph sign on busy street",
+        observation = "see-sign ⊕ busy-street",
+        p_conf      = p_conf,
+        mode        = FILTER,
+        action      = action
+    )
+END PROCEDURE
+
+
+PROCEDURE RunScenario2_SuddenBrakingCar() -> EphemerisDecisionRecord:
+    // Scenario 2: Sudden braking car appearance
+    //   Observation: "braking-car" ⊕ "immediate-hazard"
+    //   p_conf = 0.847 < 0.954 → REFLASH
+    //   Action: Rapid response without deep contextual analysis
+
+    obs := Observation(
+        raw_text    = "braking-car ⊕ immediate-hazard",
+        urgency     = HIGH,
+        context_richness = LOW   // no time for deep context
+    )
+    state := SystemState(
+        urgency_level       = 0.9,
+        evidence_sources    = BuildEvidenceSources(obs),
+        recency_weight      = 0.3,   // recent only — no time for history
+        persistence_weight  = 0.1
+    )
+
+    p_conf := 0.847   // as given in paper
+    mode   := EphemerisDecision(state)   // will confirm REFLASH
+
+    ASSERT mode == REFLASH
+    ASSERT p_conf < EPISTEMIC_THRESHOLD
+
+    action := "Rapid response without deep contextual analysis"
+    EMIT INFO "Scenario 2 | mode=" + mode + " | p_conf=" + p_conf +
+              " | action=" + action
+
+    RETURN EphemerisDecisionRecord(
+        scenario    = "Sudden braking car",
+        observation = "braking-car ⊕ immediate-hazard",
+        p_conf      = p_conf,
+        mode        = REFLASH,
+        action      = action
+    )
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 5: PRINT-AND-TRACE ARCHITECTURE INTEGRATION
+// ------------------------------------------------------------
+
+// ── 5.1: DIMENSIONAL GAME THEORY COUPLING ────────────────────
+
+// The system forms a strategic state vector for game-theoretic analysis:
+//
+//         ⎡ DAG_cost(v, n)     ⎤
+//   S_game = ⎢ vexameneria(v, n) ⎥
+//         ⎣ p_conf(state)      ⎦
+//
+// This 3-vector captures: (cost, interaction strength, confidence)
+// for use in dimensional game theory (referenced in Actor Class PDF).
+
+PROCEDURE ComputeStrategicVector(v: SymbolicCapsule, n: SymbolicCapsule,
+                                   state: SystemState) -> Vector3:
+    // S_game = [DAG_cost(v,n), vexameneria(v,n), p_conf(state)]
+
+    dag_c  := DAGCost(v, n, LAMBDA_DEFAULT, MU_DEFAULT,
+                      BETA1_DEFAULT, BETA2_DEFAULT,
+                      GAMMA1_DEFAULT, GAMMA2_DEFAULT)
+
+    vex    := VexameneriaScore(v, n)
+
+    p_conf := ComputeEpistemicConfidence(state)
+
+    S_game := Vector3(dag_c, vex, p_conf)
+    EMIT LOG "Strategic vector: [" + dag_c + ", " + vex + ", " + p_conf + "]"
+    RETURN S_game
+END PROCEDURE
+
+
+PROCEDURE PrintAndTraceRecord(v: SymbolicCapsule, n: SymbolicCapsule,
+                               state: SystemState, mode: EphemerisMode,
+                               p_conf: REAL) -> TraceRecord:
+    // Structured print-and-trace entry for audit compliance.
+    // Includes strategic vector for dimensional game theory analysis.
+
+    S_game := ComputeStrategicVector(v, n, state)
+
+    record := TraceRecord(
+        timestamp        = CURRENT_TIMESTAMP(),
+        verb_id          = v.id,
+        noun_id          = n.id,
+        dag_cost         = S_game[0],
+        vexameneria      = S_game[1],
+        p_conf           = S_game[2],
+        mode             = mode,
+        diram_epsilon    = ComputeTransitionEpsilon(state, mode),
+        proof_chain_ref  = "DAG-EPHEMERIS-SPEC → AEGIS-PROOF chain"
+    )
+
+    EMIT TRACE record
+    RETURN record
+END PROCEDURE
+
+
+// ── 5.2: DIRAM MEMORY GOVERNANCE ─────────────────────────────
+
+// DIRAM validation governs whether a state transition is committed
+// or rolled back based on the epistemic error bound:
+//
+//   DIRAM_validate(transition) = COMMIT   if ε(transition) ≤ 0.6
+//                              = ROLLBACK if ε(transition) > 0.6
+
+CONSTANT DIRAM_EPSILON_BOUND := 0.6   // inherited from entire AEGIS chain
+
+DEFINE DIRAMDecision AS ENUM:
+    COMMIT    // transition accepted — write to persistent memory
+    ROLLBACK  // transition rejected — revert to prior state
+END DEFINE
+
+
+PROCEDURE DIRAMValidate(transition: StateTransition) -> DIRAMDecision:
+    // DIRAM_validate(transition) per eq. 31
+
+    epsilon := ComputeTransitionEpsilon(transition.from_state,
+                                        transition.mode)
+
+    IF epsilon <= DIRAM_EPSILON_BOUND:
+        EMIT INFO "DIRAM COMMIT | ε=" + epsilon + " ≤ 0.6"
+        RETURN COMMIT
+    ELSE:
+        EMIT WARNING "DIRAM ROLLBACK | ε=" + epsilon + " > 0.6"
+        RETURN ROLLBACK
+    END IF
+END PROCEDURE
+
+
+PROCEDURE ComputeTransitionEpsilon(state: SystemState,
+                                    mode: EphemerisMode) -> REAL:
+    // ε(transition) measures the epistemic error of committing this
+    // mode transition to memory.
+    //
+    // Low p_conf + choosing FILTER → high ε (risky commit)
+    // High p_conf + choosing FILTER → low ε (safe commit)
+    // Choosing REFLASH → ε always low (ephemeral, no memory write)
+
+    p_conf := ComputeEpistemicConfidence(state)
+
+    MATCH mode:
+        CASE FILTER:
+            // ε = 1 - p_conf for persistent commits
+            RETURN 1.0 - p_conf
+
+        CASE REFLASH:
+            // Ephemeral — no persistent memory write — ε always minimal
+            RETURN 0.1   // small residual ε for tracking purposes
+    END MATCH
+END PROCEDURE
+
+
+PROCEDURE ApplyDIRAMGovernance(G: ConceptGraph, cycle: Cycle,
+                                state: SystemState,
+                                mode: EphemerisMode) -> ConceptGraph:
+    // Wrapper: apply DIRAM validation before committing a DAG update.
+
+    transition := StateTransition(
+        from_state = state,
+        to_state   = StateAfterCycle(state, cycle),
+        mode       = mode,
+        cycle      = cycle
+    )
+
+    decision := DIRAMValidate(transition)
+
+    MATCH decision:
+        CASE COMMIT:
+            IF mode == FILTER:
+                G := FilterUpdate(G, cycle)
+            ELSE:
+                // REFLASH updates are lightweight and always committed
+                G := FlashUpdate(G, cycle.nodes[0].capsule,
+                                  cycle.nodes[1].capsule)
+            END IF
+
+        CASE ROLLBACK:
+            EMIT INFO "DIRAM rollback — DAG not updated for this transition"
+            // G unchanged
+    END MATCH
+
+    RETURN G
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: dag_ephemeris_M5_verification_complexity.psc.txt
+// ============================================================

@@ -1,0 +1,374 @@
+% ==============================================================================
+\chapter{Git-RAF Integration: Cryptographic Governance Version Control}
+\label{ch:gitraf-integration}
+% ==============================================================================
+% AUTHOR NOTE: Do not speculate. Cite all methods. Source must trace to implementation or research.
+
+\section{Git-RAF Architecture Overview}
+
+Git-RAF (Repository-Attached Formalism) implements cryptographic governance enforcement at the version control layer, ensuring that commits containing governance violations cannot enter the main development branch \cite{gitraf2023spec}. The system extends standard Git workflows with mandatory policy validation hooks that execute RIFTlang compilation checks before merge completion.
+
+Unlike traditional Git hooks that provide optional validation, Git-RAF implements \textbf{merge-blocking enforcement} where policy violations prevent commit acceptance at the protocol level. This architectural approach ensures that governance compliance becomes a prerequisite for code integration rather than a post-hoc verification step.
+
+\subsection{Core Components}
+
+Git-RAF integrates four primary enforcement mechanisms within the standard Git workflow:
+
+\begin{description}
+\item[\texttt{pre-commit}] Validates RIFTlang compilation and governance contract satisfaction
+\item[\texttt{pre-merge}] Executes cross-branch policy inheritance checks
+\item[\texttt{governance-vector}] Computes risk metrics for commit classification
+\item[\texttt{aura-seal}] Generates cryptographic proof of compliance validation
+\end{description}
+
+Each component operates as a mandatory checkpoint that must complete successfully before the version control operation proceeds. This design prevents governance circumvention through workflow manipulation or hook bypassing.
+
+\section{Signature Enforcement Protocol}
+
+\subsection{Cryptographic Commit Structure}
+
+Git-RAF extends standard Git commit objects with governance metadata that enables cryptographic verification of policy compliance. Each commit includes structured governance information alongside traditional version control data.
+
+\begin{lstlisting}[style=riftlang, language=bash]
+# Git-RAF enhanced commit structure
+commit_object {
+    # Standard Git fields
+    tree: sha256_hash
+    parent: sha256_hash  
+    author: identity_signature<ed25519>
+    committer: identity_signature<ed25519>
+    
+    # Git-RAF governance extensions
+    policy_tag: "stable" | "minor" | "breaking" | "experimental"
+    governance_ref: file_reference<.rift.gov>
+    entropy_checksum: hash<sha3_256>
+    governance_vector: tuple<attack_risk, rollback_cost, stability_impact>
+    aura_seal: one_way_hash<entropy_model_64>
+    rift_compilation_proof: cryptographic_attestation
+}
+\end{lstlisting}
+
+\subsection{Multi-Signature Validation}
+
+Git-RAF implements multi-signature requirements for commits that modify governance-critical components. The signature threshold varies based on the governance impact classification computed during pre-commit analysis.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|r|l|}
+\hline
+\textbf{Policy Tag} & \textbf{Required Signatures} & \textbf{Validation Level} \\
+\hline
+experimental & 1 & Author attestation only \\
+minor & 2 & Peer review + maintainer \\
+stable & 3 & Peer + maintainer + governance \\
+breaking & 5 & Full governance council \\
+\hline
+\end{tabular}
+\caption{Git-RAF Signature Requirements by Policy Classification}
+\label{tab:signature_requirements}
+\end{table}
+
+\section{Policy Inheritance and Propagation}
+
+\subsection{Cross-Branch Governance Validation}
+
+Git-RAF implements policy inheritance that ensures governance constraints propagate correctly across branch merges and cherry-pick operations. When code moves between branches with different governance profiles, the system computes the union of applicable constraints and validates compliance against the combined policy set.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Policy inheritance calculation during merge
+merge_policy_check(source_branch, target_branch) {
+    source_policies = extract_governance_contracts(source_branch)
+    target_policies = extract_governance_contracts(target_branch)
+    
+    // Compute policy union with conflict resolution
+    merged_policies = union_with_precedence(source_policies, target_policies)
+    
+    // Validate all affected files against combined constraints
+    validation_result = rift_compile_with_policies(
+        changed_files, 
+        merged_policies
+    )
+    
+    return validation_result.is_compliant()
+}
+\end{lstlisting}
+
+\subsection{Governance Vector Computation}
+
+Each commit receives a governance vector that quantifies its impact along three dimensions: attack surface expansion, rollback complexity, and system stability risk. This vector enables automated classification and routing of commits through appropriate review processes.
+
+The governance vector computation follows the mathematical model defined in Section \ref{sec:governance-model} \cite{TODO:governance-vector-spec}, using entropy analysis to estimate behavioral impact:
+
+\begin{equation}
+\vec{G} = (A_{risk}, R_{cost}, S_{impact})
+\end{equation}
+
+where:
+\begin{itemize}
+\item $A_{risk}$ represents the increase in attack surface measured through entropy deviation
+\item $R_{cost}$ quantifies the complexity of rolling back the change if governance violations are discovered
+\item $S_{impact}$ estimates the effect on system stability based on dependency analysis
+\end{itemize}
+
+\section{Pre-Merge Validation Workflow}
+
+\subsection{Automated Compliance Checking}
+
+Git-RAF executes comprehensive compliance validation before allowing merge operations to complete. This process integrates RIFTlang compilation with governance contract verification to ensure that merged code satisfies all applicable policy requirements.
+
+\begin{lstlisting}[style=riftlang, language=bash]
+#!/bin/bash
+# Git-RAF pre-merge hook implementation
+
+set -e  # Exit on any validation failure
+
+echo "Git-RAF: Initiating pre-merge governance validation..."
+
+# Extract governance contracts from affected files
+GOVERNANCE_FILES=$(git diff --name-only HEAD~1 | grep '\.rift\.gov$')
+
+if [ ! -z "$GOVERNANCE_FILES" ]; then
+    echo "Git-RAF: Validating governance contracts..."
+    for contract in $GOVERNANCE_FILES; do
+        rift-validate --contract "$contract" --strict
+    done
+fi
+
+# Compile all RIFTlang files with governance enforcement
+RIFT_FILES=$(git diff --name-only HEAD~1 | grep '\.rift$')
+
+if [ ! -z "$RIFT_FILES" ]; then
+    echo "Git-RAF: Compiling RIFTlang files with governance validation..."
+    for riftfile in $RIFT_FILES; do
+        rift-compile --governance-mode strict --input "$riftfile"
+    done
+fi
+
+# Compute governance vector for impact assessment
+GOVERNANCE_VECTOR=$(git-raf compute-vector --commit HEAD)
+echo "Git-RAF: Governance vector: $GOVERNANCE_VECTOR"
+
+# Generate AuraSeal for cryptographic compliance proof
+AURA_SEAL=$(git-raf generate-seal --governance-vector "$GOVERNANCE_VECTOR")
+echo "Git-RAF: AuraSeal generated: $AURA_SEAL"
+
+echo "Git-RAF: Pre-merge validation completed successfully"
+\end{lstlisting}
+
+\subsection{Rollback Trigger Conditions}
+
+Git-RAF implements automatic rollback triggers that activate when governance violations are detected in previously merged commits. The rollback decision process evaluates the governance vector and current system state to determine the appropriate response.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Automatic rollback trigger evaluation
+rollback_trigger_check(commit_hash, current_state) {
+    violation = detect_governance_violation(commit_hash)
+    
+    if (violation.severity >= CRITICAL) {
+        // Immediate rollback required
+        execute_emergency_rollback(commit_hash)
+    } else if (violation.severity >= MODERATE) {
+        // Evaluate rollback cost vs. risk
+        rollback_cost = compute_rollback_cost(commit_hash, current_state)
+        risk_threshold = get_risk_threshold(current_state.environment)
+        
+        if (rollback_cost < risk_threshold) {
+            schedule_controlled_rollback(commit_hash)
+        } else {
+            escalate_to_governance_council(violation, commit_hash)
+        }
+    }
+}
+\end{lstlisting}
+
+\section{AuraSeal Integration}
+
+\subsection{Cryptographic Compliance Attestation}
+
+AuraSeal provides cryptographic proof that Git-RAF validation processes completed successfully and that committed code satisfies all applicable governance requirements \cite{TODO:auraseal-spec}. Each successful validation generates a unique seal that becomes part of the commit's permanent record.
+
+The AuraSeal generation process combines multiple validation outputs into a single cryptographic attestation:
+
+\begin{enumerate}
+\item RIFTlang compilation success with governance contracts satisfied
+\item Entropy analysis confirming behavioral consistency within acceptable bounds
+\item Policy inheritance validation across affected branches
+\item Multi-signature verification for commits requiring elevated approval
+\end{enumerate}
+
+\subsection{Seal Verification Protocol}
+
+AuraSeal verification enables independent validation of governance compliance without requiring access to the original validation infrastructure. This capability supports audit requirements and enables distributed trust verification across organizational boundaries.
+
+\begin{lstlisting}[style=riftlang, language=bash]
+# AuraSeal verification command
+git-raf verify-seal --commit <commit_hash> --public-key <governance_key>
+
+# Output includes:
+# - Seal validity status
+# - Governance vector at commit time  
+# - Policy compliance attestation
+# - Entropy signature verification
+\end{lstlisting}
+
+\section{Branch Policy Management}
+
+\subsection{Policy Enforcement Hierarchies}
+
+Git-RAF implements hierarchical policy enforcement that recognizes different governance requirements for different branch types. Production branches receive stricter validation than development branches, while experimental branches may operate under relaxed constraints to encourage innovation.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Branch Type} & \textbf{Policy Level} & \textbf{Validation Requirements} \\
+\hline
+\texttt{main} & Maximum & Full governance validation + 5 signatures \\
+\texttt{release/*} & High & Governance validation + 3 signatures \\
+\texttt{develop} & Standard & Governance validation + 2 signatures \\
+\texttt{feature/*} & Moderate & RIFTlang compilation + 1 signature \\
+\texttt{experimental/*} & Minimal & Syntax validation only \\
+\hline
+\end{tabular}
+\caption{Branch-Specific Policy Enforcement Levels}
+\label{tab:branch_policies}
+\end{table}
+
+\subsection{Dynamic Policy Adjustment}
+
+Git-RAF supports dynamic policy adjustment based on detected system conditions and risk assessments. When entropy analysis indicates increased system instability, the platform can automatically elevate validation requirements to prevent potentially destabilizing changes.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Dynamic policy adjustment based on system entropy
+adjust_policy_level(current_entropy, baseline_entropy) {
+    entropy_deviation = abs(current_entropy - baseline_entropy)
+    
+    if (entropy_deviation > CRITICAL_THRESHOLD) {
+        return POLICY_LEVEL_MAXIMUM
+    } else if (entropy_deviation > MODERATE_THRESHOLD) {
+        return POLICY_LEVEL_HIGH  
+    } else {
+        return POLICY_LEVEL_STANDARD
+    }
+}
+\end{lstlisting}
+
+\section{Integration with RIFTlang Compilation}
+
+\subsection{Compile-Time Governance Validation}
+
+Git-RAF integrates directly with the RIFTlang compilation pipeline described in Chapter \ref{ch:riftlang-spec}, ensuring that governance validation occurs at both the version control and compilation layers. This dual-layer validation prevents governance violations from entering the codebase and from executing in deployed systems.
+
+The integration operates through the RIFTlang governance contract system, where \texttt{.rift.gov} files referenced in commits undergo validation during both Git-RAF pre-commit checks and RIFTlang compilation processes.
+
+\subsection{Cross-Layer Policy Consistency}
+
+Git-RAF maintains consistency between version control policies and RIFTlang governance contracts through shared policy specification formats. Changes to governance requirements propagate automatically across both validation layers, ensuring that version control policies remain synchronized with compilation-time constraints.
+
+\begin{lstlisting}[style=riftlang, language=rift]
+// Shared policy specification between Git-RAF and RIFTlang
+@policy_scope("version_control", "compilation")
+@entropy_bound(max_deviation=0.05)
+@rollback_cost(threshold="moderate")
+governance_contract security_critical {
+    validation_level: maximum,
+    signature_count: 5,
+    entropy_monitoring: continuous,
+    rollback_triggers: [entropy_violation, policy_breach, security_incident]
+}
+\end{lstlisting}
+
+\section{Command Line Interface}
+
+\subsection{Core Git-RAF Commands}
+
+Git-RAF extends the standard Git command set with governance-specific operations that enable developers to interact with the policy enforcement system directly.
+
+\begin{lstlisting}[style=riftlang, language=bash]
+# Initialize Git-RAF in existing repository
+git raf init --governance-level standard
+
+# Validate current changes against governance contracts
+git raf validate --strict
+
+# Compute governance vector for staged changes  
+git raf compute-vector --staged
+
+# Generate AuraSeal for current commit
+git raf seal --commit HEAD
+
+# Verify AuraSeal for any commit
+git raf verify --commit <hash> --public-key <key>
+
+# List policy requirements for current branch
+git raf policy-status
+
+# Emergency rollback with governance justification
+git raf rollback --commit <hash> --reason "governance_violation"
+\end{lstlisting}
+
+\subsection{Configuration Management}
+
+Git-RAF configuration integrates with standard Git configuration mechanisms while adding governance-specific settings that control validation behavior and policy enforcement levels.
+
+\begin{lstlisting}[style=riftlang, language=bash]
+# Configure Git-RAF governance settings
+git config raf.governance.level "high"
+git config raf.entropy.threshold "0.05"  
+git config raf.signature.minimum "2"
+git config raf.rollback.auto "true"
+
+# Set branch-specific policies
+git config raf.branch.main.policy "maximum"
+git config raf.branch.develop.policy "standard"
+git config raf.branch.feature.policy "moderate"
+\end{lstlisting}
+
+\section{Audit Trail and Compliance Reporting}
+
+\subsection{Comprehensive Governance Logging}
+
+Git-RAF maintains detailed audit trails of all governance validation activities, creating permanent records that support compliance verification and security auditing. These logs integrate with the cryptographic attestation system to provide tamper-evident governance history.
+
+\begin{lstlisting}[style=riftlang, language=json]
+{
+  "timestamp": "2024-05-28T14:30:00Z",
+  "commit_hash": "a1b2c3d4e5f6",
+  "validation_type": "pre_merge",
+  "governance_vector": [0.02, 0.15, 0.08],
+  "policy_compliance": "PASSED",
+  "signatures_required": 3,
+  "signatures_obtained": 3,
+  "aura_seal": "seal_a1b2c3d4e5f6_validation_passed",
+  "entropy_analysis": {
+    "baseline": 0.234,
+    "current": 0.241,
+    "deviation": 0.007,
+    "within_bounds": true
+  }
+}
+\end{lstlisting}
+
+\subsection{Compliance Report Generation}
+
+Git-RAF provides automated compliance reporting capabilities that generate audit-ready documentation of governance validation activities across specified time periods or commit ranges.
+
+\begin{lstlisting}[style=riftlang, language=bash]
+# Generate compliance report for date range
+git raf report --from 2024-01-01 --to 2024-05-28 --format pdf
+
+# Audit trail for specific commit
+git raf audit-trail --commit a1b2c3d4e5f6 --detailed
+
+# Repository-wide governance status summary  
+git raf status --governance-summary --branches all
+\end{lstlisting}
+
+\section*{Conclusion}
+
+Git-RAF integration transforms version control from a simple file tracking system into a cryptographically-enforced governance compliance framework. By embedding policy validation directly into the Git workflow, the system ensures that governance violations cannot enter the codebase through standard development processes.
+
+The combination of multi-signature enforcement, entropy-based risk assessment, and cryptographic compliance attestation creates a robust foundation for trustworthy software development that maintains both innovation velocity and governance integrity. This integration serves as a critical component of the broader RIFTlang ecosystem, providing the version control foundation that enables governance-preserving optimization and trust-verified deployment.
+
+\chapter{Governance as a Constraint System}
+\label{ch:governance_constraints}

@@ -1,0 +1,215 @@
+// ============================================================
+// FILE: confio_03_zid_authorization.psc.txt
+// MODULE 3: ZID Key Authorization & ThreadProof Integration
+// SOURCE: Machine_Verifiable_Password_Rotation_and_ZID_Key_Authorization.pdf
+// Sections: 3 (ZID Key Authorization Integration), 5.2, 6 (Security Properties)
+// Legal Architect: Nnamdi Michael Okpala | OBINexus Computing
+// ============================================================
+
+// ------------------------------------------------------------
+// OVERVIEW
+// ------------------------------------------------------------
+
+// ZID = Zero Identity Key
+// ThreadProof provides non-isomorphic lattice-based identity proofs.
+// The binding function ties a password hash to a ZID to create
+// a cryptographic identity anchor. This is resistant to quantum
+// adversaries via the Learning With Errors (LWE) hardness assumption.
+
+// ------------------------------------------------------------
+// CONSTANTS
+// ------------------------------------------------------------
+
+CONST KDF_ALGORITHM         = "HKDF-SHA3-512"
+CONST COORDINATE_SYSTEM     = "Cartesian"   // Locked; no other system permitted
+CONST TIMESTAMP_PRECISION   = "microsecond" // Unix epoch, microsecond resolution
+CONST SECURITY_PARAMETER    = lambda        // Lattice security parameter (tunable)
+
+// ------------------------------------------------------------
+// DATA STRUCTURES
+// ------------------------------------------------------------
+
+STRUCT ZIDRecord:
+    zid             : BYTES                     // Derived Zero Identity Key
+    binding         : BYTES                     // B(H(P), z) — password-ZID binding
+    lattice_basis   : LatticeBasis              // Generated non-isomorphic basis
+    timestamp       : UNIX_TIMESTAMP_MICROSECONDS
+    coordinate_lock : STRING = "Cartesian"      // Must always equal "Cartesian"
+    compliance_hash : BYTES                     // Hash of constitutional compliance context
+
+STRUCT LatticeBasis:
+    dimension   : INTEGER       // Lattice dimension derived from lambda
+    basis_vectors: MATRIX       // The actual lattice basis (Cartesian-only)
+    locked      : BOOLEAN       // True once coordinate system is locked
+
+// ------------------------------------------------------------
+// SECTION 3.1: NON-ISOMORPHIC IDENTITY BINDING
+// ------------------------------------------------------------
+
+// Definition: Given password hash h and ZID z, the binding function B is:
+//   B(h, z) = HKDF-SHA3-512(h || z || context)
+//
+// Where context includes:
+//   1. Coordinate system lock: "Cartesian"
+//   2. Timestamp (Unix epoch, microsecond precision)
+//   3. Constitutional compliance hash
+
+FUNCTION build_context(compliance_hash, timestamp) -> BYTES:
+    context = SERIALIZE({
+        coordinate_system : COORDINATE_SYSTEM,
+        timestamp         : timestamp,
+        compliance_hash   : compliance_hash
+    })
+    RETURN context
+END FUNCTION
+
+FUNCTION binding_function_B(password_hash: BYTES, zid: BYTES, context: BYTES) -> BYTES:
+    // HKDF-SHA3-512 keyed derivation
+    binding = HKDF_SHA3_512(
+        key_material = password_hash || zid,
+        info         = context
+    )
+    RETURN binding
+END FUNCTION
+
+// ------------------------------------------------------------
+// SECTION 5.2 / ALGORITHM 2: ZID-PASSWORD BINDING PROTOCOL
+// ------------------------------------------------------------
+
+// Preconditions:  Password P (plaintext), User context ctx
+// Postconditions: Bound ZID record persisted; ZID z returned
+
+FUNCTION zid_password_binding_protocol(password, user_ctx) -> ZIDRecord:
+
+    // Step 1: Generate non-isomorphic lattice basis
+    // GenBasis uses security parameter lambda and enforces Cartesian geometry
+    lattice_basis = GenBasis(SECURITY_PARAMETER, COORDINATE_SYSTEM)
+
+    // Step 2: Lock coordinate system — no coordinate transformation permitted
+    lattice_basis.lock(COORDINATE_SYSTEM)
+    ASSERT lattice_basis.locked == TRUE
+
+    // Step 3: Derive ZID from lattice basis via HKDF
+    zid = HKDF(
+        key_material = lattice_basis,
+        info         = "identity"
+    )
+
+    // Step 4: Hash the password (uses PBKDF2 from Module 2)
+    password_hash = password_create(password, user_ctx.user_id).hash
+
+    // Step 5: Compute constitutional compliance hash (current policy state)
+    compliance_hash = SHA3_512(SERIALIZE(CONSTITUTIONAL_ENGINE.current_policy()))
+
+    // Step 6: Build binding context
+    timestamp = current_unix_timestamp_microseconds()
+    context   = build_context(compliance_hash, timestamp)
+
+    // Step 7: Bind password hash to ZID
+    binding = binding_function_B(password_hash, zid, context)
+
+    // Step 8: Construct and persist ZID record
+    zid_record = ZIDRecord {
+        zid             = zid,
+        binding         = binding,
+        lattice_basis   = lattice_basis,
+        timestamp       = timestamp,
+        coordinate_lock = COORDINATE_SYSTEM,
+        compliance_hash = compliance_hash
+    }
+    persist_zid_record(user_ctx.user_id, zid_record)
+
+    RETURN zid_record
+END FUNCTION
+
+// ------------------------------------------------------------
+// SECTION 3.2: LATTICE-BASED AUTHORIZATION PROOF
+// ------------------------------------------------------------
+
+// Theorem (Authorization Soundness):
+//   For any authentication attempt (P, z):
+//   Pr[ Unauthorized(P, z) = Accept ] <= 2^(-lambda) + Adv_LWE
+//
+// Where:
+//   lambda   = security parameter (lattice dimension)
+//   Adv_LWE  = adversary's advantage against Learning With Errors problem
+//
+// Implication: unauthorized access is computationally infeasible under LWE hardness.
+
+FUNCTION authorize_credentials(password, zid_claim, user_ctx) -> BOOLEAN:
+
+    // Step 1: Retrieve stored ZID record
+    stored_record = load_zid_record(user_ctx.user_id)
+    IF stored_record IS NULL THEN
+        RETURN FALSE        // No record — deny
+    END IF
+
+    // Step 2: Recompute binding using claimed credentials
+    password_hash   = PBKDF2_HMAC_SHA512(password || stored_record.lattice_basis.salt, 600000)
+    timestamp       = current_unix_timestamp_microseconds()
+    context         = build_context(stored_record.compliance_hash, stored_record.timestamp)
+    candidate_binding = binding_function_B(password_hash, zid_claim, context)
+
+    // Step 3: Constant-time comparison against stored binding
+    IF NOT constant_time_compare(candidate_binding, stored_record.binding) THEN
+        RETURN FALSE        // Binding mismatch — deny
+    END IF
+
+    // Step 4: Validate coordinate lock integrity
+    IF stored_record.coordinate_lock != COORDINATE_SYSTEM THEN
+        RETURN FALSE        // Coordinate system tampered — deny
+    END IF
+
+    // Step 5: Validate timestamp freshness (replay protection)
+    IF NOT validate_timestamp(stored_record.timestamp) THEN
+        // Note: this validates the stored binding is recent, not request timestamp
+        // Request-level timestamp validation occurs upstream (Module 2)
+        RETURN FALSE
+    END IF
+
+    RETURN TRUE             // All checks passed — authorize
+END FUNCTION
+
+// ------------------------------------------------------------
+// SECTION 6.1: FORMAL SECURITY GUARANTEES
+// ------------------------------------------------------------
+
+// Property 1 — COMPLETENESS:
+//   Valid credentials ALWAYS authenticate.
+//   GUARANTEE: If (P, z) are genuine, authorize_credentials returns TRUE.
+
+// Property 2 — SOUNDNESS:
+//   Invalid credentials fail with overwhelming probability.
+//   GUARANTEE: Pr[FALSE_ACCEPT] <= 2^(-lambda) + Adv_LWE
+
+// Property 3 — ZERO-KNOWLEDGE:
+//   Authentication reveals NO password information.
+//   MECHANISM: Only derived binding is transmitted/compared; plaintext P is never stored.
+
+// Property 4 — FORWARD SECRECY:
+//   Past sessions remain secure after password rotation.
+//   MECHANISM: Each rotation generates a fresh salt and ZID binding;
+//              old bindings are cryptographically erased (Module 2 DELETE).
+
+// ------------------------------------------------------------
+// HELPER: GenBasis
+// ------------------------------------------------------------
+
+FUNCTION GenBasis(security_parameter, coordinate_system) -> LatticeBasis:
+    // Generate an n-dimensional non-isomorphic lattice basis
+    // where n is derived from security_parameter (lambda)
+    // Basis must be unique per invocation (non-isomorphic property)
+    // TODO: Clarify from source PDF — specific lattice construction
+    //       (e.g., NTRU, Module-LWE, Ring-LWE) not explicitly stated
+    n      = derive_dimension(security_parameter)
+    basis  = generate_random_non_isomorphic_basis(n, coordinate_system)
+    RETURN LatticeBasis {
+        dimension     = n,
+        basis_vectors = basis,
+        locked        = FALSE
+    }
+END FUNCTION
+
+// ============================================================
+// END MODULE 3
+// ============================================================

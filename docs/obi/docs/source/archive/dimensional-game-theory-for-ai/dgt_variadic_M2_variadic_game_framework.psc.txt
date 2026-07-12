@@ -1,0 +1,306 @@
+// ============================================================
+// FILE: dgt_variadic_M2_variadic_game_framework.psc.txt
+// MODULE 2 OF 5 — Variadic Game Framework & Contextual Activation
+// SOURCE: "Dimensional Game Theory: Variadic Strategy in
+//          Multi-Domain Contexts"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   May 24, 2026
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 3: VARIADIC GAME FRAMEWORK
+// ------------------------------------------------------------
+
+// THE EXTENDED GAME TUPLE:
+//   G = (N, A, u, D)
+//
+//   N  — set of players (as in classical game theory, PDF 8 §2)
+//   A  — action space (VARIADIC: not fixed in number)
+//   u  — utility function
+//   D  — set of ACTIVATED strategic dimensions (conditionally active)
+//
+// Key difference from classical G = (N, A, u):
+//   The addition of D makes the game structure itself dynamic.
+//   D changes as inputs arrive and contextual triggers fire.
+
+
+// ── VARIADIC GAME STRUCTURE ───────────────────────────────────
+
+DEFINE VariadicGame AS STRUCTURE:
+    N   : Set[PlayerID]             // finite player set
+    A   : VariadicActionSpace       // A — variadic: |A| not fixed
+    u   : Map[PlayerID → UtilityFunction]
+    D   : ActiveDimensionSet        // conditionally activated dimensions
+
+    INVARIANT: LENGTH(u) == LENGTH(N)
+    // NOTE: unlike classical game, no invariant on |A| — variadic
+
+    PROCEDURE NumPlayers() -> INT:
+        RETURN LENGTH(N)
+    END PROCEDURE
+
+    PROCEDURE ActiveDimensionCount() -> INT:
+        RETURN D.ActiveCount()
+    END PROCEDURE
+
+    PROCEDURE Utility(player_i: PlayerID, action_profile: ActionProfile) -> REAL:
+        ASSERT player_i IN N
+        RETURN u[player_i].Evaluate(action_profile, self.D)
+    END PROCEDURE
+END DEFINE
+
+
+DEFINE VariadicActionSpace AS:
+    // A: the action space for the variadic game.
+    // Unlike classical A₁ × ... × Aₙ (fixed), here actions may
+    // be proposed at runtime and gated by active dimensions.
+
+    base_actions   : Set[Action]         // always-available actions
+    unlocked_actions : Map[DimensionID → Set[Action]]  // D-gated actions
+
+    PROCEDURE AvailableActions(D_active: ActiveDimensionSet) -> Set[Action]:
+        // Union of base actions + all actions unlocked by active dimensions
+        available := COPY(base_actions)
+        FOR EACH dim_id IN D_active.ActiveIDs():
+            IF dim_id IN unlocked_actions:
+                available.ADD_ALL(unlocked_actions[dim_id])
+            END IF
+        END FOR
+        RETURN available
+    END PROCEDURE
+
+    PROCEDURE IsVariadic() -> BOOL:
+        // True when at least one dimension unlocks additional actions
+        RETURN LENGTH(unlocked_actions) > 0
+    END PROCEDURE
+END DEFINE
+
+
+DEFINE ActiveDimensionSet AS:
+    // D: the set of currently active strategic dimensions.
+    // Contents change dynamically as inputs arrive.
+
+    all_dimensions : List[StrategicDimension]    // full universe of dimensions
+    active_flags   : Map[DimensionID → BOOL]     // which are currently active
+
+    PROCEDURE IsActive(dim_id: DimensionID) -> BOOL:
+        IF dim_id IN active_flags:
+            RETURN active_flags[dim_id]
+        END IF
+        RETURN FALSE
+    END PROCEDURE
+
+    PROCEDURE Activate(dim_id: DimensionID) -> VOID:
+        active_flags[dim_id] := TRUE
+        EMIT INFO "Dimension activated: " + dim_id
+    END PROCEDURE
+
+    PROCEDURE Deactivate(dim_id: DimensionID) -> VOID:
+        active_flags[dim_id] := FALSE
+        EMIT INFO "Dimension deactivated: " + dim_id
+    END PROCEDURE
+
+    PROCEDURE ActiveList() -> List[StrategicDimension]:
+        RETURN [d FOR d IN all_dimensions IF IsActive(d.id)]
+    END PROCEDURE
+
+    PROCEDURE ActiveCount() -> INT:
+        RETURN LENGTH(ActiveList())
+    END PROCEDURE
+
+    PROCEDURE ActiveIDs() -> List[DimensionID]:
+        RETURN [d.id FOR d IN ActiveList()]
+    END PROCEDURE
+END DEFINE
+
+
+// ── DEFINITION 2: CONTEXTUAL ACTIVATION ──────────────────────
+
+// DEFINITION 2 (Contextual Activation):
+//   Dimension Dᵢ is considered ACTIVE if:
+//
+//     Σⱼ δ(xⱼ, Dᵢ) ≥ τ
+//
+//   where:
+//     δ(xⱼ, Dᵢ) — relevance score of input xⱼ under dimension Dᵢ
+//     τ          — domain-defined activation threshold
+//     m          — number of inputs xⱼ in the current observation window
+
+PROCEDURE ContextualActivation(inputs: List[ScalarInput],
+                                 D_i: StrategicDimension,
+                                 delta_fn: RelevanceFunction,
+                                 tau: REAL) -> BOOL:
+    // Evaluate: Σⱼ δ(xⱼ, Dᵢ) ≥ τ
+
+    IF tau < 0:
+        EMIT ERROR "Activation threshold τ must be ≥ 0"
+        RETURN FALSE
+    END IF
+
+    relevance_sum := 0.0
+    FOR EACH x_j IN inputs:
+        delta_j := delta_fn.Evaluate(x_j, D_i)
+        // δ must be non-negative (relevance score)
+        ASSERT delta_j >= 0.0
+        relevance_sum := relevance_sum + delta_j
+    END FOR
+
+    is_active := (relevance_sum >= tau)
+
+    EMIT LOG "Contextual activation | dim=" + D_i.name +
+             " | Σδ=" + relevance_sum +
+             " | τ=" + tau +
+             " | active=" + is_active
+    RETURN is_active
+END PROCEDURE
+
+
+PROCEDURE RelevanceScore(x: ScalarInput, D: StrategicDimension) -> REAL:
+    // δ(xⱼ, Dᵢ): measures how relevant input x is to dimension D.
+    //
+    // Cross-reference: EffectivenessScore (PDF 8 §3 Definition 6)
+    //   Both measure alignment between an input/strategy and a dimension.
+    //   δ operates on raw scalar inputs; EffectivenessScore on strategies.
+    //
+    // Implementation: project x's feature vector onto D's basis.
+
+    IF x.is_promoted:
+        // Use promoted vector
+        projection := DOT(x.embedding, D.basis_vector)
+        RETURN ABS(projection) / MAX(NORM(x.embedding) * NORM(D.basis_vector), 1e-12)
+    ELSE:
+        // Scalar: treat as magnitude-weighted projection
+        RETURN ABS(x.raw_value) * NORM(D.basis_vector) /
+               MAX(NORM(D.basis_vector), 1e-12)
+    END IF
+END PROCEDURE
+
+
+// ── DIMENSION UPDATE LOOP ─────────────────────────────────────
+
+PROCEDURE UpdateActiveDimensions(G: VariadicGame,
+                                   new_inputs: List[ScalarInput],
+                                   tau_map: Map[DimensionID → REAL]) -> VOID:
+    // For each dimension, re-evaluate contextual activation.
+    // Updates G.D (the active dimension set) in-place.
+
+    FOR EACH dim IN G.D.all_dimensions:
+        tau := IF dim.id IN tau_map THEN tau_map[dim.id] ELSE DEFAULT_TAU
+
+        // Definition 2: Σⱼ δ(xⱼ, Dᵢ) ≥ τ
+        is_now_active := ContextualActivation(
+            inputs   = new_inputs,
+            D_i      = dim,
+            delta_fn = RelevanceFunction.Default(),
+            tau      = tau
+        )
+
+        IF is_now_active AND NOT G.D.IsActive(dim.id):
+            G.D.Activate(dim.id)
+        ELSE IF NOT is_now_active AND G.D.IsActive(dim.id):
+            G.D.Deactivate(dim.id)
+        END IF
+    END FOR
+END PROCEDURE
+
+CONSTANT DEFAULT_TAU := 0.3   // default activation threshold τ
+
+
+// ── VARIADIC UTILITY FUNCTION ─────────────────────────────────
+
+PROCEDURE VariadicUtility(player_i: PlayerID,
+                            action_profile: ActionProfile,
+                            D_active: ActiveDimensionSet,
+                            base_utility: UtilityFunction) -> REAL:
+    // Utility in a variadic game depends on the active dimension set D.
+    // Active dimensions unlock additional utility components.
+
+    base_u := base_utility.Evaluate(player_i, action_profile)
+
+    dimensional_bonus := 0.0
+    FOR EACH dim IN D_active.ActiveList():
+        dim_contribution := dim.Evaluate(
+            Strategy.fromActionProfile(action_profile, player_i)
+        )
+        dimensional_bonus := dimensional_bonus + dim_contribution
+    END FOR
+
+    total_u := base_u + dimensional_bonus
+    RETURN total_u
+END PROCEDURE
+
+
+// ── VARIADIC GAME CONSTRUCTION ────────────────────────────────
+
+PROCEDURE BuildVariadicGame(player_ids: List[PlayerID],
+                              base_action_set: Set[Action],
+                              dimension_unlocked_actions: Map[DimensionID → Set[Action]],
+                              utility_fns: List[UtilityFunction],
+                              all_dimensions: List[StrategicDimension]) -> VariadicGame:
+
+    A := VariadicActionSpace(
+        base_actions      = base_action_set,
+        unlocked_actions  = dimension_unlocked_actions
+    )
+
+    D := ActiveDimensionSet(
+        all_dimensions = all_dimensions,
+        active_flags   = {}   // all inactive initially
+    )
+
+    G := VariadicGame(
+        N = SET(player_ids),
+        A = A,
+        u = MAP(player_ids, utility_fns),
+        D = D
+    )
+    RETURN G
+END PROCEDURE
+
+
+// ── CONNECTION TO OBIAI FILTER-FLASH ─────────────────────────
+
+// The Filter layer (PDF 7 eq. 3.1) can be read as a variadic game:
+//   Filter(x) = Σᵢ wᵢ · ϕᵢ(x) · verify(x)
+//   → ϕᵢ = symbolic inference functions = dimension-specific utility components
+//   → verify(x) = epistemic validity = contextual activation gate
+//   → wᵢ = slot weights = dimension relevance scores δ
+//
+// The Flash layer (eq. 3.2) captures the pre-promotion scalar state:
+//   Flash(x, t) = ephemeral(x) · e^(−λt)
+//   → scalar x has not yet been promoted (‖v⃗_D‖ ≤ ε)
+//   → decays until context triggers promotion
+
+PROCEDURE FilterFlashAsMappingToVariadicGame(
+    x: ScalarInput, t: REAL, lambda: REAL,
+    D_available: List[StrategicDimension],
+    epsilon: REAL, tau: REAL) -> EphemerisMode:
+    // Determine if x should be processed by Filter (promoted) or Flash (scalar).
+
+    // Try promotion across all available dimensions
+    best_norm := 0.0
+    FOR EACH dim IN D_available:
+        f_generic := PromotionFunction.Generic()
+        result    := ScalarPromotion(x, dim, f_generic, epsilon)
+        IF result.success AND result.norm > best_norm:
+            best_norm := result.norm
+        END IF
+    END FOR
+
+    // Flash value at time t (decayed scalar)
+    flash_value := EphemeralRepresentation(x) * EXP(-lambda * t)
+
+    // If promoted AND contextually activated: Filter
+    // If only scalar remains: Flash
+    IF best_norm > epsilon AND flash_value > 0.5:
+        RETURN FILTER
+    ELSE:
+        RETURN REFLASH
+    END IF
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: dgt_variadic_M3_strategic_balance_reduction.psc.txt
+// ============================================================

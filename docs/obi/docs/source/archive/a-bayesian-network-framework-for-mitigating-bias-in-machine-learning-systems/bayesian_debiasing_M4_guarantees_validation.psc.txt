@@ -1,0 +1,213 @@
+// ============================================================
+// FILE: bayesian_debiasing_M4_guarantees_validation.psc.txt
+// MODULE 4 OF 5 — Theoretical Guarantees, Fairness & Validation
+// SOURCE: "A Bayesian Network Framework for Mitigating Bias
+//          in Machine Learning Systems"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 5: THEORETICAL GUARANTEES
+// ------------------------------------------------------------
+
+// ── THEOREM 5.1: BIAS REDUCTION ──────────────────────────────
+//
+// Let B(θ, D) be a bias measure for parameters θ on dataset D.
+// Under the Bayesian debiasing framework with proper priors:
+//
+//   E[B(θ_Bayes, D)] ≤ E[B(θ_MLE, D)] − Δ
+//
+// where Δ > 0 is the bias reduction from marginalizing over ϕ.
+//
+// This theorem guarantees the Bayesian estimator is STRICTLY
+// less biased in expectation than the MLE estimator.
+
+THEOREM BiasReduction:
+    // INPUTS:
+    //   θ_Bayes  — posterior mean from Bayesian framework
+    //   θ_MLE    — maximum likelihood estimate (no debiasing)
+    //   D        — evaluation dataset
+    //   Δ        — provable bias reduction margin (Δ > 0)
+    //
+    // ASSERTION:
+    ASSERT ExpectedBias(θ_Bayes, D) <= ExpectedBias(θ_MLE, D) - Δ
+    //
+    // MECHANISM:
+    //   The marginalization P(θ|D) = ∫ P(θ,ϕ|D) dϕ removes the
+    //   contribution of ϕ from θ. With proper priors (proper = 
+    //   integrable, not flat improper priors), the posterior 
+    //   contracts toward the true unbiased parameters.
+    //
+    // CONDITION: Priors must be PROPER (i.e., ∫ P(θ|α) dθ = 1).
+    //            Improper priors may not guarantee Δ > 0.
+
+END THEOREM
+
+
+// ── THEOREM 5.2: DEMOGRAPHIC PARITY ──────────────────────────
+//
+// The Bayesian framework ensures approximate demographic parity:
+//
+//   | P(Ŷ=1 | A=a) − P(Ŷ=1 | A=a') | ≤ ε
+//
+// for all pairs of protected attribute values a, a' ∈ 𝒜,
+// and user-specified fairness tolerance ε > 0.
+
+THEOREM DemographicParity:
+    // INPUTS:
+    //   A     — protected attribute variable (e.g., race, sex)
+    //   a, a' — two values of A (distinct demographic groups)
+    //   Ŷ     — model prediction (binary: 0 or 1)
+    //   ε     — fairness tolerance (small positive real)
+    //
+    // ASSERTION:
+    ASSERT ABS(
+        P(Y_hat = 1 | A = a,    θ_Bayes) -
+        P(Y_hat = 1 | A = a_prime, θ_Bayes)
+    ) <= ε
+    //
+    // MECHANISM:
+    //   Because A is explicitly modeled as a confounder in the DAG
+    //   and conditioned upon during inference, systematic group-based
+    //   prediction gaps are bounded by ε, where ε is controlled by:
+    //     (a) the strength of priors on ϕ
+    //     (b) the amount of training data per group
+    //     (c) the DAG structure blocking spurious A → Ŷ paths
+
+END THEOREM
+
+
+// ------------------------------------------------------------
+// PROCEDURE: VERIFY THEORETICAL GUARANTEES AT RUNTIME
+// ------------------------------------------------------------
+
+PROCEDURE VerifyBiasReductionGuarantee(θ_Bayes, θ_MLE, D: Dataset,
+                                        Δ_expected: REAL) -> BOOL:
+    bias_bayes := ComputeBiasMeasure(θ_Bayes, D)
+    bias_mle   := ComputeBiasMeasure(θ_MLE, D)
+    actual_Δ   := bias_mle - bias_bayes
+
+    IF actual_Δ < Δ_expected:
+        EMIT WARNING "Bias reduction Δ=" + actual_Δ +
+                     " is below expected Δ=" + Δ_expected
+        RETURN FALSE
+    END IF
+    EMIT INFO "Bias reduction confirmed: Δ=" + actual_Δ
+    RETURN TRUE
+END PROCEDURE
+
+
+PROCEDURE VerifyDemographicParity(θ: Parameters, D: Dataset,
+                                   A: ProtectedAttribute, ε: REAL) -> BOOL:
+    ALL_PASS := TRUE
+    FOR EACH pair (a, a_prime) IN A.all_pairs:
+        rate_a       := ComputePredictionRate(θ, D.subset(A=a))
+        rate_a_prime := ComputePredictionRate(θ, D.subset(A=a_prime))
+        gap          := ABS(rate_a - rate_a_prime)
+        IF gap > ε:
+            EMIT WARNING "Parity violation: groups " + a + " vs " + a_prime +
+                         " | gap=" + gap + " > ε=" + ε
+            ALL_PASS := FALSE
+        END IF
+    END FOR
+    RETURN ALL_PASS
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 7: EXPERIMENTAL VALIDATION — HEALTHCARE USE CASE
+// ------------------------------------------------------------
+
+// Domain: Cancer Detection
+// Benchmark: Comparison of Traditional AI vs Bayesian Framework
+
+CONSTANT TRADITIONAL_MISDIAG_UNDERREP := 0.35  // 35% excess misdiagnosis rate
+CONSTANT BAYESIAN_MISDIAG_RATE        := 0.05  // 5% across all demographics
+CONSTANT BIAS_REDUCTION_FACTOR        := 0.85  // 85% improvement in diagnostic equity
+
+PROCEDURE ValidateHealthcareUseCase(model_traditional, model_bayesian,
+                                     test_D: Dataset) -> ValidationReport:
+
+    report := NEW ValidationReport()
+
+    // Evaluate traditional model
+    FOR EACH demographic_group G IN test_D.groups:
+        trad_misdiag_rate := MisdiagnosisRate(model_traditional, test_D.subset(G))
+        report.traditional[G] := trad_misdiag_rate
+    END FOR
+
+    // Evaluate Bayesian debiased model
+    FOR EACH demographic_group G IN test_D.groups:
+        bayes_misdiag_rate := MisdiagnosisRate(model_bayesian, test_D.subset(G))
+        report.bayesian[G] := bayes_misdiag_rate
+    END FOR
+
+    // Compute reduction
+    report.parity_gap_traditional := MAX(report.traditional) - MIN(report.traditional)
+    report.parity_gap_bayesian    := MAX(report.bayesian)    - MIN(report.bayesian)
+    report.bias_reduction_pct     := (
+        (report.parity_gap_traditional - report.parity_gap_bayesian) /
+         report.parity_gap_traditional
+    ) * 100
+
+    // Assertions against paper's reported results
+    ASSERT report.bayesian.all_values_at_most(BAYESIAN_MISDIAG_RATE)
+    ASSERT report.bias_reduction_pct >= (BIAS_REDUCTION_FACTOR * 100)  // ≥ 85%
+
+    RETURN report
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 7.2: PERFORMANCE METRICS TABLE (formal specification)
+// ------------------------------------------------------------
+
+// The paper's Table 1 in pseudocode:
+
+DEFINE PerformanceComparisonTable AS:
+    METRICS := {
+        "Demographic Fairness"        : { traditional: LOW,       bayesian: HIGH       },
+        "Transparency"                : { traditional: NONE,      bayesian: COMPLETE   },
+        "Uncertainty Quantification"  : { traditional: NONE,      bayesian: EXPLICIT   },
+        "Performance Disparity"       : { traditional: HIGH,      bayesian: REDUCED    },
+        "Regulatory Compliance"       : { traditional: DIFFICULT, bayesian: AUDITABLE  }
+    }
+END DEFINE
+
+PROCEDURE DisplayPerformanceComparison() -> VOID:
+    FOR EACH (metric, values) IN PerformanceComparisonTable.METRICS:
+        PRINT metric + " | Traditional: " + values.traditional +
+                       " | Bayesian: "    + values.bayesian
+    END FOR
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 9: DEVELOPMENT PHASES (Roadmap)
+// ------------------------------------------------------------
+
+DEFINE DevelopmentPhases AS SEQUENCE:
+    PHASE_1 := "Core mathematical formulations and theoretical guarantees"
+    PHASE_2 := "Sampling algorithms for posterior inference (MCMC, variational methods)"
+    PHASE_3 := "Model validation suite with synthetic bias injection"
+    PHASE_4 := "Integration with production ML pipelines"
+    PHASE_5 := "Deployment with monitoring systems"
+END DEFINE
+
+PROCEDURE ExecuteRoadmap(current_phase: INT) -> VOID:
+    IF current_phase < 1 OR current_phase > 5:
+        EMIT ERROR "Invalid phase: " + current_phase
+        RETURN
+    END IF
+    phase_desc := DevelopmentPhases[current_phase]
+    EMIT INFO "Executing Phase " + current_phase + ": " + phase_desc
+    // Delegate to phase-specific implementation module
+    DispatchPhase(current_phase)
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 4
+// NEXT: bayesian_debiasing_M5_implementation_safety.psc.txt
+// ============================================================

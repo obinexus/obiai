@@ -1,0 +1,338 @@
+// ============================================================
+// FILE: DEFF_Module2_MathematicalStructures.psc.txt
+// SOURCE: Integrating_FlashCycle_Cognition_with_Dimensional_Game_Theory.pdf
+//         Section 3
+// AUTHOR: OBINexus Computing — Cultural Intelligence Systems Group
+//         Consciousness Preservation Architecture Division (July 20, 2025)
+// PURPOSE: Pseudocode for all four formal mathematical definitions:
+//          Definition 1 (Scalar Promotion)
+//          Definition 2 (Cultural Boundary Activation)
+//          Definition 3 (Consciousness Strategic Vector)
+//          Definition 4 (Dimensional Activation Mapping)
+// ============================================================
+
+MODULE DEFF_MathematicalStructures
+
+// ============================================================
+// SECTION 3 — MATHEMATICAL STRUCTURES AND FORMAL DEFINITIONS
+// ============================================================
+
+// ============================================================
+// SECTION 3.1 — SCALAR PROMOTION AND DIMENSIONAL ACTIVATION
+// ============================================================
+
+// DEFINITION 1 (Scalar Promotion):
+// An experiential input x undergoes promotion to dimension D if
+// there exists a mapping function:
+//
+//   f : x → v_D ∈ R^n   such that  ||v_D|| > ε
+//
+// Where ε represents the significance threshold for dimensional
+// activation within the consciousness modeling context.
+//
+// Implication: Scalar inputs only enter the vector space when
+// their promoted norm exceeds the significance threshold.
+// Low-significance inputs remain scalar — preventing noise
+// from polluting the dimensional representation.
+
+CONSTANT DIMENSIONAL_SIGNIFICANCE_EPSILON := 0.0   // ε — set per deployment context
+// NOTE: Specific ε value is context-dependent; declared here as configurable
+
+STRUCTURE ExperientialInput:
+    raw_value:          Float           // Scalar experiential input x
+    source_tag:         String          // Origin label
+    cultural_weight:    Float           // Cultural salience of this input
+    timestamp:          UInt64
+END STRUCTURE
+
+STRUCTURE DimensionalVector:
+    dimension_id:  String              // Target dimension D identifier
+    components:    List<Float>         // v_D ∈ R^n — n-dimensional vector
+    norm:          Float               // ||v_D|| — Euclidean norm
+END STRUCTURE
+
+FUNCTION compute_euclidean_norm(v: List<Float>) -> Float:
+    sum_of_squares := 0.0
+    FOR EACH component IN v DO
+        sum_of_squares := sum_of_squares + (component * component)
+    END FOR
+    RETURN SQRT(sum_of_squares)
+END FUNCTION
+
+// Scalar promotion mapping f : x → v_D
+FUNCTION promote_to_dimension(
+    input:        ExperientialInput,    // x — scalar input
+    dimension:    StrategicDimension,   // D — target dimension
+    epsilon:      Float                 // ε — significance threshold
+) -> DimensionalVector OR NULL:
+    // Apply mapping function f to generate candidate vector
+    candidate_vector := apply_promotion_mapping(input.raw_value, dimension)
+    norm             := compute_euclidean_norm(candidate_vector.components)
+
+    IF norm > epsilon THEN
+        // Promotion succeeds — input is dimensionally significant
+        candidate_vector.norm := norm
+        RETURN candidate_vector
+    ELSE
+        // Promotion fails — input below significance threshold
+        // Remains scalar — not entered into dimensional representation
+        RETURN NULL
+    END IF
+END FUNCTION
+
+FUNCTION apply_promotion_mapping(
+    x:         Float,
+    dimension: StrategicDimension
+) -> DimensionalVector:
+    // Context-specific linear or non-linear mapping of scalar x
+    // to an n-dimensional vector in the dimension's coordinate space
+    // TODO: Clarify specific promotion mapping function form from source PDF
+    //       (linear projection, embedding function, or other transform not specified)
+    n          := dimension.dimensionality
+    components := []
+
+    FOR i FROM 0 TO n-1 DO
+        // Apply dimension's basis vector projection
+        component := x * dimension.basis_vectors[i]
+        components.append(component)
+    END FOR
+
+    RETURN DimensionalVector {
+        dimension_id: dimension.id,
+        components:   components,
+        norm:         0.0   // Computed by caller
+    }
+END FUNCTION
+
+
+// DEFINITION 2 (Cultural Boundary Activation):
+// A strategic dimension D_i becomes active within cultural context C if:
+//
+//   Σⱼ δ(x_j, D_i) ≥ τ_C
+//
+// Where:
+//   δ(x_j, D_i) = relevance score of input x_j under dimension D_i
+//   τ_C         = cultural activation threshold (prevents systematic bias)
+//   j           = index over m inputs {x_1, x_2, ..., x_m}
+
+STRUCTURE CulturalContext:
+    culture_id:           String
+    tau_C:                Float       // Cultural activation threshold
+    bias_weights:         MAP<String, Float>  // Per-dimension bias prevention weights
+    regulation_constraints: List<CulturalConstraint>
+END STRUCTURE
+
+FUNCTION delta_relevance(
+    input:     ExperientialInput,    // x_j
+    dimension: StrategicDimension    // D_i
+) -> Float:
+    // δ(x_j, D_i): maps input x_j to its relevance score under dimension D_i
+    // Combines raw value with cultural weight and dimensional alignment
+    base_relevance    := compute_base_relevance(input.raw_value, dimension)
+    cultural_adjusted := base_relevance * input.cultural_weight
+    RETURN cultural_adjusted
+END FUNCTION
+
+FUNCTION is_dimension_culturally_active(
+    dimension:        StrategicDimension,    // D_i
+    inputs:           List<ExperientialInput>,  // {x_1, ..., x_m}
+    cultural_ctx:     CulturalContext
+) -> Boolean:
+    // Σⱼ δ(x_j, D_i) ≥ τ_C
+
+    activation_sum := 0.0
+    FOR EACH input x_j IN inputs DO
+        delta := delta_relevance(x_j, dimension)
+        activation_sum := activation_sum + delta
+    END FOR
+
+    // Threshold check — prevents monocultural bias activation
+    RETURN activation_sum >= cultural_ctx.tau_C
+END FUNCTION
+
+// Batch cultural boundary activation check across all candidate dimensions:
+FUNCTION compute_active_dimensions(
+    candidate_dimensions: List<StrategicDimension>,
+    inputs:               List<ExperientialInput>,
+    cultural_ctx:         CulturalContext
+) -> List<StrategicDimension>:    // D_act
+    active := []
+
+    FOR EACH dim D_i IN candidate_dimensions DO
+        IF is_dimension_culturally_active(D_i, inputs, cultural_ctx) THEN
+            active.append(D_i)
+        END IF
+    END FOR
+
+    RETURN active  // D_act
+END FUNCTION
+
+
+// ============================================================
+// SECTION 3.2 — STRATEGIC VECTOR FORMULATION
+// ============================================================
+
+// DEFINITION 3 (Consciousness Strategic Vector):
+// A consciousness state flash is represented as:
+//
+//   S_i = s⃗ = [s_{D1}, s_{D2}, ..., s_{Dk}]  where D_j ∈ D_act
+//
+// The strategic vector encodes consciousness evolution coherence
+// across activated dimensional contexts, preventing dimensional
+// drift that could compromise objective reality alignment.
+
+STRUCTURE StrategicVector:
+    flash_id:           UInt64
+    components:         MAP<String, Float>   // D_j.id → s_{Dj} value
+    active_dimensions:  List<StrategicDimension>  // D_act — only activated dims
+    coherence_score:    Float                // Measures cross-dimensional consistency
+END STRUCTURE
+
+FUNCTION construct_strategic_vector(
+    flash:      ConsciousnessFlash,
+    D_act:      List<StrategicDimension>
+) -> StrategicVector:
+    // Build strategic vector from activated dimensions only
+    // s⃗ = [s_{D1}, ..., s_{Dk}] where each D_j ∈ D_act
+
+    components := {}
+
+    FOR EACH dimension D_j IN D_act DO
+        // Extract component value for this dimension from flash state
+        s_Dj := extract_dimensional_component(flash, D_j)
+        components[D_j.id] := s_Dj
+    END FOR
+
+    coherence := compute_vector_coherence(components, D_act)
+
+    RETURN StrategicVector {
+        flash_id:          flash.flash_id,
+        components:        components,
+        active_dimensions: D_act,
+        coherence_score:   coherence
+    }
+END FUNCTION
+
+FUNCTION extract_dimensional_component(
+    flash:     ConsciousnessFlash,
+    dimension: StrategicDimension
+) -> Float:
+    // Project flash's strategic alignment onto this specific dimension
+    RETURN dot_product(flash.strategic_alignments.vector,
+                       dimension.basis_vector)
+END FUNCTION
+
+FUNCTION compute_vector_coherence(
+    components: MAP<String, Float>,
+    dimensions: List<StrategicDimension>
+) -> Float:
+    // Measures consistency across dimensional components
+    // High coherence → consciousness evolution is dimensionally stable
+    // Low coherence  → dimensional drift risk detected
+
+    IF COUNT(components) <= 1 THEN
+        RETURN 1.0   // Single or zero dimension — trivially coherent
+    END IF
+
+    values      := LIST(components.values())
+    mean_val    := MEAN(values)
+    variance    := MEAN([(v - mean_val)^2 FOR v IN values])
+    std_dev     := SQRT(variance)
+
+    // Coherence inversely proportional to standard deviation
+    coherence := 1.0 / (1.0 + std_dev)
+    RETURN coherence
+END FUNCTION
+
+FUNCTION detect_dimensional_drift(
+    vec_t:  StrategicVector,    // Vector at time t
+    vec_t1: StrategicVector     // Vector at time t+1
+) -> Boolean:
+    // Dimensional drift: significant shift in strategic vector components
+    // between consecutive flash states
+    IF vec_t.active_dimensions != vec_t1.active_dimensions THEN
+        RETURN TRUE   // Dimension set changed — potential drift
+    END IF
+
+    FOR EACH dim_id IN vec_t.components.keys() DO
+        delta := ABS(vec_t.components[dim_id] - vec_t1.components[dim_id])
+        IF delta > DIMENSIONAL_DRIFT_THRESHOLD THEN
+            RETURN TRUE
+        END IF
+    END FOR
+
+    RETURN FALSE
+END FUNCTION
+
+
+// ============================================================
+// SECTION 3.3 — DIMENSIONAL MAPPING AND FILTERING
+// ============================================================
+
+// DEFINITION 4 (Dimensional Activation Mapping):
+// The mapping function transforms subjective input sequences
+// into activated dimensional sets:
+//
+//   ϕ : {x_1, x_2, ..., x_n} → D_act
+//
+// This mapping:
+//   - Ensures systematic evaluation of consciousness inputs
+//     against strategic dimensional requirements
+//   - Provides mathematical foundation for objective reality anchoring
+
+FUNCTION phi_activation_mapping(
+    inputs:           List<ExperientialInput>,   // {x_1, ..., x_n}
+    all_dimensions:   List<StrategicDimension>,
+    cultural_ctx:     CulturalContext,
+    epsilon:          Float                      // Significance threshold for promotion
+) -> List<StrategicDimension>:                  // D_act
+
+    D_act := []
+
+    FOR EACH dimension D_i IN all_dimensions DO
+        // Step 1: Check cultural boundary activation (Definition 2)
+        culturally_active := is_dimension_culturally_active(D_i, inputs, cultural_ctx)
+        IF NOT culturally_active THEN
+            CONTINUE   // Dimension not activated by this cultural context
+        END IF
+
+        // Step 2: Verify at least one input promotes successfully (Definition 1)
+        has_promoted_input := FALSE
+        FOR EACH input x_j IN inputs DO
+            promoted := promote_to_dimension(x_j, D_i, epsilon)
+            IF promoted IS NOT NULL THEN
+                has_promoted_input := TRUE
+                BREAK
+            END IF
+        END FOR
+
+        // Step 3: Activate dimension only if both conditions met
+        IF has_promoted_input THEN
+            D_act.append(D_i)
+        END IF
+    END FOR
+
+    RETURN D_act
+
+END FUNCTION
+
+// Full pipeline: inputs → D_act → strategic vector
+FUNCTION compute_consciousness_strategic_vector(
+    flash:          ConsciousnessFlash,
+    inputs:         List<ExperientialInput>,
+    all_dimensions: List<StrategicDimension>,
+    cultural_ctx:   CulturalContext,
+    epsilon:        Float
+) -> StrategicVector:
+    // 1. Compute activated dimension set via ϕ mapping
+    D_act := phi_activation_mapping(inputs, all_dimensions, cultural_ctx, epsilon)
+
+    // 2. Construct strategic vector from activated dimensions
+    s_vec := construct_strategic_vector(flash, D_act)
+
+    // 3. Validate dimensional drift not introduced
+    // (comparison with prior vector requires caller to pass prior_vec)
+    RETURN s_vec
+END FUNCTION
+
+END MODULE DEFF_MathematicalStructures

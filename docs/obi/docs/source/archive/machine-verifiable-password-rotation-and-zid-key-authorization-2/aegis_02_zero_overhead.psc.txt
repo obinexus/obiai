@@ -1,0 +1,191 @@
+// ============================================================
+// FILE: aegis_02_zero_overhead.psc.txt
+// MODULE 2: Zero Overhead Architecture — Theorem 3.1 & Proof Components
+// SOURCE: Mathematical_Framework_for_Zero_Overhead_Data_Marshalling_for_AI.pdf
+// Sections: 3 (Architecture Theorem), 8 (Performance Analysis and Complexity)
+// Project: Aegis — OBINexus Engineering Team | Document Version 2.0
+// ============================================================
+
+// ------------------------------------------------------------
+// THEOREM 3.1: ZERO OVERHEAD ARCHITECTURE
+// "For any marshalling operation M_ij in a properly configured topology,
+//  the operational overhead is bounded by O(1) regardless of payload size."
+// ------------------------------------------------------------
+
+// The theorem is proven through three independent overhead components:
+//   1. Communication Overhead — delta + proof + metadata
+//   2. Computational Overhead — reused precomputed proofs
+//   3. Memory Overhead       — constant cache per topology node
+
+// ------------------------------------------------------------
+// DATA STRUCTURES
+// ------------------------------------------------------------
+
+STRUCT StateDelta:
+    delta_bytes : BYTES     // delta_s = s' \ s  (set difference / changed fields)
+    source_hash : BYTES     // hash of originating state s
+    target_hash : BYTES     // hash of target state s'
+
+STRUCT CryptographicProof:
+    pi          : BYTES     // pi = Proof(delta_s, Sigma)
+    valid       : BOOLEAN
+    precomputed : BOOLEAN   // True if retrieved from proof cache
+
+STRUCT MarshallingMetadata:
+    node_i      : NodeID
+    node_j      : NodeID
+    timestamp   : UNIX_TIMESTAMP_MICROSECONDS
+    size        : INTEGER   // Fixed upper bound — independent of |s|
+
+STRUCT MarshallingPayload:
+    delta       : StateDelta
+    proof       : CryptographicProof
+    metadata    : MarshallingMetadata
+
+// ------------------------------------------------------------
+// COMPONENT 1: COMMUNICATION OVERHEAD — O(1)
+// ------------------------------------------------------------
+
+// The marshalling protocol transmits ONLY:
+//   a) State delta:          delta_s = s' \ s
+//   b) Cryptographic proof:  pi = Proof(delta_s, Sigma)
+//   c) Metadata:             m = Meta(n_i, n_j, timestamp)
+//
+// Key invariants:
+//   |delta_s| << |s|             (delta is much smaller than full state)
+//   |pi| has a FIXED upper bound independent of |s|
+//   |m| has a FIXED upper bound independent of |s|
+
+FUNCTION compute_state_delta(s, s_prime) -> StateDelta:
+    // Compute set-difference: only the changed fields
+    delta_bytes = set_difference(s_prime, s)    // s' \ s
+    RETURN StateDelta {
+        delta_bytes = delta_bytes,
+        source_hash = HASH(s),
+        target_hash = HASH(s_prime)
+    }
+END FUNCTION
+
+FUNCTION build_marshalling_payload(s, s_prime, n_i, n_j, Sigma) -> MarshallingPayload:
+    delta    = compute_state_delta(s, s_prime)
+    proof    = compute_or_retrieve_proof(delta, Sigma)
+    metadata = MarshallingMetadata {
+        node_i    = n_i,
+        node_j    = n_j,
+        timestamp = current_unix_timestamp_microseconds(),
+        size      = FIXED_METADATA_SIZE    // Constant regardless of |s|
+    }
+    RETURN MarshallingPayload { delta, proof, metadata }
+    // Total payload size: O(|delta_s|) + O(1) + O(1) = O(1) amortized
+END FUNCTION
+
+// ------------------------------------------------------------
+// COMPONENT 2: COMPUTATIONAL OVERHEAD — O(1) AMORTIZED
+// ------------------------------------------------------------
+
+// Each verification reuses precomputed cryptographic proofs:
+//   VerificationCost(M_ij) = O(CryptoOp) + O(DeltaCompare) = O(1)
+
+STRUCT ProofCache:
+    entries : MAP<DeltaHash, CryptographicProof>   // keyed by delta hash
+
+FUNCTION compute_or_retrieve_proof(delta: StateDelta, Sigma) -> CryptographicProof:
+    key = HASH(delta.delta_bytes)
+
+    // Check proof cache first (O(1) lookup)
+    IF key IN ProofCache.entries THEN
+        cached = ProofCache.entries[key]
+        cached.precomputed = TRUE
+        RETURN cached
+    END IF
+
+    // Compute new proof (O(CryptoOp) — bounded by security parameter lambda)
+    pi = Proof(delta.delta_bytes, Sigma)
+    new_proof = CryptographicProof { pi = pi, valid = TRUE, precomputed = FALSE }
+    ProofCache.entries[key] = new_proof
+    RETURN new_proof
+END FUNCTION
+
+FUNCTION verify_marshalling_operation(payload: MarshallingPayload, Sigma) -> BOOLEAN:
+    // Step 1: Verify cryptographic proof — O(CryptoOp) = O(1)
+    proof_valid = Sigma.verify(payload.proof.pi, payload.delta.delta_bytes)
+
+    // Step 2: Compare delta hashes — O(DeltaCompare) = O(1)
+    delta_consistent = constant_time_compare(
+        payload.delta.target_hash,
+        HASH(apply_delta(payload.delta))
+    )
+
+    RETURN proof_valid AND delta_consistent
+    // Total: O(1) + O(1) = O(1)
+END FUNCTION
+
+// ------------------------------------------------------------
+// COMPONENT 3: MEMORY OVERHEAD — O(1) PER NODE
+// ------------------------------------------------------------
+
+// Cache management uses constant space per topology configuration:
+//   CacheOverhead = O(|T(n_i)|) = O(1) per node
+//   Because TopologyType is a fixed-size enum — not a function of |N|
+
+FUNCTION compute_cache_overhead(node, D: DistributedSystem) -> INTEGER:
+    topology_type = D.T(node)               // Fixed enum value
+    // Cache size depends on topology type, not number of nodes
+    RETURN CONSTANT_CACHE_SIZE_PER_TOPOLOGY[topology_type]  // O(1)
+END FUNCTION
+
+// ------------------------------------------------------------
+// TOTAL OVERHEAD PROOF COMPOSITION
+// ------------------------------------------------------------
+
+FUNCTION total_marshalling_overhead(n_i, n_j, s, s_prime, Sigma) -> ComplexityBound:
+    comm_overhead  = O(1)   // Communication: delta + proof + metadata
+    comp_overhead  = O(1)   // Computation: precomputed proof reuse
+    mem_overhead   = O(1)   // Memory: constant cache per topology
+
+    total = comm_overhead + comp_overhead + mem_overhead
+    RETURN O(1)
+    // QED: TotalOverhead(M_ij) = O(1), independent of |s|
+END FUNCTION
+
+// ------------------------------------------------------------
+// SECTION 8.1: THEORETICAL COMPLEXITY BOUNDS
+// ------------------------------------------------------------
+
+// Proposition 8.1: Communication Complexity
+//   Traditional:   O(n^2 * m)       [n nodes, m message size]
+//   Topology-aware: O(n * log m)    [with delta compression]
+
+COMMUNICATION_COMPLEXITY = {
+    traditional     : "O(n^2 * m)",
+    topology_aware  : "O(n * log m)"
+}
+
+// Proposition 8.2: Memory Complexity
+//   Cache overhead: O(k * log n)    [k = cache size]
+//   Verification:   O(log n)        [per operation]
+
+MEMORY_COMPLEXITY = {
+    cache_overhead      : "O(k * log n)",
+    verification_per_op : "O(log n)"
+}
+
+// Proposition 8.3: Computational Complexity
+//   Marshalling computation:  O(|delta|)    [delta << |s|]
+//   Verification (amortized): O(1)          [with precomputed proofs]
+
+COMPUTATIONAL_COMPLEXITY = {
+    marshalling_computation : "O(|delta|)",
+    verification_amortized  : "O(1)"
+}
+
+// NASA-STD-8739.8 Bounded Resource Requirements (Section 6):
+RESOURCE_BOUNDS = {
+    Time(M_ij)          : "O(n log n)",
+    Space(M_ij)         : "O(n)",
+    Communication(M_ij) : "O(log n)"
+}
+
+// ============================================================
+// END MODULE 2
+// ============================================================

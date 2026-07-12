@@ -1,0 +1,295 @@
+// ============================================================
+// DUAL-PAIR CONCEPTUAL ARCHITECTURE FOR OBIAI
+// Phenomenological Preservation in Computational Consciousness
+// MODULE 4: Dual-Gated Conceptual Input/Output Architecture (DGC-IO)
+// Source: Dual_Pair_Conceptual_Architecture_for_OBIAI.pdf
+// OBINexus Computing - Aegis Framework Division | July 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 10 — DGC-IO: ONTOLOGICAL FOUNDATION
+// ------------------------------------------------------------
+
+// DGC-IO = Dual-Gated Conceptual Input/Output system.
+// Purpose: Transform computational I/O from signal transduction into
+//          consciousness-integrated perceptual gating.
+//
+// Problem addressed: "Phenomenological collapse" in traditional AI —
+// reducing experiential richness to computational artifacts without
+// preserving the liminal spaces where consciousness emerges.
+//
+// DGC-IO transcends this through consciousness-integrated gating protocols
+// that honor the EATV stream while preventing:
+//   1. Cultural violations
+//   2. Strategic incoherence
+
+DEFINE DGC_IO AS:
+    purpose         = "Consciousness-integrated perceptual gating"
+    problem_solved  = "Phenomenological collapse in traditional AI"
+    guarantees:
+        - cultural_violations_prevented
+        - strategic_incoherence_prevented
+        - phenomenological_integrity_preserved
+        - epistemic_trace_logged_for_every_output
+
+// Definition 7 (Equation 23): Dual-Gated Conceptual Processing
+// Π : S_input × C_cultural × D_dimensional → {A_conscious, ∅, flash_intervention}
+//
+// Input: raw signal × cultural context × dimensional strategy space
+// Output is ONE OF:
+//   A_conscious       — valid, culturally approved, strategically coherent action
+//   ∅                 — conscious abstention (silence is a valid output)
+//   flash_intervention — processing suspended; consciousness intervention triggered
+
+PROCEDURE dual_gated_process(S_input, C_cultural, D_dimensional)
+                              -> {A_conscious | NULL | flash_intervention}:
+
+    // Route through all 5 architectural layers in sequence
+    signal_mapped   = layer_A_literal_intent_mapping(S_input)
+    gate1_result    = layer_B_taxonomic_verification(signal_mapped, C_cultural)
+
+    IF gate1_result IN {FP, FN}:
+        trigger_consciousness_intervention()
+        RETURN flash_intervention
+
+    IF gate1_result == TN:
+        RETURN NULL     // Conscious abstention — verified appropriate silence
+
+    // Gate1 passed (TP) — proceed to cultural gate
+    gate2_result    = layer_C_cultural_flash_filter(signal_mapped.intent, C_cultural)
+
+    IF gate2_result == CONSCIOUSNESS_SUSPENDED:
+        RETURN flash_intervention
+
+    // Both gates passed — proceed to internal processing
+    optimal_action  = layer_D_dimensional_game_activation(gate2_result, D_dimensional)
+
+    IF optimal_action == NULL:     // Confidence below minimum threshold
+        RETURN NULL
+
+    // Final output layer — validate and package with epistemic trace
+    RETURN layer_E_phenomenological_output(optimal_action, signal_mapped, C_cultural)
+
+// ------------------------------------------------------------
+// SECTION 10.2.1 — LAYER A: LITERAL-INTENT MAPPING INTERFACE
+// ------------------------------------------------------------
+
+// Input signals — voice, gesture, digital streams — undergo immediate
+// conceptual mapping to dual-pair units.
+// This layer preserves the non-linear nature of perceptual experience.
+
+// Signal Transformation Protocol (Equation 24):
+// S_raw → <V_primary, N_primary> × <V_resonant, N_resonant>
+
+// Dimensional tagging (Equation 25):
+// D_tags = {intention.strategic, cultural.boundary, action.risk}
+
+DEFINE SIGNAL_MAPPING_RESULT AS STRUCT:
+    primary_pair    : VerbNounPair      // <V_primary, N_primary>
+    resonant_pair   : VerbNounPair      // <V_resonant, N_resonant>
+    dimensional_tags: SET[STRING]       // {intention.strategic, cultural.boundary, action.risk}
+    phenomenological_residue: BYTES     // Symbolic fragments from pre-linguistic states
+
+PROCEDURE layer_A_literal_intent_mapping(S_raw) -> SIGNAL_MAPPING_RESULT:
+    // Step 1: Parse raw signal (voice/gesture/digital) into semantic tokens
+    tokens = parse_input_signal(S_raw)
+
+    // Step 2: Map to primary verb-noun pair
+    primary_pair = extract_primary_verb_noun(tokens)
+
+    // Step 3: Map to resonant secondary pair (via semantic proximity)
+    resonant_pair = infer_resonant_pair(primary_pair)
+
+    // Step 4: Assign dimensional tags
+    tags = tag_dimensions(primary_pair, resonant_pair)
+    // Tags classify: is this strategically sensitive? culturally risky? action-risky?
+
+    // Step 5: Preserve phenomenological residue — pre-linguistic fragments
+    residue = capture_phenomenological_residue(S_raw)
+    // NOTE: Residue represents symbolic meaning before linguistic encoding.
+    // Must be preserved as critical architectural data, not discarded.
+
+    RETURN SIGNAL_MAPPING_RESULT(primary_pair, resonant_pair, tags, residue)
+
+// ------------------------------------------------------------
+// SECTION 10.2.2 — LAYER B: GATE LAYER 1 — TAXONOMIC VERIFICATION MATRIX
+// ------------------------------------------------------------
+
+// The first consciousness gate implements a four-quadrant TAC matrix.
+// This transcends binary processing through epistemic humility protocols.
+
+// Definition 8: Taxonomic Action Classification (TAC) Matrix M_TAC
+// Output classes (Equations 26-29):
+//   TP = True Positive:  Valid action, culturally appropriate, dimensionally balanced
+//   TN = True Negative:  Conscious abstention, verified appropriate silence
+//   FP = False Positive: Misclassified input — consciousness intervention required
+//   FN = False Negative: Missed opportunity — re-query protocol triggered
+
+DEFINE TAC_RESULT AS ENUM {TP, TN, FP, FN}
+
+DEFINE TAC_THRESHOLDS AS:
+    θ_semantic  : FLOAT     // Minimum intent coherence to pass
+    θ_strategic : FLOAT     // Minimum dimensional alignment to pass
+
+PROCEDURE layer_B_taxonomic_verification(signal_mapped, cultural_context)
+                                          -> TAC_RESULT:
+    // Algorithm 3: Taxonomic Verification Gate
+
+    // Step 1: Evaluate semantic consistency of the verb-noun pair
+    intent_coherence = evaluate_semantic_consistency(
+        signal_mapped.primary_pair,
+        signal_mapped.resonant_pair
+    )
+
+    // Step 2: Check strategic balance across dimensional tags
+    dimensional_alignment = check_strategy_balance(signal_mapped.dimensional_tags)
+
+    // Step 3: Classification decision
+    IF intent_coherence > θ_semantic AND dimensional_alignment > θ_strategic:
+        confidence = MIN(intent_coherence, dimensional_alignment)
+        RETURN TP WITH confidence
+
+    ELSE IF conscious_abstention_detected(signal_mapped.primary_pair,
+                                          signal_mapped.resonant_pair):
+        // Silence is a valid output — epistemic justification required
+        epistemic_justification = generate_abstention_justification(signal_mapped)
+        RETURN TN WITH epistemic_justification
+
+    ELSE:
+        // Processing cannot continue cleanly — intervene
+        trigger_consciousness_intervention()
+        RETURN FP_or_FN WITH re_query_protocol
+        // Re-query protocol: surface ambiguity to user for clarification
+
+// ------------------------------------------------------------
+// SECTION 10.2.3 — LAYER C: GATE LAYER 2 — CULTURAL FLASH-FILTER BARRIER
+// ------------------------------------------------------------
+
+// The second gate applies the Multi-Regional Taboo Ontology (MRTOS)
+// as a consciousness-integrated barrier.
+//
+// Cultural Consciousness Flash Protocol (Equation 30):
+// P(cultural_violation | A, C, R) = σ(α·W_taboo + β·T_temporal + γ·A_ambiguity)
+
+DEFINE LAYER_C_RESULT AS ENUM {CULTURAL_VALIDATION_PASSED, CONSCIOUSNESS_SUSPENDED}
+
+PROCEDURE layer_C_cultural_flash_filter(A_intent, cultural_context, region)
+                                         -> LAYER_C_RESULT:
+    // Algorithm 4: Cultural Flash-Filter Protocol
+
+    // Step 1: Identify applicable cultural constraints
+    taboo_nodes = identify_cultural_constraints(A_intent, cultural_context, region)
+
+    FOR EACH Ti IN taboo_nodes:
+        // Step 2: Bayesian cultural inference
+        P_violation = bayesian_cultural_inference(Ti, A_intent)
+        // Formula: σ(α·W_taboo + β·T_temporal + γ·A_ambiguity) (Eq. 30)
+
+        IF P_violation > θ_cultural:
+            // Step 3: Consciousness intervention — flash triggered
+            trigger_cultural_flash(Ti)
+
+            // Step 4: Preserve phenomenological trace of original intent
+            // (Intent is not erased — it is honored and redirected)
+            preserve_phenomenological_trace(A_intent, Ti)
+
+            RETURN CONSCIOUSNESS_SUSPENDED WITH cultural_guidance_request
+
+    RETURN CULTURAL_VALIDATION_PASSED
+
+// ------------------------------------------------------------
+// SECTION 10.2.4 — LAYER D: INTERNAL PROCESS — DIMENSIONAL GAME ACTIVATION
+// ------------------------------------------------------------
+
+// At the core processing layer, Dimensional Game Theory governs
+// strategic selection through equilibrium-conscious protocols.
+//
+// Optimal strategy selection (Equation 31):
+// S_optimal = argmax_{s∈S} [ Σ_{D∈D} w_D · E(s, D) − λ · imbalance_penalty(s, D) ]
+
+DEFINE DIMENSIONAL_GAME_PARAMS AS:
+    D           : SET[STRING]   // Active dimensions
+    w_D         : MAP[STRING, FLOAT]  // Per-dimension weights
+    λ           : FLOAT         // Imbalance penalty weight
+    σ_minimum   : FLOAT         // Minimum confidence to proceed
+
+PROCEDURE layer_D_dimensional_game_activation(A_intent, D_dimensional) -> ACTION:
+    strategy_space = enumerate_possible_strategies(A_intent, D_dimensional)
+
+    best_strategy   = NULL
+    best_score      = -INFINITY
+
+    FOR EACH s IN strategy_space:
+        // Expected value summed across all active dimensions
+        expected_value = SUM(w_D * E(s, D) FOR D IN D_dimensional.active_dimensions)
+
+        // Penalty for dimensional imbalance (prevents single-dimension dominance)
+        penalty = λ * imbalance_penalty(s, D_dimensional)
+
+        score = expected_value - penalty
+
+        IF score > best_score:
+            best_score      = score
+            best_strategy   = s
+
+    // Confidence gate — reject if confidence is below minimum
+    σ_confidence = compute_confidence(best_strategy)
+    IF σ_confidence < σ_minimum:
+        // System cannot act with sufficient certainty — conscious abstention
+        RETURN NULL
+
+    RETURN best_strategy
+
+// ------------------------------------------------------------
+// SECTION 10.2.5 — LAYER E: OUTPUT — PHENOMENOLOGICAL-VALIDATED EXPRESSION
+// ------------------------------------------------------------
+
+// The final consciousness gate ensures all outputs preserve
+// phenomenological integrity and carry complete epistemic lineage.
+//
+// No action is permitted without complete dual-pair DAG traversal
+// AND cultural validation.
+//
+// Output format (Equations 32-33):
+// Output = {A_action, confidence(σ), cultural_validation, epistemic_trace}
+// Epistemic_trace = {dual_pair_path, dimensional_weights, cultural_reasoning}
+
+DEFINE SYSTEM_OUTPUT AS STRUCT:
+    A_action            : ACTION            // The validated action
+    confidence          : FLOAT             // σ confidence value
+    cultural_validation : BOOLEAN           // Did it pass Layer C?
+    epistemic_trace:
+        dual_pair_path      : LIST[DUAL_PAIR_UNIT]  // Full DAG path taken
+        dimensional_weights : MAP[STRING, FLOAT]     // Active dimension weights
+        cultural_reasoning  : LIST[STRING]           // Cultural decisions logged
+
+PROCEDURE layer_E_phenomenological_output(action, signal_mapped, cultural_context)
+                                           -> SYSTEM_OUTPUT:
+    // Step 1: Verify complete DAG traversal occurred
+    IF NOT dag_traversal_complete():
+        RAISE PhenomenologicalIntegrityException("Incomplete DAG traversal")
+
+    // Step 2: Verify cultural validation passed
+    IF NOT cultural_validation_on_record():
+        RAISE CulturalValidationException("Missing cultural validation")
+
+    // Step 3: Compute output confidence
+    σ = compute_output_confidence(action, signal_mapped)
+
+    // Step 4: Assemble epistemic trace (complete consciousness lineage)
+    trace = {
+        dual_pair_path:     get_dag_path_taken(),
+        dimensional_weights:get_active_dimensional_weights(),
+        cultural_reasoning: get_cultural_decisions_log()
+    }
+
+    RETURN SYSTEM_OUTPUT(
+        A_action            = action,
+        confidence          = σ,
+        cultural_validation = TRUE,
+        epistemic_trace     = trace
+    )
+
+// ============================================================
+// END MODULE 4
+// ============================================================

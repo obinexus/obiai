@@ -1,0 +1,270 @@
+// ============================================================
+// FILE: diram_boolean_M2_cache_lru_mru.psc.txt
+// MODULE 2 OF 5 — Cache Hit/Miss Semantics, LRU/MRU Logic
+//                 & Lookahead Hardware Prediction
+// SOURCE: "DIRAM Boolean Logic Truth Table — Memory Management Gates"
+// ORG:    OBINexus — Aegis Project | Directed Instruction RAM
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION: CACHE HIT VS MISS (LOOKAHEAD MEMORY LOGIC)
+// ------------------------------------------------------------
+
+// Two cache states drive the binary input A to the DIRAM gate:
+//   Cache Hit  (A=1): data already in cache — fast path
+//   Cache Miss (A=0): data absent — slow fetch path required
+
+// Cross-reference to AEGIS corpus:
+//   OBIAI Flash Layer (PDF 7 eq. 3.2): Flash(x,t) = ephemeral(x)*e^(-lambda*t)
+//   → Flash memory IS a cache: data decays toward Miss state over time
+//   AEGIS-PROOF-1.2 (PDF 3) EpistemicDAG:
+//   → Node traversal cost = cache miss cost: more divergence = higher fetch cost
+//   Storage Layer (PDF 7 eq. 3.3):
+//   → Storage(x) = hash(x) XOR cultural_context(x) XOR love_anchors(x)
+//   → XOR composition directly maps to the XOR gate in the DIRAM truth table
+
+
+// ── CACHE HIT SEMANTICS (A=1) ─────────────────────────────────
+
+DEFINE CacheHitEvent AS:
+    // Data is already in cache — no fetch required.
+    // System operates at full speed.
+    cache_state    : CacheState = HIT    // A=1
+    data_present   : BOOL = TRUE
+    fetch_required : BOOL = FALSE
+
+    // LRU/MRU action on cache hit:
+    //   Promote accessed item to Most Recently Used position
+    lru_action : LRUAction = PROMOTE_TO_MRU
+
+    // Truth table behavior on cache hit:
+    //   A=1, B=0 (compliant):  Output=1 -> ALLOW (process immediately)
+    //   A=1, B=1 (violation):  Output=0 -> BLOCK (even hits blocked)
+    COMPLIANT_OUTCOME := ALLOW_PROCESS    // 1 + 0 = 1
+    VIOLATION_OUTCOME := BLOCK_DEFER      // 1 + 1 = 0
+END DEFINE
+
+
+PROCEDURE ProcessCacheHit(cache_entry: CacheEntry,
+                           governance: GovernanceState,
+                           lru_chain: LRUChain) -> CacheHitResult:
+    // Handle a cache hit event.
+
+    // Step 1: Determine action from truth table
+    action := LookupMemoryAction(HIT, governance)
+
+    IF action == ALLOW_PROCESS:
+        // Promote to MRU — confirm access, update state
+        lru_chain.PromoteToMRU(cache_entry)
+        cache_entry.update_access_time(CURRENT_TIME())
+        nudge := NudgeRelatedPredictions(cache_entry)
+
+        EMIT LOG "Cache HIT + Compliant | ALLOW | MRU promoted | entry=" + cache_entry.key
+        RETURN CacheHitResult(
+            allowed    = TRUE,
+            mru_update = TRUE,
+            nudge      = nudge
+        )
+    ELSE:
+        // Governance violation — block even though data is present
+        EMIT WARNING "Cache HIT + Violation | BLOCK | entry=" + cache_entry.key
+        RETURN CacheHitResult(
+            allowed    = FALSE,
+            mru_update = FALSE,
+            reason     = "Governance constraint violated: epsilon > 0.5"
+        )
+    END IF
+END PROCEDURE
+
+
+// ── CACHE MISS SEMANTICS (A=0) ────────────────────────────────
+
+DEFINE CacheMissEvent AS:
+    // Data absent from cache — deep fetch required.
+    cache_state    : CacheState = MISS   // A=0
+    data_present   : BOOL = FALSE
+    fetch_required : BOOL = TRUE
+
+    // LRU action on cache miss (when allowed):
+    //   Evict Least Recently Used item to make space for incoming data
+    lru_action : LRUAction = EVICT_LRU_FOR_SPACE
+
+    // Truth table behavior on cache miss:
+    //   A=0, B=0 (compliant):  Output=1 -> ALLOW (fetch, update cache)
+    //   A=0, B=1 (violation):  Output=0 -> BLOCK (defer allocation)
+    COMPLIANT_OUTCOME := ALLOW_PROCESS    // 0 + 0 = 1
+    VIOLATION_OUTCOME := BLOCK_DEFER      // 0 + 1 = 0
+END DEFINE
+
+
+PROCEDURE ProcessCacheMiss(key: CacheKey, governance: GovernanceState,
+                            lru_chain: LRUChain,
+                            memory_backend: MemoryBackend) -> CacheMissResult:
+    // Handle a cache miss event.
+
+    // Step 1: Determine action from truth table
+    action := LookupMemoryAction(MISS, governance)
+
+    IF action == ALLOW_PROCESS:
+        // Fetch from main memory or disk
+        EMIT LOG "Cache MISS + Compliant | ALLOW | fetching key=" + key
+
+        // Evict LRU to make space
+        evicted := lru_chain.EvictLRU()
+        IF evicted != NULL:
+            EMIT LOG "LRU evicted: key=" + evicted.key
+        END IF
+
+        // Fetch fresh data
+        fresh_data := memory_backend.Fetch(key)
+
+        // Load into cache and promote to MRU
+        new_entry := CacheEntry(key=key, data=fresh_data)
+        lru_chain.InsertAsMRU(new_entry)
+
+        RETURN CacheMissResult(
+            allowed      = TRUE,
+            fetched      = TRUE,
+            evicted_key  = evicted.key IF evicted != NULL ELSE NULL,
+            new_entry    = new_entry
+        )
+    ELSE:
+        // Governance violation — defer the fetch
+        EMIT WARNING "Cache MISS + Violation | BLOCK | defer key=" + key
+        RETURN CacheMissResult(
+            allowed  = FALSE,
+            fetched  = FALSE,
+            reason   = "Governance constraint violated: epsilon > 0.5"
+        )
+    END IF
+END PROCEDURE
+
+
+// ── LRU/MRU CACHE MANAGEMENT ─────────────────────────────────
+
+// LRU = Least Recently Used: eviction policy — oldest access removed first
+// MRU = Most Recently Used:  retention policy — newest access protected
+
+DEFINE LRUAction AS ENUM:
+    PROMOTE_TO_MRU     // on cache hit: move to front of recency chain
+    EVICT_LRU_FOR_SPACE // on cache miss + allow: remove oldest entry
+    NO_ACTION          // on block: no change to LRU/MRU state
+END DEFINE
+
+DEFINE LRUChain AS:
+    // Doubly-linked list: head=MRU, tail=LRU
+    entries   : DoublyLinkedList[CacheEntry]
+    capacity  : INT
+
+    PROCEDURE PromoteToMRU(entry: CacheEntry) -> VOID:
+        // Move to head of chain (MRU position)
+        entries.Remove(entry)
+        entries.InsertHead(entry)
+        EMIT LOG "Promoted to MRU: " + entry.key
+    END PROCEDURE
+
+    PROCEDURE EvictLRU() -> CacheEntry:
+        // Remove tail (LRU position) to free space
+        IF entries.IsEmpty:
+            RETURN NULL
+        END IF
+        lru_entry := entries.RemoveTail()
+        EMIT LOG "Evicted LRU: " + lru_entry.key
+        RETURN lru_entry
+    END PROCEDURE
+
+    PROCEDURE InsertAsMRU(entry: CacheEntry) -> VOID:
+        // Insert new entry at MRU position
+        IF entries.Size() >= capacity:
+            EvictLRU()
+        END IF
+        entries.InsertHead(entry)
+    END PROCEDURE
+
+    PROCEDURE IsFull() -> BOOL:
+        RETURN entries.Size() >= capacity
+    END PROCEDURE
+END DEFINE
+
+// Hardware-level LRU/MRU decision flow:
+//   Cache Full? → Need Eviction → Check LRU Chain → Remove Oldest
+//   Cache Hit?  → Promote Item  → Move to MRU Position → Update Chain
+
+PROCEDURE HandleCacheCapacity(lru_chain: LRUChain,
+                               new_key: CacheKey) -> EvictionDecision:
+    IF lru_chain.IsFull():
+        EMIT LOG "Cache full — initiating LRU eviction for key=" + new_key
+        RETURN EvictionDecision(needs_eviction=TRUE, policy=EVICT_LRU_FOR_SPACE)
+    END IF
+    RETURN EvictionDecision(needs_eviction=FALSE)
+END PROCEDURE
+
+
+// ── LOOKAHEAD HARDWARE PREDICTION ────────────────────────────
+
+// The DIRAM system uses LOOKAHEAD PREDICTION to preload likely-needed
+// data before it is requested — increasing cache hit rate.
+//
+// Prediction mechanism:
+//   - Observes historical access patterns
+//   - Scores confidence that a given key will be needed soon
+//   - Preloads when confidence exceeds threshold AND governance permits
+
+CONSTANT LOOKAHEAD_CONFIDENCE_THRESHOLD := 0.7  // 70% prediction confidence
+
+PROCEDURE LookaheadPrediction(access_history: List[CacheKey],
+                               candidate_keys: List[CacheKey],
+                               governance: GovernanceState,
+                               lru_chain: LRUChain,
+                               backend: MemoryBackend) -> List[CacheKey]:
+    // Predict and preload keys likely to be accessed next.
+    // Only operates when governance is compliant (B=0).
+
+    IF governance == VIOLATION:
+        EMIT INFO "Lookahead disabled: governance violation (B=1)"
+        RETURN []
+    END IF
+
+    preloaded := []
+    FOR EACH key IN candidate_keys:
+        confidence := ComputeAccessConfidence(key, access_history)
+        IF confidence >= LOOKAHEAD_CONFIDENCE_THRESHOLD:
+            EMIT LOG "Lookahead preload | key=" + key + " | conf=" + confidence
+            // Verify cache has space (or can evict)
+            IF lru_chain.IsFull():
+                lru_chain.EvictLRU()
+            END IF
+            data := backend.Fetch(key)
+            lru_chain.InsertAsMRU(CacheEntry(key=key, data=data))
+            preloaded.APPEND(key)
+        END IF
+    END FOR
+
+    EMIT LOG "Lookahead complete | preloaded=" + LENGTH(preloaded) + " keys"
+    RETURN preloaded
+END PROCEDURE
+
+PROCEDURE ComputeAccessConfidence(key: CacheKey,
+                                   history: List[CacheKey]) -> REAL:
+    // Frequency-based confidence: how often this key appeared recently.
+    n        := LENGTH(history)
+    IF n == 0: RETURN 0.0 END IF
+    count    := COUNT(k FOR k IN history IF k == key)
+    RETURN count / n
+END PROCEDURE
+
+PROCEDURE NudgeRelatedPredictions(entry: CacheEntry) -> PredictionNudge:
+    // On cache hit: adjust confidence scores for related keys.
+    // "Memory confirms access, adjusts state, nudges related predictions."
+    related_keys := entry.related_keys
+    RETURN PredictionNudge(
+        boosted_keys = related_keys,
+        confidence_delta = 0.1   // +10% confidence for related items
+    )
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 2
+// NEXT: diram_boolean_M3_sinphase_governance.psc.txt
+// ============================================================

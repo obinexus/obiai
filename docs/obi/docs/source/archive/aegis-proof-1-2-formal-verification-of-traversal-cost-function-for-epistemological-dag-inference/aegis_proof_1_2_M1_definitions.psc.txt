@@ -1,0 +1,166 @@
+// ============================================================
+// FILE: aegis_proof_1_2_M1_definitions.psc.txt
+// MODULE 1 OF 5 — Framework Definitions & Context
+// SOURCE: "AEGIS-PROOF-1.2: Formal Verification of Traversal
+//          Cost Function for Epistemological DAG Inference"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — Aegis Framework Division
+// DATE:   May 27, 2025
+// DEPENDS_ON: AEGIS-PROOF-1.1 (Cost-Knowledge function verified)
+// ENABLES:    Phase 1.5 EpistemicDAG Implementation
+// ============================================================
+
+// ── DOCUMENT LINEAGE ─────────────────────────────────────────
+//
+//   AEGIS-PROOF-1.1 established:
+//     C(Kt, S) = H(S) · exp(−Kt)
+//     (monotonicity of Cost-Knowledge function over entropy decay)
+//
+//   AEGIS-PROOF-1.2 (THIS DOCUMENT) extends to:
+//     C(Nodeᵢ → Nodeⱼ) = α · KL(Pᵢ ‖ Pⱼ) + β · ΔH(Sᵢ,ⱼ)
+//     (cost-weighted traversal between discrete belief states in DAG)
+
+DEFINE FrameworkVersion AS:
+    proof_id      := "AEGIS-PROOF-1.2"
+    depends_on    := "AEGIS-PROOF-1.1"
+    enables       := "Phase 1.5 EpistemicDAG Implementation"
+    status        := VERIFIED
+    locked        := TRUE     // no heuristic modifications without formal proof revision
+END DEFINE
+
+// SAFETY LOCK:
+//   All implementations MUST reference this mathematical specification.
+//   No heuristic approximations or architectural modifications are
+//   permitted without formal proof revision.
+CONSTANT SAFETY_LOCK := "AEGIS-PROOF-1.2 VERIFICATION COMPLETE"
+
+
+// ── ARCHITECTURE CONTEXT ─────────────────────────────────────
+//
+//   The Aegis framework is a PURE BAYESIAN DAG architecture for
+//   semantic inference — no cryptographic dependencies.
+//
+//   Design principles:
+//     - Full transparency via explicit probabilistic modeling
+//     - Deterministic behavior under epistemic uncertainty
+//     - Life-critical (clinical) deployment safety requirements
+//     - Alignment with the Filter-Flash consciousness framework
+
+DEFINE AegisArchitecture AS:
+    model_type        := PURE_BAYESIAN_DAG
+    cryptographic_dep := NONE
+    transparency      := FULL              // no black-box optimization
+    safety_class      := LIFE_CRITICAL
+    uncertainty_mode  := DETERMINISTIC_UNDER_EPISTEMIC_UNCERTAINTY
+END DEFINE
+
+
+// ── DEFINITION 1: SEMANTIC BELIEF NODE ───────────────────────
+
+// A semantic belief node is a probabilistic state containing:
+//   (a) probability distribution over semantic interpretations
+//   (b) entropy measure of that distribution
+//   (c) domain-specific semantic context
+
+DEFINE SemanticBeliefNode AS STRUCTURE:
+    id           : NodeIdentifier
+
+    // (a) Probability distribution Pᵢ = {pᵢ,₁, pᵢ,₂, ..., pᵢ,ₙ}
+    //     over n semantic interpretations
+    P            : ProbabilityDistribution    // must sum to 1.0
+    n            : INT                         // number of semantic interpretations
+
+    // (b) Entropy measure: H(Pᵢ) = −Σₖ pᵢ,ₖ · log₂(pᵢ,ₖ)
+    entropy      : REAL                        // computed, not stored raw
+
+    // (c) Semantic context: domain-specific knowledge state
+    S            : SemanticContext
+
+    // Distribution validity invariant
+    INVARIANT: SUM(P) == 1.0
+    INVARIANT: ALL(p IN P : p >= 0.0)
+    INVARIANT: n == LENGTH(P)
+END DEFINE
+
+
+PROCEDURE ComputeNodeEntropy(node: SemanticBeliefNode) -> REAL:
+    // H(Pᵢ) = −Σₖ pᵢ,ₖ · log₂(pᵢ,ₖ)
+    // Convention: 0 · log₂(0) := 0 (continuous extension)
+
+    H := 0.0
+    FOR k := 1 TO node.n:
+        p_k := node.P[k]
+        IF p_k > 0.0:
+            H := H - p_k * LOG2(p_k)
+        END IF
+        // if p_k == 0: contribution is 0 by convention — no-op
+    END FOR
+    RETURN H
+END PROCEDURE
+
+
+PROCEDURE ValidateNode(node: SemanticBeliefNode) -> BOOL:
+    // Check all structural invariants before use in DAG operations
+
+    sum_check := ABS(SUM(node.P) - 1.0) < 1e-10
+    IF NOT sum_check:
+        EMIT ERROR "Node " + node.id + ": distribution does not sum to 1"
+        RETURN FALSE
+    END IF
+
+    FOR k := 1 TO node.n:
+        IF node.P[k] < 0.0:
+            EMIT ERROR "Node " + node.id + ": negative probability at k=" + k
+            RETURN FALSE
+        END IF
+    END FOR
+
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── DEFINITION 2: TRAVERSAL COST FUNCTION ────────────────────
+
+// The cost of transitioning from Nodeᵢ to Nodeⱼ:
+//
+//   C(Nodeᵢ → Nodeⱼ) = α · KL(Pᵢ ‖ Pⱼ) + β · ΔH(Sᵢ,ⱼ)
+//
+// where:
+//   KL(Pᵢ ‖ Pⱼ)  = Kullback-Leibler divergence
+//   ΔH(Sᵢ,ⱼ)     = H(Sᵢ) − H(Sⱼ) = entropy change
+//   α, β ≥ 0      = weighting parameters (probabilistic vs. epistemic)
+
+DEFINE TraversalCostFunction AS:
+    // Returns C(Nodeᵢ → Nodeⱼ) ∈ [0, ∞)
+    // Formal properties verified in Module 2 (Theorem 1)
+
+    PARAMETERS:
+        alpha : REAL    // weight for KL divergence component (probabilistic)
+        beta  : REAL    // weight for entropy change component (epistemic)
+
+    INVARIANTS:
+        alpha >= 0
+        beta  >= 0
+        // Extended constraints per Lemma 1 (Module 3):
+        //   alpha + beta == 1.0 (normalization)
+        //   alpha, beta > epsilon_min (non-degeneracy)
+END DEFINE
+
+
+// ── COST-KNOWLEDGE BASELINE (from AEGIS-PROOF-1.1) ──────────
+
+PROCEDURE CostKnowledgeBaseline(K_t: REAL, S: SemanticContext) -> REAL:
+    // C(Kt, S) = H(S) · exp(−Kt)
+    // Established in AEGIS-PROOF-1.1 — reference implementation only.
+    // Current proof (1.2) extends beyond this scalar form to node-pair costs.
+
+    H_S  := ComputeContextEntropy(S)
+    cost := H_S * EXP(-K_t)
+    RETURN cost
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: aegis_proof_1_2_M2_theorem_proof.psc.txt
+// ============================================================

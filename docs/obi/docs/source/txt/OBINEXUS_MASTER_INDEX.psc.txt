@@ -1,0 +1,365 @@
+// ============================================================
+// OBINEXUS AEGIS FRAMEWORK
+// MASTER PSEUDOCODE INDEX — All Documents
+// Cross-Document Integration Map
+// Compiled: July 2025 | Session Continuity Record
+// ============================================================
+
+// ------------------------------------------------------------
+// CONFIRMED OUTPUTS: 25 × .psc.txt files across 5 source PDFs
+// ------------------------------------------------------------
+
+// ============================================================
+// DOCUMENT SET 1: DIRAM (Directed Instruction RAM)
+// Source: Directed_Instruction_RAM.pdf
+// Files: DIRAM_01 through DIRAM_05
+// ============================================================
+
+DIRAM_01_System_Overview_and_Architecture.psc.txt
+    - Mission statement (predictive, governed, introspective RAM)
+    - Project status flags (emulator complete / silicon target 2026)
+    - 5-layer architecture stack with future hardware annotations
+    - Hardware spec goals (8nm, <10ns, 32GB modules)
+    - Performance characteristics (software + hardware targets)
+    - OBINexus ecosystem integrations (RIFTlang/Polybuild/Gosilang)
+
+DIRAM_02_Configuration_System.psc.txt
+    - DIRAM_CONFIG struct (all fields: memory, tracing, heap, isolation,
+      protection, zero-trust, telemetry, async, detach, resilience)
+    - 5-priority loading hierarchy (/etc → ~/.dramrc → ./.dramrc → CLI → ENV)
+    - parse_config_file procedure (section detection, inline comment stripping)
+    - Full programmatic API (init/load_file/set_value/get_value/validate/save)
+    - REPL config display procedure
+
+DIRAM_03_Memory_Governance.psc.txt
+    - diram_allocation_t struct (base_addr/size/timestamp/SHA256/events/PID)
+    - Sinphasé ε(x) ≤ 0.6 constraint engine with epoch detection and reset
+    - diram_alloc procedure (7 steps: governance → malloc → guard → canary → record → SHA → log)
+    - diram_free with PID binding + SHA re-verification
+    - Error codes 0x1001–0x1005 with LOG_ERROR procedure
+    - verify_zero_trust (3-layer: PID/SHA/canary)
+    - Named memory space isolation (alloc_in_space)
+
+DIRAM_04_CLI_REPL_Daemon.psc.txt
+    - main() entry point with mode routing
+    - CLI flag definitions (--init/--trace/--repl/--detach/--config/--verbose)
+    - run_detached_daemon_mode: fork → setsid → log redirect → PID bind → timeout → event loop
+    - process_with_resilience with exponential backoff (max 3 retries)
+    - run_repl_mode with full dispatch table
+    - All REPL commands: alloc/free/trace/config/help/exit
+    - Future REPL: set/get/multiply (with TODO markers)
+
+DIRAM_05_Predictive_Allocation_Telemetry_Security.psc.txt
+    - PROMISE_T and LOOKAHEAD_CACHE structs
+    - Async promise lifecycle (create → schedule → fulfill → persist)
+    - Lookahead cache hit/miss with 90% hit-rate target
+    - Telemetry levels 0/1/2 with socket emission
+    - 5-layer security model (fork safety/SHA/guard pages/ASLR/future encryption)
+    - Project file structure and build procedures
+    - Aegis 4-phase waterfall contribution methodology
+    - Master DIRAM module index
+
+// ============================================================
+// DOCUMENT SET 2: DREAM SYSTEM
+// Source: Dream_System___Formal_Technical_Specification.pdf
+// Files: DreamSystem_01 through DreamSystem_05
+// ============================================================
+
+DreamSystem_01_Introduction_Philosophy_Security_Foundations.psc.txt
+    - OBI as heart (Igbo), U companion identity ("OBINexus Talks You")
+    - Security as Code properties (versionable/testable/deployable/auditable)
+    - 4 core security principles (least privilege/defense-in-depth/fail-secure/secure-by-default)
+    - CryptographicPrimitiveValidator: 3-phase enforcement (normalize → match → level check)
+    - USCN normalization procedure
+    - Cryptographic State Machine FSA (Acrypto: Qc/Σc/δc/q0/Fc)
+    - Cryptographic Safety Theorem (Equation 2)
+    - E2E data flow (EEG → AES-256 → Phone → TLS 1.3 → Cloud → ECDSA-signed Flash)
+
+DreamSystem_02_Core_Concepts_Flash_Filter_GameTheory.psc.txt
+    - Flash confidence thresholds (Hard: 95.4% / Medium: 63.5% / Easy: 31.75%)
+    - classify_flash dispatch procedure
+    - Filter pipeline (4 steps: integrity → band categorization → noise reduction → prepare)
+    - Brainwave bands: delta/theta/alpha/beta/gamma
+    - Objective vs Subjective invariant (AI=validation, User=interpretation)
+    - Dimensional Action Space (Equation 4)
+    - Game-Theoretic Epistemic Cost Function (Equations 5 and 8 with security extension)
+    - DAG Traversal Cost (Equation 6: KL + ΔH + Γgame)
+    - Strategic Regret-sum Cost Component (Equation 7)
+
+DreamSystem_03_Architecture_Hardware_EA_DAG.psc.txt
+    - SecureFilterFlash: 4-step pipeline with 95.4% Flash threshold
+    - CI/CD preventive controls (5 scan commands)
+    - Lambda auto-response handler (revoke_session/quarantine/notify/incident)
+    - EEG hardware: IEEE 11073 PHD, surface-only, non-invasive constraints
+    - Connectivity table: BT 5.2/TLS 1.3/ANT+ with security requirements
+    - SecurePhoneOrchestrator: 4-path network-aware upload (5G/4G/3G/fallback)
+    - Dream Band: PPG/steps/activity/sleep-stage/biometric-storage
+    - EA Actor vs Pure Agent (6-property comparison table)
+    - OBICall CLI commands + security subcommands
+    - LLM binding map (Equation 9)
+    - SecureFlashFilterDAG: hash-chain add_node + verify_dag_integrity
+    - SecureCognitiveLearningModel: ROYGBIV + transactional cognitive elimination
+    - Gamification security levels map (confidence range → auth requirement)
+
+DreamSystem_04_VOIP_Distribution_Formats_Nsibidi.psc.txt
+    - SecureOBICallVOIP: ECDH-P256 key exchange, AES-256-GCM session
+    - establish_secure_session (5 steps)
+    - secure_voice_to_intent: MAC verify → decrypt → privacy-preserving STT → intent
+    - 7-step Wake Interaction Flow with 4 permission-gated intent types
+    - VOIP requirements: <150ms RTT / 16kHz / 32-64kbps / PFS / 24h key rotation
+    - 3 Distribution channels (family/medical/social) with security requirements
+    - 5 Export formats (.dvm/.dau/.dvs/.dcv/.dbx) with security features
+    - DreamBundle XML structure: Metadata / SecurityEnvelope / EncryptedComponents / Permissions
+    - SecureNsibidiCSL: cultural access-gated verb-noun analysis (6 steps)
+
+DreamSystem_05_Audit_Compliance_Proofs_Implementation.psc.txt
+    - DreamSystemSecurityAuditor: tamper-proof hash-chain log
+    - generate_compliance_report: range retrieval → framework validation → report
+    - verify_audit_chain: hash walk verification
+    - Security metrics (Table 6): MTTD<5min / MTTR<30min / 100% encryption coverage
+    - Phase 3 completion checklist (6 requirements)
+    - 6 ethical principles with enforcement mechanisms
+    - Cryptographic Safety Proof (4-lemma by construction)
+    - Compliance matrix: HIPAA/GDPR/ISO 27001/SOC 2 × 6 requirements (all compliant)
+    - Master DreamSystem module index
+
+// ============================================================
+// DOCUMENT SET 3: DPCA (Dual-Pair Conceptual Architecture for OBIAI)
+// Source: Dual_Pair_Conceptual_Architecture_for_OBIAI.pdf
+// Files: DPCA_01 through DPCA_05
+// ============================================================
+
+DPCA_01_Ontological_Foundation_and_Dual_Pair_Taxonomy.psc.txt
+    - DPCA system identity, EATV stream = {Experience, Awareness, Temporal, Vision}
+    - Dual-Pair Unit Definition 1 (Equations 1-2: semantic distance bounds + gradient threshold)
+    - validate_dual_pair with both constraints
+    - Domain-Stratified Taxonomy (Table 1: all 20 pairs across 5 domains + gradient vectors)
+    - Concept Motif notation (Equation 10: λ-weighted blend)
+    - resolve_motif procedure
+    - Nested Dual-Layer Stacking Definition 3 (Equation 11)
+    - compose_dual_pairs recursive procedure with PhenomenologicalIntegrityException
+
+DPCA_02_DAG_Architecture_Bayesian_FilterFlash.psc.txt
+    - Dual-Pair DAG Definition 2 (Equations 3-5)
+    - compute_edge_weight (Equation 6: α·Bayesian + β·cultural + γ·phenomenological)
+    - Transition validity (Equations 7-9: emotional load / cultural disruption / prior confidence)
+    - build_dag construction procedure
+    - Algorithm 1: Dual-Pair Filter-Flash Activation (θ_filter and θ_flash)
+    - Hardware mapping (sensors→P1 / actuators→P2 / neural→Bayesian / FPGA→cultural)
+    - DIRAM-backed epistemic memory cross-reference
+
+DPCA_03_MultiRegional_Taboo_Ontology_MRTOS.psc.txt
+    - MRTOS design philosophy (generative boundaries not prohibitions)
+    - Cultural Taboo Definition 4 (Equation 12: T: A×C×R → [0,1])
+    - taboo_function procedure
+    - Full Taboo Encoding Matrix (Table 2: 7 entries with cultural context and weights)
+    - 4 Regional Taboo Constellations (Equations 14-21: T_igbo/T_british/T_kenyan/T_moroccan)
+    - Bayesian Cultural Inference (Equation 13: sigmoid-bounded)
+    - Algorithm 2: Cultural Consciousness Constraint Protocol (generates alternatives)
+    - 3 exception protocols (community override / temporal adaptation / ambiguity preservation)
+    - Superstition model + numerological product formula (Equation 22)
+
+DPCA_04_Dual_Gated_IO_Architecture_DGCIO.psc.txt
+    - DGC-IO ontological foundation (phenomenological collapse problem)
+    - Π definition (Definition 7, Equation 23: 3-way output domain)
+    - Layer A: signal → dual-pair mapping (Equations 24-25, phenomenological residue)
+    - Layer B: TAC Matrix (Definition 8, Equations 26-29, Algorithm 3)
+    - Layer C: Cultural Flash-Filter (Equation 30, Algorithm 4)
+    - Layer D: Dimensional Game Activation (Equation 31: argmax with imbalance penalty)
+    - Layer E: Output with epistemic trace (Equations 32-33)
+    - dual_gated_process top-level dispatch
+
+DPCA_05_Hardware_Realizability_WorkedExample_CulturalIntegrity.psc.txt
+    - 3 hardware mechanisms (bistable resonators / DIRAM memory / FPGA taboo thresholds)
+    - Hardware invariant: "cultural violations literally impossible"
+    - Complete snake-handling worked example (all 5 layers traced, Equations 34-35)
+    - Response text composition procedure + confidence=0.89 output
+    - Epistemic trace format
+    - Cultural Integrity principles (non-linear memory / witness consciousness / epistemic humility)
+    - 7 ontological shift pairs
+    - Master DPCA module index
+
+// ============================================================
+// DOCUMENT SET 4: EATV STREAM INTEGRATION
+// Source: EATV_Stream_Integration_into_OBINexus_Framework.pdf
+// Files: EATV_01 through EATV_05
+// ============================================================
+
+EATV_01_Foundational_Axioms_Witnessing_Temporal_Flow.psc.txt
+    - Mathematical notation table (all 12 symbols)
+    - Axiom 1 (Non-Reductive Preservation)
+    - Definition 1: Witnessing Transformation W: E → E×O (3 properties)
+    - Theorem 1: Witnessing Completeness (full proof via invertibility)
+    - ConsciousnessWitness class (observe_without_judgment, store_intact)
+    - Definition 2: Husserl Temporal Triad T=(R,P,F)
+    - Proposition 1: Temporal Continuity (Equations 1-2)
+    - verify_temporal_continuity with δ-limit testing
+
+EATV_02_Tensor_Representations_DAG_Bayesian_Cultural.psc.txt
+    - Definition 3: Experiential Tensor ∈ R^{T×X×Y×Z×F}
+    - Theorem 2: Tucker Decomposition (Equations 3-4, error bound proof)
+    - tucker_decompose with Frobenius norm check
+    - TensorTransformationEngine class (Appendix B.2 full implementation)
+    - Definition 4: Consciousness-Preserving Projection (Equation 5, mutual information)
+    - Theorem 3: Dimensional Reduction + recovery guarantee (Equation 6)
+    - Definition 5: Consciousness DAG G=(V,E,W)
+    - Theorem 4: Acyclicity Guarantee (Sinphasé phase ordering proof)
+    - Definition 6: Cultural Context Model C_k=(P_k,B_k,T_k)
+    - Theorem 5: Cultural Boundary Preservation (Equation 7, proof)
+
+EATV_03_Symbolic_Residue_Complexity_Governance_CaseStudy.psc.txt
+    - Definition 7: Symbolic Residue ρ=(p,c,α) with ContextualFrame struct
+    - Theorem 6: Residue Preservation (Equation 8, activation drift bound)
+    - verify_residue_preservation procedure
+    - Proposition 2: Hawaiian Photoflash (Equation 9, activation conservation)
+    - Definition 8: Φ complexity measure (Equation 10, IIT partition minimum)
+    - compute_phi procedure
+    - Theorem 7: Isolation Threshold (Equation 11: Φ/LZ/PCI OR condition)
+    - Definition 9: Architecture Cost Function C(S) (Equation 12)
+    - Theorem 8: Refactor Trigger (Equation 13: ANY cycle = immediate refactor)
+    - C_UK / C_China / C_Japan formal models (Equations 14-27)
+    - Definition 10: Cultural Causal Bayes (Equation 28)
+    - Theorem 9: Classification Performance bounds (Equations 29-32)
+
+EATV_04_Verification_Framework_Compliance_Matrix.psc.txt
+    - Definition 11: EATV Compliance (5 conditions as executable predicates)
+    - Theorem 10: Verification Completeness
+    - verify_eatv_compliance: all 5 conditions with confidence scoring
+    - Definition 12: Compliance Matrix M_reg (Equation 33: v_i binary + β_i confidence)
+    - build_compliance_matrix procedure
+    - Theorem 11: Regulatory Certification (Equation 34: sum_v=5 AND min(β)≥β_min)
+    - certify_eatv_system + certify_full_pipeline
+
+EATV_05_OBINexus_Integration_Sinphase_Compliance.psc.txt
+    - Definition 13: OBINexus hierarchy (Equations 35-36)
+    - 5-component spec with theorem bindings:
+        WitnessLayer → Theorem 1
+        TemporalEngine → Proposition 1
+        DAGProcessor → Theorem 4
+        CulturalLens → Theorem 5
+        SymbolicRegistry → Theorem 6
+    - Theorem 12: Sinphasé Compliance (4 requirements)
+    - verify_sinphase_compliance procedure
+    - Algorithm 1: Isolation Protocol (5 steps: dir/makefile/resolve/document/validate)
+    - 6 isolation trigger conditions (Theorems 7+8)
+    - Full proof dependency chain (Axiom 1 → ... → Regulatory Certification)
+    - Master EATV module index
+
+// ============================================================
+// DOCUMENT SET 5: ECA (Epistemic Continuity Analysis)
+// Source: Epistemic_Continuity_Analysis__OBINexus_Gating_as_Knowledge_Metabolism.pdf
+// Files: ECA_01 through ECA_05
+// ============================================================
+
+ECA_01_Gating_Architecture_Epistemic_Scaffold.psc.txt
+    - Central thesis: gates as metabolic chambers (not checkpoints)
+    - Mitochondria → ATP analogy as grounding model
+    - 3-phase architecture with thresholds and biological analogs:
+        Pre-Gate: 95% / cellular machinery / epistemic organelles
+        Development: 90% manifold accuracy / protein synthesis / chaperone folding
+        Post-Gate: 100% / blood-brain barrier / selective membrane
+    - 3 Development components: Epistemic Manifold / DIRAM Audit Engine / Threat Resolver
+    - pre_gate_compliance_check with WHILE-remediation loop
+    - development_gate_check with forced framework evolution
+    - post_gate_compliance_check with strict 100% enforcement
+
+ECA_02_Legacy_Capsules_Antifragility_Hormesis.psc.txt
+    - LEGACY_CAPSULE struct (5 required, naval watertight compartments)
+    - generate_legacy_capsules with standalone viability assertion
+    - verify_legacy_capsules procedure
+    - ANTIFRAGILITY_MODEL: Wolf's Law applied to epistemic development
+    - apply_antifragility_protocol: 3 failure cases
+        manifold → framework reconception
+        equipment → university partnership (solution space diversification)
+        exhaustion → shadow contributor system activation
+    - 4-tier tiered fallback
+    - EPISTEMIC_HORMESIS: 3-level stress model (too-low/optimal/too-high)
+    - epistemic_hormesis_response with solution space UNION
+    - SHADOW_CONTRIBUTOR_SYSTEM: epistemic redundancy model
+    - activate_shadow_contributor_system with full-depth verification
+
+ECA_03_PostGate_Membrane_Metabolism_Stakeholder.psc.txt
+    - POST_GATE_METABOLISM: active biosynthesis (liver vitamin analog)
+    - 3 metabolic transformations (math→demo / algorithmic→narrative / theory→practical)
+    - ENZYMATIC_CHAMBER struct (symposia as catalytic chambers)
+    - run_enzymatic_chamber: knowledge assumes bioavailable form for stakeholder framework
+    - Letters of support as metabolic products (evidence of transformation)
+    - STAKEHOLDER_PRESSURE_TEST: ship hull pressure test before ocean launch
+    - run_stakeholder_pressure_test: breach detection + pre-submission remediation
+
+ECA_04_Compression_Chamber_Annealing_Archival.psc.txt
+    - SUBMISSION_COMPRESSION_CHAMBER: carbon→diamond reorganization model
+    - run_submission_compression: 3 forces (video/audit/assembly)
+    - epistemic_anneal: tension resolution preserving both components, alloy formation assertion
+    - 5 archival science concepts formalized:
+        permanent_value / fonds / respect_des_fonds / archival_bond / evidential_value
+    - DIRAM as archival finding aid
+    - diram_trace_knowledge_lineage: Merkle tree walk to genesis
+    - ensure_archival_permanence: grant-outcome-independent guarantee
+
+ECA_05_Living_Architecture_Epistemic_Organism.psc.txt
+    - EPISTEMIC_ORGANISM: 4 living properties (growth/adaptation/reproduction/metabolism)
+    - Grant submission as reproductive event (epistemic DNA seeking resources)
+    - submit_grant_as_reproduction with viability + archival checks
+    - run_full_epistemic_pipeline: complete 5-phase end-to-end integration
+    - 10 ontological reframing pairs
+    - Master ECA module index
+
+// ============================================================
+// CROSS-DOCUMENT INTEGRATION MAP
+// Key linkages between document sets
+// ============================================================
+
+DEFINE CROSS_DOCUMENT_LINKS AS:
+
+    DIRAM ↔ EATV:
+        EATV uses DIRAM-backed epistemic memory for phenomenological trace persistence
+        EATV Sinphasé compliance: C(S) ≤ 0.6 maps to DIRAM Sinphasé governance ε(x) ≤ 0.6
+        EATV Algorithm 1 (Isolation Protocol) triggers DIRAM TriggerIsolation
+
+    DIRAM ↔ DPCA:
+        DPCA hardware layer: DIRAM-Backed Epistemic Memory maintains phenomenological traces
+        DPCA Layer E output requires DIRAM persistence of epistemic trace
+
+    DIRAM ↔ ECA:
+        ECA Development phase: DIRAM Audit Engine = Merkle-tree immutable knowledge record
+        ECA archival science: DIRAM = archival finding aid with respect_des_fonds
+        ECA diram_trace_knowledge_lineage = DIRAM hash-chain walk (DIRAM_03 alloc_trace.log)
+
+    DreamSystem ↔ DPCA:
+        Flash confidence thresholds identical (95.4% Hard / 63.5% Medium / 31.75% Easy)
+        MRTOS taboo encoding extends Dream System cultural validation (CulturalLens)
+        DGC-IO Layer C = Dream System EA Actor cultural boundary enforcement
+
+    DreamSystem ↔ EATV:
+        Both use DAG structure for consciousness state navigation
+        EATV Cultural Context Model C_k = Dream System CulturalLens + MRTOS integration
+        Dream System ECDSA-signed Flash Events = EATV Witnessing Transformation output
+
+    DPCA ↔ EATV:
+        DPCA Dual-Pair Units = EATV experiential state vertices V in Consciousness DAG
+        EATV Symbolic Residue ρ = DPCA phenomenological residue (Layer A output)
+        EATV Tensor decomposition provides mathematical grounding for DPCA semantic space
+        Both enforce Sinphasé acyclicity in their respective DAG structures
+
+    ECA ↔ All:
+        ECA Development phase requires: DIRAM audit engine + EATV epistemic manifold + DPCA framework
+        ECA Post-Gate metabolic transformation = DreamSystem U-agent knowledge expression
+        ECA antifragility protocol = DPCA epistemic hormesis in MRTOS exception handling
+        ECA archival permanence = EATV Theorem 11 regulatory certification output
+
+// ============================================================
+// TOOLCHAIN REFERENCE (OBINexus Session Continuity)
+// ============================================================
+
+DEFINE OBINEXUS_TOOLCHAIN AS:
+    riftlang_exe    -> .so.a -> rift_exe -> gosilang
+    build_stack:    nlink -> polybuild
+    spec_format:    LaTeX spec + Markdown repos + compliance scripts
+    governance:     Sinphasé (ε(x) ≤ 0.6 per component)
+    compliance:     NASA-STD-8739.8 Software Safety Standards
+    aegis_phases:   Research → Implementation → Validation → Integration
+
+// ============================================================
+// END MASTER INDEX
+// ============================================================

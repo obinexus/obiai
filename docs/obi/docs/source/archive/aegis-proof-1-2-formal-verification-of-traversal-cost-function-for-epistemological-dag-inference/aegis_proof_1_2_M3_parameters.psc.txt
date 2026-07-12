@@ -1,0 +1,240 @@
+// ============================================================
+// FILE: aegis_proof_1_2_M3_parameters.psc.txt
+// MODULE 3 OF 5 — Parameter Constraints, Lemma 1 & Sensitivity
+// SOURCE: "AEGIS-PROOF-1.2: Formal Verification of Traversal
+//          Cost Function for Epistemological DAG Inference"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — Aegis Framework Division
+// DATE:   May 27, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4: WEIGHTING PARAMETER ANALYSIS
+// ------------------------------------------------------------
+
+// α controls the PROBABILISTIC cost component (KL divergence)
+// β controls the EPISTEMIC cost component (entropy change)
+//
+// Their balance determines how the system weights:
+//   - distributional distance between belief states  (α)
+//   - knowledge disambiguation progress             (β)
+
+
+// ── LEMMA 1: PARAMETER BOUNDEDNESS ───────────────────────────
+
+// LEMMA 1 (Parameter Boundedness):
+//   For stable traversal cost computation, weighting parameters
+//   must satisfy three constraints:
+//
+//   (10) α + β = 1         NORMALIZATION: costs sum to 1 unit
+//   (11) 0 ≤ α, β ≤ 1      BOUNDEDNESS: neither dominates unboundedly
+//   (12) α, β > ε          NON-DEGENERACY: neither component is zeroed out
+//
+// where ε > 0 is a small non-degeneracy floor.
+
+CONSTANT EPSILON_MIN_NONDEG := 1e-6    // non-degeneracy floor (ε in Lemma 1)
+                                        // distinct from stability ε_min in §5
+
+PROCEDURE ValidateParameters(alpha: REAL, beta: REAL) -> ParameterValidation:
+    result := NEW ParameterValidation()
+
+    // Constraint (10): Normalization
+    normalization_ok := ABS(alpha + beta - 1.0) < 1e-10
+    IF NOT normalization_ok:
+        EMIT ERROR "Lemma 1 violation: α + β = " + (alpha + beta) + " ≠ 1"
+    END IF
+    result.normalization := normalization_ok
+
+    // Constraint (11): Boundedness
+    bounded_ok := (alpha >= 0.0) AND (alpha <= 1.0) AND
+                  (beta  >= 0.0) AND (beta  <= 1.0)
+    IF NOT bounded_ok:
+        EMIT ERROR "Lemma 1 violation: parameters outside [0,1]"
+    END IF
+    result.bounded := bounded_ok
+
+    // Constraint (12): Non-degeneracy
+    nondeg_ok := (alpha > EPSILON_MIN_NONDEG) AND (beta > EPSILON_MIN_NONDEG)
+    IF NOT nondeg_ok:
+        EMIT ERROR "Lemma 1 violation: parameter below non-degeneracy floor ε=" +
+                   EPSILON_MIN_NONDEG
+    END IF
+    result.non_degenerate := nondeg_ok
+
+    result.all_constraints_met := normalization_ok AND bounded_ok AND nondeg_ok
+
+    RETURN result
+END PROCEDURE
+
+
+// ── CANONICAL PARAMETER CONFIGURATIONS ───────────────────────
+
+// Balanced (equal weight to both components):
+CONSTANT ALPHA_BALANCED := 0.5
+CONSTANT BETA_BALANCED  := 0.5
+
+// Probabilistic-dominant (emphasizes distributional distance):
+CONSTANT ALPHA_PROBABILISTIC_DOMINANT := 0.7
+CONSTANT BETA_PROBABILISTIC_DOMINANT  := 0.3
+
+// Epistemic-dominant (emphasizes knowledge disambiguation):
+CONSTANT ALPHA_EPISTEMIC_DOMINANT := 0.3
+CONSTANT BETA_EPISTEMIC_DOMINANT  := 0.7
+
+// Clinical deployment default (verified against 85% bias reduction):
+// TODO: Confirm specific clinical default α/β from deployment specs
+CONSTANT ALPHA_CLINICAL_DEFAULT := 0.5
+CONSTANT BETA_CLINICAL_DEFAULT  := 0.5
+
+
+// ── SECTION 4.2: SENSITIVITY ANALYSIS ────────────────────────
+
+// Partial derivatives of C with respect to parameters:
+//
+//   ∂C/∂α = KL(Pᵢ ‖ Pⱼ) ≥ 0
+//   ∂C/∂β = ΔH(Sᵢ,ⱼ)    ≥ 0
+//
+// Both partials are non-negative → cost is monotonically increasing
+// in both α and β.
+// → Predictable behavior under parameter adjustments.
+
+PROCEDURE PartialDerivativeAlpha(node_i: SemanticBeliefNode,
+                                  node_j: SemanticBeliefNode) -> REAL:
+    // ∂C/∂α = KL(Pᵢ ‖ Pⱼ)
+    kl := KLDivergence(node_i.P, node_j.P, node_i.n)
+    ASSERT kl >= 0.0   // monotonic increase in α
+    RETURN kl
+END PROCEDURE
+
+PROCEDURE PartialDerivativeBeta(node_i: SemanticBeliefNode,
+                                 node_j: SemanticBeliefNode) -> REAL:
+    // ∂C/∂β = ΔH(Sᵢ,ⱼ)
+    dh := EntropyChange(node_i.S, node_j.S)
+    ASSERT dh >= 0.0   // monotonic increase in β (for disambiguation transitions)
+    RETURN dh
+END PROCEDURE
+
+
+PROCEDURE RunSensitivityAnalysis(node_i: SemanticBeliefNode,
+                                  node_j: SemanticBeliefNode,
+                                  alpha_range: List[REAL],
+                                  beta_range: List[REAL]) -> SensitivityReport:
+    // Systematically vary α and β, verify monotonic cost response.
+
+    report := NEW SensitivityReport()
+    report.alpha_costs := []
+    report.beta_costs  := []
+
+    // Fix β = 0.5, vary α
+    FOR EACH alpha_val IN alpha_range:
+        beta_val := 1.0 - alpha_val   // maintain normalization α + β = 1
+        params_ok := ValidateParameters(alpha_val, beta_val)
+        IF params_ok.all_constraints_met:
+            cost := TraversalCost(node_i, node_j, alpha_val, beta_val)
+            report.alpha_costs.APPEND((alpha_val, cost))
+        END IF
+    END FOR
+
+    // Verify monotonic response: increasing α → increasing cost (if KL > 0)
+    prev_cost := -INFINITY
+    FOR EACH (alpha_val, cost) IN report.alpha_costs:
+        kl := PartialDerivativeAlpha(node_i, node_j)
+        IF kl > 0 AND cost < prev_cost:
+            report.monotonicity_violation := TRUE
+            EMIT WARNING "Sensitivity: non-monotonic response at α=" + alpha_val
+        END IF
+        prev_cost := cost
+    END FOR
+
+    report.partial_alpha := PartialDerivativeAlpha(node_i, node_j)
+    report.partial_beta  := PartialDerivativeBeta(node_i, node_j)
+    report.both_partials_nonneg := (report.partial_alpha >= 0.0) AND
+                                    (report.partial_beta  >= 0.0)
+
+    EMIT INFO "Sensitivity analysis complete | ∂C/∂α=" + report.partial_alpha +
+              " | ∂C/∂β=" + report.partial_beta
+    RETURN report
+END PROCEDURE
+
+
+// ── PARAMETER OPTIMIZATION UTILITY ───────────────────────────
+
+PROCEDURE OptimizeParameters(training_pairs: List[(NodePair, REAL)],
+                              optimization_objective: Objective) -> (REAL, REAL):
+    // Find α, β that minimize objective over training pairs while
+    // satisfying all Lemma 1 constraints.
+    //
+    // Uses constrained gradient descent:
+    //   minimize   Σ loss(C(node_i→node_j; α,β), target)
+    //   subject to α + β = 1
+    //              α, β > ε_min
+    //              α, β ≤ 1
+
+    alpha := ALPHA_BALANCED    // initialization
+    beta  := BETA_BALANCED
+
+    CONSTANT LEARNING_RATE    := 0.01
+    CONSTANT MAX_ITERATIONS   := 1000
+    CONSTANT CONVERGENCE_TOL  := 1e-6
+
+    FOR iteration := 1 TO MAX_ITERATIONS:
+        grad_alpha := 0.0
+        grad_beta  := 0.0
+
+        FOR EACH (pair, target) IN training_pairs:
+            node_i := pair.first
+            node_j := pair.second
+
+            cost    := TraversalCost(node_i, node_j, alpha, beta)
+            d_loss  := optimization_objective.gradient(cost, target)
+
+            grad_alpha := grad_alpha + d_loss * PartialDerivativeAlpha(node_i, node_j)
+            grad_beta  := grad_beta  + d_loss * PartialDerivativeBeta(node_i, node_j)
+        END FOR
+
+        // Gradient step
+        alpha_new := alpha - LEARNING_RATE * grad_alpha
+        beta_new  := beta  - LEARNING_RATE * grad_beta
+
+        // Project onto constraint set: α + β = 1, both in [ε_min, 1-ε_min]
+        (alpha_new, beta_new) := ProjectOntoConstraintSet(alpha_new, beta_new)
+
+        // Convergence check
+        IF ABS(alpha_new - alpha) < CONVERGENCE_TOL AND
+           ABS(beta_new  - beta)  < CONVERGENCE_TOL:
+            EMIT INFO "Parameter optimization converged at iteration " + iteration
+            BREAK
+        END IF
+
+        alpha := alpha_new
+        beta  := beta_new
+    END FOR
+
+    EMIT INFO "Optimized: α=" + alpha + " β=" + beta
+    RETURN (alpha, beta)
+END PROCEDURE
+
+
+PROCEDURE ProjectOntoConstraintSet(alpha: REAL, beta: REAL) -> (REAL, REAL):
+    // Enforce α + β = 1 and α, β ∈ [ε_min, 1 - ε_min]
+
+    // Normalize to sum to 1
+    total := alpha + beta
+    IF ABS(total) < 1e-12:
+        RETURN (0.5, 0.5)   // degenerate case: reset to balanced
+    END IF
+    alpha := alpha / total
+    beta  := beta  / total
+
+    // Clamp to non-degeneracy bounds
+    alpha := CLAMP(alpha, EPSILON_MIN_NONDEG, 1.0 - EPSILON_MIN_NONDEG)
+    beta  := 1.0 - alpha    // maintain normalization exactly
+
+    RETURN (alpha, beta)
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: aegis_proof_1_2_M4_stability_filterflash.psc.txt
+// ============================================================

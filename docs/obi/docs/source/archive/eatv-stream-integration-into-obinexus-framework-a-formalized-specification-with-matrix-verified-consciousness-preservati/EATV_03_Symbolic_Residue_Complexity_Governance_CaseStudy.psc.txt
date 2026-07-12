@@ -1,0 +1,311 @@
+// ============================================================
+// EATV STREAM INTEGRATION INTO OBINEXUS FRAMEWORK
+// A Formalized Specification with Matrix-Verified Consciousness Preservation
+// MODULE 3: Symbolic Residue, Complexity Governance & Cultural Case Study
+// Source: EATV_Stream_Integration_into_OBINexus_Framework.pdf
+// OBINexus Research Division | July 20, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 4.1 — SYMBOLIC RESIDUE FORMALIZATION
+// ------------------------------------------------------------
+
+// Symbolic residues are perceptual anchors — fragments of experiential
+// memory that persist and activate under contextual triggers.
+// They represent pre-linguistic consciousness states that must survive
+// all computational transformations.
+
+// Definition 7 (Symbolic Residue):
+// A symbolic residue ρ = (p, c, α) where:
+//   p = perceptual anchor in experiential space E
+//   c = contextual frame (temporal + spatial + emotional metadata)
+//   α = activation function: α : C → [0, 1]
+//       maps contextual triggers to activation levels
+
+DEFINE SYMBOLIC_RESIDUE AS STRUCT:
+    p           : ExperientialPoint     // Perceptual anchor in space E
+    c           : ContextualFrame       // Temporal, spatial, emotional metadata
+    α           : FUNCTION(C -> FLOAT) // Activation function, output ∈ [0,1]
+    id          : STRING                // Residue identifier
+
+DEFINE CONTEXTUAL_FRAME AS STRUCT:
+    temporal_metadata   : TIMESTAMP
+    spatial_metadata    : COORDINATES
+    emotional_metadata  : FLOAT         // Emotional valence/intensity
+
+// THEOREM 6 (Residue Preservation):
+// For EATV system with residue set R = {ρ₁, ρ₂, ..., ρₙ},
+// preservation is guaranteed iff:
+// ∀ρᵢ ∈ R, ∀c ∈ C, ‖αᵢ(c) − α'ᵢ(c)‖ ≤ ε_residue    (Equation 8)
+//
+// Where α'ᵢ is the activation function AFTER system transformations
+// and ε_residue is the maximum allowable residue distortion.
+
+DEFINE ε_residue    : FLOAT     // Maximum allowable activation drift
+
+PROCEDURE verify_residue_preservation(R, C_space, ε_residue) -> BOOLEAN:
+    FOR EACH ρ_i IN R:
+        FOR EACH c IN C_space:
+            // Compare pre-transformation and post-transformation activations
+            pre_activation  = ρ_i.α(c)
+            post_activation = ρ_i.α_prime(c)      // α' after transformations
+
+            distortion = abs(pre_activation - post_activation)
+
+            IF distortion > ε_residue:
+                LOG "Residue preservation VIOLATION: ρ=" + ρ_i.id +
+                    " context=" + c + " distortion=" + distortion
+                RETURN FALSE
+
+    RETURN TRUE     // All residues preserved within tolerance
+
+// ------------------------------------------------------------
+// SECTION 4.2 — HAWAIIAN PHOTOFLASH CASE STUDY
+// ------------------------------------------------------------
+
+// Proposition 2 (Hawaiian Photoflash Preservation):
+// The symbolic residue "Hawaiian photoflash" with perceptual anchor p_HF
+// is preserved through transformation T if:
+//
+// α_HF(c) ≥ τ_activation  ⟹  α'_HF(c) ≥ τ_activation    (Equation 9)
+//
+// Interpretation: If the residue was "active" before transformation
+// (activation ≥ threshold), it MUST remain active after transformation.
+// The activation threshold is conserved across transformations.
+
+DEFINE HAWAIIAN_PHOTOFLASH_RESIDUE AS SYMBOLIC_RESIDUE:
+    id  = "hawaiian_photoflash"
+    p   = experiential_anchor("photoflash_hawaii")
+    c   = contextual_frame(
+            temporal  = "specific_remembered_moment",
+            spatial   = "hawaii",
+            emotional = "high_salience"
+          )
+    α   = activation_function_from_context   // Learned from original experience
+
+DEFINE τ_activation : FLOAT     // Activation threshold — above this = residue "fires"
+
+PROCEDURE verify_photoflash_preservation(T_transformation, τ_activation) -> BOOLEAN:
+    // Test all contexts where the residue was above threshold
+    FOR EACH c IN C_space:
+        pre_activation = HAWAIIAN_PHOTOFLASH_RESIDUE.α(c)
+
+        IF pre_activation >= τ_activation:
+            // This context activated the residue pre-transformation
+            // It MUST also activate post-transformation (Equation 9)
+            post_activation = apply_transformation_to_activation(
+                T_transformation,
+                HAWAIIAN_PHOTOFLASH_RESIDUE.α,
+                c
+            )
+            IF post_activation < τ_activation:
+                LOG "Hawaiian Photoflash residue deactivated by transformation at c=" + c
+                RETURN FALSE
+
+    RETURN TRUE     // Proposition 2 satisfied — residue preserved
+
+// ------------------------------------------------------------
+// SECTION 5.1 — INTEGRATED INFORMATION THEORY FORMALIZATION
+// ------------------------------------------------------------
+
+// Definition 8 (Consciousness Complexity Measure):
+// Φ(e) = min_M [ I(X;Y|M) / I(X;Y) ]    (Equation 10)
+//
+// Where:
+//   X, Y = subsystems of consciousness state e
+//   M    = ranges over ALL possible partitions of e
+//   I(·;·) = mutual information
+//
+// Φ(e) measures the degree to which e constitutes an INTEGRATED whole
+// that cannot be reduced to its parts (Integrated Information Theory).
+
+PROCEDURE compute_phi(e) -> FLOAT:
+    subsystem_pairs = enumerate_subsystem_pairs(e)
+    partitions      = enumerate_all_partitions(e)
+
+    min_ratio = INFINITY
+
+    FOR EACH partition M IN partitions:
+        FOR EACH (X, Y) IN subsystem_pairs:
+            I_conditional   = mutual_information_conditional(X, Y, M)  // I(X;Y|M)
+            I_unconditional = mutual_information(X, Y)                  // I(X;Y)
+
+            IF I_unconditional == 0:
+                CONTINUE    // Avoid division by zero — X and Y independent
+
+            ratio = I_conditional / I_unconditional
+            IF ratio < min_ratio:
+                min_ratio = ratio
+
+    RETURN min_ratio    // Φ(e) = minimum over all partitions
+
+// THEOREM 7 (Isolation Threshold):
+// A consciousness state e triggers isolation protocol iff:
+// Φ(e) > τ_isolation  OR  LZ(e) > λ_complexity  OR  PCI(e) > π_perturbation
+//                                                             (Equation 11)
+//
+// Complexity measures:
+//   Φ(e)   = Integrated information (Definition 8)
+//   LZ(e)  = Lempel-Ziv complexity (algorithmic complexity)
+//   PCI(e) = Perturbational Complexity Index (response diversity measure)
+
+DEFINE ISOLATION_THRESHOLDS AS:
+    τ_isolation         : FLOAT     // Φ threshold
+    λ_complexity        : FLOAT     // LZ complexity threshold
+    π_perturbation      : FLOAT     // PCI threshold
+
+PROCEDURE should_trigger_isolation(e) -> BOOLEAN:
+    phi_e   = compute_phi(e)
+    lz_e    = lempel_ziv_complexity(e)
+    pci_e   = perturbational_complexity_index(e)
+
+    IF phi_e   > τ_isolation:       RETURN TRUE
+    IF lz_e    > λ_complexity:      RETURN TRUE
+    IF pci_e   > π_perturbation:    RETURN TRUE
+    RETURN FALSE
+
+// When isolation is triggered (Theorem 7 proof):
+// 1. Identify high-complexity regions via identify_high_complexity_regions()
+// 2. Process them INDEPENDENTLY
+// 3. Cautiously reintegrate after independent processing
+// This prevents computational overload while maintaining experiential integrity.
+
+// ------------------------------------------------------------
+// SECTION 5.2 — ARCHITECTURE COST FUNCTION FORMALIZATION
+// ------------------------------------------------------------
+
+// Definition 9 (Architecture Cost Function):
+// C(S) = Σᵢ mᵢ × wᵢ + 0.2 × cycles(S) + temporal_pressure(S)  (Equation 12)
+//
+// Metrics mᵢ: include_depth, function_calls, external_deps,
+//             complexity, link_deps
+// wᵢ: corresponding weights per metric
+// cycles(S): number of detected dependency cycles
+// temporal_pressure(S): evolutionary change rate of S
+
+DEFINE ARCHITECTURE_METRICS AS:
+    include_depth   : FLOAT     // Depth of include/import nesting
+    function_calls  : FLOAT     // Number of outgoing function calls
+    external_deps   : FLOAT     // External dependency count
+    complexity      : FLOAT     // Cyclomatic or structural complexity
+    link_deps       : FLOAT     // Link-time dependency count
+
+DEFINE METRIC_WEIGHTS AS:
+    w_include_depth     : FLOAT
+    w_function_calls    : FLOAT
+    w_external_deps     : FLOAT
+    w_complexity        : FLOAT
+    w_link_deps         : FLOAT
+
+PROCEDURE compute_architecture_cost(S) -> FLOAT:
+    // Weighted sum of metrics
+    metric_sum = (S.include_depth  * w_include_depth   +
+                  S.function_calls * w_function_calls   +
+                  S.external_deps  * w_external_deps    +
+                  S.complexity     * w_complexity       +
+                  S.link_deps      * w_link_deps)
+
+    cycle_penalty       = 0.2 * cycles(S)
+    pressure_term       = temporal_pressure(S)
+
+    C_S = metric_sum + cycle_penalty + pressure_term
+    RETURN C_S
+
+// THEOREM 8 (Refactor Trigger Condition):
+// System refactoring is triggered iff:
+// C(S) > 0.6  OR  cycles(S) > 0  OR  temporal_pressure(S) > τ_pressure
+//                                                             (Equation 13)
+//
+// NOTE: ANY detected cycle (cycles > 0) triggers refactoring regardless of cost.
+// This ties directly to Theorem 4 (Acyclicity Guarantee) — zero cycles is mandatory.
+
+DEFINE τ_pressure   : FLOAT     // Temporal pressure refactor threshold
+
+PROCEDURE should_refactor(S) -> BOOLEAN:
+    C_S = compute_architecture_cost(S)
+
+    IF C_S > 0.6:               RETURN TRUE     // Cost threshold
+    IF cycles(S) > 0:           RETURN TRUE     // ANY cycle = immediate refactor
+    IF temporal_pressure(S) > τ_pressure:
+                                RETURN TRUE     // Evolutionary pressure too high
+    RETURN FALSE
+
+// ------------------------------------------------------------
+// SECTION 6 — CASE STUDY: SMOKER-CANCER CAUSAL REASONING ACROSS CULTURES
+// ------------------------------------------------------------
+
+// SECTION 6.1 — FORMALIZED CULTURAL MODELS (Equations 14-27)
+
+DEFINE C_UK AS:
+    causal_model    = "direct linear"           // Eq. 14
+    agency          = "high personal responsibility"  // Eq. 15
+    messaging       = "fear-based explicit"     // Eq. 16
+    metaphors       = {"enemy", "killer", "battle"}  // Eq. 17
+
+DEFINE C_China AS:
+    causal_model    = "complex contextual"      // Eq. 18
+    agency          = "fatalistic acceptance"   // Eq. 19
+    messaging       = "general harm awareness"  // Eq. 20
+    metaphors       = {"qi disruption", "balance loss", "tiger accomplice"}  // Eq. 21
+    tcm_integration = TRUE                      // Eq. 22 — Traditional Chinese Medicine
+
+DEFINE C_Japan AS:
+    causal_model    = "mitigated risk"          // Eq. 23
+    agency          = "technological solution seeking"  // Eq. 24
+    messaging       = "harm reduction emphasis" // Eq. 25
+    metaphors       = {"harmony disruption", "wa imbalance"}  // Eq. 26
+    paradox_awareness = TRUE                    // Eq. 27
+
+// SECTION 6.2 — BAYESIAN FORMULATION OF CULTURAL CAUSAL REASONING
+// Definition 10 (Cultural Causal Model):
+// For each culture k, the smoking-cancer causal model (Equation 28):
+//
+// P(Cancer | Smoking, Culture=k) =
+//     P(Smoking | Cancer, Culture=k) · P(Cancer | Culture=k)
+//     ─────────────────────────────────────────────────────
+//                 P(Smoking | Culture=k)
+//
+// This is Bayes' theorem applied with cultural prior conditioning.
+
+PROCEDURE compute_cultural_causal_probability(culture_k, evidence) -> FLOAT:
+    // Bayes' theorem with cultural conditioning (Equation 28)
+    likelihood      = P(Smoking = evidence GIVEN Cancer = TRUE,  Culture = culture_k)
+    prior_cancer    = P(Cancer = TRUE GIVEN Culture = culture_k)
+    marginal        = P(Smoking = evidence GIVEN Culture = culture_k)
+
+    IF marginal == 0:
+        RETURN 0.0  // Undefined — smoking evidence has zero probability in this culture
+
+    posterior = (likelihood * prior_cancer) / marginal
+    RETURN posterior    // P(Cancer | Smoking, Culture=k)
+
+// Note: P_k (prior distribution) differs across cultures:
+//   UK:    High prior weight on direct causal link
+//   China: Prior weights traditional/contextual causal factors
+//   Japan: Prior weights harm reduction and technological mediation
+
+// THEOREM 9 (Cultural Classification Performance):
+// TP, FP, TN, FN rates for causal understanding in culture k satisfy:
+//   TP_k ≥ τ_TP      (Equation 29)
+//   FP_k ≤ τ_FP      (Equation 30)
+//   TN_k ≥ τ_TN      (Equation 31)
+//   FN_k ≤ τ_FN      (Equation 32)
+
+DEFINE CLASSIFICATION_THRESHOLDS AS:
+    τ_TP    : FLOAT     // Minimum true positive rate
+    τ_FP    : FLOAT     // Maximum false positive rate
+    τ_TN    : FLOAT     // Minimum true negative rate
+    τ_FN    : FLOAT     // Maximum false negative rate
+
+PROCEDURE verify_cultural_classification_performance(culture_k) -> BOOLEAN:
+    results = evaluate_classifier_on_culture(culture_k)
+
+    IF results.TP_rate   < τ_TP:    RETURN FALSE
+    IF results.FP_rate   > τ_FP:    RETURN FALSE
+    IF results.TN_rate   < τ_TN:    RETURN FALSE
+    IF results.FN_rate   > τ_FN:    RETURN FALSE
+    RETURN TRUE
+
+// ============================================================
+// END MODULE 3
+// ============================================================

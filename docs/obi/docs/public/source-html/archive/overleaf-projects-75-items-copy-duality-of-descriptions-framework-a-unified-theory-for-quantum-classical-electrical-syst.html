@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Duality of Descriptions Framework A Unified Theory for Quantum Classical Electrical Systems} | OBI Source HTML</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --surface: #ffffff;
+      --text: #202321;
+      --muted: #626962;
+      --accent: #147d7e;
+      --border: #d9ddd4;
+      --code: #eef1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    header, main, footer { max-width: 1060px; margin: 0 auto; padding: 1.25rem; }
+    header { border-bottom: 4px solid var(--accent); background: #161819; color: #f5f7f2; max-width: none; }
+    header > div { max-width: 1060px; margin: 0 auto; }
+    a { color: #0f5f60; }
+    header a { color: inherit; }
+    main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 1.25rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p, li { max-width: 78ch; }
+    img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    pre { overflow: auto; background: #20251f; color: #f7fbf2; padding: 1rem; border-radius: 8px; }
+    code { background: var(--code); padding: 0.12rem 0.25rem; border-radius: 5px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--border); padding: 0.45rem 0.6rem; text-align: left; }
+    blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding-left: 1rem; color: var(--muted); }
+    .skip-link { position: absolute; left: 1rem; top: 0.75rem; transform: translateY(-200%); }
+    .skip-link:focus { transform: translateY(0); background: var(--surface); color: var(--text); padding: 0.5rem; }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header>
+    <div>
+      <a href="../index.html">OBI Source HTML</a>
+      <h1>Duality of Descriptions Framework A Unified Theory for Quantum Classical Electrical Systems}</h1>
+      <p>Generated from Markdown with Python tooling and Pandoc-compatible source preservation.</p>
+    </div>
+  </header>
+  <main id="content" tabindex="-1">
+    <h1 id="duality-of-descriptions-framework-a-unified-theory-for-quantum-classical-electrical-systems">Duality of Descriptions Framework A Unified Theory for Quantum Classical Electrical Systems}</h1>
+<p>Source folder: <code>overleaf-projects-75-items-copy/Duality-of-Descriptions Framework- A Unified Theory for Quantum-Classical Electrical Systems}</code></p>
+<h2 id="extracted-files">Extracted Files</h2>
+<ul>
+<li><code>main.tex</code></li>
+</ul>
+<h2 id="main">main</h2>
+<h1 id="introduction">Introduction</h1>
+<p>Modern electrical systems increasingly operate at the boundary between classical and quantum regimes, requiring unified theoretical frameworks that can seamlessly transition between different mathematical descriptions. This paper introduces the Duality-of-Descriptions framework, which provides explicit mappings between multiple modeling formalisms while preserving physical observables.</p>
+<h2 id="core-concept">Core Concept</h2>
+<p>A system $<code>S</code>$ is described by multiple <em>models</em> $<code>M_i</code>$ (continuous PDE, lumped circuit, stochastic, logical statement-layer). Duality is an explicit mapping $<code>\mathcal{F}_{ij}: M_i \to M_j</code>$ (and ideally a reverse mapping $<code>\mathcal{G}_{ji}</code>$) such that observable predictions and conserved quantities correspond under the mapping (up to controlled approximation).</p>
+<h1 id="mathematical-framework">Mathematical Framework</h1>
+<h2 id="model-spaces-and-morphisms">Model Spaces and Morphisms</h2>
+<p>Let $<code>\mathcal{M}</code>$ be a category whose objects are modeling formalisms:</p>
+<ul>
+<li>
+<p><strong>CONT</strong>: Continuum PDEs for wave-like descriptions</p>
+</li>
+<li>
+<p><strong>LUMP</strong>: State-space/circuit models for particle-like descriptions</p>
+</li>
+<li>
+<p><strong>OP</strong>: Operator/Koopman representations</p>
+</li>
+<li>
+<p><strong>SYM</strong>: Symbolic/logic descriptions</p>
+</li>
+</ul>
+<p>A morphism $<code>f: M_i \to M_j</code>$ is a concrete transformation (projection, modal decomposition, coarse-graining, aggregation, symbolic abstraction, etc.).</p>
+<h2 id="hilbert-space-formulation">Hilbert Space Formulation</h2>
+<p>The total system state resides in the tensor product Hilbert space:</p>
+<pre><code class="language-math">\begin{equation}
+\mathcal{H} = \mathcal{H}_{\text{quantum}} \otimes \mathcal{H}_{\text{classical}}
+\end{equation}
+</code></pre>
+<p>We define joint states as superpositions:</p>
+<pre><code class="language-math">\begin{equation}
+\ket{\Phi} = \sum_{n,m} c_{nm} \ket{\psi_n} \otimes \ket{E_m}
+\end{equation}
+</code></pre>
+<p>where $<code>\ket{\psi_n} \in \mathcal{H}_{\text{quantum}}</code>$ and $<code>\ket{E_m} \in \mathcal{H}_{\text{classical}}</code>$.</p>
+<h1 id="concrete-instantiations-for-electrical-systems">Concrete Instantiations for Electrical Systems</h1>
+<h2 id="continuous-wave-like-model">Continuous (Wave-like) Model</h2>
+<p>For a transmission line or distributed circuit, the field variable $<code>\phi(x,t)</code>$ satisfies the wave PDE:</p>
+<pre><code class="language-math">\begin{equation}
+\frac{\partial^2 \phi}{\partial t^2} = c^2 \nabla^2 \phi - \gamma \frac{\partial \phi}{\partial t} + s(x,t)
+\end{equation}
+</code></pre>
+<p>where $<code>c</code>$ is the wave speed, $<code>\gamma</code>$ is the damping coefficient, and $<code>s(x,t)</code>$ represents sources.</p>
+<h2 id="lumped-particle-like-model">Lumped (Particle-like) Model</h2>
+<p>The state-space representation with circuit nodes $<code>\mathbf{x}(t)</code>$:</p>
+<pre><code class="language-math">\begin{equation}
+\dot{\mathbf{x}} = A\mathbf{x} + B\mathbf{u}, \qquad \mathbf{y} = C\mathbf{x}
+\end{equation}
+</code></pre>
+<h2 id="koopmanoperator-lift">Koopman/Operator Lift</h2>
+<p>For nonlinear dynamics, we lift to a linear operator $<code>\mathcal{K}</code>$ acting on observables $<code>g</code>$:</p>
+<pre><code class="language-math">\begin{equation}
+\mathcal{K} g = g \circ \Phi
+\end{equation}
+</code></pre>
+<p>where $<code>\Phi</code>$ is the flow map.</p>
+<h2 id="symbolicstatement-layer">Symbolic/Statement Layer</h2>
+<p>A logical description $<code>L</code>$ consists of temporal logic formulas, rules, and constraints describing permissible transitions and safety invariants.</p>
+<h1 id="extended-theory-for-heterogeneous-systems">Extended Theory for Heterogeneous Systems</h1>
+<h2 id="homogeneous-and-heterogeneous-data-inputs">Homogeneous and Heterogeneous Data Inputs</h2>
+<p>The framework is extended to handle two classes of data inputs:</p>
+<h3 id="homogeneous-data">Homogeneous Data</h3>
+<p>Similar data types that can be modeled uniformly (model-agnostic). For example, Cartesian coordinates $<code>(x, y, z)</code>$ and polar coordinates $<code>(r, \theta, \phi)</code>$ are isomorphic systems representing the same spatial information through different parametrizations.</p>
+<h3 id="heterogeneous-data">Heterogeneous Data</h3>
+<p>Mixed data requiring transcriptional transformers with pattern recognition. The system must verify non-mutual exclusion of datasets to establish isomorphic relationships.</p>
+<h2 id="wave-propagation-and-decoherence">Wave Propagation and Decoherence</h2>
+<p>At the quantum-classical interface, system behavior emerges through:</p>
+<ul>
+<li>
+<p><strong>Coherence</strong>: Phase relations between wave components preserved</p>
+</li>
+<li>
+<p><strong>Decoherence</strong>: Environmental coupling causes phase randomization</p>
+</li>
+<li>
+<p><strong>Interference</strong>: Constructive and destructive wave interactions</p>
+</li>
+</ul>
+<h1 id="explicit-mapping-recipes">Explicit Mapping Recipes</h1>
+<h2 id="modal-projection-cont-lump">Modal Projection (CONT LUMP)</h2>
+<ol>
+<li>
+<p>Solve eigenproblem: $<code>\nabla^2 \psi_n + \lambda_n \psi_n = 0</code>$</p>
+</li>
+<li>
+<p>Project: $<code>\phi(x,t) = \sum_n q_n(t)\psi_n(x)</code>$</p>
+</li>
+<li>
+<p>Truncate to first $<code>N</code>$ modes $<code>\to</code>$ state vector $<code>q(t)</code>$</p>
+</li>
+<li>
+<p>Result matches lumped model parameters $<code>A, B, C</code>$</p>
+</li>
+</ol>
+<h2 id="aggregationhomogenization">Aggregation/Homogenization</h2>
+<p>Use averaging and renormalization to produce effective parameters with controlled error estimates from multiscale analysis.</p>
+<h2 id="koopman-embedding">Koopman Embedding</h2>
+<p>Choose observable basis $<code>\{g_k\}</code>$ and approximate Koopman operator via EDMD/DMD for linear representation.</p>
+<h2 id="symbolic-abstraction">Symbolic Abstraction</h2>
+<p>Extract invariants (energy functionals, Lyapunov functions) and encode as logical rules.</p>
+<h1 id="duality-metrics">Duality Metrics</h1>
+<p>We define measures to evaluate mapping quality:</p>
+<ul>
+<li>
+<p><strong>Observable error</strong>: $<code>\epsilon_O = \|y_i(t) - \mathcal{F}_{ij}(y_j(t))\|</code>$</p>
+</li>
+<li>
+<p><strong>Invariant preservation</strong>: $<code>\Delta E</code>$ (difference in conserved quantities)</p>
+</li>
+<li>
+<p><strong>Information loss</strong>: Relative entropy/KL divergence</p>
+</li>
+<li>
+<p><strong>Computational gain</strong>: State dimension reduction vs fidelity loss</p>
+</li>
+</ul>
+<p>Duality holds when $<code>\epsilon_O, \Delta E</code>$ are below acceptable thresholds and the mapping has a stable pseudo-inverse.</p>
+<h1 id="example-virtual-circuit-control-system">Example: Virtual Circuit Control System</h1>
+<p>Consider monitoring electric current through an electromagnetic field using a coil-based system. The objective is to control electricity flow safely by modeling the system through multiple descriptions.</p>
+<h2 id="classical-description-particle-model">Classical Description (Particle Model)</h2>
+<p>Using Ohm’s law and circuit theory:</p>
+<pre><code class="language-math">\begin{equation}
+V = IR
+\end{equation}
+</code></pre>
+<p>where current $<code>I</code>$ represents particle flow through resistance $<code>R</code>$.</p>
+<h2 id="quantum-description-wave-model">Quantum Description (Wave Model)</h2>
+<p>The system exhibits wave properties through:</p>
+<pre><code class="language-math">\begin{equation}
+\psi(x,t) = A(x,t)e^{iS(x,t)/\hbar}
+\end{equation}
+</code></pre>
+<p>allowing analysis of oscillations and interference patterns.</p>
+<h2 id="dual-representation">Dual Representation</h2>
+<p>The coherence operator bridges both descriptions, enabling prediction of wave-particle transitions based on measurement context.</p>
+<h1 id="binding-condition-and-theorem">Binding Condition and Theorem</h1>
+<div class="theorem">
+
+Let $`M_{\text{CONT}}`$ and $`M_{\text{LUMP}}`$ be models with mapping $`\mathcal{P}`$ by modal truncation. If the neglected spectral tail energy $`E_{\text{tail}} < \varepsilon`$ and truncation basis diagonalizes dominant operator, then for all bounded inputs $`\mathbf{u}`$:
+
+<pre><code class="language-math">\begin{equation}
+\sup_{t \in [0,T]} \| y_{\text{CONT}}(t) - y_{\text{LUMP}}(t) \| \leq C(\varepsilon) \|u\|
+\end{equation}
+</code></pre>
+
+where $`C`$ depends on operator norms and damping.
+
+</div>
+
+<h1 id="implementation-roadmap">Implementation Roadmap</h1>
+<ol>
+<li>
+<p><strong>System Selection</strong>: Choose canonical electrical system (e.g., transmission line with nonlinear load)</p>
+</li>
+<li>
+<p><strong>PDE Derivation</strong>: Derive continuous model and compute mode shapes</p>
+</li>
+<li>
+<p><strong>Projection</strong>: Build lumped model via modal truncation</p>
+</li>
+<li>
+<p><strong>Koopman Analysis</strong>: Compute operator approximation for nonlinear dynamics</p>
+</li>
+<li>
+<p><strong>Logic Extraction</strong>: Encode invariants in temporal logic</p>
+</li>
+<li>
+<p><strong>Validation</strong>: Evaluate mappings with defined metrics</p>
+</li>
+<li>
+<p><strong>Documentation</strong>: Create category-theoretic framework repository</p>
+</li>
+</ol>
+<h1 id="tools-and-methods">Tools and Methods</h1>
+<ul>
+<li>
+<p>Modal analysis (FEM/spectral methods)</p>
+</li>
+<li>
+<p>Model reduction (balanced truncation, POD)</p>
+</li>
+<li>
+<p>DMD/EDMD for Koopman approximation</p>
+</li>
+<li>
+<p>SMT/model-checkers for statement layer</p>
+</li>
+<li>
+<p>Python/MATLAB for numerical experiments</p>
+</li>
+</ul>
+<h1 id="applications-and-extensions">Applications and Extensions</h1>
+<h2 id="practical-applications">Practical Applications</h2>
+<ul>
+<li>
+<p>Power grid stability analysis</p>
+</li>
+<li>
+<p>Quantum device modeling</p>
+</li>
+<li>
+<p>RF circuit design</p>
+</li>
+<li>
+<p>Control system synthesis</p>
+</li>
+</ul>
+<h2 id="future-extensions">Future Extensions</h2>
+<ul>
+<li>
+<p>Multi-scale integration</p>
+</li>
+<li>
+<p>Non-Markovian environments</p>
+</li>
+<li>
+<p>Stochastic model incorporation</p>
+</li>
+<li>
+<p>Machine learning enhancement</p>
+</li>
+</ul>
+<h1 id="conclusion">Conclusion</h1>
+<p>The Duality-of-Descriptions framework provides a mathematically rigorous approach to modeling electrical systems across quantum and classical regimes. By establishing explicit mappings between different mathematical representations while preserving physical observables, this framework enables engineers to choose the most appropriate description for their specific application while maintaining consistency across scales.</p>
+<p>The ability to handle both homogeneous and heterogeneous data inputs, combined with quantitative duality metrics, makes this framework particularly suitable for modern electrical systems that operate at the quantum-classical boundary. Future work will focus on experimental validation and extension to more complex multi-agent systems.</p>
+<h1 id="acknowledgments">Acknowledgments</h1>
+<p>The author thanks the OBINexus team for valuable discussions and support.</p>
+<div class="thebibliography">
+
+99 Dirac, P.A.M. (1939). *The Principles of Quantum Mechanics*. Oxford University Press.
+
+Koopman, B.O. (1931). Hamiltonian systems and transformation in Hilbert space. *Proceedings of the National Academy of Sciences*, 17(5), 315-318.
+
+Various Authors (2020). Modal Analysis and Model Reduction Techniques. *IEEE Transactions on Automatic Control*.
+
+</div>
+  </main>
+  <footer>
+    <p>Generated artifact: <code>archive/overleaf-projects-75-items-copy-duality-of-descriptions-framework-a-unified-theory-for-quantum-classical-electrical-syst</code></p>
+  </footer>
+</body>
+</html>

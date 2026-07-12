@@ -1,0 +1,247 @@
+// ============================================================
+// FILE: diram_boolean_M5_obinexus_integration.psc.txt
+// MODULE 5 OF 5 — OBINexus Corpus Integration & Final Index
+// SOURCE: "DIRAM Boolean Logic Truth Table - Memory Management Gates"
+// ORG:    OBINexus Aegis Project | Directed Instruction RAM
+// ============================================================
+
+// ------------------------------------------------------------
+// DIRAM AS THE HARDWARE SUBSTRATE OF THE OBIAI STACK
+// ------------------------------------------------------------
+
+// DIRAM is referenced throughout the corpus but never fully
+// specified at the binary gate level until this document.
+// This module maps DIRAM's truth table behavior to every
+// higher-level abstraction that depends on it.
+
+
+// ── DIRAM GATE IN THE AEGIS PROOF CHAIN ──────────────────────
+
+DEFINE DIRAMCorpusConnections AS:
+
+    // PDF 3 (AEGIS-PROOF-1.2): EpistemicDAG traversal uses DIRAM commit/rollback
+    CONNECT_PDF3 := {
+        higher_abstraction : "DIRAM_validate(transition) = COMMIT/ROLLBACK",
+        hardware_substrate : "DIRAMMemoryGate(A, B) → Allow/Block",
+        mapping            : "COMMIT ↔ output=1 (ALLOW); ROLLBACK ↔ output=0 (BLOCK)",
+        epsilon_note       : "PDF 3 uses ε≤0.6; DIRAM gate uses ε≤0.5 below that"
+    }
+
+    // PDF 4 (AEGIS-PROOF-3.2): Hybrid convergence writes to DIRAM-governed memory
+    CONNECT_PDF4 := {
+        higher_abstraction : "J(vₙ,nₙ) → J* stored in DIRAM-governed memory",
+        hardware_substrate : "Each parameter update is a cache write gate operation",
+        mapping            : "Convergence requires B=0 (compliant) for writes to persist",
+        epsilon_note       : "Robbins-Monro noise ξₙ must not push ε > 0.5"
+    }
+
+    // PDF 6 (DAG Ephemeris): DIRAM governs verb-noun capsule persistence
+    CONNECT_PDF6 := {
+        higher_abstraction : "DIRAM_validate(transition): COMMIT if ε≤0.6",
+        hardware_substrate : "DIRAMMemoryGate(A=capsule_cached, B=governance_state)",
+        mapping            : "Flash capsule persists only when gate outputs ALLOW",
+        epsilon_note       : "Hardware ε≤0.5 is prerequisite for software ε≤0.6 commit"
+    }
+
+    // PDF 7 (OBIAI): DIRAM cascade persona management
+    CONNECT_PDF7 := {
+        higher_abstraction : "DIRAM cascade model: Obinexus→Uche→Eze activation",
+        hardware_substrate : "Each cascade tier activation is a DIRAM gate decision",
+        mapping            : "Tier activates only when gate ALLOWS (output=1)",
+        epsilon_note       : "Cascade uses drift-based ε; hardware floor is 0.5"
+    }
+
+    // PDF 9 (RAF): QuantumAuraSeal uses entropy_coefficient ≤ 0.5
+    CONNECT_PDF9 := {
+        higher_abstraction : "entropy_coefficient ≤ 0.5 in QuantumAuraSeal",
+        hardware_substrate : "DIRAMCheckSinphaseCompliance(heap_events, max_events)",
+        mapping            : "IDENTICAL bound: both use 0.5 as the operative threshold",
+        epsilon_note       : "RAF 0.5 and DIRAM 0.5 are the same underlying constraint"
+    }
+
+    // PDF 11 (DGT Variadic): D_act computability bound maps to memory allocation
+    CONNECT_PDF11 := {
+        higher_abstraction : "Θ = 8 active dimensions (computability bound)",
+        hardware_substrate : "DIRAM cache capacity = analogue of Θ in memory domain",
+        mapping            : "When |D_act| > Θ, evict LRU dimension (same logic as cache eviction)",
+        epsilon_note       : "Dimension activation governed by ε; full cache = governance risk"
+    }
+END DEFINE
+
+
+// ── FULL DIRAM INTEGRATION PROCEDURE ─────────────────────────
+
+PROCEDURE RunDIRAMIntegratedOperation(
+    cache_key     : CacheKey,
+    heap_events   : UINT8,
+    max_events    : UINT8,
+    cache         : DIRAMCache) -> IntegratedResult:
+
+    // Step 1: Compute governance state (B) from Sinphase check
+    B := DeriveGovernanceState(heap_events, max_events)
+    epsilon := ComputeEpsilon(heap_events, max_events)
+
+    // Step 2: Determine cache state (A)
+    A := IF cache_key IN cache.store THEN 1 ELSE 0
+
+    // Step 3: Apply DIRAM gate
+    output := DIRAMMemoryGate(A, B)
+
+    // Step 4: Execute based on output
+    cache_result := cache.Access(cache_key, governance_state=B)
+
+    // Step 5: Generate SHA-256 receipt
+    receipt := GenerateSHAReceipt(cache_key, A, B, output)
+    receipt.epsilon_value := epsilon
+
+    // Step 6: Classify outcome
+    zone := ClassifyEpsilonZone(epsilon)
+
+    RETURN IntegratedResult(
+        A=A, B=B, output=output,
+        action=cache_result.action,
+        epsilon=epsilon,
+        zone=zone,
+        receipt=receipt
+    )
+END PROCEDURE
+
+
+PROCEDURE ClassifyEpsilonZone(epsilon: REAL) -> STRING:
+    // Map ε to operational zone (bridges DIRAM to OBIAI failure scale)
+    IF epsilon <= 0.25:   RETURN "SAFE"          // well within bounds
+    IF epsilon <= 0.50:   RETURN "NOMINAL"        // at DIRAM hardware limit
+    IF epsilon <= 0.60:   RETURN "SOFT_WARNING"   // AEGIS software layer active
+    IF epsilon <= 0.75:   RETURN "HARD_WARNING"   // approaching crisis
+    RETURN "VIOLATION"                            // full governance breach
+END PROCEDURE
+
+
+// ── TRUTH TABLE AS ROUTING LOGIC IN OBIAI ────────────────────
+
+// The 4 truth table rows map to 4 operational states in OBIAI:
+
+DEFINE OBIAIStateMapping AS:
+
+    ROW1_ALLOW_MISS := {
+        diram       : "(A=0, B=0) → output=1",
+        obiai_state : "FLASH → FILTER elevation candidate",
+        meaning     : "Cache miss + compliant → attempt to persist Flash result",
+        action      : "FilterLayer.Integrate(flash_result) if CanPersist()",
+        file_ref    : "obiai_thesis_M3_implementation_modules.psc.txt"
+    }
+
+    ROW2_BLOCK_MISS := {
+        diram       : "(A=0, B=1) → output=0",
+        obiai_state : "FLASH blocked — governance violation during miss",
+        meaning     : "New data cannot be loaded — system must wait for ε to drop",
+        action      : "Return Flash result without cache persistence",
+        file_ref    : "obiai_thesis_M3_implementation_modules.psc.txt"
+    }
+
+    ROW3_ALLOW_HIT := {
+        diram       : "(A=1, B=0) → output=1",
+        obiai_state : "FILTER mode — persistent data available and compliant",
+        meaning     : "Ideal operating state — high confidence, low overhead",
+        action      : "FilterLayer.Process(cached_data) immediately",
+        file_ref    : "aegis_proof_3_1_3_2_M5_compliance_algorithm.psc.txt"
+    }
+
+    ROW4_BLOCK_HIT := {
+        diram       : "(A=1, B=1) → output=0",
+        obiai_state : "ALL modes blocked — governance violation overrides cache",
+        meaning     : "Even available Filter data cannot be served safely",
+        action      : "TriggerEmergencyStop() or DIRAMCascade.ActivateTier(EZE)",
+        file_ref    : "obiai_thesis_M2_diram_cascade_algorithm.psc.txt"
+    }
+END DEFINE
+
+
+// ── EPSILON HIERARCHY RESOLUTION (COMPLETE) ──────────────────
+
+PROCEDURE ResolveEpsilonBound(context: OperationalContext) -> REAL:
+    // Determine which ε bound applies at this context level.
+
+    MATCH context.level:
+        CASE HARDWARE_DIRAM:
+            RETURN 0.5    // THIS DOCUMENT — strictest hardware gate
+        CASE SOFTWARE_RAF_QUANTUM:
+            RETURN 0.5    // PDF 9 RAF — matches hardware level
+        CASE SOFTWARE_AEGIS_OBIAI:
+            RETURN 0.6    // PDFs 3,4,6,7 — software integration layer
+        CASE SINPHASE_GOVERNANCE:
+            RETURN 0.6    // PDF 2 Actor Class — architectural constant
+    END MATCH
+
+    RETURN 0.5   // conservative default — use hardware bound
+END PROCEDURE
+
+
+// ── COMPLETE CORPUS INDEX (12 PDFs, 60 Modules) ──────────────
+
+PROCEDURE PrintFinalCorpusIndex() -> VOID:
+    EMIT INFO "=========================================================="
+    EMIT INFO "COMPLETE OBINEXUS PSEUDOCODE CORPUS — FINAL"
+    EMIT INFO "12 PDFs → 60 Modules | Nnamdi Michael Okpala, OBINexus"
+    EMIT INFO "Span: May 2025 – May 2026"
+    EMIT INFO "=========================================================="
+    EMIT INFO ""
+    EMIT INFO "── AEGIS PROOF CHAIN ──────────────────────────────────────"
+    EMIT INFO "PDF 1  Bayesian Debiasing (July 4, 2025)"
+    EMIT INFO "       bayesian_debiasing_M1–M5.psc.txt"
+    EMIT INFO "PDF 2  Actor Class (2025)"
+    EMIT INFO "       actor_class_M1–M5.psc.txt"
+    EMIT INFO "PDF 3  AEGIS-PROOF-1.2 Traversal Cost (May 27, 2025)"
+    EMIT INFO "       aegis_proof_1_2_M1–M5.psc.txt"
+    EMIT INFO "PDF 4  AEGIS-PROOF-3.1 & 3.2 (August 2025)"
+    EMIT INFO "       aegis_proof_3_1_3_2_M1–M5.psc.txt"
+    EMIT INFO "PDF 5  AEGIS-PROOF-4.1 Hospital Safety (August 2025)"
+    EMIT INFO "       aegis_proof_4_1_M1–M5.psc.txt"
+    EMIT INFO "PDF 6  DAG Ephemeris Spec (August 2025)"
+    EMIT INFO "       dag_ephemeris_M1–M5.psc.txt"
+    EMIT INFO "PDF 7  OBIAI Thesis (September 2025)"
+    EMIT INFO "       obiai_thesis_M1–M5.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "── DIMENSIONAL GAME THEORY SUB-SERIES ────────────────────"
+    EMIT INFO "PDF 8  DGT Formal: Nash/Theorem 1 (July 4, 2025)"
+    EMIT INFO "       dimensional_game_theory_M1–M5.psc.txt"
+    EMIT INFO "PDF 9  DGT-RAF Cryptographic (August 2025)"
+    EMIT INFO "       raf_cryptographic_M1–M5.psc.txt"
+    EMIT INFO "PDF 10 DGT Variadic V2 Reissue (May 24, 2026)"
+    EMIT INFO "       dgt_variadic_M1–M5.psc.txt"
+    EMIT INFO "PDF 11 DGT Variadic V1 ORIGINAL (July 4, 2025)"
+    EMIT INFO "       dgt_variadic_v1_M1–M5.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "── DIRAM HARDWARE LAYER ───────────────────────────────────"
+    EMIT INFO "PDF 12 DIRAM Boolean Logic Truth Table  ← THIS"
+    EMIT INFO "       diram_boolean_M1_truth_table.psc.txt"
+    EMIT INFO "       diram_boolean_M2_cache_mechanics.psc.txt"
+    EMIT INFO "       diram_boolean_M3_governance_compliance.psc.txt"
+    EMIT INFO "       diram_boolean_M4_hardware_implementation.psc.txt"
+    EMIT INFO "       diram_boolean_M5_obinexus_integration.psc.txt  ← THIS"
+    EMIT INFO ""
+    EMIT INFO "=========================================================="
+    EMIT INFO "GLOBAL INVARIANTS (all 12 documents):"
+    EMIT INFO "  EPISTEMIC_THRESHOLD         := 0.954"
+    EMIT INFO "  DIRAM_EPSILON_HARDWARE      := 0.5  ← PDF 12 (strictest)"
+    EMIT INFO "  DIRAM_EPSILON_RAF_QUANTUM   := 0.5  ← PDF 9"
+    EMIT INFO "  DIRAM_EPSILON_SOFTWARE      := 0.6  ← PDFs 3,4,6,7"
+    EMIT INFO "  SINPHASE_BOUND              := 0.6  ← PDFs 2,3,4,5"
+    EMIT INFO "  THETA_COMPUTABILITY         := 8"
+    EMIT INFO "  STRESS_RANGE                := [0, 12]"
+    EMIT INFO "  TRIPOLAR                    := {UCHE, EZE, OBI}"
+    EMIT INFO "  SHA256_RECEIPT_PER_OP       := TRUE  ← PDF 12 (DIRAM)"
+    EMIT INFO ""
+    EMIT INFO "FOUNDING DAY (July 4, 2025): PDFs 1, 8, 11"
+    EMIT INFO "HARDWARE FOUNDATION:          PDF 12 (DIRAM Boolean Logic)"
+    EMIT INFO "=========================================================="
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 5 — CORPUS COMPLETE
+//
+// TOTAL: 12 PDFs → 60 MODULES
+// DIRAM provides the hardware gate substrate for the entire
+// OBINexus OBIAI/AEGIS stack.
+// ============================================================

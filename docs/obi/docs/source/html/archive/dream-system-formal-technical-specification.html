@@ -1,0 +1,1511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dream system formal technical specification | OBI Source HTML</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --surface: #ffffff;
+      --text: #202321;
+      --muted: #626962;
+      --accent: #147d7e;
+      --border: #d9ddd4;
+      --code: #eef1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    header, main, footer { max-width: 1060px; margin: 0 auto; padding: 1.25rem; }
+    header { border-bottom: 4px solid var(--accent); background: #161819; color: #f5f7f2; max-width: none; }
+    header > div { max-width: 1060px; margin: 0 auto; }
+    a { color: #0f5f60; }
+    header a { color: inherit; }
+    main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 1.25rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p, li { max-width: 78ch; }
+    img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    pre { overflow: auto; background: #20251f; color: #f7fbf2; padding: 1rem; border-radius: 8px; }
+    code { background: var(--code); padding: 0.12rem 0.25rem; border-radius: 5px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--border); padding: 0.45rem 0.6rem; text-align: left; }
+    blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding-left: 1rem; color: var(--muted); }
+    .skip-link { position: absolute; left: 1rem; top: 0.75rem; transform: translateY(-200%); }
+    .skip-link:focus { transform: translateY(0); background: var(--surface); color: var(--text); padding: 0.5rem; }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header>
+    <div>
+      <a href="../index.html">OBI Source HTML</a>
+      <h1>dream system formal technical specification</h1>
+      <p>Generated from Markdown with Python tooling and Pandoc-compatible source preservation.</p>
+    </div>
+  </header>
+  <main id="content" tabindex="-1">
+    <h1 id="dream-system-formal-technical-specification">dream system formal technical specification</h1>
+<p>Source folder: <code>dream-system-formal-technical-specification</code></p>
+<h2 id="extracted-files">Extracted Files</h2>
+<ul>
+<li><code>DreamSystem_01_Introduction_Philosophy_Security_Foundations.psc.txt</code></li>
+<li><code>DreamSystem_02_Core_Concepts_Flash_Filter_GameTheory.psc.txt</code></li>
+<li><code>DreamSystem_03_Architecture_Hardware_EA_DAG.psc.txt</code></li>
+<li><code>DreamSystem_04_VOIP_Distribution_Formats_Nsibidi.psc.txt</code></li>
+<li><code>DreamSystem_05_Audit_Compliance_Proofs_Implementation.psc.txt</code></li>
+</ul>
+<h2 id="dreamsystem-01-introduction-philosophy-security-foundationspsc">DreamSystem 01 Introduction Philosophy Security Foundations.psc</h2>
+<h2 id="dreamsystem-01-introduction-philosophy-security-foundations">DreamSystem 01 Introduction Philosophy Security Foundations</h2>
+<p>// ============================================================
+// DREAM SYSTEM: Formal Technical Specification
+// Cognitive Observability Platform v0.3
+// MODULE 1: Introduction, Core Philosophy &amp; Security Foundations
+// Source: Dream_System___Formal_Technical_Specification.pdf
+// OBINexus Engineering Team | May 24, 2026
+// ============================================================</p>
+<p>// ------------------------------------------------------------
+// SECTION 1.1 — CORE PHILOSOPHY: OBI AS HEART
+// ------------------------------------------------------------</p>
+<p>// "OBI" in Igbo means "heart" — this is the foundational principle.
+// The Dream System is not a cold technical interface.
+// It is a bridge between the dreamer's heart and conscious understanding.
+// Technology must REFLECT and REMEMBER the user's inner self.</p>
+<p>DEFINE SYSTEM_IDENTITY AS:
+    name                = "Dream System"
+    platform_type       = "Cognitive Observability Platform"
+    version             = "0.3"
+    core_language_root  = "Igbo"    // OBI = heart
+    philosophy          = "Technology reflects and remembers the user's inner self"
+    ai_companion_name   = "U"       // "You" — deliberate naming choice</p>
+<p>// ------------------------------------------------------------
+// SECTION 1.2 — U: THE PERSONALIZED DREAM COMPANION
+// ------------------------------------------------------------</p>
+<p>// The AI interface is named "U" (You).
+// This is NOT an external interpreter — it is a REFLECTION of the dreamer.
+// Interaction model: "OBINexus Talks You"
+// Goal: dialog between user and their dream-self
+// Maintains agency and self-discovery — never external imposition.</p>
+<p>DEFINE U_COMPANION AS:
+    identity            = "Reflection of the dreamer, not external interpreter"
+    interaction_model   = "OBINexus Talks You"
+    authority_model:
+        AI PROVIDES     validation
+        AI DOES_NOT_PROVIDE interpretation    // User retains interpretive authority
+    consent_required    = TRUE FOR all_actions
+    design_principle    = "Privacy-first, user-sovereign"</p>
+<p>// ------------------------------------------------------------
+// SECTION 2.1 — SECURITY AS CODE PRINCIPLES
+// ------------------------------------------------------------</p>
+<p>// The Dream System implements Security as Code methodology throughout.
+// Security is not bolted-on — it is intrinsic to architecture.</p>
+<p>DEFINE SECURITY_AS_CODE_PROPERTIES AS:
+    versionable:
+        // All security configurations tracked in version control
+        ALL security_configs STORED_IN version_control_system
+    testable:
+        // Automated security validation in CI/CD pipelines
+        CI_CD_PIPELINE INCLUDES security_scan_stage
+    deployable:
+        // Infrastructure security provisions are automated
+        INFRASTRUCTURE_SECURITY = provisioned_automatically
+    auditable:
+        // Comprehensive logging and compliance tracking
+        ALL operations PRODUCE audit_log_entry</p>
+<p>DEFINE CORE_SECURITY_DESIGN_PRINCIPLES AS:</p>
+<pre><code>PRINCIPLE 1: Least_Privilege
+    // EA actors and system components granted MINIMUM necessary permissions
+    FOR EACH component IN system:
+        permissions = minimum_required(component.role)
+        DENY all_others BY DEFAULT
+
+PRINCIPLE 2: Defense_in_Depth
+    // Multiple security layers from hardware to application
+    LAYERS:
+        hardware_layer      -&gt; encryption at device level
+        transport_layer     -&gt; TLS 1.3
+        application_layer   -&gt; cryptographic validation
+        data_layer          -&gt; AES-256 at rest
+
+PRINCIPLE 3: Fail_Secure
+    // System defaults to SECURE state on ALL error conditions
+    ON ANY error_condition:
+        default_behavior = SECURE_STATE
+        NEVER default_to_open OR permissive
+
+PRINCIPLE 4: Secure_by_Default
+    // All configurations START at maximum security settings
+    ON system_init:
+        SET all_security_flags = MAXIMUM
+        REQUIRE explicit_relaxation WITH justification
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 2.2 — CRYPTOGRAPHIC PRIMITIVE STANDARDS
+// ------------------------------------------------------------</p>
+<p>// The Dream System implements the OBINexus Cryptographic Interoperability Standard.
+// All cryptographic primitives must be registered and validated before use.</p>
+<p>DEFINE PRIMITIVE_FORMAT_SPEC AS:
+    // Standardized format for all cryptographic primitives:
+    FORMAT: "<ALGORITHM>-<KEYSIZE>:[<HEX_PATTERN>]{<LENGTH>}"</p>
+<pre><code>APPROVED_PRIMITIVES:
+    RSA_2048:       "RSA-2048:[a-f0-9]{512}"
+    AES_256:        "AES-256:[a-f0-9]{64}"
+    ECDSA_P256:     "ECDSA-P256:[a-f0-9]{128}"
+    PBKDF2_SHA512:  "PBKDF2-HMAC-SHA512:[a-f0-9]{128}"
+</code></pre>
+<p>DEFINE CryptographicPrimitiveValidator AS CLASS:</p>
+<pre><code>STATE:
+    registered_patterns     : LIST[PatternState]    // Loaded at init
+    compatibility_matrix    : MATRIX                // Algorithm compatibility
+    LEGACY_ALLOWED_CONTEXTS : SET[STRING]           // Contexts permitting deprecated
+
+PROCEDURE init():
+    registered_patterns  = load_primitive_patterns()
+    compatibility_matrix = load_compatibility_matrix()
+
+PROCEDURE enforce_primitive_pattern(primitive_digest, context) -&gt; ValidationResult:
+    // PHASE 1: Normalization (isomorphic reduction)
+    canonical = normalize_primitive_input(primitive_digest)
+
+    // PHASE 2: Pattern Recognition
+    matched_patterns = EMPTY LIST
+    FOR EACH pattern_state IN registered_patterns:
+        IF pattern_state.matches(canonical):
+            APPEND pattern_state TO matched_patterns
+
+    // PHASE 3: Security Level Validation
+    IF matched_patterns IS EMPTY:
+        RETURN ValidationResult.REJECT_UNKNOWN_PATTERN
+
+    // Longest pattern wins (most specific match)
+    canonical_pattern = MAX(matched_patterns, key = len(pattern.pattern))
+
+    IF canonical_pattern.security_level == "deprecated":
+        IF context NOT IN LEGACY_ALLOWED_CONTEXTS:
+            RETURN ValidationResult.REJECT_DEPRECATED_SECURITY
+
+    RETURN ValidationResult.ACCEPT_VALIDATED
+
+PROCEDURE normalize_primitive_input(input_string) -&gt; STRING:
+    // Apply Unicode-Only Structural Charset Normalization (USCN)
+    // Encoding-agnostic validation
+    normalized = input_string
+    FOR EACH encoding_variant, canonical IN ENCODING_MAPPINGS:
+        normalized = replace(normalized, encoding_variant, canonical)
+
+    IF is_hex_string(normalized):
+        normalized = to_uppercase(normalized)
+
+    RETURN standardize_delimiters(normalized)
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 2.3 — CRYPTOGRAPHIC STATE MACHINE MODEL
+// ------------------------------------------------------------</p>
+<p>// All cryptographic operations are modeled as a Finite State Automaton:
+// Acrypto = (Qc, Σc, δc, q0, Fc)</p>
+<p>DEFINE CRYPTO_STATE_MACHINE AS:</p>
+<pre><code>Qc = SET {plaintext, encrypted, signed, verified, decrypted}
+                                    // All possible cryptographic states
+Σc = SET {encrypt, decrypt, sign, verify, derive_key}
+                                    // Input alphabet — primitive operations
+δc : FUNCTION(Qc × Σc) -&gt; Qc       // State transition function
+q0 = plaintext                      // Initial state
+Fc = SET {verified, decrypted}      // Accepting (terminal) states
+
+TRANSITIONS:
+    δc(plaintext,  encrypt)     -&gt; encrypted
+    δc(encrypted,  sign)        -&gt; signed
+    δc(signed,     verify)      -&gt; verified
+    δc(encrypted,  decrypt)     -&gt; decrypted
+    δc(plaintext,  sign)        -&gt; signed      // Direct signing permitted
+
+SECURITY_INVARIANT (Theorem 1 — Cryptographic Safety):
+    // For ANY sequence of operations σ ∈ Σ*c, the system guarantees:
+    FOR ALL s IN SensitiveData:
+        ASSERT: exposed(s) == FALSE  OR  encrypted(s) == TRUE
+    // No sensitive data may be exposed in plaintext at any reachable state.
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 2.4 — SECURE DATA FLOW ARCHITECTURE
+// ------------------------------------------------------------</p>
+<p>// End-to-End Cryptographic Data Flow (Figure 1 inference):</p>
+<p>DEFINE E2E_DATA_FLOW AS:</p>
+<pre><code>STAGE 1: EEG_Headset
+    ACTION: capture raw_EEG_data
+    IMMEDIATE: encrypt WITH AES-256
+    OUTPUT: EncryptedEEGData
+
+STAGE 2: Phone_Orchestrator
+    INPUT: EncryptedEEGData via Bluetooth 5.2
+    ACTION: PBKDF2 key derivation FOR session_key
+    VALIDATE: data_integrity of incoming stream
+    OUTPUT: validated_encrypted_bundle
+
+STAGE 3: Transport
+    PROTOCOL: TLS 1.3
+    DIRECTION: Phone -&gt; Cloud
+    CERTIFICATE_PINNING: REQUIRED
+
+STAGE 4: Cloud_Processing
+    INPUT: encrypted_bundle over TLS 1.3
+    ACTION: decrypt WITH session_key (server-side, authorized context only)
+    ACTION: process -&gt; generate Flash Events
+    ACTION: sign result WITH ECDSA
+
+STAGE 5: Flash_Events
+    SIGNED: ECDSA-P256
+    STORED: in SecureFlashFilterDAG (see Module 3)
+    AUDIT: every event logged to tamper-proof audit chain
+</code></pre>
+<p>// ============================================================
+// END MODULE 1
+// ============================================================</p>
+<h2 id="dreamsystem-02-core-concepts-flash-filter-gametheorypsc">DreamSystem 02 Core Concepts Flash Filter GameTheory.psc</h2>
+<h2 id="dreamsystem-02-core-concepts-flash-filter-gametheory">DreamSystem 02 Core Concepts Flash Filter GameTheory</h2>
+<p>// ============================================================
+// DREAM SYSTEM: Formal Technical Specification
+// Cognitive Observability Platform v0.3
+// MODULE 2: Core Concepts — Flash-Filter Architecture &amp; Dimensional Game Theory
+// Source: Dream_System___Formal_Technical_Specification.pdf
+// OBINexus Engineering Team | May 24, 2026
+// ============================================================</p>
+<p>// ------------------------------------------------------------
+// SECTION 3.1 — FLASH-FILTER ARCHITECTURE
+// ------------------------------------------------------------</p>
+<p>// The Flash-Filter Architecture is the central cognitive processing model.
+// Two complementary subsystems: Filter (pre-processing) and Flash (event detection).</p>
+<p>// ------------------------------------------------------------
+// SECTION 3.1.1 — FLASH RECOGNITION
+// ------------------------------------------------------------</p>
+<p>// A Flash is a VALIDATED cognitive resonance event.
+// Brainwave patterns must exceed defined confidence thresholds.</p>
+<p>DEFINE FLASH_CONFIDENCE_THRESHOLDS AS:
+    BASE_THRESHOLD      = 95.4%         // Hard Mode baseline</p>
+<pre><code>HARD_MODE:
+    condition       = confidence &gt;= 95.4%
+    security_level  = "Biometric + MFA"     // From gamification model
+    description     = "Maximum confidence — fully validated cognitive event"
+
+MEDIUM_MODE:
+    condition       = confidence &gt;= (2/3 × 95.4%)
+    computed_min    = 63.6%                 // ≈ 63.5% from Figure 3
+    security_level  = "MFA Required"
+    description     = "Moderate confidence — partial cognitive resonance"
+
+EASY_MODE:
+    condition       = confidence &gt;= (1/2 × 2/3 × 95.4%)
+    computed_min    = 31.8%                 // ≈ 31.75% from Figure 3
+    security_level  = "Basic Auth"
+    description     = "Low confidence threshold — introductory mode"
+</code></pre>
+<p>PROCEDURE classify_flash(confidence_C) -&gt; FlashMode:
+    IF confidence_C &gt;= 95.4%:
+        RETURN HARD_MODE
+    ELSE IF confidence_C &gt;= 63.5%:
+        RETURN MEDIUM_MODE
+    ELSE IF confidence_C &gt;= 31.75%:
+        RETURN EASY_MODE
+    ELSE:
+        RETURN NOT_A_FLASH    // Below all thresholds — discard</p>
+<p>DEFINE SECURE_FLASH_EVENT AS STRUCT:
+    data:
+        node_id         : STRING
+        confidence      : FLOAT
+        timestamp       : ISO8601_STRING
+        user_id         : STRING
+        session_id      : STRING
+    signature           : BYTES             // ECDSA-P256 signature
+    primitive           : STRING = "ECDSA-P256"</p>
+<p>// ------------------------------------------------------------
+// SECTION 3.1.2 — FILTER MECHANISM
+// ------------------------------------------------------------</p>
+<p>// The Filter is a pre-processing layer applied BEFORE flash recognition.
+// Operates on raw EEG streams and prepares them for the Flash engine.</p>
+<p>PROCEDURE apply_filter_pipeline(raw_eeg_data) -&gt; FilteredEEGData:</p>
+<pre><code>// Step 1: Validate incoming EEG data integrity
+IF NOT validate_data_integrity(raw_eeg_data):
+    LOG_ERROR("EEG data integrity check failed")
+    RETURN NULL
+
+// Step 2: Categorize brainwave patterns by frequency band
+bands = categorize_brainwave_bands(raw_eeg_data)
+// Bands: delta, theta, alpha, beta, gamma
+
+// Step 3: Apply noise reduction algorithms
+denoised = apply_noise_reduction(bands)
+// TODO: Clarify from source PDF — specific noise reduction algorithm (e.g., ICA, wavelet)
+
+// Step 4: Prepare data for flash recognition
+prepared = prepare_for_flash_engine(denoised)
+
+RETURN prepared
+</code></pre>
+<p>DEFINE BRAINWAVE_BANDS AS:
+    delta   // Deep sleep, unconscious processing
+    theta   // REM sleep, drowsiness, memory consolidation
+    alpha   // Relaxed wakefulness
+    beta    // Active thinking, focus
+    gamma   // High-level cognitive processing</p>
+<p>// ------------------------------------------------------------
+// SECTION 3.2 — OBJECTIVE VS. SUBJECTIVE PROCESSING FRAMEWORK
+// ------------------------------------------------------------</p>
+<p>// The system maintains a strict separation between what is MEASURED
+// and what is INTERPRETED. The user retains interpretive authority.</p>
+<p>DEFINE PROCESSING_FRAMEWORK AS:</p>
+<pre><code>OBJECTIVE_PROCESSING:
+    definition      = "Quantifiable brainwave metrics validated against established patterns"
+    measurement     = "EEG frequency bands, amplitude, coherence"
+    authority       = AI_VALIDATOR         // AI has authority over objective data
+    output          = "Confidence scores, pattern matches"
+
+SUBJECTIVE_PROCESSING:
+    definition      = "User-interpreted meaning and personal significance"
+    measurement     = "User tagging, emotional resonance, memory association"
+    authority       = USER                 // User (dreamer) has SOLE authority
+    output          = "Personal insights, shared narratives"
+
+INVARIANT:
+    // AI MUST NOT conflate objective output with subjective meaning
+    AI_ROLE = validation
+    USER_ROLE = interpretation
+    NEVER allow AI_ROLE = interpretation
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 4.1 — DIMENSIONAL GAME THEORY FOR EPISTEMIC REASONING
+// ------------------------------------------------------------</p>
+<p>// Dream System implements Dimensional Game Theory to enable EA actors
+// to navigate complex decision spaces with strategic reasoning.</p>
+<p>// ------------------------------------------------------------
+// SECTION 4.1.1 — DIMENSIONAL ACTION SPACE DEFINITION
+// ------------------------------------------------------------</p>
+<p>// Adim = union over i=1..n of (Ai × Di)</p>
+<p>DEFINE DIMENSIONAL_ACTION_SPACE AS:
+    // Adim is the cross-product of action spaces and decision domains
+    // across all active dimensions n.</p>
+<pre><code>FOR EACH dimension i IN {1 .. n}:
+    Ai = action_space[i]        // Set of possible actions in dimension i
+    Di = decision_domain[i]     // Set of valid decision contexts in dimension i
+
+Adim = UNION(i=1 to n) OF (Ai × Di)
+// Each element of Adim is a (action, decision_context) pair
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 4.1.2 — GAME-THEORETIC EPISTEMIC COST FUNCTION
+// ------------------------------------------------------------</p>
+<p>// E_game_cost governs when an EA actor engages on a task.
+// Actor engages when E_secure_cost &lt; τ_threshold (default: 0.3)</p>
+<p>DEFINE EPISTEMIC_COST_FUNCTION_GAME AS:</p>
+<pre><code>// Numerator components (INCREASE cost — reasons to hesitate):
+Aambiguity      // Ambiguity score of input context (0-1)
+Ccomplexity     // Complexity score of processing required (0-1)
+Gstrategic      // Strategic complexity from game theory analysis (0-1)
+
+// Denominator components (DECREASE cost — reasons to act):
+Fconfidence     // Confidence score from Flash validation (0-1)
+Uintent         // User intent clarity score (0-1)
+Nequilibrium    // Nash equilibrium stability measure (0-1)
+
+// Weighting parameters:
+α   // Ambiguity weight
+β   // Complexity weight
+λ   // Game theory strategic weight
+γ   // Confidence weight
+δ   // Intent weight
+μ   // Equilibrium weight
+
+// Formula (Equation 5):
+E_game_cost = (α·Aambiguity + β·Ccomplexity + λ·Gstrategic)
+            / (γ·Fconfidence + δ·Uintent + μ·Nequilibrium)
+</code></pre>
+<p>// Security-enhanced version (Equation 8) adds security dimensions:
+DEFINE EPISTEMIC_COST_FUNCTION_SECURE AS:</p>
+<pre><code>// Additional security numerator component:
+Srisk           // Security risk score (0-1) — INCREASES cost if risky
+
+// Additional security denominator component:
+Ttrust          // Trust level based on authentication strength (0-1)
+
+// Additional weighting:
+σ               // Security risk weight
+ρ               // Trust weight
+
+// Formula:
+E_secure_cost = (α·Aambiguity + β·Ccomplexity + λ·Gstrategic + σ·Srisk)
+              / (γ·Fconfidence + δ·Uintent + μ·Nequilibrium + ρ·Ttrust)
+
+// Engagement threshold:
+ENGAGE_THRESHOLD = 0.3      // τ_threshold
+EA_ACTOR_ENGAGES WHEN E_secure_cost &lt; ENGAGE_THRESHOLD
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 4.2 — DAG TRAVERSAL WITH GAME-THEORETIC OPTIMIZATION
+// ------------------------------------------------------------</p>
+<p>// DAG traversal cost function integrates information-theoretic
+// and game-theoretic components.</p>
+<p>// ------------------------------------------------------------
+// SECTION 4.2.1 — TRAVERSAL COST FUNCTION (Equation 6)
+// ------------------------------------------------------------</p>
+<p>// C(Node_i → Node_j) = α·KL(Pi‖Pj) + β·ΔH(Si,j) + η·Γgame(i,j)</p>
+<p>DEFINE DAG_TRAVERSAL_COST(Node_i, Node_j) -&gt; FLOAT:</p>
+<pre><code>// Term 1: Kullback-Leibler divergence between node probability distributions
+KL_term     = KL_divergence(Pi, Pj)     // Information gain of transition
+
+// Term 2: Entropy change during state transition
+delta_H     = entropy_change(Si, Sj)    // Si, Sj = states at nodes i, j
+
+// Term 3: Game-theoretic strategic cost component
+gamma_game  = compute_strategic_cost(i, j)
+
+// Weighting parameters α, β, η
+cost = α * KL_term + β * delta_H + η * gamma_game
+
+RETURN cost
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 4.2.2 — STRATEGIC COST COMPONENT (Equation 7)
+// ------------------------------------------------------------</p>
+<p>// Γgame(i,j) = Σ_{k∈K} wk · Regretk(si, sj)</p>
+<p>DEFINE compute_strategic_cost(i, j) -&gt; FLOAT:</p>
+<pre><code>// K = set of other EA actors in the system
+// Regret_k = strategic regret of transitioning si -&gt; sj given actor k's actions
+
+total_strategic_cost = 0.0
+
+FOR EACH actor_k IN other_EA_actors:
+    regret_k = compute_regret(actor_k, state_i=si, state_j=sj)
+    total_strategic_cost += weight(actor_k) * regret_k
+
+RETURN total_strategic_cost
+</code></pre>
+<p>// NOTE: "Regret" here is the game-theoretic concept —
+// the cost of a decision relative to the best alternative
+// an opponent actor could exploit.</p>
+<p>// ============================================================
+// END MODULE 2
+// ============================================================</p>
+<h2 id="dreamsystem-03-architecture-hardware-ea-dagpsc">DreamSystem 03 Architecture Hardware EA DAG.psc</h2>
+<h2 id="dreamsystem-03-architecture-hardware-ea-dag">DreamSystem 03 Architecture Hardware EA DAG</h2>
+<p>// ============================================================
+// DREAM SYSTEM: Formal Technical Specification
+// Cognitive Observability Platform v0.3
+// MODULE 3: System Architecture — Hardware Layer, EA Actor, DAG Memory
+// Source: Dream_System___Formal_Technical_Specification.pdf
+// OBINexus Engineering Team | May 24, 2026
+// ============================================================</p>
+<p>// ------------------------------------------------------------
+// SECTION 5 — SECURITY-ENHANCED FILTER-FLASH PROCESSING
+// ------------------------------------------------------------</p>
+<p>DEFINE SecureFilterFlash AS CLASS:</p>
+<pre><code>STATE:
+    crypto_validator    : CryptographicPrimitiveValidator
+    security_monitor    : SecurityMonitor
+    audit_logger        : SecureAuditLogger
+    dag                 : SecureFlashFilterDAG
+
+PROCEDURE init():
+    crypto_validator = NEW CryptographicPrimitiveValidator()
+    security_monitor = NEW SecurityMonitor()
+    audit_logger     = NEW SecureAuditLogger()
+
+PROCEDURE secure_filter_to_flash(encrypted_eeg_data, user_context)
+                                 -&gt; LIST[SecureFlashEvent]:
+    // STEP 1: Validate cryptographic envelope
+    IF NOT crypto_validator.validate_encryption(encrypted_eeg_data):
+        audit_logger.log_security_event("INVALID_CRYPTO_ENVELOPE")
+        RAISE SecurityException("Invalid cryptographic envelope")
+
+    // STEP 2: Decrypt with authenticated encryption
+    decrypted_data = decrypt_with_validation(
+        encrypted_eeg_data,
+        user_context.session_key
+    )
+
+    // STEP 3: Apply security-aware filtering
+    filtered_data = apply_secure_filters(decrypted_data)
+
+    // STEP 4: Game-theoretic flash detection across DAG nodes
+    flash_events = EMPTY LIST
+    FOR EACH node IN dag.nodes():
+        confidence = compute_secure_confidence(node, filtered_data, user_context)
+        IF confidence &gt;= 0.954:     // 95.4% Hard Mode threshold
+            flash_event = create_signed_flash_event(node, confidence, user_context)
+            APPEND flash_event TO flash_events
+            audit_logger.log_flash_event(flash_event)
+
+    RETURN flash_events
+
+PROCEDURE create_signed_flash_event(node, confidence, context) -&gt; SecureFlashEvent:
+    event_data = {
+        node_id:    node.id,
+        confidence: confidence,
+        timestamp:  utcnow().isoformat(),
+        user_id:    context.user_id,
+        session_id: context.session_id
+    }
+    // Sign with user's private key (ECDSA-P256)
+    signature = sign_with_ecdsa(json(event_data), context.signing_key)
+    RETURN SecureFlashEvent(
+        data      = event_data,
+        signature = signature,
+        primitive = "ECDSA-P256"
+    )
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 5.2 — SECURITY CONTROLS INTEGRATION
+// ------------------------------------------------------------</p>
+<p>// PREVENTIVE CONTROLS (CI/CD Pipeline)
+DEFINE CICD_SECURITY_PIPELINE AS:
+    stages: [build, security_scan, test, deploy]</p>
+<pre><code>security_scan_stage:
+    // Static analysis for cryptographic vulnerabilities
+    RUN "cryptography-audit scan --standard obinexus-v1.0"
+
+    // Dependency vulnerability scanning
+    RUN "dependency-check --project 'Dream System' --scan ."
+
+    // Infrastructure as Code security
+    RUN "cfn-nag scan --input-path infrastructure/"
+    RUN "checkov -d terraform/"
+
+    // Custom Dream System checks
+    RUN "dream-security-validator --check-primitives"
+    RUN "dream-security-validator --verify-dag-integrity"
+
+    OUTPUT: "gl-security-report.json"
+</code></pre>
+<p>// DETECTIVE CONTROLS (Runtime Monitoring)
+DEFINE RUNTIME_SECURITY_MONITORING AS:
+    alarm_name      = "DreamSystem-CryptoAnomaly"
+    metric          = "InvalidCryptoPrimitive"
+    namespace       = "DreamSystem/Security"
+    threshold       = 1                     // Any single anomaly triggers alarm
+    period_seconds  = 300
+    action          = SecurityIncidentTopic // SNS topic</p>
+<pre><code>ON alarm_trigger:
+    INVOKE DreamSystem_SecurityResponse_Lambda WITH event_detail
+
+DEFINE SecurityResponse_Lambda(event):
+    detail = event.detail
+    IF detail.eventType == "InvalidCryptoPrimitive":
+        revoke_session(detail.sessionId)
+        quarantine_user_data(detail.userId)
+        notify_security_team(detail)
+        create_security_incident(detail)
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 6.1 — HARDWARE LAYER
+// ------------------------------------------------------------</p>
+<p>// SECTION 6.1.1 — NON-INVASIVE TECHNOLOGY SPECIFICATION
+DEFINE EEG_HARDWARE_SPECIFICATION AS:
+    technology          = "Non-invasive EEG"
+    electrode_placement = "Surface electrodes only"
+    skin_penetration    = FALSE
+    subdural_placement  = FALSE     // NOT semi-invasive
+    intracranial        = FALSE     // NOT invasive
+    standard_compliance = "IEEE 11073 PHD"   // Personal Health Device standard</p>
+<p>// SECTION 6.1.3 — CONNECTIVITY SPECIFICATIONS (Table 2)
+DEFINE CONNECTIVITY_STANDARDS AS:</p>
+<pre><code>device_to_device:
+    standard            = "Bluetooth 5.2"
+    security_minimum    = "AES-128"
+    pairing             = "Secure pairing mandatory"
+
+network_upload:
+    standard            = "3G / 4G / 5G"
+    transport_security  = "TLS 1.3"
+    certificate_pinning = REQUIRED
+
+orchestration:
+    layer               = "Phone App"
+    authentication      = "Biometric"
+    storage             = "Secure enclave"
+
+pedometric_data:
+    standard            = "ANT+ / BLE"
+    channel_encryption  = REQUIRED
+    integrity_check     = REQUIRED
+</code></pre>
+<p>// SECTION 6.1.4 — SECURE PHONE ORCHESTRATION LAYER
+DEFINE SecurePhoneOrchestrator AS CLASS:</p>
+<pre><code>STATE:
+    keyManager          : CryptoKeyManager
+    sessionManager      : SecureSessionManager
+    auditLogger         : AuditLogger
+    btManager           : SecureBluetoothManager
+    headsetConnection   : EncryptedChannel     // BT 5.2 + AES to EEG headset
+    bandConnection      : EncryptedChannel     // BLE Secure to Dream Band
+    networkQuality      : NetworkMonitor
+
+PROCEDURE secureOrchestrateDataFlow():
+    // Step 1: Validate session integrity
+    IF NOT sessionManager.validateSession():
+        auditLogger.logSecurityEvent("INVALID_SESSION")
+        RAISE SecurityException("Session validation failed")
+
+    // Step 2: Collect from encrypted Bluetooth channels
+    eegData      = headsetConnection.readEncryptedStream()
+    activityData = bandConnection.getEncryptedPedometric()
+
+    // Step 3: Verify data integrity for both streams
+    IF NOT verifyDataIntegrity(eegData) OR NOT verifyDataIntegrity(activityData):
+        auditLogger.logSecurityEvent("DATA_INTEGRITY_FAILURE")
+        RETURN
+
+    // Step 4: Network-aware secure upload
+    IF networkQuality.is5G():
+        uploadSecureRealtime(eegData, activityData)
+    ELSE IF networkQuality.is4G():
+        uploadSecureBatched(eegData, activityData, interval=30s)
+    ELSE:    // 3G fallback
+        uploadSecureCompressed(eegData, activityData, interval=60s)
+
+PROCEDURE uploadSecureRealtime(eeg, activity):
+    bundle = NEW SecureUploadBundle()
+    bundle.addData(eeg)
+    bundle.addData(activity)
+    bundle.sign(keyManager.getSigningKey())
+    secureCloudConnector.upload(bundle)
+</code></pre>
+<p>// SECTION 6.1.5 — DREAM BAND PEDOMETRIC INTEGRATION
+DEFINE DREAM_BAND_CAPABILITIES AS:
+    sensor_ppg              : BOOLEAN = TRUE    // Continuous heart rate monitoring
+    step_counting           : BOOLEAN = TRUE    // Step count + distance
+    activity_classification : LIST = ["walking", "running", "sedentary"]
+    sleep_stage_detection   : BOOLEAN = TRUE    // When paired with EEG headset
+    day_pattern_analysis    : BOOLEAN = TRUE    // Context for dream analysis
+    biometric_storage:
+        encryption          = "Hardware encryption"
+        location            = "On-device secure storage"</p>
+<p>// ------------------------------------------------------------
+// SECTION 6.2 — EPISTEMIC AGENT (EA) ACTOR: FORMAL DEFINITION
+// ------------------------------------------------------------</p>
+<p>// SECTION 6.2.1 — ACTOR VS AGENT ARCHITECTURAL DISTINCTION (Table 3)
+DEFINE EA_ACTOR_MODEL AS:</p>
+<pre><code>PURE_AGENT_BEHAVIOR:
+    decision_making     = "Protocol-driven, deterministic"
+    user_interaction    = "Responds to explicit commands only"
+    data_processing     = "Follows predefined algorithms"
+    authority           = NONE      // Purely executive
+    memory_access       = READ_ONLY // Validation only
+    security_model      = "Static permissions"
+
+EA_ACTOR_BEHAVIOR:
+    decision_making     = "Intent-driven within epistemic bounds"
+    user_interaction    = "Anticipates needs based on validated states"
+    data_processing     = "Applies contextual reasoning"
+    authority           = LIMITED   // Within user-granted permissions only
+    memory_access       = READ_WRITE // With explicit user consent
+    security_model      = "Dynamic, context-aware permissions"
+</code></pre>
+<p>// Engagement condition (see Module 2, E_secure_cost):
+// EA Actor engages ONLY when E_secure_cost &lt; 0.3 (τ_threshold)</p>
+<p>// ------------------------------------------------------------
+// SECTION 6.2.3 — OBICALL POLYGLOT LAYER
+// ------------------------------------------------------------</p>
+<p>// OBICall provides a unified CLI/API interface for AI binding.</p>
+<p>DEFINE OBICALL_COMMAND_INTERFACE AS:
+    syntax: "obicall.exe [command] [subcommand] [parameters] --auth [token]"</p>
+<pre><code>COMMANDS:
+    bind        -&gt; Connect AI model to Dream System
+    validate    -&gt; Run epistemic validation
+    flash       -&gt; Trigger flash recognition
+    filter      -&gt; Apply pre-processing filters
+    export      -&gt; Generate dream visualization
+    game        -&gt; Execute game-theoretic analysis
+    security    -&gt; Manage cryptographic operations
+
+SECURITY_SUBCOMMANDS:
+    security keygen     -&gt; Generate new cryptographic keys
+    security validate   -&gt; Validate primitive patterns
+    security audit      -&gt; Review security audit trail
+    security rotate     -&gt; Rotate encryption keys
+
+AUTH_REQUIREMENT:
+    --auth [token]  // Mandatory for all commands
+</code></pre>
+<p>// SECTION 6.2.4 — CORE LLM BINDING WITH SECURITY LAYER (Equation 9)
+// OBICall_binding : LLMcore × Gdim × Scrypto -&gt; DreamSystemAPI</p>
+<p>DEFINE LLM_BINDING_MAP AS:
+    LLM_pattern_recognition     -&gt; Flash_Model_Engine
+    LLM_nlp                     -&gt; U_Interface
+    LLM_validation_logic        -&gt; EA_Actor
+    LLM_strategic_reasoning     -&gt; Dimensional_Game_Theory_Engine
+    LLM_security_operations     -&gt; CryptographicPrimitiveValidator</p>
+<p>// ------------------------------------------------------------
+// SECTION 7.1 — SECURE FLASH-FILTER DAG MEMORY ARCHITECTURE
+// ------------------------------------------------------------</p>
+<p>DEFINE SecureFlashFilterDAG AS CLASS:</p>
+<pre><code>STATE:
+    graph           : DirectedAcyclicGraph  // NetworkX DiGraph
+    flash_index     : MAP[STRING, NODE]     // Fast lookup by confidence
+    crypto_validator: CryptographicPrimitiveValidator
+    user_context    : SecureContext
+    hash_chain      : HashChain             // Append-only cryptographic chain
+    audit_logger    : SecureAuditLogger
+
+PROCEDURE init(user_context):
+    graph           = NEW DiGraph()
+    flash_index     = EMPTY MAP
+    user_context    = user_context
+    hash_chain      = initialize_hash_chain()
+
+PROCEDURE add_secure_flash_event(flash_id, confidence, timestamp, data) -&gt; STRING:
+    // Build event bundle with hash chain linkage
+    event_bundle = {
+        flash_id:       flash_id,
+        confidence:     confidence,
+        timestamp:      timestamp.isoformat(),
+        data:           data,
+        previous_hash:  hash_chain.get_latest(),
+        user_id:        user_context.user_id
+    }
+
+    // Sign event with user's key
+    signature = sign_event(event_bundle)
+    event_bundle.signature = signature
+
+    // Compute and append hash to chain
+    event_hash = compute_secure_hash(event_bundle)
+    hash_chain.append(event_hash)
+
+    // Add to DAG with full security metadata
+    graph.add_node(flash_id, {
+        confidence: confidence,
+        timestamp:  timestamp,
+        data:       data,
+        type:       "flash",
+        hash:       event_hash,
+        signature:  signature
+    })
+
+    // Create temporal links to adjacent flash events
+    create_temporal_links(flash_id, timestamp)
+
+    // Emit audit entry (only first 16 chars of hash for log)
+    audit_logger.log_dag_modification(
+        operation   = "ADD_FLASH",
+        node_id     = flash_id,
+        hash        = event_hash[:16]
+    )
+
+    RETURN event_hash
+
+PROCEDURE verify_dag_integrity() -&gt; BOOLEAN:
+    // Check 1: Hash chain continuity
+    IF NOT hash_chain.verify():
+        RETURN FALSE
+
+    // Check 2: Each node's ECDSA signature
+    FOR EACH node_id IN graph.nodes():
+        node_data = graph.nodes[node_id]
+        IF NOT verify_node_signature(node_id, node_data):
+            RETURN FALSE
+
+    // Check 3: Temporal ordering consistency
+    IF NOT verify_temporal_consistency():
+        RETURN FALSE
+
+    RETURN TRUE
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 7.2 — SECURE COGNITIVE LEARNING MODEL (ROYGBIV)
+// ------------------------------------------------------------</p>
+<p>// The system implements a ROYGBIV-mapped learning model
+// with cryptographic state protection on all learning transitions.</p>
+<p>DEFINE SecureCognitiveLearningModel AS CLASS:</p>
+<pre><code>STATE:
+    color_map       : ENCRYPTED_MAP         // ROYGBIV color associations
+    learning_dag    : SecureFlashFilterDAG
+    state_protector : CryptoStateProtector
+
+PROCEDURE secure_objective_learning_cycle(input_color, user_feedback, auth_token) -&gt; DICT:
+    // Authenticate before any learning state mutation
+    IF NOT verify_auth_token(auth_token):
+        RAISE SecurityException("Unauthorized learning attempt")
+
+    // Encrypt the learning state snapshot
+    encrypted_state = state_protector.encrypt_state({
+        input:      input_color,
+        feedback:   user_feedback,
+        timestamp:  utcnow()
+    })
+
+    IF user_feedback == "incorrect":
+        // Transactional modification — atomic with rollback
+        WITH learning_dag.secure_transaction():
+            learning_dag.remove_flash_association(
+                input_color,
+                auth_token = auth_token
+            )
+            new_flash = generate_corrective_flash()
+            audit_logger.log_learning_event(
+                event   = "COGNITIVE_ELIMINATION",
+                removed = input_color,
+                added   = new_flash.id
+            )
+        RETURN { status: "updated", new_flash: new_flash }
+
+    // TODO: Clarify from source PDF — handling of "correct" feedback branch
+
+PROCEDURE verify_learning_integrity() -&gt; BOOLEAN:
+    RETURN learning_dag.verify_dag_integrity()
+</code></pre>
+<p>// SECTION 7.3 — GAMIFICATION MODEL WITH SECURITY LEVELS (Figure 3)
+DEFINE GAMIFICATION_SECURITY_LEVELS AS:
+    // Confidence range maps to both game mode AND authentication requirement</p>
+<pre><code>RANGE [0%, 31.75%)  :   below_threshold     AUTH: none
+RANGE [31.75%, 63.5%):  EASY_MODE           AUTH: "Basic Auth"
+RANGE [63.5%, 95.4%):   MEDIUM_MODE         AUTH: "MFA Required"
+RANGE [95.4%, 100%] :   HARD_MODE           AUTH: "Biometric + MFA"
+</code></pre>
+<p>// ============================================================
+// END MODULE 3
+// ============================================================</p>
+<h2 id="dreamsystem-04-voip-distribution-formats-nsibidipsc">DreamSystem 04 VOIP Distribution Formats Nsibidi.psc</h2>
+<h2 id="dreamsystem-04-voip-distribution-formats-nsibidi">DreamSystem 04 VOIP Distribution Formats Nsibidi</h2>
+<p>// ============================================================
+// DREAM SYSTEM: Formal Technical Specification
+// Cognitive Observability Platform v0.3
+// MODULE 4: OBICall-VOIP, Distribution System, File Formats &amp; Nsibidi CSL
+// Source: Dream_System___Formal_Technical_Specification.pdf
+// OBINexus Engineering Team | May 24, 2026
+// ============================================================</p>
+<p>// ------------------------------------------------------------
+// SECTION 8 — OBICALL-VOIP PROTOCOL WITH END-TO-END ENCRYPTION
+// ------------------------------------------------------------</p>
+<p>DEFINE SecureOBICallVOIP AS CLASS:</p>
+<pre><code>STATE:
+    protocol_version    : STRING  = "1.0-secure"
+    supported_codecs    : LIST    = ["opus", "g.711", "speex"]
+    encryption          : STRING  = "AES-256-GCM"
+    key_exchange        : STRING  = "ECDH-P256"
+
+PROCEDURE establish_secure_session(user_id, dream_session_id, auth_credentials) -&gt; DICT:
+    // Step 1: Authenticate user identity
+    IF NOT authenticate_user(user_id, auth_credentials):
+        RAISE SecurityException("Authentication failed")
+
+    // Step 2: Generate fresh session keys
+    session_keys = generate_session_keys()
+    // Returns: { encryption: key, mac: key }
+
+    // Step 3: Build session record
+    session = {
+        id:               generate_session_id(),
+        user:             user_id,
+        dream_ref:        dream_session_id,
+        state:            "processing",
+        codec:            negotiate_codec(),        // Best of supported_codecs
+        encryption_key:   session_keys.encryption,
+        mac_key:          session_keys.mac,
+        session_token:    generate_session_token()
+    }
+
+    // Step 4: Initialize E2E encryption channel
+    init_e2e_encryption(session)
+
+    RETURN session
+
+PROCEDURE secure_voice_to_intent(encrypted_audio, session) -&gt; DICT:
+    // Step 1: Verify MAC integrity of audio stream
+    IF NOT verify_session_mac(encrypted_audio, session):
+        RAISE SecurityException("Session integrity check failed")
+
+    // Step 2: Decrypt audio stream
+    audio_stream = decrypt_audio(encrypted_audio, session)
+
+    // Step 3: Speech-to-text with privacy preservation
+    transcript = privacy_preserving_stt(audio_stream)
+    // NOTE: privacy_preserving_stt ensures raw audio is not persisted
+
+    // Step 4: Extract intent with security validation
+    intent = extract_validated_intent(transcript)
+
+    // Step 5: Audit trail
+    audit_logger.log_voice_interaction(
+        session_id      = session.id,
+        intent_type     = intent.type,
+        security_level  = intent.security_level
+    )
+
+    // Step 6: Route to U agent
+    RETURN route_to_secure_u_agent(intent)
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 8.1.2 — SECURE WAKE INTERACTION FLOW
+// ------------------------------------------------------------</p>
+<p>// This is the complete workflow from user awakening to U response.</p>
+<p>PROCEDURE wake_interaction_flow():</p>
+<pre><code>// Step 1: Wake Detection
+// Dream Band detects user awakening (accelerometer + HR pattern)
+event = dream_band.detect_awakening()
+IF event.awake == FALSE:
+    RETURN  // Continue sleep monitoring
+
+// Step 2: Biometric Verification
+voice_sample = capture_voice_sample()
+IF NOT verify_voice_biometric(voice_sample):
+    LOG "Biometric verification failed"
+    RETURN
+
+// Step 3: Session Initiation
+session = establish_secure_session(
+    user_id         = current_user.id,
+    dream_session_id= current_dream.id,
+    auth_credentials= { voice_biometric: voice_sample }
+)
+
+// Step 4: Video Processing
+// Dream visualization renders with user-specific watermarking
+visualization = render_dream_visualization(current_dream)
+apply_invisible_watermark(visualization, current_user.id)
+
+// Step 5: Voice Interaction (encrypted)
+encrypted_command = capture_encrypted_voice_command(session)
+
+// Step 6: Intent Processing — permission-gated
+intent = secure_voice_to_intent(encrypted_command, session)
+
+DISPATCH intent.type:
+    "show_moment":      // "Show me the moment with water"
+        REQUIRE permission: READ
+        execute_read_intent(intent)
+
+    "heart_rate_query": // "What was my heart rate during the chase?"
+        REQUIRE permission: ANALYTICS
+        execute_analytics_intent(intent)
+
+    "save_dream":       // "Save this dream to family collection"
+        REQUIRE permission: SHARE
+        execute_share_intent(intent)
+
+    "schedule_therapist": // "Schedule discussion with sleep therapist"
+        REQUIRE permission: MEDICAL
+        execute_medical_intent(intent)
+
+    DEFAULT:
+        LOG "Unknown intent type: " + intent.type
+
+// Step 7: U Response — encrypted voice feedback
+response = u_agent.generate_response(intent.result)
+send_encrypted_voice_response(response, session)
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 8.2 — TECHNICAL REQUIREMENTS WITH SECURITY (Table 4)
+// ------------------------------------------------------------</p>
+<p>DEFINE VOIP_TECHNICAL_REQUIREMENTS AS:
+    latency         : LESS_THAN 150ms   // Round-trip INCLUDING crypto overhead
+    audio_quality   : MINIMUM 16kHz_sample_rate
+    bandwidth       : 32-64_kbps_adaptive + encryption_overhead
+    security:
+        e2e_encryption          = MANDATORY
+        perfect_forward_secrecy = REQUIRED
+    availability    : 99.9% SLA
+    key_rotation    : EVERY 24_hours OR every 1000_messages
+                      // Whichever comes first</p>
+<p>// ------------------------------------------------------------
+// SECTION 9 — SECURE OBI AGENT DISTRIBUTION SYSTEM
+// ------------------------------------------------------------</p>
+<p>// Distribution channels for dream data exports.
+// Each channel has independent security requirements.</p>
+<p>// ------------------------------------------------------------
+// SECTION 9.1.1 — DISTRIBUTION SECURITY REQUIREMENTS
+// ------------------------------------------------------------</p>
+<p>DEFINE DISTRIBUTION_CHANNELS AS:</p>
+<pre><code>CHANNEL family_investment:
+    encryption          = "E2E encryption for all shared content"
+    identity_proof      = "Cryptographic proof of relationship"
+    access_tokens       = "Revocable with expiration timestamps"
+    audit               = "Full audit trail of all access events"
+
+CHANNEL medical_specialist:
+    encryption          = "HIPAA-compliant: at-rest + in-transit"
+    credential_check    = "Verified medical professional credentials required"
+    integrity           = "Digital signatures on all data"
+    audit               = "Comprehensive logging for HIPAA compliance"
+
+CHANNEL social_sharing:
+    privacy             = "Zero-knowledge proof for privacy preservation"
+    access_tokens       = "Time-bound only"
+    watermarking        = "Content watermarking for protection"
+    permissions         = "Granular per-content, per-user permission controls"
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 9.2 — SECURE EXPORT FILE FORMAT SPECIFICATIONS
+// ------------------------------------------------------------</p>
+<p>// SECTION 9.2.1 — ENCRYPTED FILE FORMATS (Table 5)
+DEFINE EXPORT_FILE_FORMATS AS:</p>
+<pre><code>DreamVideo:
+    extension       = ".dvm"
+    encryption      = "AES-256"
+    features        = ["signed metadata", "invisible watermark"]
+
+DreamAudio:
+    extension       = ".dau"
+    encryption      = "AES-256-GCM"
+    features        = ["integrity verification"]
+
+DreamVisual:
+    extension       = ".dvs"
+    encryption      = "visual encryption"
+    features        = ["tamper detection"]
+
+DreamConverse:
+    extension       = ".dcv"
+    encryption      = "E2E"
+    features        = ["encrypted conversation logs"]
+
+DreamBundle:
+    extension       = ".dbx"
+    encryption      = "AES-256-GCM"
+    features        = ["comprehensive package", "ECDSA signatures", "all sub-formats"]
+</code></pre>
+<p>// SECTION 9.2.2 — SECURE FILE FORMAT STRUCTURE (.dbx)
+DEFINE DREAM_BUNDLE_STRUCTURE AS:</p>
+<pre><code>SecureDreamBundle:
+    version         = "1.0"
+    algorithm       = "AES-256-GCM"
+
+    Metadata [ENCRYPTED]:
+        UserID              : encrypted_identifier
+        Timestamp           : ISO8601_datetime
+        FlashConfidence     : FLOAT (e.g. 95.4)
+        Duration            : INTEGER (seconds)
+        IntegrityHash       : "SHA3-256: ..."
+
+    SecurityEnvelope:
+        EncryptionKey       : "ECDH-derived-key-reference"
+        Signature:
+            algorithm       = "ECDSA-P256"
+            value           : BYTES
+        Certificate         : "X.509 user certificate"
+
+    EncryptedComponents:
+        Video [ENCRYPTED]:
+            codec           = "h265"
+            resolution      = "1920x1080"
+            tracks:
+                visual      : "dream_visual.dvs.enc"
+                audio       : "dream_audio.dau.enc"
+            Watermark:
+                type        = "invisible"
+                value       = user_specific_id
+
+        Conversation [ENCRYPTED]:
+            format          = "json"
+            Dialog:
+                agent       = "U"
+                timestamp   = "relative"
+                entries     : LIST[EncryptedEntry]
+
+        BrainwaveData [ENCRYPTED]:
+            format          = "edf"
+            channels:
+                delta       : encrypted_data
+                theta       : encrypted_data
+                alpha       : encrypted_data
+                beta        : encrypted_data
+                gamma       : encrypted_data
+
+    Permissions:
+        family_share:
+            enabled         = TRUE
+            expires         = "ISO8601 expiration date"
+        medical_share:
+            enabled         = FALSE     // Default off
+        social_share:
+            enabled         = FALSE     // Default off
+        AuditLog:
+            entries:
+                - { timestamp, action="created", user }
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 10 — NSIBIDI CONCEPTUAL SYMBOLIC LAYER WITH SECURITY
+// ------------------------------------------------------------</p>
+<p>// Nsibidi is an Igbo/Cross River symbolic writing system.
+// The Dream System uses it as a semantic layer for dream analysis.
+// Access to cultural knowledge is permission-controlled.</p>
+<p>DEFINE SecureNsibidiCSL AS CLASS:</p>
+<pre><code>STATE:
+    verb_noun_dict      : ENCRYPTED_DICTIONARY
+    igbo_symbols        : PROTECTED_SYMBOL_TABLE
+    access_controller   : SymbolicAccessController
+
+PROCEDURE init():
+    verb_noun_dict  = load_encrypted_dictionary()
+    igbo_symbols    = load_protected_symbols()
+    access_controller = NEW SymbolicAccessController()
+
+PROCEDURE analyze_dream_segment_secure(dream_event, user_context) -&gt; DICT:
+    // Step 1: Verify cultural access permissions
+    IF NOT access_controller.verify_cultural_access(user_context):
+        RETURN get_generic_interpretation()  // Graceful fallback
+
+    // Step 2: Decrypt event with user's key
+    decrypted_event = decrypt_with_verification(
+        dream_event,
+        user_context.decryption_key
+    )
+
+    // Step 3: Extract verb and noun with privacy preservation
+    verb = extract_verb_private(decrypted_event)
+    noun = extract_noun_private(decrypted_event)
+
+    // Step 4: Map to Nsibidi symbol
+    symbol = secure_nsibidi_mapping(verb, noun, user_context)
+
+    // Step 5: Apply cultural cosmology layer (permission-gated depth)
+    meaning = apply_protected_cosmology(symbol, {
+        verb:           verb,
+        noun:           noun,
+        context:        decrypted_event.context,
+        cultural_level: user_context.cultural_access_level
+    })
+
+    // Step 6: Audit cultural access
+    audit_logger.log_cultural_access(
+        user         = user_context.user_id,
+        symbol       = symbol.id,
+        access_level = user_context.cultural_access_level
+    )
+
+    RETURN {
+        surface:        verb + " + " + noun,
+        symbol:         symbol,
+        meaning:        meaning,
+        cultural_layer: get_permitted_significance(symbol, user_context.cultural_access_level),
+        security_level: "protected"
+    }
+
+// Note: cultural_access_level controls depth of Nsibidi interpretation
+// Higher access = deeper cosmological significance returned
+// Lower access = surface-level symbolic mapping only
+</code></pre>
+<p>// ============================================================
+// END MODULE 4
+// ============================================================</p>
+<h2 id="dreamsystem-05-audit-compliance-proofs-implementationpsc">DreamSystem 05 Audit Compliance Proofs Implementation.psc</h2>
+<h2 id="dreamsystem-05-audit-compliance-proofs-implementation">DreamSystem 05 Audit Compliance Proofs Implementation</h2>
+<p>// ============================================================
+// DREAM SYSTEM: Formal Technical Specification
+// Cognitive Observability Platform v0.3
+// MODULE 5: Security Audit, Compliance, Security Proofs &amp; Implementation Notes
+// Source: Dream_System___Formal_Technical_Specification.pdf
+// OBINexus Engineering Team | May 24, 2026
+// ============================================================</p>
+<p>// ------------------------------------------------------------
+// SECTION 11 — SECURITY AUDIT AND COMPLIANCE
+// ------------------------------------------------------------</p>
+<p>// ------------------------------------------------------------
+// SECTION 11.1 — COMPREHENSIVE AUDIT TRAIL
+// ------------------------------------------------------------</p>
+<p>DEFINE DreamSystemSecurityAuditor AS CLASS:</p>
+<pre><code>STATE:
+    audit_store             : EncryptedAuditStore
+    compliance_validator    : ComplianceValidator
+    current_hash_chain_tip  : STRING    // Latest hash in chain
+
+PROCEDURE init():
+    audit_store          = NEW EncryptedAuditStore()
+    compliance_validator = NEW ComplianceValidator()
+
+PROCEDURE log_security_event(event_type, details) -&gt; STRING:
+    // Build tamper-proof audit entry with chain linkage
+    audit_entry = {
+        timestamp:      utcnow().isoformat(),
+        event_type:     event_type,
+        details:        details,
+        user_id:        get_current_user_id(),
+        session_id:     get_current_session_id(),
+        system_state:   capture_system_state(),
+        previous_hash:  get_previous_hash()     // Chaining for tamper detection
+    }
+
+    // Sign the audit entry for non-repudiation
+    signature = sign_audit_entry(audit_entry)
+    audit_entry.signature = signature
+
+    // Compute hash and extend chain
+    entry_hash = compute_secure_hash(audit_entry)
+    current_hash_chain_tip = entry_hash
+
+    // Store encrypted in audit store
+    audit_store.store_encrypted(entry_hash, audit_entry)
+
+    // Immediate alert for high-severity events
+    IF requires_immediate_alert(event_type):
+        send_security_alert(audit_entry)
+
+    RETURN entry_hash
+
+PROCEDURE generate_compliance_report(start_date, end_date, compliance_framework) -&gt; DICT:
+    // Step 1: Retrieve all audit entries in date range
+    entries = audit_store.retrieve_range(start_date, end_date)
+
+    // Step 2: Validate against specified compliance framework
+    validation_results = compliance_validator.validate(entries, compliance_framework)
+
+    // Step 3: Return structured compliance report
+    RETURN {
+        period:                  start_date + " to " + end_date,
+        framework:               compliance_framework,
+        total_events:            len(entries),
+        compliance_score:        validation_results.score,
+        violations:              validation_results.violations,
+        recommendations:         validation_results.recommendations,
+        cryptographic_integrity: verify_audit_chain(entries)
+    }
+
+PROCEDURE verify_audit_chain(entries) -&gt; BOOLEAN:
+    // Walk the hash chain forward — each entry's previous_hash
+    // must match the hash of the entry before it.
+    FOR i IN range(1, len(entries)):
+        IF entries[i].previous_hash != compute_hash(entries[i-1]):
+            RETURN FALSE
+    RETURN TRUE
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 11.2 — SECURITY METRICS AND MONITORING (Table 6)
+// ------------------------------------------------------------</p>
+<p>DEFINE SECURITY_METRICS AS:</p>
+<pre><code>encryption_coverage:
+    target          = 100%
+    measurement     = "All data at rest and in transit encrypted"
+    verification    = automated_scan_per_deployment
+
+key_rotation_frequency:
+    target          = "Every 24 hours"
+    mechanism       = "Automated key lifecycle management"
+    scope           = "All session keys and long-term keys"
+
+primitive_validation_rate:
+    target          = 100%
+    measurement     = "All cryptographic operations pass validator"
+    enforcement     = "Block any non-validated primitive use"
+
+audit_trail_integrity:
+    target          = 100%
+    measurement     = "Hash chain verification passes on all entries"
+    verification    = continuous
+
+mttd_security_events:
+    target          = LESS_THAN 5_minutes   // Mean Time To Detect
+    mechanism       = "Real-time CloudWatch monitoring"
+
+mttr_security_issues:
+    target          = LESS_THAN 30_minutes  // Mean Time To Resolve
+    mechanism       = "Automated Lambda response (see Module 3, Section 5.2)"
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 12.1 — PHASE 3 SECURITY REQUIREMENTS
+// ------------------------------------------------------------</p>
+<p>DEFINE PHASE_3_SECURITY_REQUIREMENTS AS:
+    // All of these must be satisfied for Phase 3 completion:</p>
+<pre><code>hardware_specification:
+    status      = COMPLETE
+    requirement = "Security features included in hardware spec"
+
+software_binding:
+    requirement = "Secure OBICall polyglot layer active"
+    mechanism   = "obicall.exe --auth [token] for all operations"
+
+cryptographic_validation:
+    requirement = "All primitives validated per OBINexus v1.0 standard"
+    standard    = CryptographicPrimitiveValidator (see Module 1)
+
+security_as_code:
+    requirement = "Security as Code principles applied throughout"
+    evidence    = "CI/CD security_scan stage in all pipelines"
+
+e2e_encryption:
+    requirement = "All data flows use end-to-end encryption"
+    scope       = "EEG -&gt; Phone -&gt; Cloud -&gt; U Response"
+
+audit_compliance:
+    requirement = "Comprehensive audit trail and compliance reporting active"
+    reporting   = generate_compliance_report() callable at any time
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 12.2 — ETHICAL AND SECURITY CONSIDERATIONS
+// ------------------------------------------------------------</p>
+<p>DEFINE ETHICAL_PRINCIPLES AS:</p>
+<pre><code>user_interpretive_authority:
+    // User maintains FULL interpretive authority at all times
+    RULE: AI provides validation, NOT interpretation
+    ENFORCEMENT: Subjective processing authority = USER only (see Module 2)
+
+privacy_first_design:
+    // All data transmission is encrypted
+    RULE: No plaintext transmission of dream data, EEG, or biometrics
+    ENFORCEMENT: Cryptographic Safety Theorem (see Section 2.3.2)
+
+explicit_consent:
+    // Consent required for ALL actions
+    RULE: No action taken without user explicit consent
+    SCOPE: sharing, medical access, social export, therapist scheduling
+
+game_theoretic_fairness:
+    // Multi-agent interactions must be fair
+    RULE: Nash equilibrium stability (Nequilibrium) tracked in cost function
+    ENFORCEMENT: EA_Actor engagement gated by E_secure_cost &lt; τ_threshold
+
+zero_knowledge_privacy:
+    // Social sharing uses zero-knowledge proofs
+    RULE: Content shared without revealing identifying information
+    MECHANISM: ZK proofs in social sharing channel (see Module 4)
+
+cultural_knowledge_protection:
+    // Nsibidi symbolic layer is access-controlled
+    RULE: Cultural depth proportional to user's cultural_access_level
+    ENFORCEMENT: SymbolicAccessController.verify_cultural_access()
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 13 — APPENDIX A: SECURITY PROOFS
+// ------------------------------------------------------------</p>
+<p>// THEOREM 1: Proof of Cryptographic Safety (formal)
+// (Also stated as security invariant in Section 2.3.2, Equation 2)</p>
+<p>THEOREM cryptographic_safety:
+    CLAIM: "The Dream System's cryptographic architecture ensures that no
+            sensitive data is exposed in plaintext during any system operation."</p>
+<pre><code>PROOF_BY_CONSTRUCTION:
+
+    LEMMA 1: data_creation_encryption
+        // All data is encrypted at point of creation
+        AT EEG_headset:   ENCRYPT raw_eeg WITH AES-256 IMMEDIATELY
+        AT Dream_Band:    ENCRYPT biometric_data WITH hardware_encryption
+
+    LEMMA 2: channel_encryption
+        // All inter-component channels are encrypted
+        FOR EACH channel IN {
+            headset -&gt; phone,
+            band -&gt; phone,
+            phone -&gt; cloud,
+            cloud -&gt; U_agent,
+            U_agent -&gt; user_response
+        }:
+            ASSERT channel.encryption_active == TRUE
+
+    LEMMA 3: pre_processing_validation
+        // Cryptographic validation occurs BEFORE any data processing
+        IN SecureFilterFlash.secure_filter_to_flash():
+            STEP 1 = validate_encryption()      // Before any decrypt
+            STEP 2 = decrypt_with_validation()  // Only after validation passes
+
+    LEMMA 4: key_management
+        // Keys managed via hardware security modules
+        key_storage     = hardware_security_module
+        key_derivation  = PBKDF2-HMAC-SHA512
+        key_exchange    = ECDH-P256
+        key_rotation    = every_24_hours
+
+    // By induction on all possible data paths through the system:
+    // At every state transition in the cryptographic state machine,
+    // sensitive data either remains encrypted OR is in an accepting state.
+    // Therefore: ∀s ∈ SensitiveData: exposed(s) = false ∨ encrypted(s) = true
+    QED
+</code></pre>
+<p>// ------------------------------------------------------------
+// SECTION 14 — APPENDIX B: COMPLIANCE MAPPINGS
+// ------------------------------------------------------------</p>
+<p>// REGULATORY COMPLIANCE MATRIX (Table 7)
+// All checkmarks (✓) from the source document — all requirements covered.</p>
+<p>DEFINE COMPLIANCE_MATRIX AS:</p>
+<pre><code>FRAMEWORKS: [HIPAA, GDPR, ISO_27001, SOC_2]
+
+encryption_at_rest:
+    HIPAA       = COMPLIANT
+    GDPR        = COMPLIANT
+    ISO_27001   = COMPLIANT
+    SOC_2       = COMPLIANT
+    MECHANISM   = "AES-256-GCM on all stored data"
+
+encryption_in_transit:
+    HIPAA       = COMPLIANT
+    GDPR        = COMPLIANT
+    ISO_27001   = COMPLIANT
+    SOC_2       = COMPLIANT
+    MECHANISM   = "TLS 1.3 + E2E encryption for all channels"
+
+access_controls:
+    HIPAA       = COMPLIANT
+    GDPR        = COMPLIANT
+    ISO_27001   = COMPLIANT
+    SOC_2       = COMPLIANT
+    MECHANISM   = "Least privilege + dynamic EA Actor permissions"
+
+audit_trails:
+    HIPAA       = COMPLIANT
+    GDPR        = COMPLIANT
+    ISO_27001   = COMPLIANT
+    SOC_2       = COMPLIANT
+    MECHANISM   = "Tamper-proof hash chain audit log (Section 11.1)"
+
+data_retention:
+    HIPAA       = COMPLIANT
+    GDPR        = COMPLIANT
+    ISO_27001   = COMPLIANT
+    SOC_2       = COMPLIANT
+    MECHANISM   = "Configurable retention + secure deletion"
+    // TODO: Clarify from source PDF — specific retention period policies
+
+incident_response:
+    HIPAA       = COMPLIANT
+    GDPR        = COMPLIANT
+    ISO_27001   = COMPLIANT
+    SOC_2       = COMPLIANT
+    MECHANISM   = "Automated Lambda response + MTTD &lt; 5min / MTTR &lt; 30min"
+</code></pre>
+<p>// ============================================================
+// DREAM SYSTEM PSEUDOCODE MODULE INDEX
+// ============================================================
+//
+// MODULE 1: DreamSystem_01_Introduction_Philosophy_Security_Foundations.psc.txt
+//   - Core philosophy (OBI = heart), U companion model, Security as Code
+//     principles, CryptographicPrimitiveValidator, Cryptographic State Machine
+//     (formal FSA definition), Cryptographic Safety Theorem, E2E data flow
+//
+// MODULE 2: DreamSystem_02_Core_Concepts_Flash_Filter_GameTheory.psc.txt
+//   - Flash confidence thresholds (3 modes), Filter pipeline, Objective vs
+//     Subjective processing, Dimensional Action Space, Game-Theoretic Epistemic
+//     Cost Function (Eq. 5 &amp; 8), DAG Traversal Cost (Eq. 6 &amp; 7)
+//
+// MODULE 3: DreamSystem_03_Architecture_Hardware_EA_DAG.psc.txt
+//   - SecureFilterFlash pipeline, CI/CD preventive controls, Runtime detective
+//     controls (Lambda), Hardware spec (EEG non-invasive), Connectivity standards,
+//     SecurePhoneOrchestrator, Dream Band capabilities, EA Actor vs Agent model,
+//     OBICall CLI interface, LLM binding map, SecureFlashFilterDAG, ROYGBIV
+//     cognitive learning model, Gamification security levels
+//
+// MODULE 4: DreamSystem_04_VOIP_Distribution_Formats_Nsibidi.psc.txt
+//   - SecureOBICallVOIP (session, voice-to-intent), Wake interaction flow,
+//     VOIP technical requirements, Distribution channels (family/medical/social),
+//     Export file formats (.dvm .dau .dvs .dcv .dbx), DreamBundle XML structure,
+//     SecureNsibidiCSL (verb-noun analysis, cultural access control)
+//
+// MODULE 5: DreamSystem_05_Audit_Compliance_Proofs_Implementation.psc.txt
+//   - DreamSystemSecurityAuditor (hash-chain log, compliance report), Security
+//     metrics (Table 6), Phase 3 requirements, Ethical principles, Cryptographic
+//     Safety Proof (formal, by construction), Compliance matrix (HIPAA/GDPR/
+//     ISO 27001/SOC 2)
+//
+// ============================================================
+// END MODULE 5
+// ============================================================</p>
+  </main>
+  <footer>
+    <p>Generated artifact: <code>archive/dream-system-formal-technical-specification</code></p>
+  </footer>
+</body>
+</html>

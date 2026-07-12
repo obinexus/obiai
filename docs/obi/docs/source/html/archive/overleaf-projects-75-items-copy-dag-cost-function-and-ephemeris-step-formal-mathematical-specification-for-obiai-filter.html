@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAG Cost Function and Ephemeris Step Formal Mathematical Specification for OBIAI Filter Flash Transitions | OBI Source HTML</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --surface: #ffffff;
+      --text: #202321;
+      --muted: #626962;
+      --accent: #147d7e;
+      --border: #d9ddd4;
+      --code: #eef1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    header, main, footer { max-width: 1060px; margin: 0 auto; padding: 1.25rem; }
+    header { border-bottom: 4px solid var(--accent); background: #161819; color: #f5f7f2; max-width: none; }
+    header > div { max-width: 1060px; margin: 0 auto; }
+    a { color: #0f5f60; }
+    header a { color: inherit; }
+    main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 1.25rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p, li { max-width: 78ch; }
+    img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    pre { overflow: auto; background: #20251f; color: #f7fbf2; padding: 1rem; border-radius: 8px; }
+    code { background: var(--code); padding: 0.12rem 0.25rem; border-radius: 5px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--border); padding: 0.45rem 0.6rem; text-align: left; }
+    blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding-left: 1rem; color: var(--muted); }
+    .skip-link { position: absolute; left: 1rem; top: 0.75rem; transform: translateY(-200%); }
+    .skip-link:focus { transform: translateY(0); background: var(--surface); color: var(--text); padding: 0.5rem; }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header>
+    <div>
+      <a href="../index.html">OBI Source HTML</a>
+      <h1>DAG Cost Function and Ephemeris Step Formal Mathematical Specification for OBIAI Filter Flash Transitions</h1>
+      <p>Generated from Markdown with Python tooling and Pandoc-compatible source preservation.</p>
+    </div>
+  </header>
+  <main id="content" tabindex="-1">
+    <h1 id="dag-cost-function-and-ephemeris-step-formal-mathematical-specification-for-obiai-filter-flash-transitions">DAG Cost Function and Ephemeris Step Formal Mathematical Specification for OBIAI Filter Flash Transitions</h1>
+<p>Source folder: <code>overleaf-projects-75-items-copy/DAG Cost Function and Ephemeris Step -Formal Mathematical Specification for OBIAI Filter-Flash Transitions</code></p>
+<h2 id="extracted-files">Extracted Files</h2>
+<ul>
+<li><code>frog.jpg</code></li>
+<li><code>main.tex</code></li>
+</ul>
+<h2 id="frog">frog</h2>
+<p><img alt="frog" src="../assets/overleaf-projects-75-items-copy-dag-cost-function-and-ephemeris-step-formal-mathematical-specification-for-obiai-filter/frog.jpg"></p>
+<h2 id="main">main</h2>
+<h1 id="mathematical-foundations">Mathematical Foundations</h1>
+<h2 id="dag-cost-function-for-verb-noun-capsules">DAG Cost Function for Verb-Noun Capsules</h2>
+<p>The core DAG cost function for verb-noun symbolic capsules within the vexameneria framework:</p>
+<pre><code class="language-math">\begin{equation}
+\text{DAG\_cost}(v,n) = \sum_{k=1}^{K} w_k \cdot \text{sem\_dist}(v_k, n_k) + \lambda \cdot \text{CG}(v,n) + \mu \cdot \text{TC}(v,n)
+\end{equation}
+</code></pre>
+<p>where:</p>
+<pre><code class="language-math">\begin{align}
+v,n &amp;\quad \text{-- verb and noun symbolic capsules (multi-slot)} \\
+K &amp;\quad \text{-- number of aligned feature slots between } v \text{ and } n \\
+w_k &amp;\quad \text{-- learned slot weight (}w_k \geq 0\text{), normalized: } \sum_k w_k = 1 \\
+\text{sem\_dist}(\cdot,\cdot) &amp;\quad \text{-- semantic distance function} \\
+\text{CG}(v,n) &amp;\quad \text{-- cultural grounding penalty} \\
+\text{TC}(v,n) &amp;\quad \text{-- temporal-context penalty} \\
+\lambda,\mu &amp;\quad \text{-- hyperparameters controlling influence}
+\end{align}
+</code></pre>
+<h2 id="semantic-distance-function">Semantic Distance Function</h2>
+<p>The semantic distance implements cosine-based measurement with learned Mahalanobis correction:</p>
+<pre><code class="language-math">\begin{equation}
+\text{sem\_dist}(v_k, n_k) = 1 - \cos(e_v, e_n) + \alpha \cdot (v_k - n_k)^T M (v_k - n_k)
+\end{equation}
+</code></pre>
+<p>where $<code>e_v, e_n</code>$ are embedding vectors and $<code>M</code>$ is the learned Mahalanobis matrix.</p>
+<h2 id="cultural-grounding-function">Cultural Grounding Function</h2>
+<p>The cultural grounding penalty incorporates Nsibidi-inspired symbolic constraints:</p>
+<pre><code class="language-math">\begin{equation}
+\text{CG}(v,n) = \beta_1 \cdot \text{nsibidi\_dist}(v,n) + \beta_2 \cdot \text{domain\_prior}(v,n)
+\end{equation}
+</code></pre>
+<pre><code class="language-math">\begin{equation}
+\text{nsibidi\_dist}(v,n) = \frac{1}{|\mathcal{G}|} \sum_{g \in \mathcal{G}} \left| \text{glyph\_encode}(v) - \text{glyph\_encode}(n) \right|_g
+\end{equation}
+</code></pre>
+<p>where $<code>\mathcal{G}</code>$ represents the glyph encoding space.</p>
+<h2 id="temporal-context-function">Temporal-Context Function</h2>
+<p>For ephemeral vs. persistent memory alignment:</p>
+<pre><code class="language-math">\begin{equation}
+\text{TC}(v,n) = \gamma_1 \cdot \text{recency}(v,n) + \gamma_2 \cdot \text{persistence\_mismatch}(v,n)
+\end{equation}
+</code></pre>
+<pre><code class="language-math">\begin{equation}
+\text{persistence\_mismatch}(v,n) = \left| \tau_{\text{flash}}(v) - \tau_{\text{filter}}(n) \right|
+\end{equation}
+</code></pre>
+<h1 id="ephemeris-step-decision-logic">Ephemeris Step Decision Logic</h1>
+<h2 id="confidence-threshold-framework">Confidence Threshold Framework</h2>
+<p>The ephemeris step implements the 95.4% epistemic confidence threshold:</p>
+<pre><code class="language-math">\begin{equation}
+\text{ephemeris\_decision}(state) = \begin{cases}
+\text{FILTER} &amp; \text{if } p_{\text{conf}}(state) \geq 0.954 \\
+\text{REFLASH} &amp; \text{if } p_{\text{conf}}(state) &lt; 0.954
+\end{cases}
+\end{equation}
+</code></pre>
+<h2 id="epistemic-confidence-calculation">Epistemic Confidence Calculation</h2>
+<pre><code class="language-math">\begin{equation}
+p_{\text{conf}}(state) = \frac{1}{N} \sum_{i=1}^{N} \max\left( P(\text{Filter}_i | state), P(\text{Flash}_i | state) \right)
+\end{equation}
+</code></pre>
+<p>where the individual probabilities follow Bayesian update rules:</p>
+<pre><code class="language-math">\begin{equation}
+P(\text{Filter}_i | state) = \frac{P(state | \text{Filter}_i) \cdot P(\text{Filter}_i)}{P(state)}
+\end{equation}
+</code></pre>
+<h2 id="mode-selection-cost-minimization">Mode Selection Cost Minimization</h2>
+<p>The system selects the optimal mode through cost minimization:</p>
+<pre><code class="language-math">\begin{equation}
+\text{mode}^* = \arg\min_{m \in \{\text{Flash}, \text{Filter}\}} \mathbb{E}\left[ C_{\text{runtime}}(m) + C_{\text{error}}(m) \right]
+\end{equation}
+</code></pre>
+<pre><code class="language-math">\begin{align}
+C_{\text{runtime}}(m) &amp;= \alpha_m \cdot \text{latency}(m) + \beta_m \cdot \text{energy}(m) \\
+C_{\text{error}}(m) &amp;= \sum_{v,n} \text{DAG\_cost}(v,n) \cdot P(\text{error} | v,n,m)
+\end{align}
+</code></pre>
+<h1 id="peristaltic-cross-referential-algorithm">Peristaltic Cross-Referential Algorithm</h1>
+<h2 id="hamiltonian-cycle-dag-resolution">Hamiltonian Cycle DAG Resolution</h2>
+<p>The peristaltic cross-referential process implements cyclical concept connections:</p>
+<div class="algorithm">
+
+<div class="algorithmic">
+
+**Input:** Verb-noun pairs $`(v_i, n_i)`$, confidence threshold $`\theta = 0.954`$ **Output:** Resolved concept graph $`G^*`$ $`G \leftarrow \text{initialize\_dag}()`$ $`cost_{ij} \leftarrow \text{DAG\_cost}(v_i, n_j)`$ for all $`j`$ $`cycle \leftarrow \text{find\_hamiltonian\_cycle}(G, cost_{ij})`$ $`p_{\text{conf}} \leftarrow \text{compute\_confidence}(cycle)`$ $`G \leftarrow \text{filter\_update}(G, cycle)`$ $`G \leftarrow \text{flash\_update}(G, v_i, n_i)`$ **return** $`G`$
+
+</div>
+
+</div>
+
+<h2 id="vexameneria-quantification">Vexameneria Quantification</h2>
+<p>The vexameneria system quantifies verb-noun interactions through:</p>
+<pre><code class="language-math">\begin{equation}
+\text{vexameneria}(v,n) = \omega_1 \cdot \text{action\_intensity}(v) + \omega_2 \cdot \text{object\_complexity}(n) + \omega_3 \cdot \text{interaction\_coherence}(v,n)
+\end{equation}
+</code></pre>
+<pre><code class="language-math">\begin{align}
+\text{action\_intensity}(v) &amp;= \left\| \nabla_v \text{semantic\_field}(v) \right\|_2 \\
+\text{object\_complexity}(n) &amp;= H(n) \cdot \log(|\text{attributes}(n)|) \\
+\text{interaction\_coherence}(v,n) &amp;= \cos(\text{embed}(v), \text{embed}(n))
+\end{align}
+</code></pre>
+<h1 id="real-world-application-autonomous-vehicle-scenario">Real-World Application: Autonomous Vehicle Scenario</h1>
+<h2 id="scenario-implementation">Scenario Implementation</h2>
+<p>For the driving scenario with speed limit recognition:</p>
+<pre><code class="language-python">def ephemeris_step_decision(observation, state):
+    &quot;&quot;&quot;
+    Implements ephemeris step for driving scenario
+    &quot;&quot;&quot;
+    # Parse verb-noun pairs from observation
+    verb_noun_pairs = extract_verb_noun_pairs(observation)
+
+    # Calculate DAG costs
+    total_cost = 0
+    for v, n in verb_noun_pairs:
+        cost = dag_cost_function(v, n, state)
+        total_cost += cost
+
+    # Compute epistemic confidence
+    p_conf = compute_epistemic_confidence(
+        verb_noun_pairs, state, total_cost
+    )
+
+    # Ephemeris decision
+    if p_conf &gt;= 0.954:
+        return &quot;FILTER&quot;  # Persistent inference
+    else:
+        return &quot;REFLASH&quot;  # Ephemeral working memory
+
+def dag_cost_function(verb, noun, state):
+    &quot;&quot;&quot;
+    Implements equation (1) for verb-noun cost calculation
+    &quot;&quot;&quot;
+    # Semantic distance component
+    sem_dist = semantic_distance(verb, noun)
+
+    # Cultural grounding (Nsibidi-inspired)
+    cultural_penalty = cultural_grounding(verb, noun)
+
+    # Temporal context for flash/filter alignment  
+    temporal_penalty = temporal_context(verb, noun, state)
+
+    return (sem_dist + 
+            LAMBDA * cultural_penalty + 
+            MU * temporal_penalty)
+</code></pre>
+<h2 id="example-transitions">Example Transitions</h2>
+<p><strong>Scenario 1: 40 mph sign on busy street</strong></p>
+<pre><code class="language-math">\begin{align}
+\text{Observation} &amp;: \text{``see-sign''} \oplus \text{``busy-street''} \\
+p_{\text{conf}} &amp;= 0.972 \geq 0.954 \Rightarrow \text{FILTER mode} \\
+\text{Action} &amp;: \text{Persistent speed adjustment with context retention}
+\end{align}
+</code></pre>
+<p><strong>Scenario 2: Sudden braking car appearance</strong></p>
+<pre><code class="language-math">\begin{align}
+\text{Observation} &amp;: \text{``braking-car''} \oplus \text{``immediate-hazard''} \\
+p_{\text{conf}} &amp;= 0.847 &lt; 0.954 \Rightarrow \text{REFLASH mode} \\
+\text{Action} &amp;: \text{Rapid response without deep contextual analysis}
+\end{align}
+</code></pre>
+<h1 id="print-and-trace-architecture-integration">Print-and-Trace Architecture Integration</h1>
+<h2 id="dimensional-game-theory-coupling">Dimensional Game Theory Coupling</h2>
+<p>The system integrates with dimensional game theory through strategic vector formulation:</p>
+<pre><code class="language-math">\begin{equation}
+\mathbf{S}_{\text{game}}(v,n) = \begin{bmatrix}
+\text{DAG\_cost}(v,n) \\
+\text{vexameneria}(v,n) \\
+p_{\text{conf}}(\text{state})
+\end{bmatrix}
+\end{equation}
+</code></pre>
+<h2 id="diram-memory-governance">DIRAM Memory Governance</h2>
+<p>Integration with DIRAM for epistemic validation:</p>
+<pre><code class="language-math">\begin{equation}
+\text{DIRAM\_validate}(\text{transition}) = \begin{cases}
+\text{COMMIT} &amp; \text{if } \epsilon(\text{transition}) \leq 0.6 \\
+\text{ROLLBACK} &amp; \text{if } \epsilon(\text{transition}) &gt; 0.6
+\end{cases}
+\end{equation}
+</code></pre>
+<h1 id="formal-verification-requirements">Formal Verification Requirements</h1>
+<h2 id="aegis-proof-41-dag-cost-monotonicity">AEGIS-PROOF-4.1: DAG Cost Monotonicity</h2>
+<p><strong>Theorem:</strong> For fixed cultural and temporal parameters, DAG cost function exhibits monotonic behavior with respect to semantic distance.</p>
+<p><strong>Proof Sketch:</strong></p>
+<pre><code class="language-math">\begin{align}
+\frac{\partial}{\partial d} \text{DAG\_cost}(v,n) &amp;= \sum_{k=1}^{K} w_k \frac{\partial}{\partial d} \text{sem\_dist}(v_k, n_k) \\
+&amp;= \sum_{k=1}^{K} w_k \cdot 1 &gt; 0 \quad \text{(since } w_k \geq 0\text{)}
+\end{align}
+</code></pre>
+<h2 id="aegis-proof-42-ephemeris-convergence">AEGIS-PROOF-4.2: Ephemeris Convergence</h2>
+<p><strong>Theorem:</strong> Under bounded observation sequences, the ephemeris step decision converges to optimal mode selection.</p>
+<p><strong>Proof Requirements:</strong></p>
+<ul>
+<li>
+<p>Lipschitz continuity of confidence function</p>
+</li>
+<li>
+<p>Bounded variance in observation stream</p>
+</li>
+<li>
+<p>Convergence rate analysis using stochastic approximation theory</p>
+</li>
+</ul>
+<h1 id="implementation-notes">Implementation Notes</h1>
+<h2 id="computational-complexity">Computational Complexity</h2>
+<pre><code class="language-math">\begin{align}
+\text{Time Complexity} &amp;: O(K \cdot N \cdot \log N) \text{ per verb-noun pair} \\
+\text{Space Complexity} &amp;: O(K \cdot N + |\mathcal{G}|) \text{ for glyph encoding}
+\end{align}
+</code></pre>
+<h2 id="hyperparameter-tuning">Hyperparameter Tuning</h2>
+<p>Recommended ranges based on Triangi dataset validation:</p>
+<pre><code class="language-math">\begin{align}
+\lambda &amp;\in [0.1, 0.3] \quad \text{(cultural influence)} \\
+\mu &amp;\in [0.05, 0.15] \quad \text{(temporal influence)} \\
+\alpha &amp;\in [0.2, 0.4] \quad \text{(Mahalanobis correction)}
+\end{align}
+</code></pre>
+<h1 id="conclusion">Conclusion</h1>
+<p>This formal specification provides the mathematical foundation for DAG cost calculation and ephemeris step decision logic within the OBIAI Filter-Flash framework. The integration of vexameneria quantification with peristaltic cross-referential processing enables robust real-world deployment with 95.4% epistemic confidence validation.</p>
+<p>The systematic approach ensures compatibility with existing AEGIS mathematical frameworks while enabling the nuanced decision-making required for autonomous systems operating in dynamic environments.</p>
+<div class="thebibliography">
+
+10 N. Okpala, *Filter-Flash Consciousness Model: Technical Foundation*, OBINexus Computing, 2025.
+
+N. Okpala, *Hierarchical Actor-Orchestrated State Management with DIRAM Backed Epistemic Validation*, OBINexus Computing, 2025.
+
+N. Okpala, *Subjective Symbolic Cognition: A Multi-Tiered Architecture for Prompt-Free Problem Solving in OBIAI*, OBINexus Computing, 2025.
+
+OBINexus Computing, *Aegis Project: Monotonicity of Cost-Knowledge Function - Mathematical Verification*, Technical Documentation, 2025.
+
+</div>
+  </main>
+  <footer>
+    <p>Generated artifact: <code>archive/overleaf-projects-75-items-copy-dag-cost-function-and-ephemeris-step-formal-mathematical-specification-for-obiai-filter</code></p>
+  </footer>
+</body>
+</html>

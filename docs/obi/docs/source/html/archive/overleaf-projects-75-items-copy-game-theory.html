@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Game Theory | OBI Source HTML</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --surface: #ffffff;
+      --text: #202321;
+      --muted: #626962;
+      --accent: #147d7e;
+      --border: #d9ddd4;
+      --code: #eef1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    header, main, footer { max-width: 1060px; margin: 0 auto; padding: 1.25rem; }
+    header { border-bottom: 4px solid var(--accent); background: #161819; color: #f5f7f2; max-width: none; }
+    header > div { max-width: 1060px; margin: 0 auto; }
+    a { color: #0f5f60; }
+    header a { color: inherit; }
+    main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 1.25rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p, li { max-width: 78ch; }
+    img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    pre { overflow: auto; background: #20251f; color: #f7fbf2; padding: 1rem; border-radius: 8px; }
+    code { background: var(--code); padding: 0.12rem 0.25rem; border-radius: 5px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--border); padding: 0.45rem 0.6rem; text-align: left; }
+    blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding-left: 1rem; color: var(--muted); }
+    .skip-link { position: absolute; left: 1rem; top: 0.75rem; transform: translateY(-200%); }
+    .skip-link:focus { transform: translateY(0); background: var(--surface); color: var(--text); padding: 0.5rem; }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header>
+    <div>
+      <a href="../index.html">OBI Source HTML</a>
+      <h1>Game Theory</h1>
+      <p>Generated from Markdown with Python tooling and Pandoc-compatible source preservation.</p>
+    </div>
+  </header>
+  <main id="content" tabindex="-1">
+    <h1 id="game-theory">Game Theory</h1>
+<p>Source folder: <code>overleaf-projects-75-items-copy/Game Theory</code></p>
+<h2 id="extracted-files">Extracted Files</h2>
+<ul>
+<li><code>main.tex</code></li>
+<li><code>Theor.tex</code></li>
+</ul>
+<h2 id="main">main</h2>
+<div class="center">
+
+*Computing from the Heart*
+
+</div>
+
+<h1 id="introduction">Introduction</h1>
+<p>Game theory provides a mathematical framework for analyzing strategic interactions between rational agents. While traditional game theory focuses on equilibrium concepts and payoff matrices, we propose an extended framework—dimensional game theory—that enables the development of practical algorithms for decision-making in competitive environments.</p>
+<p>The purpose of this paper is not to diminish existing game theory but to extend its formal definitions and create a pathway for new algorithmic implementations. By establishing rigorous mathematical definitions and theorems, we demonstrate how real-world applications can benefit from these algorithmic developments.</p>
+<h1 id="formal-game-theory-definitions">Formal Game Theory Definitions</h1>
+<div class="definition">
+
+**Definition 1** (Game). *A **game** is formally defined as a tuple $`G = (N, A, u)`$, where:*
+
+- *$`N = \{1, 2, \ldots, n\}`$ is a finite set of **players**.*
+
+- *$`A = A_1 \times A_2 \times \ldots \times A_n`$, where $`A_i`$ is a finite set of **actions** available to player $`i`$.*
+
+- *$`u = (u_1, u_2, \ldots, u_n)`$, where $`u_i: A \rightarrow \mathbb{R}`$ is a **utility function** for player $`i`$ that assigns a real-valued payoff to each action profile.*
+
+</div>
+
+<div class="definition">
+
+**Definition 2** (Strategy). *A **pure strategy** for player $`i`$ is an element $`s_i \in A_i`$. A **mixed strategy** $`\sigma_i`$ is a probability distribution over $`A_i`$, where $`\sigma_i(a_i)`$ represents the probability that player $`i`$ selects action $`a_i \in A_i`$.*
+
+</div>
+
+<div class="definition">
+
+**Definition 3** (Strategy Profile). *A **strategy profile** $`s = (s_1, s_2, \ldots, s_n)`$ is a tuple of strategies, one for each player. We denote by $`s_{-i} = (s_1, \ldots, s_{i-1}, s_{i+1}, \ldots, s_n)`$ the strategies of all players except player $`i`$.*
+
+</div>
+
+<div class="definition">
+
+**Definition 4** (Nash Equilibrium). *A strategy profile $`s^* = (s_1^*, s_2^*, \ldots, s_n^*)`$ is a **Nash equilibrium** if for each player $`i \in N`$ and for all alternative strategies $`s_i \in A_i`$:
+
+<pre><code class="language-math">u_i(s_i^*, s_{-i}^*) \geq u_i(s_i, s_{-i}^*)
+```*
+
+&lt;/div&gt;
+
+# Dimensional Game Theory
+
+We now introduce the concept of dimensional game theory, which extends traditional game theory to account for the dimensional quality of strategies.
+
+&lt;div class=&quot;definition&quot;&gt;
+
+**Definition 5** (Strategic Dimension). *A **strategic dimension** $`D`$ is a parameter space that categorizes strategies according to specific attributes. For example, in a combat game, dimensions might include $`D_{\text{offensive}}`$, $`D_{\text{defensive}}`$, and $`D_{\text{tactical}}`$.*
+
+&lt;/div&gt;
+
+&lt;div class=&quot;definition&quot;&gt;
+
+**Definition 6** (Dimensional Strategy). *A **dimensional strategy** $`s_i^D`$ is a strategy that is optimized along a specific dimension $`D`$. The effectiveness of $`s_i^D`$ is measured by a function $`E: A_i \times D \rightarrow \mathbb{R}`$ that evaluates how well the strategy performs in that dimension.*
+
+&lt;/div&gt;
+
+&lt;div class=&quot;theorem&quot;&gt;
+
+**Theorem 1** (Perfect Game Outcome). *In a two-player zero-sum game with complete information, if both players employ optimal strategies in all relevant dimensions, the game will result in a deterministic tie.*
+
+&lt;/div&gt;
+
+&lt;div class=&quot;proof&quot;&gt;
+
+*Proof.* Let $`G = (\{1, 2\}, A_1 \times A_2, (u_1, u_2))`$ be a two-player zero-sum game where $`u_1(a_1, a_2) = -u_2(a_1, a_2)`$ for all $`(a_1, a_2) \in A_1 \times A_2`$.
+
+Let $`s_1^*`$ and $`s_2^*`$ be optimal strategies for players 1 and 2, respectively. By definition, these satisfy:
+``` math
+s_1^* = \arg\max_{s_1 \in A_1} \min_{s_2 \in A_2} u_1(s_1, s_2)
+</code></pre>
+
+
+<pre><code class="language-math">s_2^* = \arg\max_{s_2 \in A_2} \min_{s_1 \in A_1} u_2(s_1, s_2)
+</code></pre>
+
+
+By the minimax theorem, we have:
+
+<pre><code class="language-math">\max_{s_1 \in A_1} \min_{s_2 \in A_2} u_1(s_1, s_2) = \min_{s_2 \in A_2} \max_{s_1 \in A_1} u_1(s_1, s_2)
+</code></pre>
+
+
+Since the game is zero-sum, when both players play optimally, the value of the game is uniquely determined. Let this value be $`v`$.
+
+For a game to result in a non-tie outcome, one player must receive a payoff strictly greater than $`v`$, which contradicts the minimax theorem. Therefore, when both players employ optimal strategies, the game must result in a tie with payoffs $`(v, -v)`$. ◻
+
+</div>
+
+<div class="corollary">
+
+**Corollary 1** (Strategic Imbalance). *The existence of a non-tie outcome in a supposedly perfect game implies a strategic imbalance in at least one dimension.*
+
+</div>
+
+<h1 id="algorithmic-implementation">Algorithmic Implementation</h1>
+<p>Based on the dimensional game theory framework, we can develop several classes of algorithms:</p>
+<h2 id="dimension-detection-algorithms">Dimension Detection Algorithms</h2>
+<p>These algorithms identify the strategic dimensions relevant to a particular game context:</p>
+<div class="algorithm">
+
+Initialize dimension set $`D = \emptyset`$
+
+</div>
+
+<h2 id="strategic-adaptation-algorithms">Strategic Adaptation Algorithms</h2>
+<p>These algorithms dynamically adjust strategies based on detected imbalances:</p>
+<div class="algorithm">
+
+Identify dominant dimensions $`D_{\text{dom}} = \{D | E(\hat{s}_o, D) > \theta\}`$ Combine counter-strategies with weights proportional to dimension dominance
+
+</div>
+
+<h1 id="practical-applications">Practical Applications</h1>
+<p>The dimensional game theory framework and its algorithms have several real-world applications:</p>
+<h2 id="financial-markets">Financial Markets</h2>
+<p>In trading environments, dimensional strategies might include momentum, mean-reversion, and liquidity-seeking dimensions. The algorithm can detect when a market is dominated by momentum traders and adapt accordingly.</p>
+<h2 id="cybersecurity">Cybersecurity</h2>
+<p>Security systems can identify attack dimensions (e.g., brute force, social engineering) and dynamically allocate defensive resources to counter detected threat patterns.</p>
+<h2 id="autonomous-vehicles">Autonomous Vehicles</h2>
+<p>Navigation algorithms can model other drivers’ behaviors along dimensions such as aggressiveness and risk-aversion, allowing for safer interactions in mixed-autonomy traffic.</p>
+<h2 id="business-competition">Business Competition</h2>
+<p>Companies can model competitor strategies along dimensions like price sensitivity, quality focus, and innovation rate, developing adaptive competitive responses.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>This paper has presented a formal extension of game theory—dimensional game theory—that provides a mathematical foundation for developing practical algorithms. We have shown that perfect games result in deterministic outcomes, and deviations from these outcomes indicate strategic imbalances that can be algorithmically detected and exploited.</p>
+<p>The algorithms derived from this theory have broad applications across multiple domains, enabling the development of adaptive, strategically aware systems. OBINexus Computing continues to refine these algorithms and implementation frameworks, pushing the boundaries of what game theory can achieve in computational applications.</p>
+<p>Future work will focus on developing more sophisticated dimension detection methods, improving the efficiency of strategic adaptation algorithms, and expanding the application areas to include multi-agent reinforcement learning and complex systems modeling.</p>
+<div class="thebibliography">
+
+9
+
+von Neumann, J., & Morgenstern, O. (1944). *Theory of Games and Economic Behavior*. Princeton University Press.
+
+Nash, J. (1950). *Equilibrium points in n-person games*. Proceedings of the National Academy of Sciences, 36(1), 48-49.
+
+Okpala, N. M. (2025). *Dimensional Game Theory: A New Framework for Strategic Algorithm Design*. Journal of Computational Strategy, forthcoming.
+
+</div>
+
+<h2 id="theor">Theor</h2>
+<p>No extractable text was found in <code>Theor.tex</code>.</p>
+  </main>
+  <footer>
+    <p>Generated artifact: <code>archive/overleaf-projects-75-items-copy-game-theory</code></p>
+  </footer>
+</body>
+</html>

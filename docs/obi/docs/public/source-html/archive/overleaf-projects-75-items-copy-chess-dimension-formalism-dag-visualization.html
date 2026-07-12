@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chess Dimension Formalism — DAG Visualization | OBI Source HTML</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --surface: #ffffff;
+      --text: #202321;
+      --muted: #626962;
+      --accent: #147d7e;
+      --border: #d9ddd4;
+      --code: #eef1eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    header, main, footer { max-width: 1060px; margin: 0 auto; padding: 1.25rem; }
+    header { border-bottom: 4px solid var(--accent); background: #161819; color: #f5f7f2; max-width: none; }
+    header > div { max-width: 1060px; margin: 0 auto; }
+    a { color: #0f5f60; }
+    header a { color: inherit; }
+    main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 1.25rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    p, li { max-width: 78ch; }
+    img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+    pre { overflow: auto; background: #20251f; color: #f7fbf2; padding: 1rem; border-radius: 8px; }
+    code { background: var(--code); padding: 0.12rem 0.25rem; border-radius: 5px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--border); padding: 0.45rem 0.6rem; text-align: left; }
+    blockquote { border-left: 4px solid var(--accent); margin-left: 0; padding-left: 1rem; color: var(--muted); }
+    .skip-link { position: absolute; left: 1rem; top: 0.75rem; transform: translateY(-200%); }
+    .skip-link:focus { transform: translateY(0); background: var(--surface); color: var(--text); padding: 0.5rem; }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header>
+    <div>
+      <a href="../index.html">OBI Source HTML</a>
+      <h1>Chess Dimension Formalism — DAG Visualization</h1>
+      <p>Generated from Markdown with Python tooling and Pandoc-compatible source preservation.</p>
+    </div>
+  </header>
+  <main id="content" tabindex="-1">
+    <h1 id="chess-dimension-formalism-dag-visualization">Chess Dimension Formalism — DAG Visualization</h1>
+<p>Source folder: <code>overleaf-projects-75-items-copy/Chess Dimension Formalism — DAG Visualization</code></p>
+<h2 id="extracted-files">Extracted Files</h2>
+<ul>
+<li><code>main.tex</code></li>
+</ul>
+<h2 id="main">main</h2>
+<pre><code class="language-latex">% chess_dimensions_dag.tex
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, shadows}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\small,breaklines=true}
+\usepackage{lmodern}
+
+\usepackage{textcomp}
+\usepackage{amsfonts}
+
+\title{Chess Dimension Formalism — DAG Visualization}
+\author{OBINexus / Draft}
+\date{October 2025}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document contains a formalised section for the &quot;Chess Dimension&quot; model and a directed acyclic graph (DAG) that visualises the pipeline from board state to per-dimension scoring and final move selection. The DAG is intentionally acyclic to show flow; iterative or cyclical behaviour (search loops, temporal NFA transitions) is handled by external control (search engine, NFA runner).
+\end{abstract}
+
+\section{DAG: Dimension Transition Pipeline}
+\begin{figure}[ht]
+  \centering
+  % TikZ DAG
+  \begin{tikzpicture}[
+      node distance=12mm and 28mm,
+      every node/.style={font=\small},
+      box/.style={draw, fill=white, rectangle, rounded corners, minimum width=38mm, minimum height=10mm, align=center, drop shadow},
+      smallbox/.style={draw, fill=white, rounded corners, minimum width=30mm, minimum height=8mm, align=center},
+      arrow/.style={-{Stealth[scale=1]}, line width=0.8pt}
+    ]
+
+    % Nodes
+    \node[box] (S) {Board State \\ $s\in\mathcal S$};
+    \node[box, right=of S] (F) {Feature Extraction \\ $\pi_A,\pi_{Df},\pi_{Of}$};
+    \node[smallbox, right=of F, yshift= 10mm] (A) {Attack \\ $u_A(s,m)$};
+    \node[smallbox, right=of F, yshift=-10mm] (D) {Defense \\ $u_{Df}(s,m)$};
+    \node[smallbox, right=of F, xshift=36mm] (O) {Offense \\ $u_{Of}(s,m)$};
+    \node[box, right=of O, xshift=18mm] (M) {Meta-controller \\ combine \&amp; decide \\ $U_{\text{combined}}(m)$};
+    \node[box, right=of M] (Move) {Move Selection \\ $m^*=\arg\max U_{\text{combined}}$};
+    \node[box, below=of Move, yshift=-6mm] (Next) {Next State \\ $s'=\textsf{apply}(s,m^*)$};
+
+    % Arrows
+    \draw[arrow] (S) -- (F) node[midway, above] {extract};
+    \draw[arrow] (F) -- (A) node[midway, above, sloped] {attack features};
+    \draw[arrow] (F) -- (D) node[midway, above, sloped] {defense features};
+    \draw[arrow] (F.east) .. controls +(.9,0) and +(-.9,0) .. (O.west) node[midway, above] {positional features};
+    \draw[arrow] (A.east) -- ++(8mm,0) |- (M.north) node[pos=0.85, above] {$U_A(m)$};
+    \draw[arrow] (D.east) -- ++(8mm,0) |- (M.south) node[pos=0.9, above] {$U_{Df}(m)$};
+    \draw[arrow] (O.east) -- (M.west) node[midway, above] {$U_{Of}(m)$};
+    \draw[arrow] (M) -- (Move) node[midway, above] {select};
+    \draw[arrow] (Move) -- (Next) node[midway, right] {apply};
+
+    % Styling hints
+    \node[below=6mm of F, align=center] (note) {\small Figure: Acyclic pipeline from state to move; repeated play / search loops happen outside this DAG (e.g. repeated application of the pipeline per ply).};
+  \end{tikzpicture}
+  \caption{Directed Acyclic Graph (DAG) for chess-dimension decision pipeline.}
+  \label{fig:chess-dag}
+\end{figure}
+
+\section{Accompanying Formal Notes}
+The DAG shows a single forward pass for one decision step. In practice:
+\begin{itemize}
+  \item \textbf{Iterative search.} The Meta-controller may call a search routine (alpha-beta, minimax, MCTS) that iteratively expands the DAG into a search tree/DAG; those internal loops are implemented by the search engine and are not drawn here to keep the figure acyclic.
+  \item \textbf{NFA-driven mode switching.} An NFA (observer \(\to\) consumer state machine) can operate in the background to set weights $\omega_A,\omega_{Df},\omega_{Of}$ or to force a single-dimension policy (e.g., urgent defense). The NFA is a control process that does not introduce cycles into this \emph{single-decision} DAG.
+  \item \textbf{Coherence \&amp; formation.} Feature extraction computes formation coherence scores $\mathcal C(F)$ and vulnerability metrics used by $u_{Df}$ and $u_{Of}$.
+\end{itemize}
+
+\section{LaTeX-ready Pseudocode}
+Below is the same selection loop expressed as pseudocode. You can include this in your documentation or use it as a skeleton for implementation.
+
+\begin{lstlisting}[caption={Decision selection pseudocode}]
+function SelectMove(s):
+    best_m = None
+    best_score = -Inf
+    for m in LegalMoves(s):
+        scoreA = AttackScore(s,m)        # u_A(s,m)
+        scoreD = DefenseScore(s,m)       # u_Df(s,m)
+        scoreO = OffenseScore(s,m)       # u_Of(s,m)
+        combined = wA*scoreA + wD*scoreD + wO*scoreO
+        if combined &gt; best_score:
+            best_score = combined
+            best_m = m
+    return best_m
+\end{lstlisting}
+
+\section{How to extend the DAG (notes for integration)}
+\begin{enumerate}
+  \item To visualise iterative search, expand the Move node into a subtree: nodes become states at depth $d$, edges moves, with leaf evaluations fed back into the Meta-controller for minimax aggregation.
+  \item To show NFA transitions explicitly, add a parallel ``Controller'' lane above the DAG that outputs $\omega$ weights to the Meta-controller; keep it acyclic by modelling controller decisions as input tokens for a single step.
+  \item To show witness logging (HDIS ledger), add a side node that ingests $(s,m^*,\mathcal C,\tau,\sigma)$ for audit; this is an append-only sink and can be drawn as a DAG leaf.
+\end{enumerate}
+</code></pre>
+  </main>
+  <footer>
+    <p>Generated artifact: <code>archive/overleaf-projects-75-items-copy-chess-dimension-formalism-dag-visualization</code></p>
+  </footer>
+</body>
+</html>

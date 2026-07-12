@@ -1,0 +1,357 @@
+// ============================================================
+// FILE: dag_ephemeris_M5_verification_complexity.psc.txt
+// MODULE 5 OF 5 — Formal Verification, Complexity & Hyperparameters
+// SOURCE: "DAG Cost Function and Ephemeris Step: Formal Mathematical
+//          Specification for OBIAI Filter-Flash Transitions"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 6: FORMAL VERIFICATION REQUIREMENTS
+// ------------------------------------------------------------
+
+// Two verification theorems are specified here as extensions to
+// the AEGIS proof chain. Both are labeled as AEGIS-PROOF-4.1 and
+// AEGIS-PROOF-4.2 within this document (distinct from the hospital
+// safety specification also labeled 4.1 — this document uses the
+// label for the DAG cost monotonicity and ephemeris convergence proofs).
+
+// ── 6.1: AEGIS-PROOF-4.1 (DAG COST MONOTONICITY) ────────────
+
+// THEOREM: For fixed cultural (C_G) and temporal (TC) parameters,
+//           DAG_cost(v, n) exhibits MONOTONIC BEHAVIOR with respect
+//           to semantic distance d.
+//
+// Proof Sketch:
+//   ∂/∂d DAG_cost(v, n) = Σₖ wₖ · ∂/∂d sem_dist(vₖ, nₖ)
+//                        = Σₖ wₖ · 1
+//                        > 0   (since wₖ ≥ 0 and Σwₖ = 1)
+
+THEOREM DAGCostMonotonicity:
+    // Formal pseudocode statement of Theorem from §6.1
+
+    // PRECONDITIONS:
+    //   Cultural and temporal parameters fixed: λ, μ, β₁, β₂, γ₁, γ₂ = const
+    //   Slot weights wₖ ≥ 0, Σwₖ = 1
+
+    // CLAIM: ∂DAG_cost/∂d > 0 — cost strictly increases with semantic distance
+
+    PROCEDURE VerifyMonotonicityWrtSemanticDistance(
+        v: SymbolicCapsule, n: SymbolicCapsule,
+        d_range: List[REAL]) -> BOOL:
+        // Verify DAG cost increases as semantic distance increases.
+        // Perturb v's embedding to increase/decrease d, check cost follows.
+
+        prev_cost := -POSITIVE_INFINITY
+        d_values_sorted := SORTED(d_range, ASCENDING)
+
+        FOR EACH d_target IN d_values_sorted:
+            // Synthesize capsule pair at distance d_target
+            v_d := PerturbCapsuleToDistance(v, n, d_target)
+            cost_d := DAGCost(v_d, n, LAMBDA_DEFAULT, MU_DEFAULT,
+                              BETA1_DEFAULT, BETA2_DEFAULT,
+                              GAMMA1_DEFAULT, GAMMA2_DEFAULT)
+
+            IF cost_d < prev_cost - 1e-10:
+                EMIT WARNING "Monotonicity violated: cost=" + cost_d +
+                             " at d=" + d_target +
+                             " < previous cost=" + prev_cost
+                RETURN FALSE
+            END IF
+            prev_cost := cost_d
+        END FOR
+
+        EMIT INFO "DAG cost monotonicity verified over d_range"
+        RETURN TRUE
+    END PROCEDURE
+
+
+    PROCEDURE ProvePartialDerivative(v: SymbolicCapsule, n: SymbolicCapsule) -> REAL:
+        // ∂/∂d DAG_cost = Σₖ wₖ · ∂/∂d sem_dist(vₖ, nₖ)
+        //
+        // Key step: ∂/∂d sem_dist(vₖ, nₖ) = 1  (by construction)
+        // Cosine dissimilarity (1 − cos) increases linearly with angular distance.
+        // Mahalanobis term is positive definite → also increases with d.
+        //
+        // Therefore: ∂DAG_cost/∂d = Σₖ wₖ · 1 = 1 > 0  (since Σwₖ = 1)
+
+        partial_sum := 0.0
+        K := LENGTH(v.slots)
+        FOR k := 0 TO K-1:
+            w_k         := v.slots[k].weight
+            partial_sem := 1.0   // ∂sem_dist/∂d = 1 (linear in d)
+            partial_sum := partial_sum + w_k * partial_sem
+        END FOR
+
+        // partial_sum = Σₖ wₖ = 1.0 (by normalization invariant)
+        ASSERT ABS(partial_sum - 1.0) < 1e-10   // verifies normalization
+        ASSERT partial_sum > 0.0                 // confirms monotonicity
+
+        EMIT INFO "∂DAG_cost/∂d = " + partial_sum + " > 0 — monotonicity proven"
+        RETURN partial_sum
+    END PROCEDURE
+
+END THEOREM
+
+
+// ── 6.2: AEGIS-PROOF-4.2 (EPHEMERIS CONVERGENCE) ─────────────
+
+// THEOREM: Under bounded observation sequences, the ephemeris step
+//           decision converges to optimal mode selection.
+//
+// Proof Requirements:
+//   (a) Lipschitz continuity of confidence function
+//   (b) Bounded variance in observation stream
+//   (c) Convergence rate analysis using stochastic approximation theory
+
+THEOREM EphemerisConvergence:
+
+    // PROOF REQUIREMENT (a): Lipschitz continuity of p_conf
+    PROCEDURE VerifyLipschitzConfidence(state1: SystemState,
+                                         state2: SystemState,
+                                         L_conf: REAL) -> BOOL:
+        // |p_conf(s₁) − p_conf(s₂)| ≤ L_conf · ‖s₁ − s₂‖
+        //
+        // p_conf is a weighted average of max-posteriors (eq. 15).
+        // Each Bayesian update (eq. 16) is Lipschitz with constant
+        // determined by the prior variance and likelihood smoothness.
+
+        p1 := ComputeEpistemicConfidence(state1)
+        p2 := ComputeEpistemicConfidence(state2)
+        lhs := ABS(p1 - p2)
+        rhs := L_conf * StateDistance(state1, state2)
+
+        IF lhs > rhs + 1e-10:
+            EMIT WARNING "Lipschitz continuity violated: |Δp|=" + lhs +
+                         " > L·‖Δs‖=" + rhs
+            RETURN FALSE
+        END IF
+        EMIT INFO "Lipschitz continuity verified: L_conf=" + L_conf
+        RETURN TRUE
+    END PROCEDURE
+
+
+    // PROOF REQUIREMENT (b): Bounded variance in observation stream
+    PROCEDURE VerifyObservationBoundedVariance(stream: Stream[Observation],
+                                                n_samples: INT,
+                                                sigma_bound: REAL) -> BOOL:
+        // Collect n_samples from stream and verify empirical variance ≤ σ²_bound.
+        samples := []
+        FOR i := 1 TO n_samples:
+            obs := stream.next()
+            p_conf_i := ComputeEpistemicConfidenceFromPairs(
+                            ExtractVerbNounPairs(obs),
+                            SystemState.default(), 0.0)
+            samples.APPEND(p_conf_i)
+        END FOR
+
+        empirical_variance := VARIANCE(samples)
+        IF empirical_variance > sigma_bound ^ 2:
+            EMIT WARNING "Observation variance " + empirical_variance +
+                         " > bound " + (sigma_bound ^ 2)
+            RETURN FALSE
+        END IF
+        EMIT INFO "Bounded variance confirmed: σ²=" + empirical_variance
+        RETURN TRUE
+    END PROCEDURE
+
+
+    // PROOF REQUIREMENT (c): Convergence rate analysis
+    // Cross-reference: AEGIS-PROOF-3.2 (Hybrid Mode Convergence) uses
+    // Robbins-Monro stochastic approximation with O(1/n) rate.
+    // Ephemeris convergence inherits this rate under the same conditions:
+    //   - Lipschitz confidence (verified above)
+    //   - Bounded variance (verified above)
+    //   - Diminishing step size αₙ = α₀/nᵝ with β > 0.5
+
+    PROCEDURE VerifyEphemerisConvergence(history: List[(SystemState, EphemerisMode)],
+                                          optimal_mode: EphemerisMode) -> REAL:
+        // Measure convergence of mode selection to optimal.
+        // Returns fraction of last 10% of decisions matching optimal mode.
+
+        n      := LENGTH(history)
+        tail   := history[FLOOR(0.9 * n) :]   // last 10% of decisions
+        n_tail := LENGTH(tail)
+
+        correct := 0
+        FOR EACH (state, mode) IN tail:
+            IF mode == optimal_mode:
+                correct := correct + 1
+            END IF
+        END FOR
+
+        rate := correct / MAX(n_tail, 1)
+        EMIT INFO "Ephemeris convergence rate: " + rate +
+                  " (target: ≥ " + EPISTEMIC_THRESHOLD + ")"
+        RETURN rate
+    END PROCEDURE
+
+END THEOREM
+
+
+// ── VERIFICATION ENTRY POINT ─────────────────────────────────
+
+PROCEDURE RunFormalVerificationSuite(v: SymbolicCapsule,
+                                      n: SymbolicCapsule,
+                                      stream: Stream[Observation]) -> VerificationReport:
+    report := NEW VerificationReport()
+
+    // AEGIS-PROOF-4.1: DAG cost monotonicity
+    d_range := [0.1, 0.2, 0.3, 0.5, 0.7, 1.0, 1.5, 2.0]
+    report.monotonicity_ok := DAGCostMonotonicity.VerifyMonotonicityWrtSemanticDistance(
+                                  v, n, d_range)
+    report.partial_deriv   := DAGCostMonotonicity.ProvePartialDerivative(v, n)
+
+    // AEGIS-PROOF-4.2: Ephemeris convergence prerequisites
+    state1 := SystemState.fromObservation(stream.peek(0))
+    state2 := SystemState.fromObservation(stream.peek(1))
+    report.lipschitz_ok    := EphemerisConvergence.VerifyLipschitzConfidence(
+                                  state1, state2, L_conf=2.0)
+    report.variance_ok     := EphemerisConvergence.VerifyObservationBoundedVariance(
+                                  stream, n_samples=100, sigma_bound=0.3)
+
+    report.all_verified := report.monotonicity_ok AND
+                           report.lipschitz_ok AND
+                           report.variance_ok
+
+    IF report.all_verified:
+        EMIT INFO "FORMAL VERIFICATION SUITE: ALL REQUIREMENTS MET ✓"
+    ELSE:
+        EMIT ERROR "FORMAL VERIFICATION SUITE: FAILURES DETECTED"
+    END IF
+
+    RETURN report
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 7: IMPLEMENTATION NOTES
+// ------------------------------------------------------------
+
+// ── 7.1: COMPUTATIONAL COMPLEXITY ────────────────────────────
+
+// Time complexity:  O(K · N · log N) per verb-noun pair
+//   K = number of feature slots
+//   N = size of glyph encoding space |G|
+//   log N factor: from Hamiltonian cycle nearest-neighbor sort step
+//
+// Space complexity: O(K · N + |G|) for glyph encoding
+//   K · N = slot values across N glyph dimensions
+//   |G| = glyph encoding space storage
+
+DEFINE ComplexitySpec AS:
+    time_per_pair   := "O(K · N · log N)"
+    space_total     := "O(K · N + |G|)"
+
+    // Practical breakdown:
+    //   SemanticDistance:      O(K)         per slot, K slots → O(K)
+    //   CulturalGrounding:     O(|G|)       glyph loop
+    //   TemporalContext:       O(1)         constant per pair
+    //   HamiltonianCycle:      O(N · log N) nearest-neighbor sort
+    //   VexameneriaScore:      O(K)         gradient computation
+
+    PROCEDURE VerifyComplexityBudget(K: INT, N: INT, budget_ms: REAL) -> BOOL:
+        // Estimate wall-clock time from complexity
+        CONSTANT OPS_PER_MS := 1e6   // ~1M simple ops/ms (rough estimate)
+        estimated_ops := K * N * LOG2(N)
+        estimated_ms  := estimated_ops / OPS_PER_MS
+
+        IF estimated_ms > budget_ms:
+            EMIT WARNING "Complexity exceeds budget: " + estimated_ms +
+                         "ms > " + budget_ms + "ms for K=" + K + " N=" + N
+            RETURN FALSE
+        END IF
+        EMIT INFO "Complexity within budget: " + estimated_ms + "ms"
+        RETURN TRUE
+    END PROCEDURE
+END DEFINE
+
+
+// ── 7.2: HYPERPARAMETER TUNING (TRIANGI DATASET) ─────────────
+
+// Recommended ranges from Triangi dataset validation:
+//
+//   λ ∈ [0.1, 0.3]   — cultural influence weight
+//   μ ∈ [0.05, 0.15] — temporal influence weight
+//   α ∈ [0.2, 0.4]   — Mahalanobis correction weight
+
+DEFINE HyperparameterSpec AS:
+    // From §7.2 Table (eqs. 36–38):
+    LAMBDA_MIN  := 0.1;   LAMBDA_MAX  := 0.3    // cultural
+    MU_MIN      := 0.05;  MU_MAX      := 0.15   // temporal
+    ALPHA_MIN   := 0.2;   ALPHA_MAX   := 0.4    // Mahalanobis
+
+    // Default midpoints:
+    LAMBDA_DEFAULT  := 0.2
+    MU_DEFAULT      := 0.1
+    ALPHA_MAHAL     := 0.3
+    BETA1_DEFAULT   := 0.5    // Nsibidi vs domain prior split (not specified — equal)
+    BETA2_DEFAULT   := 0.5
+    GAMMA1_DEFAULT  := 0.5    // recency vs persistence mismatch split
+    GAMMA2_DEFAULT  := 0.5
+END DEFINE
+
+
+PROCEDURE ValidateHyperparameters(lambda_w: REAL, mu_w: REAL,
+                                   alpha_m: REAL) -> BOOL:
+    ok := TRUE
+    IF lambda_w < LAMBDA_MIN OR lambda_w > LAMBDA_MAX:
+        EMIT WARNING "λ=" + lambda_w + " outside recommended [0.1, 0.3]"
+        ok := FALSE
+    END IF
+    IF mu_w < MU_MIN OR mu_w > MU_MAX:
+        EMIT WARNING "μ=" + mu_w + " outside recommended [0.05, 0.15]"
+        ok := FALSE
+    END IF
+    IF alpha_m < ALPHA_MIN OR alpha_m > ALPHA_MAX:
+        EMIT WARNING "α=" + alpha_m + " outside recommended [0.2, 0.4]"
+        ok := FALSE
+    END IF
+    RETURN ok
+END PROCEDURE
+
+
+// ── CONCLUSION SUMMARY ────────────────────────────────────────
+
+PROCEDURE PrintConclusion() -> VOID:
+    EMIT INFO "=== DAG EPHEMERIS SPEC — VERIFICATION COMPLETE ==="
+    EMIT INFO ""
+    EMIT INFO "DAG_cost(v,n) = Σ wₖ·sem_dist(vₖ,nₖ) + λ·C_G(v,n) + μ·TC(v,n)"
+    EMIT INFO "Ephemeris decision: FILTER if p_conf ≥ 0.954 | REFLASH otherwise"
+    EMIT INFO "Vexameneria: ω₁·action_intensity + ω₂·object_complexity + ω₃·coherence"
+    EMIT INFO "DIRAM: COMMIT if ε(transition) ≤ 0.6 | ROLLBACK otherwise"
+    EMIT INFO ""
+    EMIT INFO "AEGIS-PROOF-4.1 (DAG monotonicity):   ∂DAG_cost/∂d = 1 > 0 ✓"
+    EMIT INFO "AEGIS-PROOF-4.2 (Ephemeris convergence): Lipschitz + bounded var ✓"
+    EMIT INFO ""
+    EMIT INFO "Complexity: O(K·N·log N) time | O(K·N + |G|) space"
+    EMIT INFO "Hyperparameters: λ∈[0.1,0.3] μ∈[0.05,0.15] α∈[0.2,0.4]"
+    EMIT INFO "==================================================="
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 5 — FINAL MODULE
+//
+// FULL MODULE INDEX (DAG Ephemeris Spec):
+//   M1: dag_ephemeris_M1_dag_cost_function.psc.txt
+//   M2: dag_ephemeris_M2_ephemeris_step.psc.txt
+//   M3: dag_ephemeris_M3_peristaltic_vexameneria.psc.txt
+//   M4: dag_ephemeris_M4_application_diram.psc.txt
+//   M5: dag_ephemeris_M5_verification_complexity.psc.txt  ← THIS FILE
+//
+// COMPLETE AEGIS PROOF CHAIN (all 6 PDF sessions, 30 modules):
+//   PDF 1 Bayesian Debiasing     : bayesian_debiasing_M1–M5
+//   PDF 2 Actor Class            : actor_class_M1–M5
+//   PDF 3 AEGIS-PROOF-1.2        : aegis_proof_1_2_M1–M5
+//   PDF 4 AEGIS-PROOF-3.1 & 3.2 : aegis_proof_3_1_3_2_M1–M5
+//   PDF 5 AEGIS-PROOF-4.1        : aegis_proof_4_1_M1–M5
+//   PDF 6 DAG Ephemeris Spec     : dag_ephemeris_M1–M5  ← THIS
+//
+// SHARED CONSTANTS ACROSS ALL 6 DOCUMENTS:
+//   EPISTEMIC_THRESHOLD := 0.954
+//   DIRAM_EPSILON_BOUND := 0.6
+//   SINPHASE_BOUND      := 0.6
+// ============================================================

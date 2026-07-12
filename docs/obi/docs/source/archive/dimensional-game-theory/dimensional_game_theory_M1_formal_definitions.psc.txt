@@ -1,0 +1,244 @@
+// ============================================================
+// FILE: dimensional_game_theory_M1_formal_definitions.psc.txt
+// MODULE 1 OF 5 — Formal Game Theory Definitions
+// SOURCE: "Formal Analysis of Game Theory for Algorithm Development"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// MOTTO:  "Computing from the Heart"
+// ============================================================
+
+// ── CORPUS POSITION ──────────────────────────────────────────
+//
+// This paper introduces DIMENSIONAL GAME THEORY — the strategic
+// layer that underpins the OBIAI decision-making architecture.
+//
+// Cross-references within OBINexus corpus:
+//   DAG Ephemeris Spec (PDF 6):
+//     S_game = [DAG_cost(v,n), vexameneria(v,n), p_conf(state)]
+//     → The strategic vector is the dimensional game theory realization
+//       within the OBIAI Filter-Flash framework.
+//
+//   Actor Class (PDF 2):
+//     Dimensional Innovation Property: τ ∉ span(C)
+//     → Actors operate across strategic dimensions, extending beyond
+//       conventional agent action spaces.
+//
+//   OBIAI Thesis (PDF 7):
+//     Three-tiered persona cascade (Obinexus/Uche/Eze)
+//     → Personas map to strategic dimensions in competitive environments.
+
+DEFINE DimensionalGameTheoryContext AS:
+    paper_title := "Formal Analysis of Game Theory for Algorithm Development"
+    framework   := "Dimensional Game Theory"
+    organization := "OBINexus Computing"
+    corpus_role := "Strategic optimization layer for OBIAI decisions"
+    s_game_ref  := "DAG Ephemeris Spec §5.1 — S_game 3-vector"
+END DEFINE
+
+
+// ── SECTION 2: FORMAL GAME THEORY DEFINITIONS ────────────────
+
+// ── DEFINITION 1: GAME ───────────────────────────────────────
+
+// A game is a tuple G = (N, A, u) where:
+//   N = {1, 2, ..., n}        — finite set of players
+//   A = A₁ × A₂ × ... × Aₙ  — joint action space
+//   u = (u₁, u₂, ..., uₙ)    — utility functions
+
+DEFINE Game AS STRUCTURE:
+    N : Set[PlayerID]                          // N = {1, ..., n}
+    A : CartesianProduct[Set[Action]]          // A = A₁ × ... × Aₙ
+    u : List[UtilityFunction]                  // uᵢ : A → ℝ
+
+    // Invariants:
+    INVARIANT: LENGTH(u) == LENGTH(N)          // one utility fn per player
+    INVARIANT: LENGTH(A.factor_sets) == LENGTH(N)  // one action set per player
+
+    PROCEDURE NumPlayers() -> INT:
+        RETURN LENGTH(N)
+    END PROCEDURE
+
+    PROCEDURE ActionSpaceSize() -> INT:
+        total := 1
+        FOR EACH A_i IN A.factor_sets:
+            total := total * LENGTH(A_i)
+        END FOR
+        RETURN total
+    END PROCEDURE
+
+    PROCEDURE Utility(player_i: PlayerID, action_profile: ActionProfile) -> REAL:
+        // uᵢ(a) = payoff to player i under joint action profile a ∈ A
+        ASSERT player_i IN N
+        ASSERT action_profile.length == LENGTH(N)
+        RETURN u[player_i].evaluate(action_profile)
+    END PROCEDURE
+END DEFINE
+
+
+PROCEDURE BuildGame(player_ids: List[PlayerID],
+                     action_sets: List[Set[Action]],
+                     utility_fns: List[UtilityFunction]) -> Game:
+    // Constructor with validation
+    IF LENGTH(player_ids) != LENGTH(action_sets):
+        EMIT ERROR "Player count ≠ action set count"
+        RETURN NULL
+    END IF
+    IF LENGTH(player_ids) != LENGTH(utility_fns):
+        EMIT ERROR "Player count ≠ utility function count"
+        RETURN NULL
+    END IF
+
+    G := Game(
+        N = SET(player_ids),
+        A = CartesianProduct(action_sets),
+        u = utility_fns
+    )
+    RETURN G
+END PROCEDURE
+
+
+// ── DEFINITION 2: STRATEGY ────────────────────────────────────
+
+// Pure strategy:  sᵢ ∈ Aᵢ
+// Mixed strategy: σᵢ = probability distribution over Aᵢ
+//                 σᵢ(aᵢ) = P(player i selects action aᵢ)
+
+DEFINE PureStrategy AS:
+    player_id : PlayerID
+    action    : Action          // sᵢ ∈ Aᵢ
+    INVARIANT: action IN ActionSetFor(player_id)
+END DEFINE
+
+
+DEFINE MixedStrategy AS:
+    player_id   : PlayerID
+    distribution : Map[Action → REAL]   // σᵢ(aᵢ) = P(select aᵢ)
+
+    // Distribution invariants:
+    INVARIANT: ALL(p >= 0.0 FOR p IN distribution.values)
+    INVARIANT: ABS(SUM(distribution.values) - 1.0) < 1e-10
+
+    PROCEDURE Probability(a: Action) -> REAL:
+        IF a IN distribution:
+            RETURN distribution[a]
+        END IF
+        RETURN 0.0   // zero probability for actions not in support
+    END PROCEDURE
+
+    PROCEDURE Support() -> Set[Action]:
+        // Actions with non-zero probability
+        RETURN {a FOR a, p IN distribution IF p > 0.0}
+    END PROCEDURE
+
+    PROCEDURE SampleAction() -> Action:
+        // Draw one action according to probability distribution
+        RETURN SAMPLE_CATEGORICAL(distribution)
+    END PROCEDURE
+END DEFINE
+
+
+PROCEDURE ValidateMixedStrategy(sigma: MixedStrategy,
+                                  A_i: Set[Action]) -> BOOL:
+    // All support actions must be in Aᵢ
+    FOR EACH a IN sigma.Support():
+        IF a NOT IN A_i:
+            EMIT ERROR "Mixed strategy support action " + a +
+                       " not in action set"
+            RETURN FALSE
+        END IF
+    END FOR
+    // Probabilities must sum to 1
+    IF ABS(SUM(sigma.distribution.values) - 1.0) > 1e-10:
+        EMIT ERROR "Mixed strategy probabilities do not sum to 1"
+        RETURN FALSE
+    END IF
+    RETURN TRUE
+END PROCEDURE
+
+
+// ── DEFINITION 3: STRATEGY PROFILE ───────────────────────────
+
+// s = (s₁, s₂, ..., sₙ) — one strategy per player
+// s₋ᵢ = (s₁, ..., sᵢ₋₁, sᵢ₊₁, ..., sₙ) — all except player i
+
+DEFINE StrategyProfile AS:
+    strategies : Map[PlayerID → Strategy]   // sᵢ for each i ∈ N
+
+    PROCEDURE Get(player_i: PlayerID) -> Strategy:
+        RETURN strategies[player_i]
+    END PROCEDURE
+
+    PROCEDURE ExcludePlayer(player_i: PlayerID) -> StrategyProfile:
+        // s₋ᵢ: all strategies except player i's
+        excluded := COPY(strategies)
+        excluded.REMOVE(player_i)
+        RETURN StrategyProfile(strategies=excluded)
+    END PROCEDURE
+
+    PROCEDURE Substitute(player_i: PlayerID,
+                          new_s_i: Strategy) -> StrategyProfile:
+        // Return (sᵢ', s₋ᵢ): replace player i's strategy with new_s_i
+        modified := COPY(strategies)
+        modified[player_i] := new_s_i
+        RETURN StrategyProfile(strategies=modified)
+    END PROCEDURE
+END DEFINE
+
+
+// ── DEFINITION 4: NASH EQUILIBRIUM ───────────────────────────
+
+// s* = (s₁*, s₂*, ..., sₙ*) is a Nash Equilibrium if:
+//   For each player i and for all alternative strategies sᵢ ∈ Aᵢ:
+//     uᵢ(sᵢ*, s₋ᵢ*) ≥ uᵢ(sᵢ, s₋ᵢ*)
+//
+// No player can improve their payoff by unilaterally deviating.
+
+PROCEDURE IsNashEquilibrium(G: Game, s_star: StrategyProfile) -> BOOL:
+    // Verify Nash Equilibrium condition for all players.
+
+    FOR EACH player_i IN G.N:
+        current_payoff := G.Utility(player_i,
+                                     s_star.AsActionProfile())
+
+        // Check all alternative strategies for player i
+        FOR EACH s_i_alt IN ActionSetFor(player_i):
+            s_alt_profile  := s_star.Substitute(player_i, s_i_alt)
+            alt_payoff     := G.Utility(player_i, s_alt_profile.AsActionProfile())
+
+            IF alt_payoff > current_payoff + 1e-10:
+                EMIT INFO "NE violated: player " + player_i +
+                          " can improve by switching to " + s_i_alt
+                RETURN FALSE
+            END IF
+        END FOR
+    END FOR
+
+    EMIT INFO "Nash Equilibrium verified ✓"
+    RETURN TRUE
+END PROCEDURE
+
+
+PROCEDURE FindBestResponse(G: Game, player_i: PlayerID,
+                             s_minus_i: StrategyProfile) -> Strategy:
+    // Best response: argmax_{sᵢ ∈ Aᵢ} uᵢ(sᵢ, s₋ᵢ*)
+
+    best_strategy := NULL
+    best_payoff   := NEGATIVE_INFINITY
+
+    FOR EACH s_i IN ActionSetFor(player_i):
+        profile  := s_minus_i.Substitute(player_i, s_i)
+        payoff_i := G.Utility(player_i, profile.AsActionProfile())
+        IF payoff_i > best_payoff:
+            best_payoff   := payoff_i
+            best_strategy := s_i
+        END IF
+    END FOR
+
+    RETURN best_strategy
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: dimensional_game_theory_M2_dimensional_extension.psc.txt
+// ============================================================

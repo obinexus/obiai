@@ -1,0 +1,328 @@
+// ============================================================
+// FILE: FMFRS_Module4_SecurityProtocols.psc.txt
+// SOURCE: Formal_Mathematical_Reasoning_System.pdf — Sections 6, 7, 8
+// AUTHOR: Nnamdi Michael Okpala (2025)
+// PURPOSE: Pseudocode for USCN (Unicode Structural Charset Normalizer),
+//          Zero-Overhead Marshalling Protocols (Cryptographic + ZK),
+//          and Mathematical Validation Implementation
+// ============================================================
+
+MODULE SecurityProtocols
+
+// ============================================================
+// SECTION 6 — Unicode-Only Structural Charset Normalizer (USCN)
+// ============================================================
+
+// ============================================================
+// SECTION 6.1 — Isomorphic Reduction Principle
+// ============================================================
+
+// USCN applies automaton-based character encoding normalization
+// through structural equivalence.
+//
+// DEFINITION (Structural Equivalence):
+//   Two encoding paths p1, p2 in Sigma* are structurally equivalent
+//   under automaton A if:
+//     delta*(q0, p1) == delta*(q0, p2) == qf  (where qf is an accept state)
+//
+// THEOREM (Canonical Reduction):
+//   For any set P = {p1, p2, ..., pk} of structurally equivalent paths,
+//   there exists a UNIQUE canonical form c such that:
+//     for all pi in P:  phi(pi) == c  AND  semantics(pi) ≡ semantics(c)
+
+STRUCTURE Automaton:
+    states:         Set<State>
+    initial_state:  State           // q0
+    accept_states:  Set<State>      // F
+    transition_fn:  FUNCTION(State, Char) -> State   // delta
+END STRUCTURE
+
+FUNCTION delta_star(
+    automaton: Automaton,
+    start:     State,
+    path:      String
+) -> State:
+    // Extended transition function — processes a full path string
+    current := start
+    FOR EACH character c IN path DO
+        current := automaton.transition_fn(current, c)
+    END FOR
+    RETURN current
+END FUNCTION
+
+FUNCTION are_structurally_equivalent(
+    automaton: Automaton,
+    path1:     String,
+    path2:     String
+) -> Boolean:
+    // Both paths must reach the same accept state from q0
+    final_state_1 := delta_star(automaton, automaton.initial_state, path1)
+    final_state_2 := delta_star(automaton, automaton.initial_state, path2)
+
+    same_state    := (final_state_1 == final_state_2)
+    in_accept_set := automaton.accept_states.contains(final_state_1)
+
+    RETURN same_state AND in_accept_set
+END FUNCTION
+
+FUNCTION compute_canonical_form(
+    paths:     List<String>,
+    automaton: Automaton
+) -> CanonicalForm:
+    // THEOREM: there is a unique canonical c for any equivalence class
+    // Compute canonical by reducing all equivalent paths to one representation
+    equivalence_class := {}
+
+    FOR EACH p IN paths DO
+        IF are_structurally_equivalent(automaton, paths[0], p) THEN
+            equivalence_class.add(p)
+        END IF
+    END FOR
+
+    canonical := select_canonical_representative(equivalence_class)
+    ASSERT semantics(canonical) == semantics(paths[0])  // Semantic preservation
+
+    RETURN canonical
+END FUNCTION
+
+FUNCTION normalize(input: String, automaton: Automaton) -> String:
+    // Core USCN normalization step
+    // Reduces any encoding path to its canonical form
+    encoded_paths := decompose_to_encoding_paths(input)
+    canonical     := compute_canonical_form(encoded_paths, automaton)
+    RETURN canonical.to_string()
+END FUNCTION
+
+
+// ============================================================
+// SECTION 6.2 — Security Invariant
+// ============================================================
+
+// GUARANTEE:
+//   validate(normalize(s)) ≡ validate(canonical(s))
+//
+// This eliminates encoding-based exploit vectors through structural
+// normalization — NOT heuristic pattern matching.
+
+FUNCTION uscn_security_invariant(
+    input:     String,
+    automaton: Automaton,
+    validator: Validator
+) -> SecurityAssurance:
+
+    normalized := normalize(input, automaton)
+    canonical  := compute_canonical_form(
+                      decompose_to_encoding_paths(input),
+                      automaton
+                  ).to_string()
+
+    validation_on_normalized := validator.validate(normalized)
+    validation_on_canonical  := validator.validate(canonical)
+
+    // Invariant: results must be identical
+    IF validation_on_normalized != validation_on_canonical THEN
+        RAISE SecurityInvariantViolation(
+            "USCN invariant broken: normalize and canonical produce different validation results"
+        )
+    END IF
+
+    RETURN SecurityAssurance.ENCODING_EXPLOIT_VECTOR_ELIMINATED
+END FUNCTION
+
+
+// ============================================================
+// SECTION 7 — Zero-Overhead Marshalling Protocols
+// ============================================================
+
+// ============================================================
+// SECTION 7.1 — Cryptographic Reduction Framework
+// ============================================================
+
+// THEOREM (Protocol Soundness):
+//   Any violation of protocol soundness implies a break
+//   in the underlying cryptographic assumptions.
+//
+// Derived key formula:
+//   K_derived = HMAC_{x_A}(y_A)
+//   where x_A = Alice's private key, y_A = Alice's public key
+
+STRUCTURE CryptographicIdentity:
+    private_key: PrivateKey   // x_A
+    public_key:  PublicKey    // y_A
+END STRUCTURE
+
+FUNCTION derive_key(identity: CryptographicIdentity) -> DerivedKey:
+    // K_derived = HMAC_{x_A}(y_A)
+    K_derived := HMAC(
+        key:     identity.private_key,
+        message: identity.public_key
+    )
+    RETURN K_derived
+END FUNCTION
+
+FUNCTION verify_protocol_soundness(
+    session:    ProtocolSession,
+    crypto_params: CryptographicParameters
+) -> SoundnessResult:
+    // If soundness is violated, it means the cryptographic
+    // assumptions themselves are broken.
+    // This is a REDUCTION proof — not a direct check.
+
+    IF session.has_soundness_violation() THEN
+        RETURN SoundnessResult.CRYPTOGRAPHIC_ASSUMPTION_BROKEN
+    END IF
+    RETURN SoundnessResult.SOUND
+END FUNCTION
+
+
+// ============================================================
+// SECTION 7.2 — Zero-Knowledge Protocol Integration (Schnorr)
+// ============================================================
+
+// Schnorr Identification Protocol must satisfy:
+//   1. Completeness:   Honest Alice always passes verification
+//   2. Soundness:      Cheating provers cannot forge valid responses
+//   3. Zero-Knowledge: Simulators produce transcripts indistinguishable
+//                      from real protocol transcripts
+
+STRUCTURE SchnorrProof:
+    commitment:  GroupElement     // R = g^r
+    challenge:   Scalar           // c (issued by verifier)
+    response:    Scalar           // s = r + c*x_A mod q
+END STRUCTURE
+
+FUNCTION schnorr_prove(
+    private_key: PrivateKey,
+    nonce:       Scalar,          // r (random, secret)
+    challenge:   Scalar           // c (from verifier)
+) -> SchnorrProof:
+    commitment := group_generator() ^ nonce        // R = g^r
+    response   := nonce + (challenge * private_key) MOD group_order()
+
+    RETURN SchnorrProof {
+        commitment: commitment,
+        challenge:  challenge,
+        response:   response
+    }
+END FUNCTION
+
+FUNCTION schnorr_verify(
+    public_key: PublicKey,
+    proof:      SchnorrProof
+) -> Boolean:
+    // Completeness: verify g^s == R * y_A^c
+    lhs := group_generator() ^ proof.response
+    rhs := proof.commitment * (public_key ^ proof.challenge)
+    RETURN lhs == rhs
+END FUNCTION
+
+FUNCTION verify_zero_knowledge_property(
+    simulator: ZKSimulator,
+    verifier:  Verifier
+) -> Boolean:
+    // ZK property: simulator transcripts are computationally
+    // indistinguishable from real transcripts
+    real_transcript      := run_real_protocol_session()
+    simulated_transcript := simulator.simulate()
+
+    RETURN are_indistinguishable(real_transcript, simulated_transcript)
+END FUNCTION
+
+
+// ============================================================
+// SECTION 8 — Mathematical Validation Implementation
+// ============================================================
+
+// ============================================================
+// SECTION 8.1 — Function Equivalence Validation (Algorithm 1)
+// ============================================================
+
+// Algorithm 1: Domain-Based Equivalence Verification
+// REQUIRE: Functions f_s (static), f_d (dynamic), and domain D
+// ENSURE:  Equivalence status and divergence information
+
+CONSTANT EPSILON := 1e-6   // Floating-point equivalence tolerance
+
+FUNCTION domain_based_equivalence_verification(
+    f_static:  Function,
+    f_dynamic: Function,
+    domain:    Domain
+) -> EquivalenceReport:
+
+    // Step 1: Initialize tolerance
+    epsilon := EPSILON
+
+    // Step 2: Iterate over domain
+    FOR EACH x IN domain DO
+        result_s := f_static.evaluate(x)     // Line 3: results = fs(x)
+        result_d := f_dynamic.evaluate(x)    // Line 4: resultd = fd(x)
+
+        // Step 3: Check if outputs diverge beyond tolerance
+        IF ABS(result_s - result_d) > epsilon THEN
+            // Divergence found — return non-equivalent with details
+            RETURN EquivalenceReport {
+                equivalent: FALSE,
+                divergence: {
+                    x:        x,
+                    result_s: result_s,
+                    result_d: result_d
+                }
+            }
+        END IF
+    END FOR
+
+    // Step 4: All points equivalent — return success
+    RETURN EquivalenceReport {
+        equivalent: TRUE,
+        domain:     domain
+    }
+
+END FUNCTION
+
+
+// ============================================================
+// SECTION 8.2 — Cost Function Monitoring (Real-Time)
+// ============================================================
+
+// Governance zone assessment (from equation 2):
+//
+//   C <= 0.5        → AUTONOMOUS ZONE
+//   0.5 < C <= 0.6  → WARNING ZONE
+//   C > 0.6         → GOVERNANCE ZONE
+
+FUNCTION assess_governance_zone(C: Float) -> GovernanceAssessment:
+    IF C <= 0.5 THEN
+        RETURN GovernanceAssessment {
+            zone:   "AUTONOMOUS ZONE",
+            action: "Allow — system within compliant bounds"
+        }
+    ELSE IF C <= 0.6 THEN
+        RETURN GovernanceAssessment {
+            zone:   "WARNING ZONE",
+            action: "Alert — approaching governance threshold"
+        }
+    ELSE
+        RETURN GovernanceAssessment {
+            zone:   "GOVERNANCE ZONE",
+            action: "Halt — system exceeds architectural bounds"
+        }
+    END IF
+END FUNCTION
+
+PROCEDURE real_time_cost_monitoring(system: AegisSystem):
+    LOOP continuously:
+        C        := compute_sinphase_cost(system)          // From Module 3
+        assessment := assess_governance_zone(C)
+
+        emit_monitoring_event(C, assessment)
+
+        IF assessment.zone == "GOVERNANCE ZONE" THEN
+            TRIGGER governance_intervention(system)
+            BREAK
+        END IF
+
+        SLEEP monitoring_interval
+    END LOOP
+END PROCEDURE
+
+END MODULE SecurityProtocols

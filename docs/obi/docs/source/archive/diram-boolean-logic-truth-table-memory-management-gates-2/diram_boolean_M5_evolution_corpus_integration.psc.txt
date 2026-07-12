@@ -1,0 +1,245 @@
+// ============================================================
+// FILE: diram_boolean_M5_evolution_corpus_integration.psc.txt
+// MODULE 5 OF 5 — DIRAM Evolution (Random→Directed),
+//                 Corpus Integration & Final 12-PDF Index
+// SOURCE: "DIRAM Boolean Logic Truth Table — Memory Management Gates"
+// ORG:    OBINexus — Aegis Project | Directed Instruction RAM
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION: MEMORY EVOLUTION — RANDOM TO DIRECTED
+// ------------------------------------------------------------
+
+// Traditional RAM: PASSIVE storage responding to requests.
+// DIRAM:           ACTIVE memory making intelligent decisions based on:
+//   (1) Boolean logic gates for fast decision-making
+//   (2) Cache hit/miss prediction patterns
+//   (3) Governance constraints preventing resource exhaustion
+//   (4) Cryptographic traceability for security
+
+DEFINE MemoryEvolutionComparison AS:
+
+    TRADITIONAL_RAM := {
+        mode        : "Passive",
+        decision    : "None — responds to every request uniformly",
+        governance  : "None — no constraint enforcement",
+        prediction  : "None — reactive only",
+        traceability: "None — no audit trail",
+        behavior    : "Stores and retrieves without intelligence"
+    }
+
+    DIRAM := {
+        mode        : "Active / Directed",
+        decision    : "Boolean gate: diram_memory_gate(A, B)",
+        governance  : "Sinphase epsilon(x) <= 0.5 — hardware enforced",
+        prediction  : "Lookahead with confidence scoring",
+        traceability: "SHA-256 receipt for every cache operation",
+        behavior    : "Memory that thinks, predicts, and governs allocation"
+    }
+
+    EVOLUTION_STATEMENT :=
+        "Result: Memory that doesn't just store — it thinks, predicts, " +
+        "and governs its own allocation patterns using boolean logic as foundation."
+END DEFINE
+
+
+// ── FOUR PILLARS OF DIRECTED MEMORY ──────────────────────────
+
+DEFINE DIRAMPillars AS:
+
+    PILLAR_1_BOOLEAN_GATES := {
+        description  : "Fast decision-making via 2-input 1-output boolean logic",
+        gate_circuit : "NOT(A) → XOR(A,B) → Output = (NOT_A AND NOT(XOR)) OR (NOT(NOT_A) AND XOR)",
+        speed        : "Single clock cycle",
+        determinism  : "FULLY DETERMINISTIC — same inputs always yield same output"
+    }
+
+    PILLAR_2_CACHE_PREDICTION := {
+        description  : "Cache hit/miss patterns drive lookahead preloading",
+        mechanism    : "Frequency-based confidence scoring on historical access log",
+        benefit      : "Increases hit rate → fewer miss penalties → faster system",
+        threshold    : LOOKAHEAD_CONFIDENCE_THRESHOLD    // 0.7
+    }
+
+    PILLAR_3_GOVERNANCE := {
+        description  : "Governance constraints prevent resource exhaustion",
+        bound        : "epsilon(x) = heap_events / max_events <= 0.5",
+        enforcement  : "Hardware level — checked before every allocation",
+        violation_action : "BLOCK all allocations (including cache hits)"
+    }
+
+    PILLAR_4_CRYPTOGRAPHIC := {
+        description  : "Cryptographic traceability for security and audit",
+        mechanism    : "SHA-256 receipt per cache operation",
+        integration  : "Compatible with AuraSeal (PDF 9) validation pipeline",
+        immutability : "Receipts are append-only in RECEIPT_LOG_REGION"
+    }
+END DEFINE
+
+
+// ── CORPUS-WIDE DIRAM INTEGRATION MAP ────────────────────────
+
+DEFINE DIRAMCorpusIntegrationMap AS:
+
+    // How the DIRAM boolean gate connects to each prior document:
+
+    PDF_2_ACTOR_CLASS := {
+        connection  : "Sinphase governance epsilon(x) <= 0.6 (software form)",
+        now_refined : "PDF 12 shows hardware gate uses 0.5 — tighter bound",
+        file        : "actor_class_M3_cost_functions.psc.txt"
+    }
+
+    PDF_3_AEGIS_1_2 := {
+        connection  : "DIRAM epsilon(transition) <= 0.6 gates EpistemicDAG traversal",
+        now_refined : "Boolean gate is the hardware enforcement of that same constraint",
+        file        : "aegis_proof_1_2_M5_validation_deployment.psc.txt"
+    }
+
+    PDF_4_AEGIS_3_1_2 := {
+        connection  : "Proposition 1 DIRAM compatibility: ε(transition) <= 0.6",
+        now_refined : "Convergence J→J* implies epsilon→0, satisfying both 0.5 and 0.6 bounds",
+        file        : "aegis_proof_3_1_3_2_M4_obiai_diram_integration.psc.txt"
+    }
+
+    PDF_6_DAG_EPHEMERIS := {
+        connection  : "DIRAM COMMIT if epsilon <= 0.6, ROLLBACK if epsilon > 0.6",
+        now_refined : "PDF 12 gate: ALLOW if epsilon <= 0.5, BLOCK if epsilon > 0.5",
+        bridge      : "COMMIT path in PDF 6 requires PDF 12 ALLOW precondition",
+        file        : "dag_ephemeris_M4_application_diram.psc.txt"
+    }
+
+    PDF_7_OBIAI := {
+        connection  : "DIRAM cascade governs Filter-Flash engine persistence",
+        now_refined : "CanPersist() in FilterFlashEngine gates on DIRAM COMMIT",
+        bridge      : "PDF 12 hardware gate is the lowest-level enforcement of that gate",
+        file        : "obiai_thesis_M3_implementation_modules.psc.txt"
+    }
+
+    PDF_9_RAF := {
+        connection  : "AuraSeal: entropy_coefficient <= 0.5 (same bound as PDF 12)",
+        direct_link : "Both PDF 9 and PDF 12 use the 0.5 strict hardware bound",
+        integration : "QuantumAuraSeal.entropy_valid = (entropy_coefficient <= 0.5)",
+        file        : "raf_cryptographic_M3_quantum_lattice.psc.txt"
+    }
+
+    PDF_12_THIS := {
+        connection  : "Provides the boolean hardware gate implementing all of the above",
+        primacy     : "The most concrete, hardware-level specification of epsilon enforcement"
+    }
+END DEFINE
+
+
+// ── DIRAM + FILTER-FLASH UNIFIED DECISION LOGIC ──────────────
+
+// The DIRAM boolean gate and the Filter-Flash ephemeris step are
+// complementary decision mechanisms operating at different layers:
+//
+//   DIRAM Gate (hardware, boolean):
+//     Input: A=cache_state, B=governance_state
+//     Output: ALLOW/BLOCK
+//     Timescale: single clock cycle
+//
+//   Filter-Flash Ephemeris (cognitive, Bayesian):
+//     Input: p_conf(state)
+//     Output: FILTER/REFLASH
+//     Timescale: inference loop step
+//
+// Together: DIRAM gates the memory layer; Filter-Flash gates the cognitive layer.
+// A FILTER mode decision still requires DIRAM ALLOW to actually persist to memory.
+
+PROCEDURE UnifiedMemoryAndCognitiveDecision(
+    key: CacheKey,
+    state: SystemState,
+    monitor: HeapEventMonitor,
+    lru_chain: LRUChain,
+    backend: MemoryBackend) -> UnifiedDecision:
+
+    // Step 1: DIRAM hardware gate (boolean, fast)
+    cache_state  := IF lru_chain.Contains(key) THEN HIT ELSE MISS
+    gov_state    := monitor.GetGovernanceState()
+    diram_output := diram_memory_gate(cache_state, gov_state)
+
+    // Step 2: Filter-Flash cognitive gate (Bayesian, slower)
+    p_conf        := ComputeEpistemicConfidence(state)
+    ephemeris_mode := EphemerisDecision(state)
+
+    // Step 3: Combined decision
+    //   Memory can only be written if BOTH gates permit:
+    //   DIRAM ALLOW  AND  FILTER mode (p_conf >= 0.954)
+    memory_allowed   := (diram_output == 1)
+    cognitive_filter := (ephemeris_mode == FILTER)
+
+    can_persist := memory_allowed AND cognitive_filter
+
+    EMIT LOG "Unified decision | DIRAM=" + diram_output +
+             " | ephemeris=" + ephemeris_mode +
+             " | can_persist=" + can_persist
+
+    RETURN UnifiedDecision(
+        diram_gate    = diram_output,
+        cognitive_gate = ephemeris_mode,
+        can_persist   = can_persist,
+        epsilon        = monitor.CurrentEpsilon(),
+        p_conf         = p_conf
+    )
+END PROCEDURE
+
+
+// ── COMPLETE 12-PDF CORPUS INDEX (12 PDFs, 60 Modules) ───────
+
+PROCEDURE PrintFinalCorpusIndex() -> VOID:
+    EMIT INFO "=========================================================="
+    EMIT INFO "COMPLETE OBINEXUS PSEUDOCODE CORPUS — FINAL"
+    EMIT INFO "12 PDFs → 60 Modules | Nnamdi Michael Okpala, OBINexus"
+    EMIT INFO "Span: May 2025 – May 2026"
+    EMIT INFO "=========================================================="
+    EMIT INFO ""
+    EMIT INFO "── AEGIS PROOF CHAIN ──────────────────────────────────────"
+    EMIT INFO "PDF 1  bayesian_debiasing_M1–M5              (July 4, 2025)"
+    EMIT INFO "PDF 2  actor_class_M1–M5                     (2025)"
+    EMIT INFO "PDF 3  aegis_proof_1_2_M1–M5                 (May 27, 2025)"
+    EMIT INFO "PDF 4  aegis_proof_3_1_3_2_M1–M5             (August 2025)"
+    EMIT INFO "PDF 5  aegis_proof_4_1_M1–M5                 (August 2025)"
+    EMIT INFO "PDF 6  dag_ephemeris_M1–M5                   (August 2025)"
+    EMIT INFO "PDF 7  obiai_thesis_M1–M5                    (September 2025)"
+    EMIT INFO ""
+    EMIT INFO "── DIMENSIONAL GAME THEORY SUB-SERIES ────────────────────"
+    EMIT INFO "PDF 8  dimensional_game_theory_M1–M5         (July 4, 2025)"
+    EMIT INFO "PDF 9  raf_cryptographic_M1–M5               (August 2025)"
+    EMIT INFO "PDF 10 dgt_variadic_M1–M5                    (May 24, 2026)"
+    EMIT INFO "PDF 11 dgt_variadic_v1_M1–M5 [ORIGINAL]      (July 4, 2025)"
+    EMIT INFO ""
+    EMIT INFO "── DIRAM HARDWARE SPECIFICATION ───────────────────────────"
+    EMIT INFO "PDF 12 diram_boolean_M1–M5  ← THIS           (OBINexus Aegis)"
+    EMIT INFO "  diram_boolean_M1_truth_table.psc.txt"
+    EMIT INFO "  diram_boolean_M2_cache_lru_mru.psc.txt"
+    EMIT INFO "  diram_boolean_M3_sinphase_governance.psc.txt"
+    EMIT INFO "  diram_boolean_M4_hardware_implementation.psc.txt"
+    EMIT INFO "  diram_boolean_M5_evolution_corpus_integration.psc.txt"
+    EMIT INFO ""
+    EMIT INFO "=========================================================="
+    EMIT INFO "GLOBAL INVARIANTS (all 12 documents):"
+    EMIT INFO "  EPISTEMIC_THRESHOLD      := 0.954"
+    EMIT INFO "  DIRAM_EPSILON_SW_BOUND   := 0.6  (PDFs 2-7, software)"
+    EMIT INFO "  DIRAM_EPSILON_HW_BOUND   := 0.5  (PDFs 9, 12, hardware)"
+    EMIT INFO "  SINPHASE_BOUND           := 0.6  (AEGIS chain)"
+    EMIT INFO "  THETA_COMPUTABILITY      := 8    (PDFs 9-11)"
+    EMIT INFO "  STRESS_RANGE             := [0, 12]"
+    EMIT INFO "  TRIPOLAR                 := {UCHE, EZE, OBI}"
+    EMIT INFO "  SHA256_RECEIPT           := TRUE  (PDF 12 — all cache ops)"
+    EMIT INFO ""
+    EMIT INFO "FOUNDING DAY (July 4, 2025): PDFs 1, 8, 11"
+    EMIT INFO "  Bayesian inference + Nash equilibrium + Scalar promotion"
+    EMIT INFO "  = three mathematical pillars of OBINexus"
+    EMIT INFO "=========================================================="
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 5 — CORPUS COMPLETE
+//
+// TOTAL: 12 PDFs → 60 MODULES
+// DIRAM HARDWARE GATE: diram_memory_gate(A, B) -> {0, 1}
+// GOVERNANCE:         epsilon(x) = heap_events/max_events <= 0.5
+// CRYPTOGRAPHY:       SHA-256 receipt per operation
+// ============================================================

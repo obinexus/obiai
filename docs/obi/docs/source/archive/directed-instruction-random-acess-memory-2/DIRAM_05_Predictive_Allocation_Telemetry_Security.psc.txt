@@ -1,0 +1,357 @@
+// ============================================================
+// DIRAM (Directed Instruction RAM)
+// MODULE 5: Predictive Allocation Engine, Telemetry, Security & Development
+// Source: Directed_Instruction_RAM.pdf (README.md, 2025-07-03)
+// OBINexus Aegis Project | License: MIT
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 5.1 — PREDICTIVE ALLOCATION ENGINE
+// ------------------------------------------------------------
+
+// The Predictive Allocation Engine anticipates future memory needs
+// using asynchronous promises and a lookahead cache.
+// Future: replaced by ML-driven hardware prefetch unit.
+
+DEFINE LOOKAHEAD_CACHE AS STRUCT:
+    entries     : ARRAY[1024] OF lookahead_entry_t
+    capacity    : INTEGER = 1024        // From config: async.lookahead_cache_size
+    hit_count   : INTEGER = 0
+    miss_count  : INTEGER = 0
+
+DEFINE lookahead_entry_t AS STRUCT:
+    predicted_size  : SIZE_T
+    predicted_tag   : STRING
+    pre_allocated   : POINTER           // NULL if not yet materialized
+    promise_handle  : PROMISE_T
+
+DEFINE PROMISE_T AS STRUCT:
+    state           : ENUM {PENDING, FULFILLED, REJECTED, EXPIRED}
+    requested_size  : SIZE_T
+    tag             : STRING
+    result_ptr      : POINTER
+    timeout_ms      : INTEGER           // From config: async.default_timeout_ms
+    created_at      : UINT64
+    receipt         : CHAR[65]          // SHA-256 receipt when fulfilled
+
+// ------------------------------------------------------------
+// SECTION 5.2 — ASYNC PROMISE LIFECYCLE
+// ------------------------------------------------------------
+
+PROCEDURE create_allocation_promise(size, tag) -> PROMISE_T:
+    // Validate pending promise count
+    IF pending_promise_count >= global_config.async.max_pending_promises:
+        LOG_WARNING "Max pending promises reached — cannot create new promise"
+        RETURN NULL
+
+    promise = NEW PROMISE_T
+    promise.state           = PENDING
+    promise.requested_size  = size
+    promise.tag             = tag
+    promise.timeout_ms      = global_config.async.default_timeout_ms
+    promise.created_at      = current_unix_timestamp()
+
+    REGISTER promise IN pending_promise_queue
+    pending_promise_count += 1
+
+    // Schedule async fulfillment
+    ASYNC SCHEDULE fulfill_promise(promise)
+
+    RETURN promise
+
+PROCEDURE fulfill_promise(promise):
+    // Check timeout before fulfilling
+    elapsed_ms = (current_unix_timestamp() - promise.created_at) * 1000
+    IF elapsed_ms > promise.timeout_ms:
+        promise.state = EXPIRED
+        LOG_WARNING "Promise expired for tag=" + promise.tag
+        pending_promise_count -= 1
+        RETURN
+
+    // Attempt allocation
+    ptr = diram_alloc(promise.requested_size, promise.tag)
+
+    IF ptr == NULL:
+        promise.state = REJECTED
+        pending_promise_count -= 1
+        RETURN
+
+    promise.result_ptr  = ptr
+    promise.state       = FULFILLED
+    promise.receipt     = allocation_table[ptr].sha256_receipt
+    pending_promise_count -= 1
+
+    IF global_config.detach.persist_promise_receipts:
+        persist_promise_receipt_to_disk(promise)
+
+    IF global_config.detach.log_async_operations:
+        ASYNC_WRITE TO alloc_trace.log:
+            "[PROMISE_FULFILLED] tag=" + promise.tag +
+            " addr=" + hex(promise.result_ptr) +
+            " SHA=" + promise.receipt[0:16] + "..."
+
+PROCEDURE process_pending_promises():
+    // Called on each daemon loop tick
+    FOR EACH promise IN pending_promise_queue:
+        IF promise.state == PENDING:
+            fulfill_promise(promise)
+        IF promise.state IN {FULFILLED, REJECTED, EXPIRED}:
+            REMOVE promise FROM pending_promise_queue
+
+// ------------------------------------------------------------
+// SECTION 5.3 — LOOKAHEAD CACHE MANAGEMENT
+// ------------------------------------------------------------
+
+PROCEDURE lookahead_cache_lookup(size, tag) -> POINTER:
+    FOR EACH entry IN lookahead_cache.entries:
+        IF entry.predicted_size == size AND entry.predicted_tag == tag:
+            IF entry.pre_allocated != NULL:
+                lookahead_cache.hit_count += 1
+                ptr = entry.pre_allocated
+                entry.pre_allocated = NULL      // Consume the cached allocation
+                RETURN ptr
+
+    lookahead_cache.miss_count += 1
+    RETURN NULL     // Cache miss — caller must allocate synchronously
+
+PROCEDURE lookahead_cache_prefill(predicted_allocations[]):
+    // Pre-allocate memory for predicted future requests
+    FOR EACH (size, tag) IN predicted_allocations:
+        IF cache_has_space():
+            promise = create_allocation_promise(size, tag)
+            entry = NEW lookahead_entry_t
+            entry.predicted_size = size
+            entry.predicted_tag  = tag
+            entry.promise_handle = promise
+            INSERT entry INTO lookahead_cache.entries
+
+PROCEDURE get_lookahead_hit_rate() -> FLOAT:
+    total = lookahead_cache.hit_count + lookahead_cache.miss_count
+    IF total == 0: RETURN 0.0
+    RETURN lookahead_cache.hit_count / total
+    // Hardware target: > 90% hit rate for AI workloads
+
+// ------------------------------------------------------------
+// SECTION 5.4 — TELEMETRY SUBSYSTEM
+// ------------------------------------------------------------
+
+// telemetry_level:
+//   0 = disabled
+//   1 = system-level events only
+//   2 = opcode-bound (per-allocation granularity)
+
+DEFINE TELEMETRY_EVENT AS STRUCT:
+    code        : INTEGER
+    message     : STRING
+    timestamp   : UINT64
+    addr        : POINTER   // Optional — may be NULL
+    epsilon     : FLOAT     // Current ε value at time of event
+
+PROCEDURE emit_telemetry_event(code, message, addr=NULL, epsilon=NULL):
+    IF global_config.telemetry_level == 0:
+        RETURN  // Telemetry disabled
+
+    IF global_config.telemetry_level == 1:
+        // Only emit system-level error codes
+        IF code NOT IN {0x1001, 0x1002, 0x1003, 0x1004, 0x1005}:
+            RETURN
+
+    event = NEW TELEMETRY_EVENT
+    event.code      = code
+    event.message   = message
+    event.timestamp = current_unix_timestamp()
+    event.addr      = addr
+    event.epsilon   = current_epsilon
+
+    // Emit via UNIX domain socket
+    SEND event TO socket(global_config.telemetry_endpoint)
+    // Note: Socket is non-blocking; telemetry dropped on full buffer
+
+PROCEDURE emit_telemetry_if_due():
+    // Called on daemon loop tick (level 1 periodic heartbeat)
+    IF global_config.telemetry_level >= 1:
+        heartbeat = build_system_heartbeat_event()
+        SEND heartbeat TO socket(global_config.telemetry_endpoint)
+
+// ------------------------------------------------------------
+// SECTION 5.5 — SECURITY MODEL
+// ------------------------------------------------------------
+
+// DIRAM implements a 5-layer security model.
+// Each layer is independently configurable.
+
+DEFINE SECURITY_LAYERS AS:
+
+    LAYER 1: Fork_Safety
+        // PID binding prevents cross-process memory access
+        ON alloc: RECORD binding_pid = get_current_pid()
+        ON free:  VERIFY current_pid == alloc_record.binding_pid
+        IF mismatch AND strict_mode: ABORT
+        IF mismatch AND relaxed_mode: LOG_WARNING
+
+    LAYER 2: Cryptographic_Receipts
+        // SHA-256 ensures allocation integrity end-to-end
+        ON alloc: receipt = SHA256(addr || size || timestamp || pid)
+        ON audit: RECOMPUTE receipt, COMPARE with stored
+        IF mismatch: RAISE error_code 0x1005
+
+    LAYER 3: Guard_Pages
+        // Optional; adds boundary protection with performance cost
+        ON alloc: MAP protected pages before AND after region
+        ON access_violation: TRAP -> LOG_ERROR(0x1004)
+        // Performance impact: additional mmap syscalls per allocation
+
+    LAYER 4: ASLR
+        // Address Space Layout Randomization
+        // Randomizes base addresses to prevent deterministic exploitation
+        ON startup: IF aslr_enabled -> apply_randomization_to_heap_base()
+        // TODO: Clarify from source PDF — per-allocation or global ASLR
+
+    LAYER 5 [FUTURE]: Hardware_Encryption
+        // Hardware-level memory encryption and secure enclaves
+        // Not yet implemented in software emulation
+        // Target: hardware memory cell encryption per bank
+        // TODO: Clarify from source PDF — encryption algorithm and key management
+
+// ------------------------------------------------------------
+// SECTION 5.6 — PROJECT STRUCTURE (FILE TREE)
+// ------------------------------------------------------------
+
+// Canonical directory layout for the DIRAM repository.
+
+DEFINE PROJECT_STRUCTURE AS:
+    diram/
+    ├── include/
+    │   └── diram/
+    │       └── core/
+    │           └── feature-alloc/
+    │               ├── alloc.h             // Core allocation struct + API declarations
+    │               └── feature_alloc.h     // Enhanced feature allocation declarations
+    ├── src/
+    │   ├── cli/
+    │   │   └── main.c                      // CLI entry point (see Module 4)
+    │   └── core/
+    │       └── feature-alloc/
+    │           ├── alloc.c                 // Core traced allocation implementation
+    │           └── feature_alloc.c         // Error indexing + governance implementation
+    ├── tests/                              // Test suite (make test)
+    ├── examples/                           // Example programs using DIRAM API
+    ├── Makefile                            // Build system
+    ├── diram.drc                           // Example configuration (see Module 2)
+    └── README.md
+
+// ------------------------------------------------------------
+// SECTION 5.7 — BUILD SYSTEM PROCEDURES
+// ------------------------------------------------------------
+
+PROCEDURE build_standard():
+    EXECUTE "make clean"
+    EXECUTE "make"
+    // Output: diram binary in build output path
+
+PROCEDURE build_debug():
+    EXECUTE "make clean"
+    EXECUTE "make DEBUG=1"
+    // Debug build enables additional runtime assertions and verbose logging
+
+PROCEDURE run_tests():
+    EXECUTE "make test"
+    // Runs test suite in tests/ directory
+
+PROCEDURE run_static_analysis():
+    EXECUTE "make analyze"
+    // Runs static analysis toolchain (tool not specified in source)
+
+PROCEDURE install_system_wide():
+    EXECUTE "sudo make install"
+    // Default PREFIX: /usr/local
+
+PROCEDURE install_user_local(prefix):
+    EXECUTE "make install PREFIX=" + prefix
+    // Example: PREFIX=$HOME/.local
+
+// ------------------------------------------------------------
+// SECTION 5.8 — AEGIS PROJECT CONTRIBUTION METHODOLOGY
+// ------------------------------------------------------------
+
+// All contributions to DIRAM MUST follow the Aegis Project
+// waterfall methodology. Four sequential phases are mandatory.
+
+DEFINE AEGIS_CONTRIBUTION_WORKFLOW AS:
+
+    PHASE 1: Research_Phase
+        // Problem analysis and solution design
+        DELIVERABLE: problem_statement + design_document
+        GATE: design_approved_by_maintainers
+
+    PHASE 2: Implementation_Phase
+        // Code development with governance compliance
+        REQUIREMENTS:
+            - Follow zero-trust coding conventions
+            - Maintain ε(x) ≤ 0.6 in any allocation-critical code
+            - All new allocations MUST use diram_alloc (not raw malloc)
+        DELIVERABLE: implementation + unit_tests
+
+    PHASE 3: Validation_Phase
+        // Testing and compliance verification
+        REQUIREMENTS:
+            - make test MUST pass with zero failures
+            - make analyze MUST produce no critical warnings
+            - SHA receipt coverage for all new allocation paths
+        DELIVERABLE: validation_report
+
+    PHASE 4: Integration_Phase
+        // Ecosystem compatibility testing
+        REQUIREMENTS:
+            - Test integration with RIFTlang governance contracts
+            - Verify Polybuild compatibility
+            - Confirm Gosilang runtime compatibility
+        DELIVERABLE: integration_test_results + changelog_entry
+
+// CONTRIBUTING.md contains full details (referenced but not reproduced here)
+
+// ------------------------------------------------------------
+// SECTION 5.9 — ACKNOWLEDGEMENTS AND STANDARDS
+// ------------------------------------------------------------
+
+DEFINE ACKNOWLEDGEMENTS AS:
+    OBINexus_Protocol_Engineering_Group         // Primary development team
+    Aegis_Project_Technical_Spec_Contributors   // Architecture reviewers
+    NASA_STD_8739_8_Software_Safety_Standards   // Referenced safety standard
+    Future_Hardware_Partners                    // TBD — silicon fabrication
+
+// DIRAM is designed for safety-critical AI systems requiring
+// cryptographic memory governance, aligned with NASA-STD-8739.8.
+
+// ============================================================
+// END MODULE 5
+// ============================================================
+
+// ============================================================
+// DIRAM PSEUDOCODE INDEX
+// ============================================================
+//
+// MODULE 1: DIRAM_01_System_Overview_and_Architecture.psc.txt
+//   - Mission statement, project status, 5-layer architecture,
+//     hardware vision, performance specs, ecosystem integration
+//
+// MODULE 2: DIRAM_02_Configuration_System.psc.txt
+//   - Config data structures, loading hierarchy, file parser,
+//     programmatic API, REPL config display
+//
+// MODULE 3: DIRAM_03_Memory_Governance.psc.txt
+//   - diram_allocation_t struct, Sinphasé ε(x) ≤ 0.6 constraint,
+//     traced alloc/free, error codes, zero-trust enforcement,
+//     named memory spaces
+//
+// MODULE 4: DIRAM_04_CLI_REPL_Daemon.psc.txt
+//   - CLI entry point, arg parsing, init/trace/detach/REPL modes,
+//     daemon fork lifecycle, resilience/retry logic, all REPL commands,
+//     future REPL commands (set/get/multiply)
+//
+// MODULE 5: DIRAM_05_Predictive_Allocation_Telemetry_Security.psc.txt
+//   - Async promise lifecycle, lookahead cache, telemetry subsystem,
+//     5-layer security model, project file structure, build procedures,
+//     Aegis contribution methodology
+//
+// ============================================================

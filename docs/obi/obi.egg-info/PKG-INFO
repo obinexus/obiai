@@ -1,0 +1,149 @@
+Metadata-Version: 2.4
+Name: obi
+Version: 0.1.0
+Summary: OBI - Ontological Bayesian Intelligence documentation and indexable web interface.
+Author-email: Nnamdi Michael Okpala <okpalan86@gmail.com>
+License: OBINexus NT Open Access / MIT-style
+Project-URL: Homepage, https://github.com/obinexus/obi
+Project-URL: Repository, https://github.com/obinexus/obi
+Project-URL: Documentation, https://obinexus.github.io/obi
+Keywords: OBI,OBINexus,Ontological Bayesian Intelligence,Bayesian networks,ontology,semantic web,reasoning,robotics,humanitarian AI
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: JavaScript
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Documentation
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Provides-Extra: docs
+Requires-Dist: beautifulsoup4>=4.12; extra == "docs"
+Requires-Dist: lxml>=5.0; extra == "docs"
+Requires-Dist: markdown>=3.6; extra == "docs"
+Requires-Dist: pdfplumber>=0.11; extra == "docs"
+Requires-Dist: pypdf>=4.0; extra == "docs"
+
+# OBI - Ontological Bayesian Intelligence
+
+OBI means Ontological Bayesian Intelligence. It is an ontological and Bayesian reasoning infrastructure for uncertainty-aware robotic and humanitarian systems.
+
+The repository contains a static documentation toolchain that converts plain text, Markdown, LaTeX, and BibTeX source material into consistent HTML pages, a client-side search index, bibliography outputs, and static publishing artifacts.
+
+## What OBI Is Not
+
+OBI should not be described as conscious AI. It is not a claim of machine consciousness, sentience, or personhood. The project language should stay focused on reasoning infrastructure, uncertainty modeling, ontologies, Bayesian inference, semantic graphs, robotics interfaces, and humanitarian real-world assistance systems.
+
+## Repository Layout
+
+```text
+.
+├── .circleci/
+├── .github/workflows/
+├── docs/
+│   ├── archive/
+│   ├── public/
+│   └── source/
+├── nw/
+├── obi/
+├── scripts/
+├── package.json
+├── pyproject.toml
+└── README.md
+```
+
+Source documents live under `docs/source`. Generated static output is written to `docs/public`. Research ZIP bundles are preserved under `docs/archive`.
+
+## Install
+
+Node.js is used for the documentation build. Python remains available for future research tooling and the package is still installable.
+
+```powershell
+npm install
+pip install -e .
+```
+
+The Node build currently has no external runtime dependencies, so it is easy to run from PowerShell and CI.
+
+## Documentation Commands
+
+```powershell
+npm run clean
+npm run docs:populate
+npm run docs:build
+npm run docs:validate
+npm run docs:serve
+npm run docs:serve:html
+npm run publish:check
+```
+
+`npm run docs:populate` extracts ZIP bundles from `docs/archive`, converts extracted text/LaTeX/PDF material into Markdown under `docs/source/md`, and writes standalone source HTML under `docs/source/html`.
+
+`npm run docs:build` generates:
+
+- `docs/public/index.html`
+- `docs/public/papers.html`
+- `docs/public/bibliography.html`
+- `docs/public/search.json`
+- `docs/public/sitemap.xml`
+- `docs/public/robots.txt`
+- `docs/public/manifest.json`
+- `docs/public/assets/obi.css`
+- `docs/public/assets/obi.js`
+- copied PDFs under `docs/public/pdf`
+- copied source HTML under `docs/public/source-html`
+
+## Source Formats
+
+Place source files in these folders:
+
+- `.tex` in `docs/source/tex`
+- `.bib` in `docs/source/bib`
+- `.md` in `docs/source/md`
+- `.pdf` in `docs/source/pdf`
+- `.txt` in `docs/source/txt`
+- images and diagrams in `docs/source/assets`
+- generated archive/PDF HTML in `docs/source/html`
+
+The build converts source pages into static HTML under `docs/public/sources`.
+
+## Archive, PDF, Pandoc, and MiKTeX Notes
+
+The population step uses Python and prefers Pandoc for LaTeX-to-Markdown and Markdown-to-HTML conversion. The script also uses Python Markdown when it is installed, and uses `pdfplumber` or `pypdf` for PDF text extraction.
+
+MiKTeX or another LaTeX distribution is optional for future PDF compilation. The HTML path does not require a TeX engine, but the generated `docs/source/html/manifest.json` records whether Pandoc, `pdflatex`, `xelatex`, `lualatex`, and `bibtex` were available.
+
+Math syntax is preserved and rendered in HTML with MathJax. Image Markdown is rendered with `alt` text and responsive sizing so certificate images, diagrams, and extracted figures remain accessible in the HTML view.
+
+To inspect the raw generated HTML directly:
+
+```powershell
+npm run docs:serve:html
+```
+
+Open `http://127.0.0.1:8000/html/`.
+
+## BibTeX Notes
+
+BibTeX files belong in `docs/source/bib`. The build generates `docs/public/bibliography.html` and `docs/public/bibliography.json`.
+
+LaTeX citations are linked when the citation key exists in the loaded BibTeX entries. Missing keys are shown as unresolved citations but do not fail the build.
+
+## NW.js / Node-Webkit Notes
+
+The desktop wrapper lives in `nw/package.json` and points at `../docs/public/index.html`.
+
+```powershell
+npm run docs:build
+npm run nw:start
+```
+
+The user-facing phrase may be node-webkit, but the implementation uses modern NW.js naming.
+
+## CircleCI
+
+CircleCI installs Node.js dependencies, cleans generated docs, builds the static site, validates required outputs, and stores `docs/public` as an artifact.
+
+## GitHub Pages Publishing
+
+The GitHub Actions workflow in `.github/workflows/publish.yml` runs on pushes to `main`, builds the documentation, validates it, uploads `docs/public` as a Pages artifact, and deploys it to GitHub Pages.

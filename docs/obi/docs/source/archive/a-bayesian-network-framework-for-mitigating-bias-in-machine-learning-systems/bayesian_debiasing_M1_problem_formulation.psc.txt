@@ -1,0 +1,165 @@
+// ============================================================
+// FILE: bayesian_debiasing_M1_problem_formulation.psc.txt
+// MODULE 1 OF 5 — Problem Formulation & Bias Sources
+// SOURCE: "A Bayesian Network Framework for Mitigating Bias
+//          in Machine Learning Systems"
+// AUTHOR: Nnamdi Michael Okpala — OBINexus Computing
+// DATE:   July 4, 2025
+// ============================================================
+
+// ------------------------------------------------------------
+// SECTION 1: CONTEXT & MOTIVATION
+// ------------------------------------------------------------
+
+DEFINE domain := HIGH_STAKES_ML   // e.g., healthcare, finance, legal
+DEFINE problem := ALGORITHMIC_BIAS
+
+// Observed impact in healthcare domain:
+CONSTANT MISDIAGNOSIS_RATE_UNDERREPRESENTED := 0.35  // 35% higher for minority groups
+CONSTANT HEALTHCARE_AI_MARKET_2030          := 188e9  // USD $188 billion projected
+
+// Core thesis:
+// Bias must NOT be treated as a post-processing correction.
+// It must be embedded structurally into the model architecture.
+
+
+// ------------------------------------------------------------
+// SECTION 2: TRADITIONAL ML SYSTEM — BIAS PROPAGATION MODEL
+// ------------------------------------------------------------
+
+// Standard MLE (Maximum Likelihood Estimation) objective:
+//
+//   θ* = argmax_θ P(θ | D)
+//
+// Problem: if dataset D contains systematic bias ϕ, then
+// the learned parameters θ* inherit and amplify those biases.
+
+PROCEDURE TraditionalMLTraining(D: Dataset) -> θ_star:
+    // D may contain systematic bias ϕ (latent, unmodeled)
+    θ_star := ARGMAX over θ of P(θ | D)
+
+    // WARNING: bias ϕ is embedded in D but never explicitly modeled
+    // θ_star will encode ϕ invisibly → biased predictions follow
+    RETURN θ_star
+END PROCEDURE
+
+
+PROCEDURE BiasedFeedbackLoop(model, predictions, deployment_env):
+    // Once deployed, biased predictions reinforce existing disparities
+
+    LOOP indefinitely:
+        prediction := model.predict(new_input)
+        IF prediction.disadvantages(protected_group):
+            deployment_env.record(prediction)
+            // Historical label bias grows over time in retraining data
+        END IF
+    END LOOP
+    // Result: compounding disparity with each training cycle
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 3: FOUR PRIMARY BIAS VECTORS
+// ------------------------------------------------------------
+
+// Each vector describes a pathway through which bias enters an ML system.
+
+DEFINE BiasVector AS ENUM:
+    DATA_COLLECTION_BIAS      // (1)
+    FEATURE_SELECTION_BIAS    // (2)
+    LABEL_BIAS                // (3)
+    MODEL_SPECIFICATION_BIAS  // (4)
+END DEFINE
+
+
+// Vector (1): Data Collection Bias
+PROCEDURE DataCollectionBias(dataset D) -> BOOL:
+    // Check for population subgroup over/under-representation
+    FOR EACH subgroup G IN D.subgroups:
+        IF D.representation(G) != D.expected_proportion(G):
+            EMIT WARNING "Subgroup " + G + " is over/under-represented"
+            RETURN TRUE   // bias detected
+        END IF
+    END FOR
+    RETURN FALSE
+END PROCEDURE
+
+
+// Vector (2): Feature Selection Bias
+PROCEDURE FeatureSelectionBias(feature_set F, protected_attrs A) -> BOOL:
+    // Features that correlate with protected attributes inject proxy bias
+    FOR EACH feature f IN F:
+        correlation := COMPUTE_CORRELATION(f, A)
+        IF correlation > THRESHOLD_PROXY_CORRELATION:
+            EMIT WARNING "Feature " + f + " acts as proxy for protected attribute"
+            RETURN TRUE
+        END IF
+    END FOR
+    RETURN FALSE
+END PROCEDURE
+
+
+// Vector (3): Label Bias
+PROCEDURE LabelBias(labels Y, protected_attrs A) -> BOOL:
+    // Historical disparities encoded in ground-truth labels
+    FOR EACH class c IN Y.classes:
+        FOR EACH group g IN A.groups:
+            label_rate_g := COMPUTE_LABEL_RATE(Y, c, g)
+            IF label_rate_g DIFFERS_SIGNIFICANTLY FROM baseline:
+                EMIT WARNING "Label distribution for class " + c +
+                             " biased against group " + g
+                RETURN TRUE
+            END IF
+        END FOR
+    END FOR
+    RETURN FALSE
+END PROCEDURE
+
+
+// Vector (4): Model Specification Bias
+PROCEDURE ModelSpecificationBias(model_config M, data D) -> BOOL:
+    // Algorithmic choices (loss function, regularization, architecture)
+    // may amplify existing imbalances in D
+    IF M.loss_function.is_imbalance_sensitive() == FALSE:
+        EMIT WARNING "Loss function does not account for class imbalance"
+        RETURN TRUE
+    END IF
+    IF M.architecture.induces_shortcut_learning(D):
+        EMIT WARNING "Architecture may exploit spurious correlations in D"
+        RETURN TRUE
+    END IF
+    RETURN FALSE
+END PROCEDURE
+
+
+// ------------------------------------------------------------
+// SECTION 4: BIAS AUDIT ENTRY POINT
+// ------------------------------------------------------------
+
+PROCEDURE AuditDatasetForBias(D: Dataset, F: FeatureSet, A: ProtectedAttributes,
+                               Y: LabelSet, M: ModelConfig) -> BiasReport:
+
+    report := NEW BiasReport()
+
+    report.data_bias       := DataCollectionBias(D)
+    report.feature_bias    := FeatureSelectionBias(F, A)
+    report.label_bias      := LabelBias(Y, A)
+    report.spec_bias       := ModelSpecificationBias(M, D)
+
+    report.any_bias_found  := report.data_bias OR report.feature_bias
+                              OR report.label_bias OR report.spec_bias
+
+    IF report.any_bias_found:
+        EMIT ALERT "Bias detected — proceed to Bayesian Debiasing Framework (Module 2)"
+    ELSE:
+        EMIT INFO "No bias vectors detected at audit threshold"
+    END IF
+
+    RETURN report
+END PROCEDURE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: bayesian_debiasing_M2_framework_math.psc.txt
+// ============================================================

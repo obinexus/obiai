@@ -1,0 +1,294 @@
+// ============================================================
+// FILE: dag_ephemeris_M1_dag_cost_function.psc.txt
+// MODULE 1 OF 5 — DAG Cost Function: Semantic, Cultural, Temporal
+// SOURCE: "DAG Cost Function and Ephemeris Step: Formal Mathematical
+//          Specification for OBIAI Filter-Flash Transitions"
+// AUTHOR: Nnamdi Michael Okpala
+// ORG:    OBINexus Computing — AEGIS Project Team
+// DATE:   August 2025
+// ============================================================
+
+// ── DOCUMENT POSITION IN AEGIS PROOF CHAIN ───────────────────
+//
+//   This specification formalizes the DAG cost function referenced
+//   throughout the AEGIS proof chain:
+//
+//   AEGIS-PROOF-1.2 : Traversal Cost C(Nodeᵢ→Nodeⱼ)     → uses KL + ΔH
+//   AEGIS-PROOF-3.1 : Filter-Flash Monotonicity            → uses C_error(m)
+//   AEGIS-PROOF-3.2 : Hybrid Mode Convergence              → J(v,n) = DAG_cost + λ·C_G + μ·TC
+//   AEGIS-PROOF-4.1 : Hospital Safety Systems              → DAG cost in C_error weighting
+//   THIS DOCUMENT   : Full formal specification of DAG_cost(v, n)
+//
+//   New terms introduced here:
+//     vexameneria    — verb-noun interaction quantification system
+//     peristaltic    — cyclical cross-referential DAG processing
+//     Nsibidi        — cultural-linguistic glyph encoding space
+
+DEFINE DocumentContext AS:
+    id          := "DAG-EPHEMERIS-SPEC"
+    framework   := "OBIAI Filter-Flash"
+    confidence  := 0.954    // 95.4% epistemic threshold (constant across all AEGIS docs)
+    diram_bound := 0.6      // ε(transition) ≤ 0.6
+END DEFINE
+
+
+// ── SECTION 1.1: DAG COST FUNCTION FOR VERB-NOUN CAPSULES ────
+
+// DAG_cost(v, n) = Σₖ wₖ · sem_dist(vₖ, nₖ) + λ · C_G(v, n) + μ · TC(v, n)
+//
+//   v, n      — verb and noun symbolic capsules (multi-slot)
+//   K         — number of aligned feature slots between v and n
+//   wₖ        — learned slot weight (wₖ ≥ 0), normalized: Σₖ wₖ = 1
+//   sem_dist  — semantic distance function
+//   C_G(v,n)  — cultural grounding penalty
+//   TC(v,n)   — temporal-context penalty
+//   λ, μ      — hyperparameters controlling influence
+
+DEFINE SymbolicCapsule AS:
+    // A multi-slot symbolic capsule for either a verb or noun
+    id      : CapsuleID
+    slots   : List[FeatureSlot]    // K feature slots
+    embedding : Vector             // continuous embedding vector eᵥ or eₙ
+    semantic_field : VectorField   // used for action_intensity in vexameneria
+END DEFINE
+
+DEFINE FeatureSlot AS:
+    slot_index : INT          // k ∈ {1, ..., K}
+    value      : Vector       // continuous slot value
+    weight     : REAL         // wₖ ≥ 0 (learned)
+END DEFINE
+
+
+PROCEDURE ValidateSlotWeights(v: SymbolicCapsule) -> BOOL:
+    // Invariant: Σₖ wₖ = 1 (normalized weights)
+    total := 0.0
+    FOR EACH slot IN v.slots:
+        IF slot.weight < 0.0:
+            EMIT ERROR "Slot weight wₖ=" + slot.weight + " < 0 — invariant violated"
+            RETURN FALSE
+        END IF
+        total := total + slot.weight
+    END FOR
+    IF ABS(total - 1.0) > 1e-10:
+        EMIT ERROR "Slot weights sum=" + total + " ≠ 1"
+        RETURN FALSE
+    END IF
+    RETURN TRUE
+END PROCEDURE
+
+
+PROCEDURE DAGCost(v: SymbolicCapsule, n: SymbolicCapsule,
+                   lambda_w: REAL, mu_w: REAL,
+                   beta1: REAL, beta2: REAL,
+                   gamma1: REAL, gamma2: REAL) -> REAL:
+    // DAG_cost(v, n) = Σₖ wₖ · sem_dist(vₖ, nₖ) + λ · C_G(v, n) + μ · TC(v, n)
+
+    ValidateSlotWeights(v)
+    ValidateSlotWeights(n)
+
+    // Verify slot count matches
+    K := LENGTH(v.slots)
+    IF K != LENGTH(n.slots):
+        EMIT ERROR "Slot count mismatch: v has " + K + " but n has " + LENGTH(n.slots)
+        RETURN POSITIVE_INFINITY
+    END IF
+
+    // Σₖ wₖ · sem_dist(vₖ, nₖ)
+    semantic_sum := 0.0
+    FOR k := 0 TO K-1:
+        w_k      := v.slots[k].weight    // use v's slot weights
+        sd_k     := SemanticDistance(v.slots[k], n.slots[k])
+        semantic_sum := semantic_sum + w_k * sd_k
+    END FOR
+
+    // λ · C_G(v, n)
+    cultural_term := lambda_w * CulturalGrounding(v, n, beta1, beta2)
+
+    // μ · TC(v, n)
+    temporal_term := mu_w * TemporalContext(v, n, gamma1, gamma2)
+
+    cost := semantic_sum + cultural_term + temporal_term
+    RETURN cost
+END PROCEDURE
+
+
+// ── SECTION 1.2: SEMANTIC DISTANCE FUNCTION ──────────────────
+
+// sem_dist(vₖ, nₖ) = 1 − cos(eᵥ, eₙ) + α · (vₖ − nₖ)ᵀ M (vₖ − nₖ)
+//
+//   eᵥ, eₙ — embedding vectors of capsule v and n
+//   M       — learned Mahalanobis matrix (positive semidefinite)
+//   α       — Mahalanobis correction weight ∈ [0.2, 0.4] (recommended)
+
+PROCEDURE SemanticDistance(slot_v: FeatureSlot, slot_n: FeatureSlot) -> REAL:
+    // sem_dist(vₖ, nₖ) = 1 − cos(eᵥ, eₙ) + α · (vₖ − nₖ)ᵀ M (vₖ − nₖ)
+    //
+    // Uses per-slot embedding vectors for the cosine component and
+    // the Mahalanobis correction on the slot value difference.
+
+    // Component 1: Cosine dissimilarity (1 − cos similarity)
+    cosine_sim  := CosineSimilarity(slot_v.value, slot_n.value)
+    cosine_term := 1.0 - cosine_sim
+
+    // Component 2: Mahalanobis correction
+    // α · (vₖ − nₖ)ᵀ M (vₖ − nₖ)
+    diff         := slot_v.value - slot_n.value
+    mahal_term   := ALPHA_MAHAL * MahalanobisQuadratic(diff, M_LEARNED)
+
+    sem_d := cosine_term + mahal_term
+
+    // Post-condition: sem_dist ≥ 0
+    // cos_term ∈ [0,2], mahal_term ≥ 0 → total ≥ 0
+    ASSERT sem_d >= 0.0
+    RETURN sem_d
+END PROCEDURE
+
+
+PROCEDURE CosineSimilarity(u: Vector, v: Vector) -> REAL:
+    // cos(u, v) = (u · v) / (‖u‖ · ‖v‖)
+    dot_product := DOT(u, v)
+    norm_u := NORM(u)
+    norm_v := NORM(v)
+    IF norm_u < 1e-12 OR norm_v < 1e-12:
+        RETURN 0.0   // degenerate: zero vector has undefined angle
+    END IF
+    RETURN dot_product / (norm_u * norm_v)
+END PROCEDURE
+
+
+PROCEDURE MahalanobisQuadratic(diff: Vector, M: Matrix) -> REAL:
+    // Computes xᵀ M x for Mahalanobis correction
+    // M must be positive semidefinite (learned from data)
+    Mx := MatrixVectorMult(M, diff)
+    RETURN DOT(diff, Mx)
+END PROCEDURE
+
+
+// ── SECTION 1.3: CULTURAL GROUNDING FUNCTION ─────────────────
+
+// C_G(v, n) = β₁ · nsibidi_dist(v, n) + β₂ · domain_prior(v, n)
+//
+// nsibidi_dist(v, n) = (1/|G|) Σ_{g∈G} |glyph_encode(v) − glyph_encode(n)|_g
+//
+//   G       — glyph encoding space (Nsibidi-inspired symbolic system)
+//   β₁, β₂ — weighting coefficients for cultural vs. domain components
+
+PROCEDURE CulturalGrounding(v: SymbolicCapsule, n: SymbolicCapsule,
+                              beta1: REAL, beta2: REAL) -> REAL:
+    // C_G(v, n) = β₁ · nsibidi_dist(v, n) + β₂ · domain_prior(v, n)
+
+    nsibidi_d    := NsibidiDistance(v, n)
+    domain_p     := DomainPrior(v, n)
+
+    cg := (beta1 * nsibidi_d) + (beta2 * domain_p)
+    RETURN cg
+END PROCEDURE
+
+
+PROCEDURE NsibidiDistance(v: SymbolicCapsule, n: SymbolicCapsule) -> REAL:
+    // nsibidi_dist(v, n) = (1/|G|) Σ_{g∈G} |glyph_encode(v) − glyph_encode(n)|_g
+    //
+    // Nsibidi: ancient Igbo/Cross River logographic writing system.
+    // Here formalized as a glyph encoding space G for cultural-linguistic
+    // distance measurement between symbolic capsules.
+
+    G              := GlyphEncodingSpace.GetGlyphs()
+    G_cardinality  := LENGTH(G)
+    distance_sum   := 0.0
+
+    FOR EACH glyph g IN G:
+        encode_v := GlyphEncode(v, g)   // glyph_encode(v) at dimension g
+        encode_n := GlyphEncode(n, g)   // glyph_encode(n) at dimension g
+        distance_sum := distance_sum + ABS(encode_v - encode_n)
+    END FOR
+
+    IF G_cardinality == 0:
+        RETURN 0.0
+    END IF
+    RETURN distance_sum / G_cardinality
+END PROCEDURE
+
+
+PROCEDURE GlyphEncode(capsule: SymbolicCapsule, glyph: Glyph) -> REAL:
+    // Maps a symbolic capsule to a scalar value in glyph dimension g.
+    // Encoding derived from capsule's embedding vector projected onto
+    // the glyph's basis direction.
+    basis := glyph.basis_vector
+    RETURN DOT(capsule.embedding, basis)
+END PROCEDURE
+
+
+PROCEDURE DomainPrior(v: SymbolicCapsule, n: SymbolicCapsule) -> REAL:
+    // Domain-specific prior on verb-noun compatibility.
+    // Returns higher values for domain-mismatched capsule pairs.
+    prior_v := DomainPriorDistribution(v)
+    prior_n := DomainPriorDistribution(n)
+    // KL divergence between domain priors as mismatch measure
+    RETURN KLDivergence(prior_v, prior_n, n_dims=DomainPrior.dimensions)
+END PROCEDURE
+
+
+// ── SECTION 1.4: TEMPORAL-CONTEXT FUNCTION ───────────────────
+
+// TC(v, n) = γ₁ · recency(v, n) + γ₂ · persistence_mismatch(v, n)
+//
+// persistence_mismatch(v, n) = |τ_flash(v) − τ_filter(n)|
+//
+//   τ_flash(v)  — Flash (ephemeral) memory lifetime of verb v
+//   τ_filter(n) — Filter (persistent) memory horizon of noun n
+//   γ₁, γ₂     — recency vs. persistence mismatch weights
+
+PROCEDURE TemporalContext(v: SymbolicCapsule, n: SymbolicCapsule,
+                           gamma1: REAL, gamma2: REAL) -> REAL:
+    // TC(v, n) = γ₁ · recency(v, n) + γ₂ · persistence_mismatch(v, n)
+
+    recency_term  := gamma1 * Recency(v, n)
+    persist_term  := gamma2 * PersistenceMismatch(v, n)
+
+    RETURN recency_term + persist_term
+END PROCEDURE
+
+
+PROCEDURE Recency(v: SymbolicCapsule, n: SymbolicCapsule) -> REAL:
+    // Recency: how recently v and n co-occurred in the observation stream.
+    // Higher recency → lower temporal cost (recently paired → coherent).
+    last_co_occurrence := ObservationHistory.LastCoOccurrence(v.id, n.id)
+    time_since := CURRENT_TIME() - last_co_occurrence
+    RETURN EXPONENTIAL_DECAY(time_since, rate=RECENCY_DECAY_RATE)
+END PROCEDURE
+
+
+PROCEDURE PersistenceMismatch(v: SymbolicCapsule, n: SymbolicCapsule) -> REAL:
+    // persistence_mismatch(v, n) = |τ_flash(v) − τ_filter(n)|
+    //
+    // τ_flash(v):  ephemeral working memory lifetime for verb v
+    // τ_filter(n): persistent memory horizon for noun n
+    //
+    // Large mismatch → verb and noun are operating at different temporal scales
+    // → higher cost to align them in a single decision step.
+
+    tau_flash_v  := v.flash_memory_lifetime     // seconds (ephemeral)
+    tau_filter_n := n.filter_memory_horizon     // seconds (persistent)
+    RETURN ABS(tau_flash_v - tau_filter_n)
+END PROCEDURE
+
+
+// ── DEFAULT HYPERPARAMETER RANGES (§7.2) ─────────────────────
+
+DEFINE HyperparameterRanges AS:
+    // Recommended ranges from Triangi dataset validation:
+    LAMBDA_RANGE  := RANGE[0.1, 0.3]   // cultural influence
+    MU_RANGE      := RANGE[0.05, 0.15] // temporal influence
+    ALPHA_RANGE   := RANGE[0.2, 0.4]   // Mahalanobis correction
+
+    // Defaults (midpoints of recommended ranges):
+    LAMBDA_DEFAULT  := 0.2
+    MU_DEFAULT      := 0.1
+    ALPHA_MAHAL     := 0.3
+END DEFINE
+
+
+// ============================================================
+// END MODULE 1
+// NEXT: dag_ephemeris_M2_ephemeris_step.psc.txt
+// ============================================================

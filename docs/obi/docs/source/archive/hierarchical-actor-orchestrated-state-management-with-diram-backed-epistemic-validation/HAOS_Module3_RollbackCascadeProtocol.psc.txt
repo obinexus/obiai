@@ -1,0 +1,341 @@
+// ============================================================
+// FILE: HAOS_Module3_RollbackCascadeProtocol.psc.txt
+// SOURCE: Hierarchical_Actor_Orchestrated_State_Management_with_DIRAM_Backed_Epistemic_Validation.pdf
+//         Section IV
+// AUTHOR: OBINexus Computing — Aegis Framework Division
+// COMPLIANCE: NASA-STD-8739.8, AEGIS-PROOF-1.2
+// CLASSIFICATION: Production Infrastructure
+// PURPOSE: Pseudocode for the full Cascade Rollback Protocol
+//          (Algorithm 1), confidence degradation model,
+//          memoization of deltas, and Python-mapped ratio
+//          enforcement with trial-and-error lock detection
+// ============================================================
+
+MODULE HAOS_RollbackCascadeProtocol
+
+// ============================================================
+// SECTION IV — ROLLBACK CASCADE PROTOCOL
+// ============================================================
+
+// ============================================================
+// SECTION IV.A — Strategic Rollback Mechanism (Algorithm 1)
+// ============================================================
+
+// ALGORITHM 1: Cascade Rollback Protocol
+//
+// INPUT:  Failed state s_f with confidence c_f < 0.954
+// OUTPUT: Rollback cascade receipt R
+//
+// PROCEDURE:
+//   1. Trace all states dependent on s_f (trace-dependency-Φ)
+//   2. Limit cascade depth to min(|D|, 5)
+//   3. For each depth level d (0 to depth):
+//      a. Collect all states at depth d from dependency set D
+//      b. For each such state s:
+//         i.  Degrade confidence: s.confidence *= (1 - 0.1 * d)
+//         ii. Reset status to STATE_TODO
+//         iii.Memoize confidence delta (memoize-delta-Φ)
+//         iv. Generate SHA-256 receipt (generate-receipt-Φ)
+//   4. Return rollback receipt with appended trace (append-trace-Φ)
+
+CONSTANT CONFIDENCE_DEGRADATION_RATE := 0.1   // 10% per depth level
+CONSTANT MAX_ROLLBACK_DEPTH          := 5      // Maximum cascade depth
+
+STRUCTURE RollbackReceipt:
+    origin_state_id:  UInt64
+    depth_reached:    Integer
+    states_rolled:    List<UInt64>         // IDs of all affected states
+    confidence_deltas: MAP<UInt64, Float>  // State ID → confidence change
+    sha256_receipts:  MAP<UInt64, Byte[32]>// State ID → SHA-256 receipt
+    timestamp:        UInt64
+END STRUCTURE
+
+STRUCTURE DependencyMap:
+    root_state_id: UInt64
+    dependencies:  MAP<Integer, List<HierarchicalState>>  // depth → states at that depth
+END STRUCTURE
+
+// Maps to trace-dependency-Φ in the verb-noun glossary:
+// Map hierarchical state relationships for rollback scope
+FUNCTION trace_dependency(
+    failed_state: HierarchicalState
+) -> DependencyMap:
+    // Traverse the parent_state_hash chain upward to find all
+    // states that depend on (or were derived from) failed_state
+    dep_map := DependencyMap {
+        root_state_id: failed_state.state_id,
+        dependencies:  {}
+    }
+
+    // BFS over state graph using parent_state_hash links
+    queue   := [failed_state]
+    visited := {}
+    depth   := 0
+
+    WHILE queue IS NOT EMPTY AND depth <= MAX_ROLLBACK_DEPTH DO
+        next_queue := []
+
+        FOR EACH s IN queue DO
+            IF s.state_id IN visited THEN
+                CONTINUE
+            END IF
+            visited.add(s.state_id)
+
+            // Record state at current depth
+            IF depth NOT IN dep_map.dependencies THEN
+                dep_map.dependencies[depth] := []
+            END IF
+            dep_map.dependencies[depth].append(s)
+
+            // Find children (states that have s as their parent)
+            children := diram_log.find_children(s.state_id)
+            next_queue.extend(children)
+        END FOR
+
+        queue := next_queue
+        depth := depth + 1
+    END WHILE
+
+    RETURN dep_map
+END FUNCTION
+
+// Core rollback cascade algorithm (Algorithm 1):
+FUNCTION cascade_rollback_protocol(
+    failed_state: HierarchicalState
+) -> RollbackReceipt:
+
+    // Initialize receipt
+    R := RollbackReceipt {
+        origin_state_id:  failed_state.state_id,
+        depth_reached:    0,
+        states_rolled:    [],
+        confidence_deltas: {},
+        sha256_receipts:  {},
+        timestamp:        timestamp_now()
+    }
+
+    // Line 3: D ← trace-dependency(s_f)
+    D := trace_dependency(failed_state)
+
+    // Line 4: depth ← min(|D|, 5)
+    depth := MIN(COUNT(D.dependencies), MAX_ROLLBACK_DEPTH)
+    R.depth_reached := depth
+
+    // Lines 5-13: For each depth level d from 0 to depth
+    FOR d FROM 0 TO depth DO
+        // Line 6: S_d ← {s ∈ D : depth(s) = d}
+        S_d := D.dependencies.get(d, default=[])
+
+        // Line 7: For each state s in S_d
+        FOR EACH s IN S_d DO
+
+            // Line 8: s.confidence ← s.confidence × (1 - 0.1 * d)
+            // Confidence degrades more severely at deeper levels
+            original_confidence := s.proof_confidence
+            degradation_factor  := 1.0 - (CONFIDENCE_DEGRADATION_RATE * d)
+            s.proof_confidence  := s.proof_confidence * degradation_factor
+
+            // Line 9: s.status ← STATE_TODO (reset for retry)
+            s.status_flag := STATE_TODO
+            s.error_count := s.error_count + 1
+
+            // Line 10: memoize-delta(s, c_f)
+            // Store confidence degradation for future reference
+            delta := s.proof_confidence - original_confidence
+            memoize_delta(s, delta)
+            R.confidence_deltas[s.state_id] := delta
+
+            // Line 11: generate-receipt(s)
+            receipt := generate_receipt(s)
+            R.sha256_receipts[s.state_id] := receipt
+
+            R.states_rolled.append(s.state_id)
+
+        END FOR
+    END FOR
+
+    // Line 14: return append-trace(R)
+    append_trace_to_receipt(R)
+    RETURN R
+
+END FUNCTION
+
+// Maps to memoize-delta-Φ in the verb-noun glossary:
+// Store confidence degradation for future reference
+FUNCTION memoize_delta(
+    state:           HierarchicalState,
+    confidence_delta: Float
+):
+    delta_record := ConfidenceDeltaRecord {
+        state_id:  state.state_id,
+        delta:     confidence_delta,
+        depth:     compute_state_depth(state),
+        timestamp: timestamp_now()
+    }
+    // Persisted to DIRAM memo store — enables future rollback awareness
+    diram_memo_store.put(state.state_id, delta_record)
+END FUNCTION
+
+// Append rollback receipt to immutable trace:
+// Maps to append-trace-Φ in the verb-noun glossary
+FUNCTION append_trace_to_receipt(receipt: RollbackReceipt):
+    trace_entry := DIRAMLogEntry {
+        event_type:       "CASCADE_ROLLBACK",
+        origin_state:     receipt.origin_state_id,
+        affected_states:  receipt.states_rolled,
+        depth:            receipt.depth_reached,
+        timestamp:        receipt.timestamp,
+        receipt_hash:     sha256(receipt.origin_state_id || receipt.timestamp)
+    }
+    diram_log.append(trace_entry)  // Append-only — immutable
+END FUNCTION
+
+// Entry point for cascade rollback initiation:
+FUNCTION initiate_cascade_rollback(
+    state: HierarchicalState
+) -> RollbackReceipt:
+    // Sets state to ROLLEDBACK and runs cascade protocol
+    state.status_flag := STATE_ROLLEDBACK
+    emit_trace("CASCADE_ROLLBACK_INITIATED", state.state_id)
+
+    receipt := cascade_rollback_protocol(state)
+
+    // emit-rollback-Φ: generate rollback event with epistemic signature
+    emit_rollback_event(state, receipt)
+    RETURN receipt
+END FUNCTION
+
+// Maps to emit-rollback-Φ in the verb-noun glossary:
+// Generate rollback event with epistemic signature for state recovery
+FUNCTION emit_rollback_event(
+    state:   HierarchicalState,
+    receipt: RollbackReceipt
+):
+    rollback_event := RollbackEvent {
+        state_id:        state.state_id,
+        phi_signature:   state.intent.phi_vector,
+        receipt:         receipt,
+        confidence_at:   state.proof_confidence,
+        error_count_at:  state.error_count,
+        timestamp:       timestamp_now()
+    }
+    rollback_event_log.append(rollback_event)
+    emit_trace("ROLLBACK_EVENT_EMITTED_" + receipt.depth_reached, state.state_id)
+END FUNCTION
+
+
+// ============================================================
+// SECTION IV.B — Success:Failure Ratio Enforcement
+// ============================================================
+
+// The system maintains epistemic discipline through continuous
+// ratio monitoring. Two distinct failure conditions trigger rollback:
+//
+//   Condition A: Trial-and-Error Lock
+//     confidence < 0.954  AND  error_count >= 2
+//     → Immediate rollback (hard fail)
+//
+//   Condition B: Ratio Degradation
+//     success_ratio < rollback_cascade_threshold (0.5)
+//     → Strategic rollback cascade
+//
+//   Normal Progression:
+//     state.status == STATE_DONE  → emit verification proof
+//     Otherwise                   → update state and continue
+
+CONSTANT ROLLBACK_CASCADE_THRESHOLD := 0.5   // < 1:2 ratio triggers cascade
+
+CLASS ActorStateAssessor:
+
+    epistemic_threshold:         Float := EPISTEMIC_THRESHOLD       // 0.954
+    rollback_cascade_threshold:  Float := ROLLBACK_CASCADE_THRESHOLD // 0.5
+
+    FUNCTION assess_state_continuation(
+        state: HierarchicalState
+    ) -> StateTransition:
+        // "Implements trial-and-improvement with rollback"
+
+        // --- Check A: Trial-and-error lock ---
+        // Hard failure: low confidence AND accumulated errors
+        IF state.proof_confidence < self.epistemic_threshold
+           AND state.error_count >= 2 THEN
+            // Lock condition met — initiate immediate rollback
+            RETURN self._initiate_rollback(state)
+        END IF
+
+        // --- Check B: Success:failure ratio ---
+        ratio := self._calculate_success_ratio(state)
+        IF ratio < self.rollback_cascade_threshold THEN
+            // Ratio below 1:2 — strategic rollback cascade
+            RETURN self._strategic_rollback_cascade(state)
+        END IF
+
+        // --- Normal Progression ---
+        IF state.status_flag == STATE_DONE THEN
+            // State complete — emit verification proof
+            RETURN self._emit_verification_proof(state)
+        ELSE
+            // Continue lifecycle progression
+            RETURN self._update_state(state)
+        END IF
+
+    END FUNCTION
+
+    FUNCTION _calculate_success_ratio(state: HierarchicalState) -> Float:
+        // Maps to compute-ratio-Φ in the verb-noun glossary
+        total    := count_transitions(state.state_id)
+        success  := count_successful_transitions(state.state_id)
+        IF total == 0 THEN RETURN 1.0 END IF
+        RETURN success / total
+    END FUNCTION
+
+    FUNCTION _initiate_rollback(state: HierarchicalState) -> StateTransition:
+        // Hard rollback — trial-and-error lock
+        receipt := initiate_cascade_rollback(state)
+        LOG("Trial-and-error lock triggered. Receipt: " + receipt.origin_state_id)
+        RETURN TRANSITION_ROLLBACK
+    END FUNCTION
+
+    FUNCTION _strategic_rollback_cascade(state: HierarchicalState) -> StateTransition:
+        // Ratio-triggered cascade rollback
+        receipt := initiate_cascade_rollback(state)
+        LOG("Strategic rollback cascade triggered. Depth: " + receipt.depth_reached)
+        RETURN TRANSITION_ROLLBACK
+    END FUNCTION
+
+    FUNCTION _emit_verification_proof(state: HierarchicalState) -> StateTransition:
+        // State reached DONE with valid confidence
+        emit_verification_proof(state)
+        commit_state_to_diram(state)
+        RETURN TRANSITION_COMPLETED
+    END FUNCTION
+
+    FUNCTION _update_state(state: HierarchicalState) -> StateTransition:
+        // Advance state in normal lifecycle
+        gate_result := enforce_waterfall_gate(state, GATE_2_DOING_PROGRESS)
+        IF gate_result == 0 THEN
+            state.status_flag := STATE_DONE
+            RETURN TRANSITION_ADVANCE
+        ELSE
+            RETURN TRANSITION_ROLLBACK
+        END IF
+    END FUNCTION
+
+END CLASS
+
+// Compute depth of a state within its derivation hierarchy:
+FUNCTION compute_state_depth(state: HierarchicalState) -> Integer:
+    depth   := 0
+    current := state
+
+    WHILE current.parent_state_hash IS NOT NULL DO
+        parent  := diram_log.find_by_hash(current.parent_state_hash)
+        IF parent IS NULL THEN BREAK END IF
+        current := parent
+        depth   := depth + 1
+    END WHILE
+
+    RETURN depth
+END FUNCTION
+
+END MODULE HAOS_RollbackCascadeProtocol

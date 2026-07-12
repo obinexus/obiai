@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mitigating Bias in MachineLearnign Models | OBI Documentation</title>
+  <meta name="description" content="Mitigating Bias in MachineLearnign Models Original PDF: Mitigating_Bias_in_MachineLearnign_Models.pdf Page 1 Mitigating Bias in Machine Learning Models: A Bayesian Network Approach OBINexus Computing Nnamdi M. Okpala June 23, 2026 Abstract In this technical a...">
+  <link rel="canonical" href="https://obinexus.github.io/obi/sources/mitigating-bias-in-machinelearnign-models.html">
+  <meta property="og:title" content="Mitigating Bias in MachineLearnign Models">
+  <meta property="og:description" content="Mitigating Bias in MachineLearnign Models Original PDF: Mitigating_Bias_in_MachineLearnign_Models.pdf Page 1 Mitigating Bias in Machine Learning Models: A Bayesian Network Approach OBINexus Computing Nnamdi M. Okpala June 23, 2026 Abstract In this technical a...">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://obinexus.github.io/obi/sources/mitigating-bias-in-machinelearnign-models.html">
+  <meta property="og:site_name" content="OBI Documentation">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Mitigating Bias in MachineLearnign Models">
+  <meta name="twitter:description" content="Mitigating Bias in MachineLearnign Models Original PDF: Mitigating_Bias_in_MachineLearnign_Models.pdf Page 1 Mitigating Bias in Machine Learning Models: A Bayesian Network Approach OBINexus Computing Nnamdi M. Okpala June 23, 2026 Abstract In this technical a...">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="../assets/obi.css">
+  <script>
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] } };
+    window.OBI_SEARCH_URL = "../search.json";
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"ScholarlyArticle","name":"Mitigating Bias in MachineLearnign Models","description":"Mitigating Bias in MachineLearnign Models Original PDF: Mitigating_Bias_in_MachineLearnign_Models.pdf Page 1 Mitigating Bias in Machine Learning Models: A Bayesian Network Approach OBINexus Computing Nnamdi M. Okpala June 23, 2026 Abstract In this technical a...","isPartOf":{"@type":"WebSite","name":"OBI Documentation","url":"https://obinexus.github.io/obi/"},"author":{"@type":"Person","name":"Nnamdi Michael Okpala"}}</script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="brand">
+      <a href="../index.html" aria-label="OBI Documentation home">
+        <span class="brand-mark">OBI</span>
+        <span>
+          <strong>Ontological Bayesian Intelligence</strong>
+          <small>OBINexus documentation</small>
+        </span>
+      </a>
+    </div>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" class="site-nav" aria-label="Primary navigation"><a href="../index.html" class="">Overview</a><a href="../papers.html" class="active">Papers</a><a href="../bibliography.html" class="">Bibliography</a></nav>
+  </header>
+  <div class="doc-shell">
+    <aside class="doc-sidebar">
+      <search class="search-panel">
+        <label for="site-search">Search documentation</label>
+        <input id="site-search" type="search" placeholder="Search OBI docs" autocomplete="off">
+        <div id="search-results" class="search-results" role="listbox" aria-label="Search results"></div>
+      </search>
+      <nav class="toc" aria-label="Table of contents">
+        <h2>On This Page</h2>
+        <a class="toc-level-2" href="#mitigating-bias-in-machinelearnign-models">Mitigating Bias in MachineLearnign Models</a><a class="toc-level-3" href="#page-1">Page 1</a><a class="toc-level-3" href="#page-2">Page 2</a><a class="toc-level-3" href="#page-3">Page 3</a><a class="toc-level-3" href="#page-4">Page 4</a>
+      </nav>
+    </aside>
+    <main id="content" class="content" tabindex="-1">
+      <article class="doc-article">
+        <header class="article-header">
+          <p class="eyebrow">OBINexus / OBI</p>
+          <h1>Mitigating Bias in MachineLearnign Models</h1>
+          <p>Mitigating Bias in MachineLearnign Models Original PDF: Mitigating_Bias_in_MachineLearnign_Models.pdf Page 1 Mitigating Bias in Machine Learning Models: A Bayesian Network Approach OBINexus Computing Nnamdi M. Okpala June 23, 2026 Abstract In this technical a...</p>
+        </header>
+        <h2 id="mitigating-bias-in-machinelearnign-models">Mitigating Bias in MachineLearnign Models</h2>
+<p>Original PDF: <a href="../pdf/Mitigating_Bias_in_MachineLearnign_Models.pdf">Mitigating_Bias_in_MachineLearnign_Models.pdf</a></p>
+<h3 id="page-1">Page 1</h3>
+<p>Mitigating Bias in Machine Learning Models: A Bayesian Network Approach OBINexus Computing Nnamdi M. Okpala June 23, 2026 Abstract In this technical analysis, I examine the critical challenge of bias in machine learn- ingmodels, withparticularemphasisonmedicaldiagnosticapplications. Byleveraging Bayesian network methodologies, I propose a systematic framework for bias identifi- cation, quantification, and mitigation. This document outlines the theoretical founda- tion that will underpin my development work at OBINexus Computing, establishing a roadmap for creating more equitable ML systems through rigorous probabilistic mod- eling. 1 Problem Statement and Risk Assessment As I develop machine learning models at OBINexus Computing, I’ve identified that bias presents a fundamental challenge to the integrity and ethical deployment of our systems. This is particularly acute in high-stakes domains such as medical diagnostics, where biased predictions can lead to: • Systematic misdiagnosis of specific demographic groups • Reinforcement of existing healthcare disparities • Misallocation of limited medical resources • Erosion of trust in diagnostic AI systems • Potential regulatory and legal exposure Thequantifiableimpactoftheserisksissignificant. Inourcancerdetectionusecase, bias- induced misclassification can result in false negatives that delay critical treatment or false positives that lead to unnecessary procedures, psychological distress, and resource waste. Moreover, such biases may remain undetected through standard evaluation metrics if test datasets inherit the same distributional skews present in training data. Technical analysis reveals that bias infiltrates ML models through multiple vectors: 1</p>
+<h3 id="page-2">Page 2</h3>
+<ol>
+<li>Data collection biases: Over/under-representation of population subgroups</li>
+<li>Feature selection biases: Choosingvariablesthatcorrelatewithprotectedattributes</li>
+<li>Label biases: Historical diagnostic disparities encoded in ground truth labels</li>
+<li>Model specification biases: Algorithmic choices that amplify distributional imbal-</li>
+<p>ances These biases are particularly insidious in black-box models where the decision boundary remains opaque, complicating both detection and mitigation efforts. 2 Proposed Solution: Bayesian Debiasing Framework After analyzing these challenges, I propose developing a comprehensive Bayesian network approach for debiasing machine learning models. This framework leverages probabilistic graphical models to explicitly represent and account for confounding variables and bias- inducing relationships. 2.1 Framework Components The solution I will develop at OBINexus Computing incorporates the following key elements:</p>
+<li>Variable Identification and Explicit Modeling: I will implement a systematic</li>
+<p>methodology for identifying potential confounders and explicitly incorporating them into model structures. Using the cancer detection example: • S ∈ {0,1} represents smoking status • C ∈ {0,1} represents cancer status • T represents test outcome (continuous or categorical) • Additional demographic and clinical variables as appropriate</p>
+<li>Structural Causal Modeling: I will develop a directed acyclic graph (DAG) repre-</li>
+<p>sentation of variable relationships, enabling: • Identification of potential backdoor paths that induce bias • Explicit conditional independence assumptions • Factorizationofthejointprobabilitydistributionperthetheorem: P(X ,X ,...,X ) = 1 2 n (cid:81)n P(X |Pa(X )) i=1 i i</p>
+<li>Hierarchical Bayesian Parameter Estimation: For robust debiasing, I will im-</li>
+<p>plement: 2</p>
+</ol>
+<h3 id="page-3">Page 3</h3>
+<p>• Parameter sets θ representing true risk relationships • Bias factors ϕ explicitly modeling dataset skews • Marginalizationtechniquestointegrateoverbiasparameters: P(θ|D) = (cid:82) P(θ,ϕ|D)dϕ</p>
+<ol>
+<li>Conditional Inference Pipeline: The framework will support:</li>
+<p>• Posterior computation conditioned on observed confounders • Explicit test likelihood modeling: P(T|C,S) for various data types • Calibrated uncertainty quantification through posterior distributions 2.2 Implementation Roadmap The development trajectory I envision for this framework has the following phases:</p>
+<li>Phase 1: Develop core mathematical formulations and prove theoretical guarantees</li>
+<li>Phase 2: Implement sampling algorithms for posterior inference (MCMC, variational</li>
+<p>methods)</p>
+<li>Phase 3: Create model validation suite with synthetic bias injection and recovery</li>
+<p>metrics</p>
+<li>Phase 4: Integrate with production ML pipelines at OBINexus Computing</li>
+<li>Phase 5: Deploy with monitoring systems to track bias metrics in production</li>
+<p>3 Expected Outcomes and Impact The framework I propose will directly address the identified risks with the following expected improvements: • Quantified reduction in demographic performance disparities • Explicit uncertainty representation for high-risk decisions • Audit trail for regulatory compliance • Improved generalization to underrepresented subpopulations • Enhanced trust through transparent model structure In the cancer detection context, I expect this approach to yield models that maintain highaccuracywhilesignificantlyreducingdisparityinfalsenegativeratesacrossdemographic groups. This will translate to more equitable health outcomes and reduced liability. 3</p>
+</ol>
+<h3 id="page-4">Page 4</h3>
+<p>4 Conclusion The proposed Bayesian debiasing framework provides a principled mathematical foundation for addressing bias in machine learning systems. By explicitly modeling confounding rela- tionships and accounting for them in inference procedures, we can develop more equitable and reliable systems. At OBINexus Computing, I will develop this framework into a practical, deployable system that establishes new standards for fair ML in high-stakes domains. This represents not merely a technical enhancement but an ethical imperative as we develop systems that impact human lives and well-being. 5 Next Steps As I proceed with development, I will:</p>
+<ol>
+<li>Formalize the mathematical specifications for the hierarchical models</li>
+<li>Develop proof-of-concept implementations for the cancer detection use case</li>
+<li>Establish quantitative metrics for bias assessment</li>
+<li>Design experimental protocols for empirical validation</li>
+<li>Create documentation and training materials for wider adoption</li>
+<p>Note: This framework provides the theoretical foundation. Extensive development work will be required to transform these principles into production-ready systems. I will lead this development effort at OBINexus Computing. 4</p>
+</ol>
+      </article>
+    </main>
+  </div>
+  <footer class="site-footer">
+    <p>OBI is an ontological and Bayesian reasoning infrastructure for uncertainty-aware robotic and humanitarian systems.</p>
+    <p>Generated as static HTML for local serving, NW.js desktop viewing, and GitHub Pages publishing.</p>
+  </footer>
+  <script src="../assets/obi.js" defer></script>
+</body>
+</html>

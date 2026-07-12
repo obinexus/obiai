@@ -1,0 +1,67 @@
+[project]
+name = "obi"
+version = "0.1.0"
+description = "OBI - Ontological Bayesian Intelligence documentation and indexable web interface."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "OBINexus NT Open Access / MIT-style" }
+
+authors = [
+  { name = "Nnamdi Michael Okpala", email = "okpalan86@gmail.com" }
+]
+
+keywords = [
+  "OBI",
+  "OBINexus",
+  "Ontological Bayesian Intelligence",
+  "Bayesian networks",
+  "ontology",
+  "semantic web",
+  "reasoning",
+  "robotics",
+  "humanitarian AI"
+]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: JavaScript",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Documentation"
+]
+
+dependencies = []
+
+[project.optional-dependencies]
+docs = [
+  "beautifulsoup4>=4.12",
+  "lxml>=5.0",
+  "markdown>=3.6",
+  "pdfplumber>=0.11",
+  "pypdf>=4.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/obinexus/obi"
+Repository = "https://github.com/obinexus/obi"
+Documentation = "https://obinexus.github.io/obi"
+
+[tool.setuptools]
+packages = ["obi"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = []
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"

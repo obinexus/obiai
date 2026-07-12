@@ -1,0 +1,468 @@
+\documentclass[12pt,a4paper]{report}
+
+% =============================================================================
+% OBINexus RIFT Governance Compiler Architecture
+% CORRECTED Production LaTeX Configuration - Error Resolution Phase
+% Technical Specification Document - Waterfall Methodology Implementation
+% =============================================================================
+
+% -----------------------------------------------------------------------------
+% CORE PACKAGE DECLARATIONS (DEPENDENCY ORDER VERIFIED)
+% -----------------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% -----------------------------------------------------------------------------
+% PAGE LAYOUT AND GEOMETRY (CORRECTED HEADHEIGHT)
+% -----------------------------------------------------------------------------
+\usepackage[a4paper, margin=1in, headheight=15pt]{geometry}
+
+% -----------------------------------------------------------------------------
+% COLOR DEFINITIONS (CRITICAL: LOAD BEFORE GRAPHICS PACKAGES)
+% -----------------------------------------------------------------------------
+\usepackage{xcolor}
+\definecolor{riftblue}{RGB}{0,102,204}
+\definecolor{obinexusgreen}{RGB}{0,153,76}
+\definecolor{safetycritical}{RGB}{204,0,0}
+\definecolor{codecolor}{RGB}{240,240,240}
+\definecolor{governancegray}{RGB}{128,128,128}
+\definecolor{riftorange}{RGB}{255,165,0}
+\definecolor{riftgreen}{RGB}{0,128,0}
+
+% -----------------------------------------------------------------------------
+% TCOLORBOX PACKAGE (LOAD AFTER XCOLOR, BEFORE OTHER GRAPHICS)
+% -----------------------------------------------------------------------------
+\usepackage{tcolorbox}
+\tcbuselibrary{most}
+\tcbuselibrary{skins,breakable}
+\tcbuselibrary{theorems}
+\tcbuselibrary{listings}
+
+% -----------------------------------------------------------------------------
+% MATHEMATICAL AND ALGORITHMIC PACKAGES (CORRECTED ORDER)
+% -----------------------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{algorithmicx}
+
+% ALGORITHMIC PACKAGES - CORRECTED CONFIGURATION
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\SetKwInput{KwInput}{Input}
+\SetKwInput{KwOutput}{Output}
+\SetKwProg{Fn}{Function}{:}{end}
+
+% NOTE: Do NOT load both algorithmicx and algorithm2e simultaneously
+% Use algorithm2e for RIFT project consistency
+
+% -----------------------------------------------------------------------------
+% GRAPHICS AND VISUALIZATION
+% -----------------------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc}
+
+% -----------------------------------------------------------------------------
+% TEXT FORMATTING AND LAYOUT (IMPROVED TYPOGRAPHY)
+% -----------------------------------------------------------------------------
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{setspace}
+
+% -----------------------------------------------------------------------------
+% TYPOGRAPHY IMPROVEMENTS (ADDRESSES UNDERFULL HBOX ISSUES)
+% -----------------------------------------------------------------------------
+\usepackage{microtype}  % Improved typography and spacing
+\sloppy                 % Allow more flexibility in line breaking
+\tolerance=1000         % Increase tolerance for spacing
+\emergencystretch=3em   % Allow emergency stretching
+\hyphenpenalty=50       % Reduce hyphenation penalty
+\exhyphenpenalty=50     % Reduce explicit hyphenation penalty
+
+% Improve table formatting to reduce underfull boxes
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{8pt}
+
+% -----------------------------------------------------------------------------
+% CODE LISTINGS PACKAGE
+% -----------------------------------------------------------------------------
+\usepackage{listings}
+
+% -----------------------------------------------------------------------------
+% RIFT ECOSYSTEM LANGUAGE DEFINITIONS
+% -----------------------------------------------------------------------------
+
+% RIFTlang Language Definition (Governance Compiler Source)
+\lstdefinelanguage{rift}{
+    keywords={policy, entropy_bound, memory_contract, governance_contract, 
+              role, validation, level, critical, admin_only, thread_safe, 
+              gossip, pin, relation, mutex, semaphore, async_lock, rw_lock,
+              nasa_power_of_ten, failsafe, telemetry, zero_trust, auth,
+              privilege, segmentation, encrypt, monitor, verify},
+    sensitive=false,
+    morecomment=[l]{//},
+    morestring=[b]",
+    morestring=[b]'
+}
+
+% GosiLang Language Definition (Gossip Programming Language)
+\lstdefinelanguage{gosilang}{
+    keywords={GOSSIP, pinNode, pinService, pinBot, TO, PHP, NODE, PYTHON, 
+              gosi, relation, pin, thread_pin, align, span, type, def, 
+              governance, memory, value, token, classic, quantum, bind, 
+              flow, async, sync, inherit, thread_safe_call},
+    sensitive=true,
+    morecomment=[l]{\#},
+    morecomment=[l]{//},
+    morestring=[b]",
+    morestring=[b]'
+}
+
+% NLINK Configuration Language Definition
+\lstdefinelanguage{nlink}{
+    literate={{_}}{{\_}}1,
+    keywords={component, dependency, minimal, state_minimization, automaton,
+              link, include, exclude, pattern, resolve, tree_shake,
+              package_nlink, nlink_txt, intent, transformation},
+    sensitive=false,
+    morecomment=[l]{\#},
+    morestring=[b]",
+    morestring=[b]'
+}
+
+% -----------------------------------------------------------------------------
+% HYPERLINKS AND REFERENCES
+% -----------------------------------------------------------------------------
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=riftblue,
+    urlcolor=obinexusgreen,
+    citecolor=safetycritical,
+    filecolor=black,
+    pdftitle={OBINexus RIFT Governance Compiler Architecture},
+    pdfauthor={OBINexus Core Engineering Department},
+    pdfsubject={Governance-First Compiler Toolchain Specification},
+    pdfkeywords={RIFT, GosiLang, Compiler, Governance, Safety-Critical, NLINK, PolyBuild, RIFTlang, Thread-Safety, NASA-STD-8739.8}
+}
+
+% -----------------------------------------------------------------------------
+% CAPTIONS AND FLOATS
+% -----------------------------------------------------------------------------
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+
+% -----------------------------------------------------------------------------
+% BIBLIOGRAPHY AND CITATIONS
+% -----------------------------------------------------------------------------
+\usepackage{cite}
+
+% -----------------------------------------------------------------------------
+% TABLE OF CONTENTS FORMATTING
+% -----------------------------------------------------------------------------
+\usepackage{tocloft}
+\renewcommand{\cftchapfont}{\bfseries\color{riftblue}}
+\renewcommand{\cftsecfont}{\color{obinexusgreen}}
+
+% =============================================================================
+% CUSTOM RIFT ECOSYSTEM COMMANDS
+% =============================================================================
+\newcommand{\rift}{\textsc{RIFT}}
+\newcommand{\riftlang}{\textsc{RIFTlang}}
+\newcommand{\gosilang}{\textsc{GosiLang}}
+\newcommand{\nlink}{\textsc{NLINK}}
+\newcommand{\polybuild}{\textsc{PolyBuild}}
+\newcommand{\obinexus}{\textsc{OBINexus}}
+\newcommand{\gitraf}{\textsc{GitRAF}}
+
+% Governance policy reference commands
+\newcommand{\govpolicy}[1]{\texttt{.rift.gov:#1}}
+\newcommand{\riftfile}[1]{\texttt{#1.rift}}
+\newcommand{\gosfile}[1]{\texttt{#1.gs}}
+\newcommand{\nlinkfile}[1]{\texttt{#1.nlink}}
+
+% Technical identifier formatting
+\newcommand{\compilerpass}[1]{\textsf{#1}}
+\newcommand{\governancecontract}[1]{\texttt{governance\_contract(#1)}}
+\newcommand{\threadsafe}[1]{\texttt{thread\_safe\_#1}}
+
+% =============================================================================
+% CUSTOM TCOLORBOX ENVIRONMENTS FOR RIFT PROJECT
+% =============================================================================
+
+% Governance Policy Requirement Box
+\newtcolorbox{governance}{
+    colback=riftblue!10,
+    colframe=riftblue!75!black,
+    colbacktitle=riftblue!75!black,
+    coltitle=white,
+    title={\textbf{Governance Policy Requirement}},
+    fonttitle=\bfseries,
+    enhanced,
+    attach boxed title to top left={yshift=-3mm, yshifttext=-1mm},
+    boxed title style={size=small,colframe=riftblue!75!black},
+    breakable
+}
+
+% Technical Implementation Box
+\newtcolorbox{technical}{
+    colback=obinexusgreen!10,
+    colframe=obinexusgreen!75!black,
+    colbacktitle=obinexusgreen!75!black,
+    coltitle=white,
+    title={\textbf{Technical Implementation}},
+    fonttitle=\bfseries,
+    enhanced,
+    attach boxed title to top left={yshift=-3mm, yshifttext=-1mm},
+    boxed title style={size=small,colframe=obinexusgreen!75!black},
+    breakable
+}
+
+% Safety-Critical System Warning Box
+\newtcolorbox{safety}{
+    colback=safetycritical!10,
+    colframe=safetycritical!75!black,
+    colbacktitle=safetycritical!75!black,
+    coltitle=white,
+    title={\textbf{Safety-Critical System Requirement}},
+    fonttitle=\bfseries,
+    enhanced,
+    attach boxed title to top left={yshift=-3mm, yshifttext=-1mm},
+    boxed title style={size=small,colframe=safetycritical!75!black},
+    breakable
+}
+
+% RIFTer's Way Philosophy Box
+\newtcolorbox{riftersway}{
+    colback=yellow!10,
+    colframe=orange!75!black,
+    colbacktitle=orange!75!black,
+    coltitle=white,
+    title={\textbf{RIFTer's Way Principle}},
+    fonttitle=\bfseries,
+    enhanced,
+    attach boxed title to top left={yshift=-3mm, yshifttext=-1mm},
+    boxed title style={size=small,colframe=orange!75!black},
+    breakable
+}
+
+% =============================================================================
+% LISTINGS CONFIGURATION FOR RIFT ECOSYSTEM
+% =============================================================================
+
+% RIFTlang Code Style
+\lstdefinestyle{riftlang}{
+    language=rift,
+    backgroundcolor=\color{codecolor},
+    commentstyle=\color{obinexusgreen!80!black},
+    keywordstyle=\color{riftblue!80!black}\bfseries,
+    numberstyle=\tiny\color{governancegray},
+    stringstyle=\color{safetycritical!80!black},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=true,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single,
+    frameround=tttt,
+    rulecolor=\color{black!30},
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space}
+}
+
+% GosiLang Code Style
+\lstdefinestyle{gosilang}{
+    language=gosilang,
+    backgroundcolor=\color{obinexusgreen!5},
+    commentstyle=\color{obinexusgreen!60!black},
+    keywordstyle=\color{riftblue!80!black}\bfseries,
+    numberstyle=\tiny\color{governancegray},
+    stringstyle=\color{riftorange!80!black},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=true,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single,
+    frameround=tttt,
+    rulecolor=\color{black!30},
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space}
+}
+
+% Shell/CLI Command Style
+\lstdefinestyle{shell}{
+    language=bash,
+    backgroundcolor=\color{black!90},
+    basicstyle=\footnotesize\ttfamily\color{white},
+    commentstyle=\color{green!60!white},
+    keywordstyle=\color{cyan}\bfseries,
+    stringstyle=\color{yellow!80!white},
+    breaklines=true,
+    frame=single,
+    frameround=tttt,
+    numbers=none,
+    morekeywords={riftlang, nlink, polybuild, gcc, -lrift, -lriftlang, --rift_main},
+    postbreak=\mbox{\textcolor{yellow}{$\hookrightarrow$}\space}
+}
+
+% NLINK Configuration Style
+\lstdefinestyle{nlink}{
+    language=nlink,
+    backgroundcolor=\color{riftblue!5},
+    commentstyle=\color{governancegray!80!black},
+    keywordstyle=\color{riftblue!80!black}\bfseries,
+    numberstyle=\tiny\color{governancegray},
+    stringstyle=\color{safetycritical!80!black},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=true,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single,
+    frameround=tttt,
+    rulecolor=\color{black!30}
+}
+
+% Set default listing style
+\lstset{style=riftlang}
+
+% =============================================================================
+% HEADER AND FOOTER CONFIGURATION (CORRECTED)
+% =============================================================================
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textsf{OBINexus RIFT Governance Compiler Architecture}}
+\lhead{\textsf{RIFT Is a Flexible Translator}}
+\rfoot{Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Ensure proper spacing for corrected headheight
+\addtolength{\topmargin}{-1pt}
+
+% =============================================================================
+% THEOREM ENVIRONMENTS FOR FORMAL VERIFICATION
+% =============================================================================
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{corollary}{Corollary}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[chapter]
+\newtheorem{example}{Example}[chapter]
+
+% =============================================================================
+% CHAPTER AND SECTION FORMATTING
+% =============================================================================
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries\color{riftblue}}
+{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{riftblue}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{obinexusgreen}}
+{\thesubsection}{1em}{}
+
+% =============================================================================
+% DOCUMENT METADATA
+% =============================================================================
+\title{
+    \vspace{-1cm}
+    % Note: Uncomment when logo is available
+    % \includegraphics[width=0.3\textwidth]{figures/obinexus_logo.png}\\[0.8cm]
+    \Huge\textbf{OBINexus RIFT Governance}\\
+    \Huge\textbf{Compiler Architecture}\\[0.4cm]
+    \Large\textit{RIFT Is a Flexible Translator}\\[0.4cm]
+    \large Governance-First Toolchain for Safety-Critical Systems\\[0.4cm]
+    \normalsize Technical Specification Document\\
+    \normalsize Version 1.0.0
+}
+
+\author{
+    \textsc{OBINexus Core Engineering Department}\\[0.2cm]
+    \textit{Nnamdi Michael Okpala, Lead Architect}\\[0.1cm]
+    \textit{Computing from the Heart}\\[0.3cm]
+    \small\texttt{nnamdi@obinexuscomputing.org}
+}
+
+\date{\today}
+
+% =============================================================================
+% DOCUMENT CONTENT STRUCTURE
+% =============================================================================
+\begin{document}
+
+% -----------------------------------------------------------------------------
+% TITLE PAGE
+% -----------------------------------------------------------------------------
+\maketitle
+\thispagestyle{empty}
+
+% -----------------------------------------------------------------------------
+% ABSTRACT
+% -----------------------------------------------------------------------------
+\begin{abstract}
+The RIFT Ecosystem (\textbf{RIFT} = \textbf{RIFT Is a Flexible Translator}) implements the OBINexus Computing Department's revolutionary governance-first compiler toolchain architecture. This comprehensive specification documents the complete technical implementation of a mathematically verifiable compilation system that enforces safety, reliability, and policy compliance across all compilation stages.
+
+The RIFT architecture supports critical infrastructure deployment including life-critical healthcare systems (Sleep Apnea Machine case study), aerospace software, and distributed safety-critical applications. The toolchain integrates \riftlang{} source compilation, \gosilang{} polyglot runtime coordination, \nlink{} state minimization linking, and \polybuild{} pipeline orchestration to deliver unprecedented governance assurance in software systems.
+
+This document follows the waterfall methodology progression from governance policy establishment through technical implementation, verification procedures, toolchain integration, and compliance validation, embodying the RIFTer's Way philosophy: \textit{"We compile what has been governed."}
+\end{abstract}
+
+\newpage
+
+% -----------------------------------------------------------------------------
+% TABLE OF CONTENTS
+% -----------------------------------------------------------------------------
+\tableofcontents
+\newpage
+
+% =============================================================================
+% INCLUDE CHAPTER FILES HERE
+% =============================================================================
+% Note: Add your chapter includes here following the structure:
+% \input{chapters/00_governance-primer.tex}
+% \input{chapters/01_intro.tex}
+% etc.
+
+% =============================================================================
+% END DOCUMENT
+% =============================================================================
+\end{document}

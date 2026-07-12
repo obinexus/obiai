@@ -1,0 +1,230 @@
+// ============================================================
+// FILE: diram_boolean_M3_sinphase_governance.psc.txt
+// MODULE 3 OF 5 — Sinphase Governance Model
+//                 epsilon(x) <= 0.5 | Heap Event Monitoring
+// SOURCE: "DIRAM Boolean Logic Truth Table — Memory Management Gates"
+// ORG:    OBINexus — Aegis Project | Directed Instruction RAM
+// ============================================================
+
+// ------------------------------------------------------------
+// SINPHASE GOVERNANCE: THE EPSILON CONSTRAINT
+// ------------------------------------------------------------
+
+// GOVERNANCE CONSTRAINT: epsilon(x) <= 0.5
+//
+// Sinphase (from: "single-phase") is the OBINexus cost governance model.
+// It constrains the ratio of heap events to maximum allowable events.
+//
+//   epsilon(x) = heap_events / max_events
+//
+// B=0: epsilon <= 0.5 -> System within safe memory allocation limits
+// B=1: epsilon >  0.5 -> Too many heap events; must throttle allocations
+//
+// NOTE ON 0.5 vs 0.6 BOUNDS:
+//   This document (PDF 12) uses epsilon <= 0.5 as the DIRAM hardware gate.
+//   The PDF explicitly states: "Updated constraint (not 0.6)"
+//   Prior corpus uses epsilon <= 0.6 (software/AEGIS-chain bound).
+//   Interpretation:
+//     Hardware gate (DIRAM):      0.5 — strict, enforced in boolean logic
+//     Software validation (AEGIS): 0.6 — permissive, enforced in pseudocode
+//   Both are correct in their respective enforcement layers.
+
+
+// ── SINPHASE COMPLIANCE FUNCTION (C SOURCE FORMALIZED) ───────
+
+// Original C function from the PDF (decoded from PDF character duplication):
+//
+//   bool diram_check_sinphase_compliance(uint8_t heap_events, uint8_t max_events) {
+//       double epsilon = (double)heap_events / (double)max_events;
+//       return epsilon <= 0.5;  // Updated constraint (not 0.6)
+//   }
+
+CONSTANT SINPHASE_EPSILON_BOUND_HARDWARE := 0.5   // strict hardware gate
+CONSTANT SINPHASE_EPSILON_BOUND_SOFTWARE := 0.6   // AEGIS-chain soft bound
+
+PROCEDURE diram_check_sinphase_compliance(heap_events: UINT8,
+                                           max_events: UINT8) -> BOOL:
+    // Faithfully implements the C function from PDF §Sinphase Governance Model.
+    // Returns TRUE (compliant, B=0) or FALSE (violation, B=1).
+
+    IF max_events == 0:
+        EMIT ERROR "max_events must be > 0 (division by zero)"
+        RETURN FALSE   // treat undefined as violation
+    END IF
+
+    epsilon := heap_events / max_events    // = (double)heap_events / (double)max_events
+
+    EMIT LOG "Sinphase check | epsilon=" + epsilon +
+             " | bound=" + SINPHASE_EPSILON_BOUND_HARDWARE +
+             " | compliant=" + (epsilon <= SINPHASE_EPSILON_BOUND_HARDWARE)
+
+    RETURN epsilon <= SINPHASE_EPSILON_BOUND_HARDWARE
+END PROCEDURE
+
+
+// ── SINPHASE EPSILON COMPUTATION ─────────────────────────────
+
+PROCEDURE ComputeEpsilon(heap_events: REAL, max_events: REAL) -> REAL:
+    // epsilon(x) = heap_events / max_events
+    // Returns value in [0.0, 1.0] for valid inputs.
+    IF max_events <= 0.0:
+        EMIT ERROR "max_events must be > 0"
+        RETURN 1.0   // degenerate: treat as maximum violation
+    END IF
+    RETURN heap_events / max_events
+END PROCEDURE
+
+
+// ── GOVERNANCE STATE DERIVATION ───────────────────────────────
+
+PROCEDURE DeriveGovernanceState(heap_events: UINT8,
+                                  max_events: UINT8) -> GovernanceState:
+    // Maps Sinphase epsilon to the binary B input for the DIRAM gate.
+    compliant := diram_check_sinphase_compliance(heap_events, max_events)
+    IF compliant:
+        RETURN COMPLIANT    // B=0: epsilon <= 0.5
+    ELSE:
+        RETURN VIOLATION    // B=1: epsilon > 0.5
+    END IF
+END PROCEDURE
+
+
+// ── GOVERNANCE STATES FORMALLY ────────────────────────────────
+
+DEFINE SinphaseGovernanceModel AS:
+    // B=0: epsilon <= 0.5 -> System running within safe memory allocation limits
+    STATE_B0 := {
+        epsilon_range  : RANGE[0.0, 0.5],
+        label          : "Compliant",
+        heap_pressure  : LOW,
+        diram_gate_B   : 0,
+        memory_policy  : "Normal allocation permitted"
+    }
+
+    // B=1: epsilon > 0.5 -> Too many heap events; system must throttle
+    STATE_B1 := {
+        epsilon_range  : RANGE[0.501, 1.0],
+        label          : "Violation",
+        heap_pressure  : HIGH,
+        diram_gate_B   : 1,
+        memory_policy  : "Throttle allocations; defer non-critical operations"
+    }
+
+    // Threshold: the boundary value
+    BOUNDARY := 0.5
+    // Note: epsilon == 0.5 is COMPLIANT (<=, not <)
+END DEFINE
+
+
+// ── HEAP EVENT MONITORING ─────────────────────────────────────
+
+DEFINE HeapEventMonitor AS:
+    // Tracks heap allocation events over time.
+    // Feeds into epsilon computation for governance gate.
+
+    heap_event_count : UINT64    // total events in current window
+    max_event_budget : UINT64    // configurable maximum
+    window_start     : Timestamp
+    window_duration  : Duration
+
+    PROCEDURE RecordHeapEvent() -> VOID:
+        self.heap_event_count := self.heap_event_count + 1
+        IF ShouldThrottle():
+            EMIT WARNING "Heap pressure: epsilon > 0.5 — throttling"
+        END IF
+    END PROCEDURE
+
+    PROCEDURE CurrentEpsilon() -> REAL:
+        RETURN ComputeEpsilon(heap_event_count, max_event_budget)
+    END PROCEDURE
+
+    PROCEDURE ShouldThrottle() -> BOOL:
+        RETURN CurrentEpsilon() > SINPHASE_EPSILON_BOUND_HARDWARE
+    END PROCEDURE
+
+    PROCEDURE GetGovernanceState() -> GovernanceState:
+        epsilon := CurrentEpsilon()
+        IF epsilon <= SINPHASE_EPSILON_BOUND_HARDWARE:
+            RETURN COMPLIANT
+        ELSE:
+            RETURN VIOLATION
+        END IF
+    END PROCEDURE
+
+    PROCEDURE Reset() -> VOID:
+        // Reset window at end of period
+        heap_event_count := 0
+        window_start     := CURRENT_TIMESTAMP()
+    END PROCEDURE
+END DEFINE
+
+
+// ── GOVERNANCE ENFORCEMENT LEVELS ────────────────────────────
+
+DEFINE GovernanceEnforcementLevel AS ENUM:
+    HARDWARE_GATE    // epsilon <= 0.5 (DIRAM boolean gate — PDF 12)
+    SOFTWARE_GATE    // epsilon <= 0.6 (AEGIS-chain — PDFs 2-9)
+    RUNTIME_GATE     // epsilon <= 0.5 (AuraSeal quantum — PDF 9)
+END DEFINE
+
+PROCEDURE CheckGovernance(epsilon: REAL,
+                           level: GovernanceEnforcementLevel) -> BOOL:
+    MATCH level:
+        CASE HARDWARE_GATE:
+            RETURN epsilon <= 0.5
+        CASE SOFTWARE_GATE:
+            RETURN epsilon <= 0.6
+        CASE RUNTIME_GATE:
+            RETURN epsilon <= 0.5
+    END MATCH
+END PROCEDURE
+
+
+// ── EPSILON TRANSITION MONITORING ────────────────────────────
+
+PROCEDURE MonitorEpsilonTransitions(monitor: HeapEventMonitor,
+                                     callback: GovernanceCallback) -> VOID:
+    // Watch for threshold crossings and trigger callbacks.
+    WHILE monitoring_active:
+        epsilon := monitor.CurrentEpsilon()
+        state   := monitor.GetGovernanceState()
+
+        IF epsilon CROSSES_ABOVE 0.5:
+            callback.OnViolationEnter(epsilon)
+            EMIT ALERT "Sinphase VIOLATION entered | epsilon=" + epsilon
+        ELSE IF epsilon CROSSES_BELOW 0.5:
+            callback.OnComplianceRestore(epsilon)
+            EMIT INFO "Sinphase compliance RESTORED | epsilon=" + epsilon
+        END IF
+
+        SLEEP(MONITOR_INTERVAL_MS)
+    END WHILE
+END PROCEDURE
+
+
+// ── SINPHASE CROSS-CORPUS RECONCILIATION ─────────────────────
+
+DEFINE SinphaseCorpusReconciliation AS:
+    // How Sinphase epsilon appears across all 12 PDFs:
+
+    PDF_2  := { bound: 0.6, context: "Actor Class Sinphase governance constraint" }
+    PDF_3  := { bound: 0.6, context: "EpistemicDAG DIRAM ε(transition) <= 0.6" }
+    PDF_4  := { bound: 0.6, context: "DIRAM compatibility: ε(transition) <= 0.6" }
+    PDF_6  := { bound: 0.6, context: "DIRAM COMMIT if ε(transition) <= 0.6" }
+    PDF_7  := { bound: 0.6, context: "DIRAM cascade governance ε bound" }
+    PDF_9  := { bound: 0.5, context: "AuraSeal entropy_coefficient <= 0.5" }
+    PDF_12 := { bound: 0.5, context: "DIRAM boolean hardware gate (THIS)" }
+
+    // Both values coexist:
+    INTERPRETATION := {
+        "0.6 = software-enforced upper safety limit (AEGIS proof chain)",
+        "0.5 = hardware-enforced strict gate (DIRAM boolean / AuraSeal)",
+        "0.5 implies 0.6 — hardware gate is strictly tighter than software gate"
+    }
+END DEFINE
+
+
+// ============================================================
+// END MODULE 3
+// NEXT: diram_boolean_M4_hardware_implementation.psc.txt
+// ============================================================
