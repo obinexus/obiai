@@ -23,6 +23,7 @@ __all__ = [
     "Evidence",
     "MappedEvidence",
     "Observation",
+    "ObservationIn",
     "Provenance",
     "SafetyAudit",
     "TranscriptEntry",
@@ -73,6 +74,36 @@ class Observation(BaseModel):
         return value
 
 
+class ObservationIn(BaseModel):
+    """Client-submitted observation (session_id and ids are assigned server-side)."""
+
+    modality: Literal["vision", "chat", "system"]
+    event_type: str
+    value: bool | int | float | str
+    confidence: float = Field(ge=0.0, le=1.0)
+    source: str
+
+    @field_validator("value")
+    @classmethod
+    def _reject_oversized_text(cls, value: bool | int | float | str) -> bool | int | float | str:
+        if isinstance(value, str) and len(value) > MAX_SCALAR_TEXT:
+            raise ValueError(
+                f"observation value must be a short scalar (<= {MAX_SCALAR_TEXT} chars); "
+                "raw media payloads are not accepted"
+            )
+        return value
+
+    def to_observation(self, session_id: str) -> Observation:
+        return Observation(
+            session_id=session_id,
+            modality=self.modality,
+            event_type=self.event_type,
+            value=self.value,
+            confidence=self.confidence,
+            source=self.source,
+        )
+
+
 class Evidence(BaseModel):
     """Evidence for a proposition, traceable to its source observation."""
 
@@ -90,6 +121,7 @@ class MappedEvidence(BaseModel):
     bn_variable: str
     proposition: str
     concepts: list[str] = Field(default_factory=list)
+    semantic_chain: list[str] = Field(default_factory=list)
     evidence: Evidence
 
 
