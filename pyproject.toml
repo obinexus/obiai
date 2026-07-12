@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "obiai-agent"
+version = "0.1.0"
+description = "OBI Ontological Bayesian Intelligence agentic modular model"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "Nnamdi Michael Okpala / OBINexus Computing"}]
+dependencies = [
+  "pydantic>=2.8,<3",
+  "networkx>=3.3,<4",
+  "numpy>=1.26,<3",
+  "scipy>=1.13,<2",
+  "scikit-learn>=1.5,<2",
+  "pyyaml>=6.0,<7",
+  "typer>=0.12,<1",
+  "rich>=13.7,<15",
+]
+
+[project.optional-dependencies]
+bayesian = ["pymc>=5.16,<6", "arviz>=0.18,<1"]
+api = ["fastapi>=0.112,<1", "uvicorn[standard]>=0.30,<1"]
+dev = ["pytest>=8.2,<9", "ruff>=0.5,<1", "mypy>=1.10,<2"]
+all = [
+  "pymc>=5.16,<6", "arviz>=0.18,<1",
+  "fastapi>=0.112,<1", "uvicorn[standard]>=0.30,<1",
+  "pytest>=8.2,<9", "ruff>=0.5,<1", "mypy>=1.10,<2"
+]
+
+[project.scripts]
+obiai = "obiai.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/obiai"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100

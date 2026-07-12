@@ -1,0 +1,11 @@
+agent:
+  name: OBI
+  uncertainty_threshold: 0.45
+  decision_threshold: 0.60
+ontology:
+  strict_relations: true
+bias:
+  protected_attributes: ["age_group", "disability", "ethnicity", "gender"]
+  maximum_demographic_parity_gap: 0.10
+modules:
+  enabled: ["echo"]
