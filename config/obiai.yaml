@@ -1,5 +1,5 @@
 agent:
-  name: OBI
+  name: U
   uncertainty_threshold: 0.45
   decision_threshold: 0.60
 ontology:
@@ -9,3 +9,32 @@ bias:
   maximum_demographic_parity_gap: 0.10
 modules:
   enabled: ["echo"]
+u:
+  thresholds:
+    yes_threshold: 0.75
+    no_threshold: 0.25
+    max_uncertainty_for_action: 0.30
+  phi:
+    prior:
+      calibrated: 0.9
+      miscalibrated: 0.1
+  epistemic:
+    alpha: 0.6
+    beta: 0.4
+    filter_threshold: 2.0
+    flash_threshold: 0.25
+  vision:
+    allowed_event_types: ["participant_raised_hand"]
+    min_confidence: 0.80
+    sustain_ms: 500
+    cooldown_ms: 4000
+  safety:
+    forbidden_inference_categories:
+      ["medical", "disability", "ethnicity", "emotion", "identity", "honesty"]
+  privacy:
+    upload_frames: false
+    transcript_retention: session
+  server:
+    host: 127.0.0.1
+    port: 8000
+    cors_origins: ["http://localhost:5173"]

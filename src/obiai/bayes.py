@@ -37,6 +37,10 @@ class BayesianNetwork:
         denominator = numerator + self._enumerate({**evidence, target: False})
         return 0.5 if denominator == 0 else numerator / denominator
 
+    def probability_of(self, evidence: Mapping[str, bool]) -> float:
+        """Exact joint probability P(evidence) by enumeration."""
+        return self._enumerate(dict(evidence)) if evidence else 1.0
+
     def _enumerate(self, fixed: Mapping[str, bool]) -> float:
         names = list(self.nodes)
         unknown = [name for name in names if name not in fixed]
