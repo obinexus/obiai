@@ -84,7 +84,13 @@ class VisionClassifier(Protocol):
 
 @runtime_checkable
 class SpeechToTextProvider(Protocol):
-    """Deferred: streaming transcription provider (e.g. faster-whisper)."""
+    """Deferred: a server-side streaming transcription provider over raw audio
+    (e.g. faster-whisper). The current implementation performs recognition in
+    the browser (Web Speech API) and streams only recognized text — see
+    ``obiai.realtime.events.ClientTranscriptPartial`` / ``ClientTranscriptFinal``
+    — so this protocol has no implementation yet. It exists so a backend
+    audio-stream provider can be swapped in later without changing callers.
+    """
 
     def transcribe(
         self, audio: AsyncIterator[bytes]

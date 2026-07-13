@@ -58,6 +58,23 @@ Hand tracking runs entirely in your browser; only structured events such as
 Video and audio are not stored by default, and deleting a session wipes all of
 its data.
 
+### Voice input and live captions
+
+Click **Start listening** to talk to U. Speech recognition runs in the
+browser (the Web Speech API) — only recognized *text* crosses the wire as
+`transcript.partial` / `transcript.final` WebSocket events, never raw audio.
+Interim results appear live in the caption bar under the video (toggle with
+**Captions**, independently of whether the microphone is on); a finalized
+utterance is added to the transcript as your turn and answered by U like any
+other chat message. Requires a Chromium-based browser (Web Speech API is not
+implemented in Firefox); unsupported browsers show "Voice input: not
+supported" and typed chat still works.
+
+A server-side audio-stream transcription provider (e.g. faster-whisper) is
+designed for behind `obiai.core.protocols.SpeechToTextProvider` but not
+implemented — this keeps STT dependency-free for the vertical slice while the
+interface stays ready for a future swap.
+
 ## Legacy OBIAI agent
 
 The original demo agent is unchanged:

@@ -7,6 +7,7 @@ import type {
   Observation,
   ObservationIn,
   ServerEvent,
+  TranscriptSegment,
   UState,
 } from '../lib/types';
 import { UWebSocket } from '../lib/wsClient';
@@ -23,6 +24,16 @@ export interface VisionStatus {
   handRaised: boolean;
 }
 
+export interface SpeechStatus {
+  /** Whether the browser's speech recognizer is actively listening. */
+  listening: boolean;
+  /** The current interim (not-yet-final) caption, or '' when idle. */
+  liveCaption: string;
+  /** Live captions are shown independently of whether recognition is on. */
+  captionsEnabled: boolean;
+  supported: boolean;
+}
+
 interface AppState {
   sessionId: string | null;
   sessionActive: boolean;
@@ -36,14 +47,19 @@ interface AppState {
   cameraActive: boolean;
   micActive: boolean;
   vision: VisionStatus;
+  speech: SpeechStatus;
 
   startSession: () => Promise<void>;
   endSession: () => Promise<void>;
   sendChat: (text: string) => void;
   submitObservation: (observation: ObservationIn) => void;
+  submitTranscriptPartial: (segment: TranscriptSegment) => void;
+  submitTranscriptFinal: (segment: TranscriptSegment) => void;
   setUState: (state: UState) => void;
   setMediaActive: (camera: boolean, mic: boolean) => void;
   setVision: (update: Partial<VisionStatus>) => void;
+  setSpeech: (update: Partial<SpeechStatus>) => void;
+  toggleCaptions: () => void;
 }
 
 let socket: UWebSocket | null = null;
@@ -83,6 +99,18 @@ export const useAppStore = create<AppState>((set, get) => {
         break;
       case 'audit.created':
         break; // audits already arrive inside decision.created
+      case 'transcript.partial':
+        set((state) => ({ speech: { ...state.speech, liveCaption: event.segment.text } }));
+        break;
+      case 'transcript.final':
+        set((state) => ({
+          transcript: [
+            ...state.transcript,
+            { role: 'user', text: event.segment.text, timestamp: nowIso() },
+          ],
+          speech: { ...state.speech, liveCaption: '' },
+        }));
+        break;
       case 'error':
         set({ lastError: event.message });
         break;
@@ -119,6 +147,7 @@ export const useAppStore = create<AppState>((set, get) => {
     cameraActive: false,
     micActive: false,
     vision: { trackingActive: false, liveConfidence: 0, handRaised: false },
+    speech: { listening: false, liveCaption: '', captionsEnabled: true, supported: false },
 
     startSession: async () => {
       if (get().sessionActive) return;
@@ -170,6 +199,20 @@ export const useAppStore = create<AppState>((set, get) => {
       socket?.send({ type: 'observation.submit', observation });
     },
 
+    submitTranscriptPartial: (segment: TranscriptSegment) => {
+      if (!get().sessionActive) return;
+      socket?.send({ type: 'transcript.partial', segment });
+      set((state) => ({ speech: { ...state.speech, liveCaption: segment.text } }));
+    },
+
+    submitTranscriptFinal: (segment: TranscriptSegment) => {
+      if (!get().sessionActive) return;
+      socket?.send({ type: 'transcript.final', segment });
+      // The server echoes transcript.final, which appends the transcript
+      // entry; clear the live caption immediately for a responsive feel.
+      set((state) => ({ speech: { ...state.speech, liveCaption: '' } }));
+    },
+
     setUState: (uState: UState) => set({ uState }),
 
     setMediaActive: (cameraActive: boolean, micActive: boolean) =>
@@ -177,5 +220,13 @@ export const useAppStore = create<AppState>((set, get) => {
 
     setVision: (update: Partial<VisionStatus>) =>
       set((state) => ({ vision: { ...state.vision, ...update } })),
+
+    setSpeech: (update: Partial<SpeechStatus>) =>
+      set((state) => ({ speech: { ...state.speech, ...update } })),
+
+    toggleCaptions: () =>
+      set((state) => ({
+        speech: { ...state.speech, captionsEnabled: !state.speech.captionsEnabled },
+      })),
   };
 });

@@ -18,7 +18,13 @@ from obiai.core.errors import (
     NoObservationsError,
     SessionNotFoundError,
 )
-from obiai.core.models import Decision, Observation, ObservationIn, TranscriptEntry
+from obiai.core.models import (
+    Decision,
+    Observation,
+    ObservationIn,
+    TranscriptEntry,
+    TranscriptSegment,
+)
 from obiai.memory import Session, SessionRepository
 from obiai.realtime import SessionEventBus
 from obiai.realtime.events import (
@@ -27,6 +33,8 @@ from obiai.realtime.events import (
     DecisionCreated,
     ObservationCreated,
     ReasoningStarted,
+    ServerTranscriptFinal,
+    ServerTranscriptPartial,
 )
 
 __all__ = ["UService"]
@@ -101,8 +109,33 @@ class UService:
         return observation, decision
 
     async def handle_chat(self, session_id: str, text: str) -> str:
+        """Typed chat: the client already shows the user's own message locally."""
         self.get_session(session_id)
         self.repo.append_transcript(session_id, TranscriptEntry(role="user", text=text))
+        return await self._respond(session_id)
+
+    async def handle_partial_transcript(
+        self, session_id: str, segment: TranscriptSegment
+    ) -> None:
+        """Interim speech recognition result: rebroadcast only, never persisted."""
+        self.get_session(session_id)
+        await self.bus.publish(session_id, ServerTranscriptPartial(segment=segment))
+
+    async def handle_voice_transcript(
+        self, session_id: str, segment: TranscriptSegment
+    ) -> str:
+        """A finalized spoken utterance: persisted and treated as a chat turn.
+
+        Unlike typed chat, the client has not shown the user's own words yet
+        (recognition happens after the fact), so the finalized segment is
+        echoed back before U's reply.
+        """
+        self.get_session(session_id)
+        self.repo.append_transcript(session_id, TranscriptEntry(role="user", text=segment.text))
+        await self.bus.publish(session_id, ServerTranscriptFinal(segment=segment))
+        return await self._respond(session_id)
+
+    async def _respond(self, session_id: str) -> str:
         reply = (
             "I heard you. Right now I reason about observable call events - "
             "try raising your hand and I will show you my full decision trace."

@@ -156,9 +156,16 @@ class TranscriptEntry(BaseModel):
 
 
 class TranscriptSegment(BaseModel):
-    """A segment of live speech transcription (speech providers are deferred)."""
+    """A segment of live speech transcription.
 
-    text: str
+    Recognition runs client-side (browser Web Speech API in the current
+    implementation); only recognized text crosses the wire, never audio. A
+    server-side :class:`~obiai.core.protocols.SpeechToTextProvider` that
+    accepts raw audio remains a deferred provider for a future backend
+    transcription path.
+    """
+
+    text: str = Field(max_length=4000)
     start_ms: int = Field(ge=0)
     end_ms: int = Field(ge=0)
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)

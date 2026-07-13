@@ -53,3 +53,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
+# RIFTPlayer (a separate Flask-based symbol-classification tool, not part of
+# the obiai package: no __init__.py, not imported anywhere) is excluded
+# rather than reformatted.
+extend-exclude = ["src/obiai/transcription"]

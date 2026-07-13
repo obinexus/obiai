@@ -5,8 +5,28 @@ import pytest
 from pydantic import ValidationError
 
 from obiai.realtime import SessionEventBus, client_event_adapter, server_event_adapter
-from obiai.realtime.events import AgentMessage, SessionReady
+from obiai.realtime.events import (
+    AgentMessage,
+    ServerTranscriptFinal,
+    ServerTranscriptPartial,
+    SessionReady,
+)
 
+
+PARTIAL_SEGMENT = {
+    "text": "can you inspect",
+    "start_ms": 0,
+    "end_ms": 800,
+    "confidence": 0.7,
+    "final": False,
+}
+FINAL_SEGMENT = {
+    "text": "can you inspect this error",
+    "start_ms": 0,
+    "end_ms": 1600,
+    "confidence": 0.92,
+    "final": True,
+}
 
 CLIENT_SAMPLES = [
     {"type": "session.start"},
@@ -23,6 +43,8 @@ CLIENT_SAMPLES = [
         },
     },
     {"type": "clarification.answer", "decision_id": "decision-1", "answer": "yes"},
+    {"type": "transcript.partial", "segment": PARTIAL_SEGMENT},
+    {"type": "transcript.final", "segment": FINAL_SEGMENT},
 ]
 
 
@@ -49,6 +71,31 @@ def test_server_event_serialization() -> None:
     parsed = server_event_adapter.validate_json(ready.model_dump_json())
     assert isinstance(parsed, SessionReady)
     assert parsed.session_id == "session-1"
+
+
+def test_server_transcript_events_round_trip() -> None:
+    partial = ServerTranscriptPartial(segment=PARTIAL_SEGMENT)
+    parsed_partial = server_event_adapter.validate_json(partial.model_dump_json())
+    assert isinstance(parsed_partial, ServerTranscriptPartial)
+    assert parsed_partial.segment.final is False
+
+    final = ServerTranscriptFinal(segment=FINAL_SEGMENT)
+    parsed_final = server_event_adapter.validate_json(final.model_dump_json())
+    assert isinstance(parsed_final, ServerTranscriptFinal)
+    assert parsed_final.segment.text == "can you inspect this error"
+    assert parsed_final.segment.final is True
+
+
+def test_transcript_segment_text_is_bounded() -> None:
+    with pytest.raises(ValidationError):
+        client_event_adapter.validate_json(
+            json.dumps(
+                {
+                    "type": "transcript.final",
+                    "segment": {**FINAL_SEGMENT, "text": "x" * 5000},
+                }
+            )
+        )
 
 
 def test_bus_fan_out_and_unsubscribe() -> None:

@@ -28,6 +28,16 @@ export interface Provenance {
   version: string;
 }
 
+/** A speech-recognition result. Recognition runs client-side (Web Speech
+ * API); only recognized text ever crosses the wire, never audio. */
+export interface TranscriptSegment {
+  text: string;
+  start_ms: number;
+  end_ms: number;
+  confidence: number;
+  final: boolean;
+}
+
 export interface Evidence {
   evidence_id: string;
   proposition: string;
@@ -79,7 +89,9 @@ export type ClientEvent =
   | { type: 'session.end' }
   | { type: 'chat.message'; text: string }
   | { type: 'observation.submit'; observation: ObservationIn }
-  | { type: 'clarification.answer'; decision_id: string; answer: string };
+  | { type: 'clarification.answer'; decision_id: string; answer: string }
+  | { type: 'transcript.partial'; segment: TranscriptSegment }
+  | { type: 'transcript.final'; segment: TranscriptSegment };
 
 export type ServerEvent =
   | { type: 'session.ready'; session_id: string }
@@ -93,6 +105,8 @@ export type ServerEvent =
       bias_audit: BiasReport;
       safety_audit: SafetyAudit;
     }
+  | { type: 'transcript.partial'; segment: TranscriptSegment }
+  | { type: 'transcript.final'; segment: TranscriptSegment }
   | { type: 'error'; message: string; code: string };
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected';

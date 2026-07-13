@@ -6,6 +6,9 @@ Protocol:
   otherwise the socket closes with code 4404);
 * the server immediately sends ``session.ready``;
 * ``session.start`` triggers U's greeting ("Hi, I am U.");
+* ``transcript.partial`` (live speech recognition, interim) is rebroadcast
+  for captioning and never persisted; ``transcript.final`` is persisted and
+  answered like a chat turn — see ``UService.handle_voice_transcript``;
 * invalid or unknown events produce an ``error`` event and the connection
   stays open;
 * the writer task is the only sender, so events are never interleaved.
@@ -22,6 +25,8 @@ from obiai.core.errors import UError
 from obiai.realtime.events import (
     ChatMessage,
     ClarificationAnswer,
+    ClientTranscriptFinal,
+    ClientTranscriptPartial,
     ErrorEvent,
     ObservationSubmit,
     SessionEnd,
@@ -104,3 +109,7 @@ async def _dispatch(service, session_id: str, event) -> None:
         await service.handle_observation(session_id, event.observation)
     elif isinstance(event, ClarificationAnswer):
         await service.handle_chat(session_id, event.answer)
+    elif isinstance(event, ClientTranscriptPartial):
+        await service.handle_partial_transcript(session_id, event.segment)
+    elif isinstance(event, ClientTranscriptFinal):
+        await service.handle_voice_transcript(session_id, event.segment)

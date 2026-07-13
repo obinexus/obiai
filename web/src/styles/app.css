@@ -214,6 +214,21 @@ input[type='text'] {
   align-items: center;
 }
 
+.caption-bar {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 2;
+  min-height: 1.6em;
+  padding: 0.35rem 0.7rem;
+  background: rgba(2, 6, 23, 0.78);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
 .status-text {
   font-size: 0.85rem;
   color: var(--text-dim);

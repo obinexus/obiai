@@ -8,6 +8,7 @@ interface Props {
 export function LocalVideoTile({ videoRef, canvasRef }: Props) {
   const vision = useAppStore((s) => s.vision);
   const cameraActive = useAppStore((s) => s.cameraActive);
+  const speech = useAppStore((s) => s.speech);
 
   return (
     <>
@@ -26,6 +27,11 @@ export function LocalVideoTile({ videoRef, canvasRef }: Props) {
             Hand raised: <strong>{vision.handRaised ? 'YES' : 'no'}</strong>
           </span>
           <span className="badge">Processing locally — frames are not uploaded</span>
+        </div>
+      )}
+      {speech.captionsEnabled && (
+        <div className="caption-bar" aria-live="polite" aria-label="Live captions">
+          {speech.liveCaption || (speech.listening ? '…' : '')}
         </div>
       )}
     </>

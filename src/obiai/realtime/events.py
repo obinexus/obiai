@@ -11,7 +11,13 @@ from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, Field, TypeAdapter
 
-from obiai.core.models import Decision, Observation, ObservationIn, SafetyAudit
+from obiai.core.models import (
+    Decision,
+    Observation,
+    ObservationIn,
+    SafetyAudit,
+    TranscriptSegment,
+)
 from obiai.types import BiasReport
 
 __all__ = [
@@ -20,11 +26,15 @@ __all__ = [
     "ChatMessage",
     "ClarificationAnswer",
     "ClientEvent",
+    "ClientTranscriptFinal",
+    "ClientTranscriptPartial",
     "DecisionCreated",
     "ErrorEvent",
     "ObservationCreated",
     "ObservationSubmit",
     "ReasoningStarted",
+    "ServerTranscriptFinal",
+    "ServerTranscriptPartial",
     "SessionEnd",
     "SessionReady",
     "SessionStart",
@@ -60,8 +70,35 @@ class ClarificationAnswer(BaseModel):
     answer: str = Field(min_length=1, max_length=4000)
 
 
+class ClientTranscriptPartial(BaseModel):
+    """An interim (not-yet-final) speech recognition result.
+
+    Never persisted — purely for live captioning. Recognition runs entirely
+    in the browser (Web Speech API); only recognized text crosses the wire,
+    never audio.
+    """
+
+    type: Literal["transcript.partial"] = "transcript.partial"
+    segment: TranscriptSegment
+
+
+class ClientTranscriptFinal(BaseModel):
+    """A finalized utterance, treated as a spoken chat message."""
+
+    type: Literal["transcript.final"] = "transcript.final"
+    segment: TranscriptSegment
+
+
 ClientEvent = Annotated[
-    Union[SessionStart, SessionEnd, ChatMessage, ObservationSubmit, ClarificationAnswer],
+    Union[
+        SessionStart,
+        SessionEnd,
+        ChatMessage,
+        ObservationSubmit,
+        ClarificationAnswer,
+        ClientTranscriptPartial,
+        ClientTranscriptFinal,
+    ],
     Field(discriminator="type"),
 ]
 
@@ -109,6 +146,20 @@ class ErrorEvent(BaseModel):
     code: str = "invalid_event"
 
 
+class ServerTranscriptPartial(BaseModel):
+    """Live-caption echo of an interim recognition result."""
+
+    type: Literal["transcript.partial"] = "transcript.partial"
+    segment: TranscriptSegment
+
+
+class ServerTranscriptFinal(BaseModel):
+    """The finalized utterance, for rendering the user's spoken turn in the transcript."""
+
+    type: Literal["transcript.final"] = "transcript.final"
+    segment: TranscriptSegment
+
+
 ServerEvent = Annotated[
     Union[
         SessionReady,
@@ -117,6 +168,8 @@ ServerEvent = Annotated[
         DecisionCreated,
         AgentMessage,
         AuditCreated,
+        ServerTranscriptPartial,
+        ServerTranscriptFinal,
         ErrorEvent,
     ],
     Field(discriminator="type"),
