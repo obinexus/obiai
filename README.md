@@ -8,6 +8,8 @@ audits for every decision.
 
 > “Hi, I am U.”
 
+![U reasoning live about a raised-hand event: a YES decision at 0.93 probability with full evidence, semantic path, and audit trail](docs/images/u-web-demo.png)
+
 The architecture separates:
 
 1. **Ontology** — explicit concepts and relations (`obiai.ontology`).

@@ -1,0 +1,9 @@
+# Torch is installed separately with a CUDA-specific index (see README) —
+# `pip install -r requirements.txt` alone will pull a CPU-only build.
+transformers>=4.44,<5
+peft>=0.12,<1
+bitsandbytes>=0.43.1,<1
+accelerate>=0.33,<1
+datasets>=2.20,<3
+huggingface_hub[cli]>=0.24,<1
+sentencepiece>=0.2,<1

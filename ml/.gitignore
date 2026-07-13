@@ -1,0 +1,8 @@
+# Datasets and model weights are large binaries; keep them out of git.
+data/
+models/
+checkpoints/
+.venv/
+__pycache__/
+*.pyc
+wandb/
