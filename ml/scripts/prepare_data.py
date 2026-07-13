@@ -59,8 +59,13 @@ def walk_tree(
     if node["role"] == "assistant" and not is_low_quality(node):
         if lang is None or node.get("lang") == lang:
             yield {
+                "message_id": node.get("message_id"),
                 "prompt": build_prompt(history),
                 "completion": f"{node['text']}{COMPLETION_SUFFIX}",
+                # Carried through for scripts/bias_audit.py — the review
+                # labels (toxicity, hate_speech, ...) live on the tree node
+                # itself, so no separate join against messages.jsonl.gz.
+                "labels": node.get("labels"),
             }
 
     new_history = history + [{"role": node["role"], "text": node["text"]}]

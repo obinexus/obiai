@@ -3,7 +3,8 @@
 transformers>=4.44,<5
 peft>=0.12,<1
 bitsandbytes>=0.43.1,<1
-accelerate>=0.33,<1
+accelerate>=1.0,<2
 datasets>=2.20,<3
 huggingface_hub[cli]>=0.24,<1
+hf_xet>=1.0,<2  # required: OASST2's files are Xet-backed, not plain LFS
 sentencepiece>=0.2,<1
