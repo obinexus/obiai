@@ -36,6 +36,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.u.server.cors_origins,
+        # Also allow the dev frontend from any private-LAN address (so
+        # another device on the same network can load the app), on top of
+        # the exact origins above.
+        allow_origin_regex=r"http://(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}):5173",
         allow_methods=["*"],
         allow_headers=["*"],
     )
