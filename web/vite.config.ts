@@ -28,6 +28,7 @@ export default defineConfig({
     proxy: {
       '/health': backend,
       '/version': backend,
+      '/model': backend,
       '/sessions': backend,
       '/ontology': backend,
       '/reason': backend,

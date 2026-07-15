@@ -22,7 +22,13 @@ def version(request: Request) -> dict[str, object]:
         "version": obiai.__version__,
         "assistant": "U",
         "loaded_modules": sorted(registry.modules),
+        "u_model": request.app.state.u_model.describe(),
     }
+
+
+@router.get("/model/uagentic")
+def uagentic_model(request: Request) -> dict[str, object]:
+    return request.app.state.u_model.describe()
 
 
 @router.get("/ontology/concepts")

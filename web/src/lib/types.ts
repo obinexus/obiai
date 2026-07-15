@@ -65,6 +65,19 @@ export interface Action {
   rationale: string;
 }
 
+export interface UModelProfile {
+  model_id: string;
+  version: string;
+  display_name: string;
+  training_state: string;
+  artifact_name: string;
+  loaded_from: string | null;
+  data_manifest_ref: string;
+  source_count: number;
+  concept_count: number;
+  separation_contract: string[];
+}
+
 export interface Decision {
   decision_id: string;
   session_id: string;

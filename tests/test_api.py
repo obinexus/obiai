@@ -36,6 +36,17 @@ def test_version_reports_modules(client: TestClient) -> None:
     assert payload["assistant"] == "U"
     assert payload["name"] == "obiai-u"
     assert payload["loaded_modules"] == ["echo"]
+    assert payload["u_model"]["artifact_name"] == "obi-uagentic-0.1.0.pkl"
+
+
+def test_uagentic_model_profile_endpoint(client: TestClient) -> None:
+    payload = client.get("/model/uagentic").json()
+    assert payload["model_id"] == "obi-uagentic"
+    assert payload["version"] == "0.1.0"
+    assert payload["training_state"] == "bootstrap-untrained"
+    assert payload["source_count"] >= 5
+    assert payload["concept_count"] >= 5
+    assert "raw training files remain outside web/public" in payload["separation_contract"]
 
 
 def test_ontology_endpoints(client: TestClient) -> None:
@@ -117,3 +128,13 @@ def test_legacy_reason_endpoint_still_works(client: TestClient) -> None:
     payload = response.json()
     assert payload["probability"] == pytest.approx(0.8)
     assert payload["state"] == "YES"
+
+
+def test_chat_uses_uagentic_model_profile(client: TestClient) -> None:
+    session_id = _create_session(client)
+    with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+        ws.receive_json()
+        ws.send_json({"type": "chat.message", "text": "What is unbiased AI?"})
+        reply = ws.receive_json()
+    assert reply["type"] == "agent.message"
+    assert "bias/confounding parameter phi" in reply["text"]

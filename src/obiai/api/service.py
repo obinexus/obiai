@@ -25,6 +25,7 @@ from obiai.core.models import (
     TranscriptEntry,
     TranscriptSegment,
 )
+from obiai.knowledge import UAgenticModel
 from obiai.memory import Session, SessionRepository
 from obiai.realtime import SessionEventBus
 from obiai.realtime.events import (
@@ -47,11 +48,13 @@ class UService:
         bus: SessionEventBus,
         engine: UReasoningEngine,
         settings: Settings,
+        u_model: UAgenticModel,
     ) -> None:
         self.repo = repo
         self.bus = bus
         self.engine = engine
         self.settings = settings
+        self.u_model = u_model
 
     # --- Sessions -----------------------------------------------------------
 
@@ -112,7 +115,7 @@ class UService:
         """Typed chat: the client already shows the user's own message locally."""
         self.get_session(session_id)
         self.repo.append_transcript(session_id, TranscriptEntry(role="user", text=text))
-        return await self._respond(session_id)
+        return await self._respond(session_id, text)
 
     async def handle_partial_transcript(
         self, session_id: str, segment: TranscriptSegment
@@ -133,13 +136,10 @@ class UService:
         self.get_session(session_id)
         self.repo.append_transcript(session_id, TranscriptEntry(role="user", text=segment.text))
         await self.bus.publish(session_id, ServerTranscriptFinal(segment=segment))
-        return await self._respond(session_id)
+        return await self._respond(session_id, segment.text)
 
-    async def _respond(self, session_id: str) -> str:
-        reply = (
-            "I heard you. Right now I reason about observable call events - "
-            "try raising your hand and I will show you my full decision trace."
-        )
+    async def _respond(self, session_id: str, prompt: str) -> str:
+        reply = self.u_model.answer(prompt)
         self.repo.append_transcript(session_id, TranscriptEntry(role="u", text=reply))
         await self.bus.publish(session_id, AgentMessage(text=reply))
         return reply

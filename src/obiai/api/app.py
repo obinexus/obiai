@@ -12,6 +12,7 @@ from obiai.api import routes_meta, routes_sessions, ws
 from obiai.api.service import UService
 from obiai.core.config import Settings, load_settings
 from obiai.demo import build_demo_agent
+from obiai.knowledge import load_trusted_uagentic_model
 from obiai.memory import InMemorySessionRepository
 from obiai.modules import KNOWN_MODULES, ModuleRegistry
 from obiai.realtime import SessionEventBus
@@ -45,11 +46,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
 
     engine = build_u_engine(settings)
+    u_model = load_trusted_uagentic_model()
     repo = InMemorySessionRepository(
         transcript_retention=settings.u.privacy.transcript_retention
     )
     bus = SessionEventBus()
-    service = UService(repo=repo, bus=bus, engine=engine, settings=settings)
+    service = UService(repo=repo, bus=bus, engine=engine, settings=settings, u_model=u_model)
 
     # Dynamic module loading (Unbiased AI paper, Hypothesis III).
     registry = ModuleRegistry()
@@ -62,6 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.service = service
     app.state.registry = registry
+    app.state.u_model = u_model
 
     app.include_router(routes_meta.router)
     app.include_router(routes_sessions.router)
