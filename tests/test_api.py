@@ -36,16 +36,17 @@ def test_version_reports_modules(client: TestClient) -> None:
     assert payload["assistant"] == "U"
     assert payload["name"] == "obiai-u"
     assert payload["loaded_modules"] == ["echo"]
-    assert payload["u_model"]["artifact_name"] == "obi-uagentic-0.1.0.pkl"
+    assert payload["u_model"]["artifact_name"] == "obi-uagentic-0.1.1.pkl"
 
 
 def test_uagentic_model_profile_endpoint(client: TestClient) -> None:
     payload = client.get("/model/uagentic").json()
     assert payload["model_id"] == "obi-uagentic"
-    assert payload["version"] == "0.1.0"
-    assert payload["training_state"] == "bootstrap-untrained"
+    assert payload["version"] == "0.1.1"
+    assert payload["training_state"] == "seed-curated"
     assert payload["source_count"] >= 5
     assert payload["concept_count"] >= 5
+    assert payload["intent_count"] >= 10
     assert "raw training files remain outside web/public" in payload["separation_contract"]
 
 
@@ -138,3 +139,24 @@ def test_chat_uses_uagentic_model_profile(client: TestClient) -> None:
         reply = ws.receive_json()
     assert reply["type"] == "agent.message"
     assert "bias/confounding parameter phi" in reply["text"]
+
+
+def test_chat_reports_time_of_day(client: TestClient) -> None:
+    session_id = _create_session(client)
+    with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+        ws.receive_json()
+        ws.send_json({"type": "chat.message", "text": "give me the time of day"})
+        reply = ws.receive_json()
+    assert reply["type"] == "agent.message"
+    assert reply["text"].startswith("The current local time for U is ")
+
+
+def test_chat_explains_how_u_is_working(client: TestClient) -> None:
+    session_id = _create_session(client)
+    with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+        ws.receive_json()
+        ws.send_json({"type": "chat.message", "text": "how i am working"})
+        reply = ws.receive_json()
+    assert reply["type"] == "agent.message"
+    assert "browser vision emits observable events" in reply["text"]
+    assert "obi-uagentic-0.1.1.pkl" in reply["text"]

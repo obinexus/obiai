@@ -2,8 +2,11 @@
 
 from .uagentic import (
     DEFAULT_MODEL_FILENAME,
+    MODEL_VERSION,
     UAgenticConcept,
+    UAgenticIntent,
     UAgenticModel,
+    UAgenticReply,
     UAgenticSource,
     build_bootstrap_uagentic_model,
     default_model_path,
@@ -12,8 +15,11 @@ from .uagentic import (
 
 __all__ = [
     "DEFAULT_MODEL_FILENAME",
+    "MODEL_VERSION",
     "UAgenticConcept",
+    "UAgenticIntent",
     "UAgenticModel",
+    "UAgenticReply",
     "UAgenticSource",
     "build_bootstrap_uagentic_model",
     "default_model_path",

@@ -104,7 +104,10 @@ def build_sources(include_png_pages: bool) -> tuple[list[UAgenticSource], list[d
     manifest_entries: list[dict[str, Any]] = []
     for source_id, title, kind, path in source_specs:
         if not path.is_file():
-            raise FileNotFoundError(f"source not found: {path}")
+            # Source files live outside the repo (Downloads); a missing one
+            # should not block rebuilding the artifact on another machine.
+            print(f"warning: skipping missing source {source_id}: {path}")
+            continue
         pages = pdf_page_count(path) if kind == "application/pdf" else None
         fingerprint = sha256(path)
         model_sources.append(
@@ -153,6 +156,13 @@ def main() -> None:
     with args.output.open("wb") as handle:
         pickle.dump(model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+    dataset_manifest_path = args.manifest.parent / "dataset_manifest.json"
+    dataset_manifest = (
+        json.loads(dataset_manifest_path.read_text(encoding="utf-8"))
+        if dataset_manifest_path.is_file()
+        else None
+    )
+
     args.manifest.parent.mkdir(parents=True, exist_ok=True)
     args.manifest.write_text(
         json.dumps(
@@ -163,6 +173,7 @@ def main() -> None:
                     "web_artifact_policy": "no raw source bodies in pickle",
                 },
                 "sources": manifest_entries,
+                "datasets": dataset_manifest,
             },
             indent=2,
         ),
