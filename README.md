@@ -41,6 +41,21 @@ uai demo            # raised-hand vertical slice in the terminal
 uai serve           # backend on http://127.0.0.1:8000
 ```
 
+## Train UAI
+
+Install the training extras, prepare the OASST2 data, then fine-tune the UAI
+LoRA adapter through the main OBIAI CLI:
+
+```bash
+pip install -e ".[train]"
+obiai train uai --limit 128 --max-steps 8 --grad-accum 4
+```
+
+By default the command reads
+`ml/data/oasst2/sft_pairs_weighted.jsonl` and writes the adapter under
+`ml/checkpoints/pythia-2.8b-oasst2-qlora`. Pass `--data` or `--output` to
+override those paths.
+
 Web client (Node 18+):
 
 ```bash

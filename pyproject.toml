@@ -24,6 +24,14 @@ dependencies = [
 
 [project.optional-dependencies]
 bayesian = ["pymc>=5.16,<6", "arviz>=0.18,<1"]
+train = [
+  "torch>=2.3",
+  "datasets>=2.20",
+  "transformers>=4.43",
+  "peft>=0.11",
+  "bitsandbytes>=0.43",
+  "accelerate>=0.33",
+]
 # Kept for compatibility with older docs; the API stack is now a core dependency.
 api = []
 dev = [
@@ -36,6 +44,7 @@ dev = [
 ]
 all = [
   "pymc>=5.16,<6", "arviz>=0.18,<1",
+  "torch>=2.3", "datasets>=2.20", "transformers>=4.43", "peft>=0.11", "bitsandbytes>=0.43", "accelerate>=0.33",
   "pytest>=8.2,<9", "ruff>=0.5,<1", "mypy>=1.10,<2",
   "hypothesis>=6.100,<7", "pytest-asyncio>=0.23,<2", "httpx>=0.27,<1",
 ]
