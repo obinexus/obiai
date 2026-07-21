@@ -353,6 +353,39 @@ def _default_intents() -> tuple[UAgenticIntent, ...]:
             ),
         ),
         UAgenticIntent(
+            intent_id="meta.capability",
+            domain="meta",
+            phrases=("can u answer well", "can you answer well", "answer well"),
+            keywords=("answer", "well", "capable", "capability"),
+            min_score=2,
+            priority=8,
+            response=(
+                "I can answer well when the question is inside my governed surface: OBI "
+                "concepts, observable call events, local time, and tool-routed facts. When "
+                "the question is ambiguous or needs live retrieval, a good answer is a probe "
+                "or a tool route rather than a confident guess."
+            ),
+        ),
+        UAgenticIntent(
+            intent_id="meta.governance_preservation",
+            domain="meta",
+            phrases=(
+                "preserving obinexus governance",
+                "preserve obinexus governance",
+                "while preserving governance",
+            ),
+            keywords=("governance", "obinexus", "preserving", "preserve", "answer"),
+            min_score=2,
+            priority=9,
+            response=(
+                "Yes. Preserving OBINexus governance means I separate chat fluency from "
+                "decision authority: observable evidence enters the reasoning pipeline, "
+                "posterior and uncertainty are exposed, semantic paths are audited, "
+                "protected attributes cannot become hidden causal paths, and actions are "
+                "withheld whenever safety or bias checks fail."
+            ),
+        ),
+        UAgenticIntent(
             intent_id="obi.core",
             domain="obi_philosophy",
             phrases=("what is obi", "ontological bayesian"),

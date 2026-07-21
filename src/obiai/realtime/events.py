@@ -131,6 +131,12 @@ class DecisionCreated(BaseModel):
 class AgentMessage(BaseModel):
     type: Literal["agent.message"] = "agent.message"
     text: str
+    # Provenance: which layer actually produced ``text``. Never
+    # "trained_uai" unless adapter_loaded is also true -- see
+    # obiai.knowledge.transcript.UAIResponse.
+    response_source: str = "seeded_uagentic"
+    adapter_loaded: bool = False
+    model_run_id: str | None = None
 
 
 class AuditCreated(BaseModel):

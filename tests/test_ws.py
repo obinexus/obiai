@@ -71,6 +71,67 @@ def test_invalid_event_keeps_connection_alive(client: TestClient) -> None:
         assert reply["type"] == "agent.message"
 
 
+def test_chat_raised_hand_prompt_runs_governed_decision_trace(client: TestClient) -> None:
+    session_id = _session(client)
+    with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+        ws.receive_json()  # session.ready
+
+        ws.send_json(
+            {
+                "type": "chat.message",
+                "text": (
+                    "U, a participant raises their hand with 0.90 confidence. "
+                    "Explain your decision using observable evidence only, then show "
+                    "the posterior, uncertainty, semantic path, bias audit, safety audit, "
+                    "and final action."
+                ),
+            }
+        )
+        events = [ws.receive_json() for _ in range(5)]
+
+    assert [event["type"] for event in events] == [
+        "observation.created",
+        "reasoning.started",
+        "decision.created",
+        "audit.created",
+        "agent.message",
+    ]
+    decision = events[2]["decision"]
+    reply = events[4]["text"]
+    assert decision["probability"] == pytest.approx(943 / 1010)
+    assert decision["action"]["name"] == "announce_hand_raise"
+    assert "Observable evidence only" in reply
+    assert "Posterior P(participant_requests_turn) = 0.9337" in reply
+    assert "uncertainty = 0.1327" in reply
+    assert "Semantic path: observation.hand_raised -> communication.request_turn" in reply
+    assert "Bias audit: passed" in reply
+    assert "Safety audit: passed" in reply
+    assert "Final action: announce_hand_raise" in reply
+    assert events[4]["response_source"] == "governance_pipeline"
+    assert events[4]["adapter_loaded"] is False
+
+
+def test_chat_general_question_reports_seeded_fallback_when_no_trained_model(
+    client: TestClient,
+) -> None:
+    """No trained UAI model is registered in the isolated test artifact root.
+
+    A general question must be answered by the seeded router, and must
+    honestly report that -- never claim response_source="trained_uai" when
+    no adapter was actually loaded.
+    """
+    session_id = _session(client)
+    with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+        ws.receive_json()  # session.ready
+        ws.send_json({"type": "chat.message", "text": "what is OBI"})
+        reply = ws.receive_json()
+
+    assert reply["type"] == "agent.message"
+    assert reply["response_source"] == "seeded_uagentic"
+    assert reply["adapter_loaded"] is False
+    assert reply["model_run_id"] is None
+
+
 def test_disallowed_observation_yields_error_event(client: TestClient) -> None:
     session_id = _session(client)
     with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:

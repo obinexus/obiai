@@ -44,6 +44,13 @@ CASES = [
     ("what am I holding", "tool.vision_object", ["classifier", "camera"], []),
     ("ok", "small_talk.ack", ["Got it"], ["Ontological Bayesian", "phi"]),
     ("what is weather", "general.weather_explainer", ["atmosphere"], ["which city"]),
+    ("Can U answer well?", "meta.capability", ["governed surface", "tool route"], []),
+    (
+        "Can U answer while preserving OBINexus governance?",
+        "meta.governance_preservation",
+        ["posterior", "uncertainty", "safety", "bias"],
+        ["seeded profile does not hold"],
+    ),
 ]
 
 

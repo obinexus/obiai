@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Request
 
 import obiai
+from obiai.training.runtime import UAIModelLoadError
 
 router = APIRouter(tags=["meta"])
 
@@ -29,6 +30,27 @@ def version(request: Request) -> dict[str, object]:
 @router.get("/model/uagentic")
 def uagentic_model(request: Request) -> dict[str, object]:
     return request.app.state.u_model.describe()
+
+
+@router.get("/model/status")
+def uai_model_status(request: Request) -> dict[str, object]:
+    """Whether *this running process* has loaded the trained UAI adapter."""
+    manager = request.app.state.service.uai_models
+    if manager is None:
+        return {"loaded": False, "loaded_run_id": None, "current_run_id": None, "current_status": None}
+    return manager.status()
+
+
+@router.post("/model/reload")
+def uai_model_reload(request: Request) -> dict[str, object]:
+    manager = request.app.state.service.uai_models
+    if manager is None:
+        return {"reloaded": False, "run_id": None, "error": "no UAI model manager configured"}
+    try:
+        reloaded = manager.reload_if_changed()
+    except UAIModelLoadError as exc:
+        return {"reloaded": False, "run_id": manager.active_run_id, "error": str(exc)}
+    return {"reloaded": reloaded, "run_id": manager.active_run_id}
 
 
 @router.get("/ontology/concepts")

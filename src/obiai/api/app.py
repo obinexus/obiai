@@ -16,6 +16,7 @@ from obiai.knowledge import load_trusted_uagentic_model
 from obiai.memory import InMemorySessionRepository
 from obiai.modules import KNOWN_MODULES, ModuleRegistry
 from obiai.realtime import SessionEventBus
+from obiai.training.runtime import UAIModelManager
 
 __all__ = ["create_app"]
 
@@ -47,11 +48,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     engine = build_u_engine(settings)
     u_model = load_trusted_uagentic_model()
+    # Cheap to construct: it only remembers the artifact root. The actual
+    # tokenizer/base-model/adapter load is deferred to the first chat
+    # message that needs it, so startup never blocks on it.
+    uai_models = UAIModelManager()
     repo = InMemorySessionRepository(
         transcript_retention=settings.u.privacy.transcript_retention
     )
     bus = SessionEventBus()
-    service = UService(repo=repo, bus=bus, engine=engine, settings=settings, u_model=u_model)
+    service = UService(
+        repo=repo, bus=bus, engine=engine, settings=settings, u_model=u_model, uai_models=uai_models
+    )
 
     # Dynamic module loading (Unbiased AI paper, Hypothesis III).
     registry = ModuleRegistry()

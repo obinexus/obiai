@@ -54,7 +54,10 @@ obiai train uai --limit 128 --max-steps 8 --grad-accum 4
 By default the command reads
 `ml/data/oasst2/sft_pairs_weighted.jsonl` and writes the adapter under
 `ml/checkpoints/pythia-2.8b-oasst2-qlora`. Pass `--data` or `--output` to
-override those paths.
+override those paths. Precision defaults to `--precision auto`: BF16 on
+BF16-capable CUDA GPUs, FP16 on older CUDA GPUs, and FP32 when training is
+forced onto CPU. If auto-detection disagrees with your hardware, pass
+`--precision fp16`, `--precision bf16`, or `--precision fp32` explicitly.
 
 Web client (Node 18+):
 
