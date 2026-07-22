@@ -6,6 +6,7 @@ export function ChatComposer() {
   const [text, setText] = useState('');
   const sendChat = useAppStore((s) => s.sendChat);
   const sessionActive = useAppStore((s) => s.sessionActive);
+  const pendingAssistantResponse = useAppStore((s) => s.pendingAssistantResponse);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -20,12 +21,21 @@ export function ChatComposer() {
         type="text"
         value={text}
         onChange={(event) => setText(event.target.value)}
-        placeholder={sessionActive ? 'Ask U…' : 'Start a session to chat with U'}
+        placeholder={
+          pendingAssistantResponse
+            ? 'U is replying…'
+            : sessionActive
+              ? 'Ask U…'
+              : 'Start a session to chat with U'
+        }
         aria-label="Ask U"
-        disabled={!sessionActive}
+        disabled={!sessionActive || pendingAssistantResponse}
       />
-      <button type="submit" disabled={!sessionActive || text.trim().length === 0}>
-        Send
+      <button
+        type="submit"
+        disabled={!sessionActive || pendingAssistantResponse || text.trim().length === 0}
+      >
+        {pendingAssistantResponse ? 'Waiting' : 'Send'}
       </button>
     </form>
   );

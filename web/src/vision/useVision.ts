@@ -33,6 +33,26 @@ export function useVision(
   const setUState = useAppStore((s) => s.setUState);
   const setMediaActive = useAppStore((s) => s.setMediaActive);
   const setVision = useAppStore((s) => s.setVision);
+  const cameraActive = useAppStore((s) => s.cameraActive);
+  const handTrackingEnabled = useAppStore((s) => s.handTrackingEnabled);
+
+  const clearCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (canvas && ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }, [canvasRef]);
+
+  const stopHandTracking = useCallback(() => {
+    stopPumpRef.current?.();
+    stopPumpRef.current = null;
+    void handsRef.current?.close();
+    handsRef.current = null;
+    classifierRef.current = new HandRaiseClassifier();
+    clearCanvas();
+    setVision({ trackingActive: false, liveConfidence: 0, handRaised: false });
+  }, [clearCanvas, setVision]);
 
   const onResults = useCallback(
     (results: MPResults) => {
@@ -69,16 +89,28 @@ export function useVision(
     [canvasRef, setVision, videoRef],
   );
 
+  const startHandTracking = useCallback(async () => {
+    const video = videoRef.current;
+    if (!video || !streamRef.current || handsRef.current) return;
+    await loadMediaPipe();
+    if (!streamRef.current || !useAppStore.getState().handTrackingEnabled) return;
+    const hands = createHands(onResults);
+    handsRef.current = hands;
+    stopPumpRef.current = startFramePump(video, () => {
+      if (!useAppStore.getState().handTrackingEnabled) {
+        return Promise.resolve();
+      }
+      return hands.send({ image: video });
+    });
+  }, [onResults, videoRef]);
+
   const enable = useCallback(async () => {
     const video = videoRef.current;
     if (!video || streamRef.current) return;
     setUState('requesting_permission');
     try {
-      const [stream] = await Promise.all([startCapture(video), loadMediaPipe()]);
+      const stream = await startCapture(video);
       streamRef.current = stream;
-      const hands = createHands(onResults);
-      handsRef.current = hands;
-      stopPumpRef.current = startFramePump(video, () => hands.send({ image: video }));
       setMediaActive(true, true);
       setUState(useAppStore.getState().sessionActive ? 'listening' : 'idle');
     } catch (error) {
@@ -90,22 +122,27 @@ export function useVision(
             : 'Camera/microphone unavailable.',
       });
     }
-  }, [onResults, setMediaActive, setUState, videoRef]);
+  }, [setMediaActive, setUState, videoRef]);
 
   const disable = useCallback(() => {
-    stopPumpRef.current?.();
-    stopPumpRef.current = null;
-    void handsRef.current?.close();
-    handsRef.current = null;
+    stopHandTracking();
     if (videoRef.current) {
       stopCapture(videoRef.current, streamRef.current);
     }
     streamRef.current = null;
     setMediaActive(false, false);
     setVision({ trackingActive: false, liveConfidence: 0, handRaised: false });
-  }, [setMediaActive, setVision, videoRef]);
+  }, [setMediaActive, setVision, stopHandTracking, videoRef]);
 
   useEffect(() => disable, [disable]); // cleanup on unmount
+
+  useEffect(() => {
+    if (cameraActive && handTrackingEnabled) {
+      void startHandTracking();
+    } else {
+      stopHandTracking();
+    }
+  }, [cameraActive, handTrackingEnabled, startHandTracking, stopHandTracking]);
 
   return { enable, disable };
 }

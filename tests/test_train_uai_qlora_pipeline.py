@@ -8,6 +8,7 @@ fakes so this stays a fast unit test, not a real training run.
 
 from __future__ import annotations
 
+import os
 import types
 from pathlib import Path
 
@@ -133,6 +134,88 @@ def _fake_stack(monkeypatch: pytest.MonkeyPatch, *, write_adapter_files: bool, c
         }
 
     monkeypatch.setattr(uai_qlora, "_load_training_stack", fake_load_training_stack)
+
+
+def test_windows_training_environment_allows_duplicate_openmp_runtime(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(uai_qlora.sys, "platform", "win32")
+    monkeypatch.delenv("KMP_DUPLICATE_LIB_OK", raising=False)
+
+    uai_qlora._prepare_training_environment()
+
+    assert os.environ["KMP_DUPLICATE_LIB_OK"] == "TRUE"
+
+
+def test_training_environment_preserves_explicit_openmp_setting(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(uai_qlora.sys, "platform", "win32")
+    monkeypatch.setenv("KMP_DUPLICATE_LIB_OK", "FALSE")
+
+    uai_qlora._prepare_training_environment()
+
+    assert os.environ["KMP_DUPLICATE_LIB_OK"] == "FALSE"
+
+
+def test_normalize_training_record_maps_chatqa_columns() -> None:
+    record = uai_qlora.normalize_training_record(
+        {
+            "messages": [{"content": "Who caught the touchdown?"}],
+            "document": "The Lions travelled south to Tampa.",
+            "answers": ["Mike Williams"],
+        }
+    )
+
+    assert record["prompt"].startswith("### Human: Context:")
+    assert "Question: Who caught the touchdown?" in record["prompt"]
+    assert record["completion"] == "Mike Williams"
+    assert record["weight"] == 1.0
+
+
+def test_fast_hf_dataset_clears_profile_local_data_path() -> None:
+    config = uai_qlora.resolve_uai_training_config(
+        fast=True,
+        hf_dataset="xDAN-datasets/ChatQA-Training-Data",
+        hf_subset="drop",
+    )
+
+    assert config.fast is True
+    assert config.data is None
+    assert config.hf_dataset == "xDAN-datasets/ChatQA-Training-Data"
+    assert config.hf_subset == "drop"
+    assert config.hf_split == "train"
+
+
+def test_load_training_dataset_uses_hf_subset_and_split() -> None:
+    calls = []
+
+    def fake_load_dataset(*args, **kwargs):
+        calls.append((args, kwargs))
+        return _FakeDataset(
+            [
+                {
+                    "messages": [{"content": "What is OBIAI?"}],
+                    "document": "OBIAI is an Ontological Bayesian Intelligence stack.",
+                    "answers": ["An auditable AI architecture."],
+                }
+            ]
+        )
+
+    config = uai_qlora.UAITrainingConfig(
+        hf_dataset="xDAN-datasets/ChatQA-Training-Data",
+        hf_subset="drop",
+        hf_split="train",
+    )
+
+    dataset = uai_qlora.load_training_dataset(
+        config,
+        {"load_dataset": fake_load_dataset},
+        Path("unused.jsonl"),
+    )
+
+    assert calls == [(("xDAN-datasets/ChatQA-Training-Data", "drop"), {"split": "train"})]
+    assert dataset.records[0]["completion"] == "An auditable AI architecture."
 
 
 def test_successful_fast_run_registers_artifact_manifest(

@@ -132,6 +132,40 @@ def test_chat_general_question_reports_seeded_fallback_when_no_trained_model(
     assert reply["model_run_id"] is None
 
 
+def test_chat_with_ready_trained_model_reports_thinking_before_reply() -> None:
+    class _FakeUAIModels:
+        active_run_id = "run-1"
+
+        def status(self):
+            return {
+                "current_run_id": "run-1",
+                "current_status": "ready",
+                "loaded_run_id": "run-1",
+                "loaded": True,
+            }
+
+        def try_generate(self, prompt: str):
+            return (f"trained reply for {prompt}", "run-1")
+
+    app = create_app(Settings())
+    app.state.service.uai_models = _FakeUAIModels()
+    client = TestClient(app)
+
+    session_id = _session(client)
+    with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+        ws.receive_json()  # session.ready
+        ws.send_json({"type": "chat.message", "text": "what is OBIAI"})
+        thinking = ws.receive_json()
+        reply = ws.receive_json()
+
+    assert thinking["type"] == "agent.thinking"
+    assert thinking["model_run_id"] == "run-1"
+    assert reply["type"] == "agent.message"
+    assert reply["response_source"] == "trained_uai"
+    assert reply["adapter_loaded"] is True
+    assert reply["model_run_id"] == "run-1"
+
+
 def test_disallowed_observation_yields_error_event(client: TestClient) -> None:
     session_id = _session(client)
     with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:

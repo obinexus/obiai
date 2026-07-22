@@ -78,6 +78,19 @@ export interface UModelProfile {
   separation_contract: string[];
 }
 
+/** Status of the trained (LoRA-adapter) UAI model, from GET /model/status.
+ * Separate from UModelProfile above, which describes the rule-based seeded
+ * UAgenticModel, not the trained language model. */
+export interface UAIModelStatus {
+  artifact_root?: string;
+  current_run_id: string | null;
+  current_status: string | null;
+  loaded_run_id: string | null;
+  loaded: boolean;
+  loaded_device?: string | null;
+  max_new_tokens?: number;
+}
+
 export interface Decision {
   decision_id: string;
   session_id: string;
@@ -111,7 +124,21 @@ export type ServerEvent =
   | { type: 'observation.created'; observation: Observation }
   | { type: 'reasoning.started'; observation_id: string }
   | { type: 'decision.created'; decision: Decision }
-  | { type: 'agent.message'; text: string }
+  | {
+      type: 'agent.thinking';
+      message: string;
+      model_run_id: string | null;
+    }
+  | {
+      type: 'agent.message';
+      text: string;
+      /** Which layer produced `text`: 'governance_pipeline', 'trained_uai',
+       * 'seeded_uagentic', 'transcript_confidence_guard', or 'static_greeting'.
+       * Never 'trained_uai' unless adapter_loaded is also true. */
+      response_source: string;
+      adapter_loaded: boolean;
+      model_run_id: string | null;
+    }
   | {
       type: 'audit.created';
       decision_id: string;
@@ -132,6 +159,7 @@ export type UState =
   | 'listening'
   | 'observing'
   | 'reasoning'
+  | 'thinking'
   | 'speaking'
   | 'waiting_clarification'
   | 'disconnected'
@@ -144,6 +172,7 @@ export const U_STATE_LABELS: Record<UState, string> = {
   listening: 'Listening',
   observing: 'Observing',
   reasoning: 'Reasoning',
+  thinking: 'Thinking',
   speaking: 'Speaking',
   waiting_clarification: 'Waiting for clarification',
   disconnected: 'Disconnected',

@@ -22,6 +22,7 @@ from obiai.types import BiasReport
 
 __all__ = [
     "AgentMessage",
+    "AgentThinking",
     "AuditCreated",
     "ChatMessage",
     "ClarificationAnswer",
@@ -139,6 +140,12 @@ class AgentMessage(BaseModel):
     model_run_id: str | None = None
 
 
+class AgentThinking(BaseModel):
+    type: Literal["agent.thinking"] = "agent.thinking"
+    message: str = "U is preparing a reply."
+    model_run_id: str | None = None
+
+
 class AuditCreated(BaseModel):
     type: Literal["audit.created"] = "audit.created"
     decision_id: str
@@ -172,6 +179,7 @@ ServerEvent = Annotated[
         ObservationCreated,
         ReasoningStarted,
         DecisionCreated,
+        AgentThinking,
         AgentMessage,
         AuditCreated,
         ServerTranscriptPartial,

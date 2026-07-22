@@ -11,6 +11,7 @@ engine, repository, or bus directly.
 
 from __future__ import annotations
 
+import asyncio
 import re
 
 from obiai.agents import GREETING, UReasoningEngine, render_agent_message
@@ -31,6 +32,7 @@ from obiai.knowledge import UAgenticModel, answer_transcript
 from obiai.memory import Session, SessionRepository
 from obiai.realtime import SessionEventBus
 from obiai.realtime.events import (
+    AgentThinking,
     AgentMessage,
     AuditCreated,
     DecisionCreated,
@@ -167,10 +169,22 @@ class UService:
         # punctuation/casing) and answer through the trained model when one
         # is loaded, falling back to the seeded router only when it is not
         # -- see obiai.knowledge.transcript for the confidence gate.
-        result = answer_transcript(
+        generate = self.uai_models.try_generate if self.uai_models is not None else None
+        if self._has_ready_trained_model():
+            status = self.uai_models.status() if self.uai_models is not None else {}
+            await self.bus.publish(
+                session_id,
+                AgentThinking(
+                    message="U is loading or generating with the trained adapter.",
+                    model_run_id=status.get("current_run_id"),
+                ),
+            )
+
+        result = await asyncio.to_thread(
+            answer_transcript,
             prompt,
             confidence=confidence,
-            generate=self.uai_models.try_generate if self.uai_models is not None else None,
+            generate=generate,
             seeded_answer=self.u_model.answer,
         )
         await self._emit_reply(
@@ -181,6 +195,12 @@ class UService:
             model_run_id=result.model_run_id,
         )
         return result.text
+
+    def _has_ready_trained_model(self) -> bool:
+        if self.uai_models is None:
+            return False
+        status = self.uai_models.status()
+        return status.get("current_status") == "ready"
 
     async def _emit_reply(
         self,

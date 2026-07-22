@@ -16,6 +16,10 @@ export interface TranscriptEntry {
   role: 'user' | 'u';
   text: string;
   timestamp: string;
+  /** Only set on 'u' entries: which layer produced this reply. */
+  responseSource?: string;
+  adapterLoaded?: boolean;
+  modelRunId?: string | null;
 }
 
 export interface VisionStatus {
@@ -44,8 +48,10 @@ interface AppState {
   latestDecision: Decision | null;
   lastObservation: Observation | null;
   lastError: string | null;
+  pendingAssistantResponse: boolean;
   cameraActive: boolean;
   micActive: boolean;
+  handTrackingEnabled: boolean;
   vision: VisionStatus;
   speech: SpeechStatus;
 
@@ -57,6 +63,7 @@ interface AppState {
   submitTranscriptFinal: (segment: TranscriptSegment) => void;
   setUState: (state: UState) => void;
   setMediaActive: (camera: boolean, mic: boolean) => void;
+  toggleHandTracking: () => void;
   setVision: (update: Partial<VisionStatus>) => void;
   setSpeech: (update: Partial<SpeechStatus>) => void;
   toggleCaptions: () => void;
@@ -78,11 +85,22 @@ export const useAppStore = create<AppState>((set, get) => {
         set((state) => ({
           transcript: [
             ...state.transcript,
-            { role: 'u', text: event.text, timestamp: nowIso() },
+            {
+              role: 'u',
+              text: event.text,
+              timestamp: nowIso(),
+              responseSource: event.response_source,
+              adapterLoaded: event.adapter_loaded,
+              modelRunId: event.model_run_id,
+            },
           ],
+          pendingAssistantResponse: false,
           uState:
             state.uState === 'waiting_clarification' ? 'waiting_clarification' : 'listening',
         }));
+        break;
+      case 'agent.thinking':
+        set({ pendingAssistantResponse: true, uState: 'thinking' });
         break;
       case 'observation.created':
         set({ lastObservation: event.observation, uState: 'observing' });
@@ -112,7 +130,7 @@ export const useAppStore = create<AppState>((set, get) => {
         }));
         break;
       case 'error':
-        set({ lastError: event.message });
+        set({ lastError: event.message, pendingAssistantResponse: false });
         break;
     }
   }
@@ -131,6 +149,7 @@ export const useAppStore = create<AppState>((set, get) => {
       sessionId: null,
       uState: 'error',
       lastError: 'Session no longer exists on the server. Start a new session.',
+      pendingAssistantResponse: false,
     });
   }
 
@@ -144,8 +163,10 @@ export const useAppStore = create<AppState>((set, get) => {
     latestDecision: null,
     lastObservation: null,
     lastError: null,
+    pendingAssistantResponse: false,
     cameraActive: false,
     micActive: false,
+    handTrackingEnabled: true,
     vision: { trackingActive: false, liveConfidence: 0, handRaised: false },
     speech: { listening: false, liveCaption: '', captionsEnabled: true, supported: false },
 
@@ -162,6 +183,7 @@ export const useAppStore = create<AppState>((set, get) => {
         set({
           uState: 'error',
           lastError: error instanceof Error ? error.message : String(error),
+          pendingAssistantResponse: false,
         });
       }
     },
@@ -183,14 +205,17 @@ export const useAppStore = create<AppState>((set, get) => {
         sessionActive: false,
         uState: 'idle',
         lastObservation: null,
+        pendingAssistantResponse: false,
       });
     },
 
     sendChat: (text: string) => {
-      if (!get().sessionActive || text.trim().length === 0) return;
+      if (!get().sessionActive || get().pendingAssistantResponse || text.trim().length === 0) return;
       socket?.send({ type: 'chat.message', text });
       set((state) => ({
         transcript: [...state.transcript, { role: 'user', text, timestamp: nowIso() }],
+        pendingAssistantResponse: true,
+        uState: 'thinking',
       }));
     },
 
@@ -210,13 +235,25 @@ export const useAppStore = create<AppState>((set, get) => {
       socket?.send({ type: 'transcript.final', segment });
       // The server echoes transcript.final, which appends the transcript
       // entry; clear the live caption immediately for a responsive feel.
-      set((state) => ({ speech: { ...state.speech, liveCaption: '' } }));
+      set((state) => ({
+        pendingAssistantResponse: true,
+        uState: 'thinking',
+        speech: { ...state.speech, liveCaption: '' },
+      }));
     },
 
     setUState: (uState: UState) => set({ uState }),
 
     setMediaActive: (cameraActive: boolean, micActive: boolean) =>
       set({ cameraActive, micActive }),
+
+    toggleHandTracking: () =>
+      set((state) => ({
+        handTrackingEnabled: !state.handTrackingEnabled,
+        vision: !state.handTrackingEnabled
+          ? state.vision
+          : { trackingActive: false, liveConfidence: 0, handRaised: false },
+      })),
 
     setVision: (update: Partial<VisionStatus>) =>
       set((state) => ({ vision: { ...state.vision, ...update } })),

@@ -51,7 +51,14 @@ pip install -e ".[train]"
 obiai train uai --limit 128 --max-steps 8 --grad-accum 4
 ```
 
-By default the command reads
+To train from an online Hugging Face dataset such as
+`xDAN-datasets/ChatQA-Training-Data`, pass the dataset id, subset, and split:
+
+```bash
+obiai train uai --fast --hf-dataset xDAN-datasets/ChatQA-Training-Data --hf-subset drop --hf-split train
+```
+
+By default, without `--hf-dataset`, the command reads
 `ml/data/oasst2/sft_pairs_weighted.jsonl` and writes the adapter under
 `ml/checkpoints/pythia-2.8b-oasst2-qlora`. Pass `--data` or `--output` to
 override those paths. Precision defaults to `--precision auto`: BF16 on

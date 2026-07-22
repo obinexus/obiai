@@ -16,6 +16,7 @@ import json
 import math
 import os
 import socket
+import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -51,10 +52,19 @@ FAST_BATCH_SIZE = 1
 FAST_MAX_LENGTH = 256
 
 
+def _prepare_training_environment() -> None:
+    """Apply process-local compatibility settings before ML libraries import."""
+    if sys.platform == "win32":
+        os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+
+
 @dataclass(frozen=True)
 class UAITrainingConfig:
     base_model: str = DEFAULT_BASE_MODEL
     data: Path | None = None
+    hf_dataset: str | None = None
+    hf_subset: str | None = None
+    hf_split: str = "train"
     output: Path | None = None
     max_steps: int = -1
     epochs: float = 1.0
@@ -121,6 +131,9 @@ def resolve_uai_training_config(
     fast: bool = False,
     base_model: str | None = None,
     data: Path | None = None,
+    hf_dataset: str | None = None,
+    hf_subset: str | None = None,
+    hf_split: str | None = None,
     output: Path | None = None,
     max_steps: int | None = None,
     epochs: float | None = None,
@@ -162,6 +175,9 @@ def resolve_uai_training_config(
     overrides: dict[str, Any] = {
         "base_model": base_model,
         "data": data,
+        "hf_dataset": hf_dataset,
+        "hf_subset": hf_subset,
+        "hf_split": hf_split,
         "output": output,
         "max_steps": max_steps,
         "epochs": epochs,
@@ -175,10 +191,92 @@ def resolve_uai_training_config(
         "gradient_checkpointing": gradient_checkpointing,
     }
     changes = {key: value for key, value in overrides.items() if value is not None}
+    if hf_dataset is not None and data is None:
+        changes["data"] = None
     return dataclasses.replace(base, **changes) if changes else base
 
 
+def _first_text(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        text = value.strip()
+        return text or None
+    if isinstance(value, dict):
+        for key in ("content", "value", "text", "answer"):
+            text = _first_text(value.get(key))
+            if text:
+                return text
+        return None
+    if isinstance(value, Sequence):
+        for item in value:
+            text = _first_text(item)
+            if text:
+                return text
+    return None
+
+
+def _conversation_text(messages: Any, roles: set[str]) -> str | None:
+    if not isinstance(messages, Sequence) or isinstance(messages, (str, bytes)):
+        return None
+    for message in messages:
+        if not isinstance(message, dict):
+            continue
+        role = str(message.get("role") or message.get("from") or "").lower()
+        if role in roles:
+            text = _first_text(message)
+            if text:
+                return text
+    return None
+
+
+def normalize_training_record(example: dict[str, Any]) -> dict[str, Any]:
+    """Map common chat/QA dataset rows onto prompt/completion/weight."""
+    prompt = _first_text(example.get("prompt"))
+    completion = _first_text(example.get("completion"))
+
+    if prompt is None:
+        prompt = (
+            _conversation_text(example.get("messages"), {"user", "human"})
+            or _conversation_text(example.get("sharegpt_formatted"), {"user", "human"})
+            or _first_text(example.get("messages"))
+            or _first_text(example.get("question"))
+            or _first_text(example.get("query"))
+            or _first_text(example.get("instruction"))
+        )
+    if completion is None:
+        completion = (
+            _first_text(example.get("answers"))
+            or _conversation_text(example.get("messages"), {"assistant", "gpt", "bot"})
+            or _conversation_text(example.get("sharegpt_formatted"), {"assistant", "gpt", "bot"})
+            or _first_text(example.get("answer"))
+            or _first_text(example.get("response"))
+            or _first_text(example.get("output"))
+        )
+
+    if prompt is None or completion is None:
+        available = ", ".join(sorted(example))
+        raise ValueError(
+            "Could not map training row to prompt/completion. "
+            f"Available columns: {available}"
+        )
+
+    document = _first_text(example.get("document")) or _first_text(example.get("context"))
+    if document:
+        prompt = f"Context:\n{document}\n\nQuestion: {prompt}"
+
+    if not prompt.startswith("### Human:"):
+        prompt = CHAT_TEMPLATE.format(prompt=prompt)
+
+    return {
+        "prompt": prompt,
+        "completion": completion,
+        "weight": float(example.get("weight", 1.0) or 1.0),
+    }
+
+
 def _load_training_stack() -> dict[str, Any]:
+    _prepare_training_environment()
     try:
         import torch
         from datasets import load_dataset
@@ -209,6 +307,29 @@ def _load_training_stack() -> dict[str, Any]:
         "Trainer": Trainer,
         "TrainingArguments": TrainingArguments,
     }
+
+
+def load_training_dataset(config: UAITrainingConfig, stack: dict[str, Any], data: Path) -> Any:
+    if config.hf_dataset:
+        if config.data is not None:
+            raise SystemExit("Pass either --data or --hf-dataset, not both.")
+        print(
+            "Loading Hugging Face dataset: "
+            f"{config.hf_dataset}"
+            f"{'/' + config.hf_subset if config.hf_subset else ''}"
+            f" split={config.hf_split}"
+        )
+        if config.hf_subset:
+            dataset = stack["load_dataset"](
+                config.hf_dataset,
+                config.hf_subset,
+                split=config.hf_split,
+            )
+        else:
+            dataset = stack["load_dataset"](config.hf_dataset, split=config.hf_split)
+        return dataset.map(normalize_training_record, remove_columns=dataset.column_names)
+
+    return stack["load_dataset"]("json", data_files=str(data), split="train")
 
 
 def _cuda_available(torch_module: Any) -> bool:
@@ -428,11 +549,12 @@ def train_uai_qlora(config: UAITrainingConfig) -> None:
     data = config.data or default_data_path()
     artifact_root = default_artifact_root()
 
-    if not data.exists():
+    if config.hf_dataset is None and not data.exists():
         raise SystemExit(
             f"{data} not found - run ml/scripts/prepare_data.py then "
             "ml/scripts/bias_audit.py first, or pass --data pointing at "
-            "sft_pairs.jsonl for unweighted training."
+            "sft_pairs.jsonl for unweighted training, or pass --hf-dataset "
+            "to train from an online Hugging Face dataset."
         )
 
     stack = _load_training_stack()
@@ -447,7 +569,7 @@ def train_uai_qlora(config: UAITrainingConfig) -> None:
         config.base_model, stack, runtime, use_gradient_checkpointing=config.gradient_checkpointing
     )
 
-    dataset = stack["load_dataset"]("json", data_files=str(data), split="train")
+    dataset = load_training_dataset(config, stack, data)
     if config.limit:
         dataset = dataset.select(range(min(config.limit, len(dataset))))
     dataset = dataset.map(
@@ -602,6 +724,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--base-model", default=None)
     parser.add_argument("--data", type=Path, default=None)
+    parser.add_argument("--hf-dataset", default=None)
+    parser.add_argument("--hf-subset", default=None)
+    parser.add_argument("--hf-split", default="train")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--max-steps", type=int, default=None, help="-1 = train --epochs instead.")
     parser.add_argument("--epochs", type=float, default=None)
@@ -628,6 +753,9 @@ def main(argv: Sequence[str] | None = None) -> None:
             fast=args.fast,
             base_model=args.base_model,
             data=args.data,
+            hf_dataset=args.hf_dataset,
+            hf_subset=args.hf_subset,
+            hf_split=args.hf_split,
             output=args.output,
             max_steps=args.max_steps,
             epochs=args.epochs,

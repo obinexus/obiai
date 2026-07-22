@@ -66,6 +66,21 @@ def train_uai(
             "(ml/data/uai/uai_fast_pairs.jsonl with --fast)."
         ),
     ),
+    hf_dataset: Optional[str] = typer.Option(
+        None,
+        "--hf-dataset",
+        help="Online Hugging Face dataset ID to train from, e.g. xDAN-datasets/ChatQA-Training-Data.",
+    ),
+    hf_subset: Optional[str] = typer.Option(
+        None,
+        "--hf-subset",
+        help="Optional Hugging Face dataset subset/config name, e.g. drop.",
+    ),
+    hf_split: str = typer.Option(
+        "train",
+        "--hf-split",
+        help="Hugging Face dataset split to load when --hf-dataset is set.",
+    ),
     output: Optional[Path] = typer.Option(
         None,
         "--output",
@@ -115,6 +130,9 @@ def train_uai(
         fast=fast,
         base_model=base_model,
         data=data,
+        hf_dataset=hf_dataset,
+        hf_subset=hf_subset,
+        hf_split=hf_split,
         output=output,
         max_steps=max_steps,
         epochs=epochs,

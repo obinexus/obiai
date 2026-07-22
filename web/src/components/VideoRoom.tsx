@@ -5,6 +5,7 @@ import { useAppStore } from '../store';
 import { useVision } from '../vision/useVision';
 import { CaptionsToggle } from './CaptionsToggle';
 import { DeviceControls } from './DeviceControls';
+import { HandTrackingToggle } from './HandTrackingToggle';
 import { LocalVideoTile } from './LocalVideoTile';
 import { MicrophoneControl } from './MicrophoneControl';
 import { PermissionDialog } from './PermissionDialog';
@@ -26,6 +27,7 @@ export function VideoRoom() {
       </div>
       <div className="controls-row">
         <DeviceControls onDisable={disable} onEnable={enable} />
+        <HandTrackingToggle />
         <MicrophoneControl speech={speech} />
         <CaptionsToggle />
         <SessionControls />

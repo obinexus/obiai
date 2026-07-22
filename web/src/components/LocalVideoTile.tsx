@@ -8,6 +8,7 @@ interface Props {
 export function LocalVideoTile({ videoRef, canvasRef }: Props) {
   const vision = useAppStore((s) => s.vision);
   const cameraActive = useAppStore((s) => s.cameraActive);
+  const handTrackingEnabled = useAppStore((s) => s.handTrackingEnabled);
   const speech = useAppStore((s) => s.speech);
 
   return (
@@ -18,14 +19,21 @@ export function LocalVideoTile({ videoRef, canvasRef }: Props) {
       {cameraActive && (
         <div className="video-badges" role="status" aria-live="polite">
           <span className="badge">
-            Hand tracking: <strong>{vision.trackingActive ? 'active' : 'searching…'}</strong>
+            Hand tracking:{' '}
+            <strong>
+              {handTrackingEnabled ? (vision.trackingActive ? 'active' : 'searching…') : 'off'}
+            </strong>
           </span>
-          <span className="badge">
-            Classifier confidence: <strong>{vision.liveConfidence.toFixed(2)}</strong>
-          </span>
-          <span className="badge">
-            Hand raised: <strong>{vision.handRaised ? 'YES' : 'no'}</strong>
-          </span>
+          {handTrackingEnabled && (
+            <>
+              <span className="badge">
+                Classifier confidence: <strong>{vision.liveConfidence.toFixed(2)}</strong>
+              </span>
+              <span className="badge">
+                Hand raised: <strong>{vision.handRaised ? 'YES' : 'no'}</strong>
+              </span>
+            </>
+          )}
           <span className="badge">Processing locally — frames are not uploaded</span>
         </div>
       )}

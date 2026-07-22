@@ -11,6 +11,9 @@ happens on first use, then stays cached in memory.
 from __future__ import annotations
 
 import logging
+import os
+import sys
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -43,13 +46,15 @@ class LoadedUAIModel:
     base_model: str
     tokenizer: Any
     model: Any
+    device: str
 
 
 class UAIModelManager:
-    def __init__(self, artifact_root: Path | None = None, *, max_new_tokens: int = 128) -> None:
+    def __init__(self, artifact_root: Path | None = None, *, max_new_tokens: int | None = None) -> None:
         self.artifact_root = artifact_root if artifact_root is not None else default_artifact_root()
-        self.max_new_tokens = max_new_tokens
+        self.max_new_tokens = max_new_tokens or int(os.getenv("OBIAI_UAI_MAX_NEW_TOKENS", "64"))
         self._loaded: LoadedUAIModel | None = None
+        self._lock = threading.RLock()
 
     @property
     def active_run_id(self) -> str | None:
@@ -63,9 +68,15 @@ class UAIModelManager:
             "current_status": current.status if current is not None else None,
             "loaded_run_id": self.active_run_id,
             "loaded": self._loaded is not None,
+            "loaded_device": self._loaded.device if self._loaded is not None else None,
+            "max_new_tokens": self.max_new_tokens,
         }
 
     def load_active(self) -> LoadedUAIModel:
+        with self._lock:
+            return self._load_active_unlocked()
+
+    def _load_active_unlocked(self) -> LoadedUAIModel:
         current = read_current(self.artifact_root)
         if current is None:
             raise UAIModelLoadError(
@@ -91,6 +102,7 @@ class UAIModelManager:
             raise UAIModelLoadError(f"Tokenizer directory missing for run {descriptor.run_id!r}: {tokenizer_path}")
 
         try:
+            _prepare_runtime_environment()
             import torch
             from peft import PeftModel
             from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -101,9 +113,23 @@ class UAIModelManager:
             ) from exc
 
         try:
+            device = _runtime_device(torch)
+            dtype = _runtime_dtype(torch, device)
             tokenizer = AutoTokenizer.from_pretrained(str(tokenizer_path))
-            base = AutoModelForCausalLM.from_pretrained(descriptor.base_model, torch_dtype=torch.float32)
+            try:
+                base = AutoModelForCausalLM.from_pretrained(
+                    descriptor.base_model,
+                    torch_dtype=dtype,
+                    low_cpu_mem_usage=True,
+                )
+            except TypeError:
+                base = AutoModelForCausalLM.from_pretrained(
+                    descriptor.base_model,
+                    torch_dtype=dtype,
+                )
             model = PeftModel.from_pretrained(base, str(adapter_path))
+            if device != "cpu" and callable(getattr(model, "to", None)):
+                model.to(device)
             model.eval()
         except Exception as exc:  # noqa: BLE001 - surfaced as a single clear load error
             raise UAIModelLoadError(
@@ -115,38 +141,46 @@ class UAIModelManager:
             base_model=descriptor.base_model,
             tokenizer=tokenizer,
             model=model,
+            device=device,
         )
         self._loaded = loaded
-        logger.info("uai runtime: loaded trained adapter run_id=%s", descriptor.run_id)
+        logger.info(
+            "uai runtime: loaded trained adapter run_id=%s device=%s",
+            descriptor.run_id,
+            device,
+        )
         return loaded
 
     def reload_if_changed(self) -> bool:
-        current = read_current(self.artifact_root)
-        latest_run_id = current.run_id if current is not None else None
-        if self._loaded is not None and latest_run_id == self._loaded.run_id:
-            return False
-        self.load_active()
-        return True
+        with self._lock:
+            current = read_current(self.artifact_root)
+            latest_run_id = current.run_id if current is not None else None
+            if self._loaded is not None and latest_run_id == self._loaded.run_id:
+                return False
+            self._load_active_unlocked()
+            return True
 
     def generate(self, prompt: str) -> str:
-        if self._loaded is None:
-            self.load_active()
-        loaded = self._loaded
-        assert loaded is not None
+        with self._lock:
+            if self._loaded is None:
+                self._load_active_unlocked()
+            loaded = self._loaded
+            assert loaded is not None
 
-        import torch
+            import torch
 
-        formatted = CHAT_TEMPLATE.format(prompt=prompt)
-        inputs = loaded.tokenizer(formatted, return_tensors="pt")
-        with torch.no_grad():
-            output_ids = loaded.model.generate(
-                **inputs,
-                max_new_tokens=self.max_new_tokens,
-                do_sample=False,
-                pad_token_id=loaded.tokenizer.pad_token_id or loaded.tokenizer.eos_token_id,
-            )
-        generated = output_ids[0][inputs["input_ids"].shape[1] :]
-        return loaded.tokenizer.decode(generated, skip_special_tokens=True).strip()
+            formatted = CHAT_TEMPLATE.format(prompt=prompt)
+            inputs = _move_inputs_to_device(loaded.tokenizer(formatted, return_tensors="pt"), loaded.device)
+            inference_mode = getattr(torch, "inference_mode", torch.no_grad)
+            with inference_mode():
+                output_ids = loaded.model.generate(
+                    **inputs,
+                    max_new_tokens=self.max_new_tokens,
+                    do_sample=False,
+                    pad_token_id=loaded.tokenizer.pad_token_id or loaded.tokenizer.eos_token_id,
+                )
+            generated = output_ids[0][inputs["input_ids"].shape[1] :]
+            return loaded.tokenizer.decode(generated, skip_special_tokens=True).strip()
 
     def try_generate(self, prompt: str) -> tuple[str, str] | None:
         """Best-effort generation. Returns ``(text, run_id)`` or ``None``.
@@ -158,9 +192,46 @@ class UAIModelManager:
         try:
             self.reload_if_changed()
             text = self.generate(prompt)
+            if not text.strip():
+                raise UAIModelLoadError("trained model generated an empty response")
         except UAIModelLoadError as exc:
             logger.warning("uai runtime: trained model unavailable, falling back: %s", exc)
+            return None
+        except Exception as exc:  # noqa: BLE001 - chat falls back rather than dropping the socket
+            logger.exception("uai runtime: trained generation failed, falling back: %s", exc)
             return None
         run_id = self.active_run_id
         assert run_id is not None
         return text, run_id
+
+
+def _prepare_runtime_environment() -> None:
+    if sys.platform == "win32":
+        os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+
+
+def _runtime_device(torch_module: Any) -> str:
+    cuda = getattr(torch_module, "cuda", None)
+    return "cuda" if cuda is not None and cuda.is_available() else "cpu"
+
+
+def _runtime_dtype(torch_module: Any, device: str) -> Any:
+    if device == "cuda":
+        cuda = getattr(torch_module, "cuda", None)
+        bf16_supported = getattr(cuda, "is_bf16_supported", None)
+        if callable(bf16_supported) and bf16_supported():
+            return torch_module.bfloat16
+        return torch_module.float16
+    return torch_module.float32
+
+
+def _move_inputs_to_device(inputs: Any, device: str) -> Any:
+    move = getattr(inputs, "to", None)
+    if callable(move):
+        return move(device)
+    if isinstance(inputs, dict):
+        return {
+            key: value.to(device) if callable(getattr(value, "to", None)) else value
+            for key, value in inputs.items()
+        }
+    return inputs

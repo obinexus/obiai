@@ -15,6 +15,7 @@ def test_obiai_train_uai_help() -> None:
     assert result.exit_code == 0
     assert "--base-model" in result.stdout
     assert "--grad-accum" in result.stdout
+    assert "--hf-dataset" in result.stdout
 
 
 def test_obiai_train_uai_forwards_options(monkeypatch, tmp_path: Path) -> None:
@@ -114,6 +115,37 @@ def test_obiai_train_uai_fast_flag_still_overridable(monkeypatch, tmp_path: Path
     assert config.fast is True
     assert config.max_steps == 3
     assert config.data == data
+
+
+def test_obiai_train_uai_forwards_hugging_face_dataset_options(monkeypatch) -> None:
+    captured = {}
+
+    def fake_train(config: uai_qlora.UAITrainingConfig) -> None:
+        captured["config"] = config
+
+    monkeypatch.setattr(uai_qlora, "train_uai_qlora", fake_train)
+
+    result = runner.invoke(
+        app,
+        [
+            "train",
+            "uai",
+            "--fast",
+            "--hf-dataset",
+            "xDAN-datasets/ChatQA-Training-Data",
+            "--hf-subset",
+            "drop",
+            "--hf-split",
+            "train",
+        ],
+    )
+
+    assert result.exit_code == 0
+    config = captured["config"]
+    assert config.data is None
+    assert config.hf_dataset == "xDAN-datasets/ChatQA-Training-Data"
+    assert config.hf_subset == "drop"
+    assert config.hf_split == "train"
 
 
 def test_obiai_model_status_reports_unregistered_and_unreachable(monkeypatch, tmp_path: Path) -> None:

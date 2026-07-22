@@ -1,6 +1,6 @@
 /** Minimal REST helpers (everything realtime rides the WebSocket). */
 
-import type { UModelProfile } from './types';
+import type { UAIModelStatus, UModelProfile } from './types';
 
 export async function createSession(): Promise<string> {
   const response = await fetch('/sessions', { method: 'POST' });
@@ -26,4 +26,12 @@ export async function fetchUModelProfile(): Promise<UModelProfile> {
     throw new Error(`Failed to load U model profile: HTTP ${response.status}`);
   }
   return (await response.json()) as UModelProfile;
+}
+
+export async function fetchUaiModelStatus(): Promise<UAIModelStatus> {
+  const response = await fetch('/model/status');
+  if (!response.ok) {
+    throw new Error(`Failed to load UAI model status: HTTP ${response.status}`);
+  }
+  return (await response.json()) as UAIModelStatus;
 }

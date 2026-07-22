@@ -28,6 +28,23 @@ def test_build_arg_parser_supports_fast_flag() -> None:
     assert args.fast is True
 
 
+def test_build_arg_parser_supports_hugging_face_dataset_options() -> None:
+    args = uai_qlora.build_arg_parser().parse_args(
+        [
+            "--hf-dataset",
+            "xDAN-datasets/ChatQA-Training-Data",
+            "--hf-subset",
+            "drop",
+            "--hf-split",
+            "train",
+        ]
+    )
+
+    assert args.hf_dataset == "xDAN-datasets/ChatQA-Training-Data"
+    assert args.hf_subset == "drop"
+    assert args.hf_split == "train"
+
+
 def test_build_arg_parser_defaults_fast_to_false() -> None:
     args = uai_qlora.build_arg_parser().parse_args([])
     assert args.fast is False
